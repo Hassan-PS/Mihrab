@@ -98,6 +98,7 @@ export type NotificationsSlice = Pick<
   | 'kahfReminderEnabled'
   | 'kahfReminderHour'
   | 'kahfReminderMinute'
+  | 'dhikrReminders'
   | 'mulkReminderEnabled'
   | 'mulkReminderHour'
   | 'mulkReminderMinute'
@@ -288,6 +289,7 @@ export function PrayerSettingsProvider({
       kahfReminderEnabled: settings.kahfReminderEnabled,
       kahfReminderHour: settings.kahfReminderHour,
       kahfReminderMinute: settings.kahfReminderMinute,
+      dhikrReminders: settings.dhikrReminders,
       mulkReminderEnabled: settings.mulkReminderEnabled,
       mulkReminderHour: settings.mulkReminderHour,
       mulkReminderMinute: settings.mulkReminderMinute,
@@ -317,6 +319,7 @@ export function PrayerSettingsProvider({
       settings.mulkReminderEnabled,
       settings.mulkReminderHour,
       settings.mulkReminderMinute,
+      settings.dhikrReminders,
     ],
   );
 

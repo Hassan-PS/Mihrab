@@ -360,7 +360,9 @@
     "madhab_shafii": "Şâfiî",
     "madhab_hanbali": "Hanbelî",
     "madhabCustom": "Özel",
-    "madhabHelp": "Şâfiî, Mâlikî ve Hanbelî aynı ikindi gölgesini alır; aralarındaki seçim hiçbir vakti değiştirmez. Mâlikî ayrıca sabah namazını Sabah olarak adlandırır ve ikinci vakitleri sunar."
+    "madhabHelp": "Şâfiî, Mâlikî ve Hanbelî aynı ikindi gölgesini alır; aralarındaki seçim hiçbir vakti değiştirmez. Mâlikî ayrıca sabah namazını Sabah olarak adlandırır ve ikinci vakitleri sunar.",
+    "dhikrRemindersChannel": "Zikir hatırlatmaları",
+    "dhikrRemindersSilentChannel": "Zikir hatırlatmaları (sessiz)"
   },
   "locationSetup": {
     "headline": "Konumunuzu ayarlayın",
@@ -1700,5 +1702,31 @@
     "mulkHelp": "Her gece seçtiğin saatte — uygulama ne zaman uyuduğunu bilmez, bu yüzden sorar.",
     "mulkTitle": "Mülk",
     "mulkBody": "Uyumadan önce — Mülk suresini oku."
+  },
+  "dhikr": {
+    "remindersTitle": "Zikir hatırlatmaları",
+    "remindersBlurb": "Kendi hatırlatmaların, günün her saatinde",
+    "remindersFooter": "Namaz vakitlerinden bağımsız ve tamamen çevrimdışı — bağlantı olmadan ve yeniden başlatmadan sonra da çalar.",
+    "remindersEmpty": "Henüz hatırlatma yok. Bir zikir için ya da kendi sözlerin için ekle.",
+    "addReminder": "Hatırlatma ekle",
+    "newReminder": "Yeni hatırlatma",
+    "editReminder": "Hatırlatmayı düzenle",
+    "deleteReminder": "Hatırlatmayı sil",
+    "whichDhikr": "Hangi zikir",
+    "ownWords": "Kendi sözlerin",
+    "ownWordsHelp": "Ne yazarsan onu söyleyen bir hatırlatma.",
+    "customTitle": "Hatırlatma",
+    "customTitleLabel": "Başlık",
+    "customBodyLabel": "Metin",
+    "days": "Günler",
+    "everyDay": "Her gün",
+    "sound": "Ses",
+    "soundDefault": "Bildirim sesi",
+    "soundSilent": "Sessiz",
+    "soundHelp": "Zikrin ses kaydı uygulamayla gelmez: uygulama yalnızca kaynağını ve lisansını söyleyebildiği içeriği yayınlar, ses de buna dahildir. Kendi kaydını seçmek bir sonraki adım — bkz. konu #29.",
+    "meaning": {
+      "hawqala": "Güç ve kuvvet ancak Allah’tandır",
+      "subhanallahwabihamdih": "Allah’ı hamd ile tesbih ederim"
+    }
   }
 }

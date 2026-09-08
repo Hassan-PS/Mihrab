@@ -79,5 +79,6 @@ export type RootStackParamList = {
    */
   SettingsExtraTimes: undefined;
   SettingsDailyReminders: undefined;
+  SettingsDhikrReminders: undefined;
   SettingsAttributions: undefined;
 };

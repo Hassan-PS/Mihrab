@@ -39,6 +39,8 @@ import type { Notification } from '@notifee/react-native';
 import { MIHRAB_SCHEME } from '../navigation/linking';
 import { findPageForAyah } from '../quran/pages';
 import { khatmahContinueTarget } from '../quran/khatmahTarget';
+import { findDhikr } from '../dhikr/dhikr';
+import { hydrateTasbihState, setActiveTasbih } from '../tasbih/tasbihStore';
 import {
   activeKhatmah,
   getQuranState,
@@ -50,6 +52,8 @@ export const ROUTE_KHATMAH = 'khatmah';
 export const ROUTE_AYAH_OF_DAY = 'ayahOfDay';
 /** A whole surah — the Al-Kahf and Al-Mulk reminders, #36. */
 export const ROUTE_SURAH = 'surah';
+/** One of the user's own dhikr reminders — #29. */
+export const ROUTE_DHIKR = 'dhikr';
 
 function positiveInt(value: unknown): number | null {
   const n = Number(value);
@@ -96,6 +100,29 @@ export async function notificationRoute(
       // Fall through to the ayah form, which needs nothing loaded.
     }
     return readUrl(surah, 'scrollToAyah=1');
+  }
+
+  // A dhikr reminder — issue #29. The counter, already on those words,
+  // so the reminder is a thing you can act on rather than read.
+  //
+  // The preset is set here and not carried in the URL because the Tasbih
+  // screen takes its dhikr from the store rather than from route params
+  // — the same reason the khatmah link resolves its page at tap time.
+  // A custom reminder has nothing to count and carries no dhikr; it
+  // opens the counter on whatever was last there, which is the honest
+  // answer for words the app did not choose.
+  if (data.route === ROUTE_DHIKR) {
+    const entry =
+      typeof data.dhikr === 'string' ? findDhikr(data.dhikr) : undefined;
+    if (entry?.tasbihPresetId) {
+      try {
+        await hydrateTasbihState();
+        setActiveTasbih(entry.tasbihPresetId);
+      } catch {
+        // The counter opens on its last dhikr rather than not at all.
+      }
+    }
+    return `${MIHRAB_SCHEME}tasbih`;
   }
 
   if (data.route === ROUTE_KHATMAH) {

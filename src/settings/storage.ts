@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { resolveDeviceLanguage } from '../i18n/deviceLanguage';
 import { coerceNotificationSoundId } from '../notifications/notificationSounds';
 import { coerceClockFormat } from '../utils/clockFormat';
+import { coerceDhikrReminders } from '../dhikr/dhikrReminders';
 import { coerceDaruriAlerts } from '../prayer/daruriTimes';
 import { coercePrePrayerReminderMinutes } from './prePrayerReminder';
 import {
@@ -266,6 +267,11 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
   // blob holding anything but a known key must come back empty rather
   // than scheduling something nobody chose.
   merged.malikiSecondTimeAlerts = coerceDaruriAlerts(parsed.malikiSecondTimeAlerts);
+  // #29. Every field of every reminder comes back through a coercion,
+  // and a malformed one is dropped rather than repaired: these schedule
+  // notifications, and an hour of NaN is a trigger that never fires or
+  // fires now. Same treatment as the location presets beside them.
+  merged.dhikrReminders = coerceDhikrReminders(parsed.dhikrReminders);
   merged.malikiSecondTimeAlertMinutes = coercePrePrayerReminderMinutes(
     parsed.malikiSecondTimeAlertMinutes ?? DEFAULT_SETTINGS.malikiSecondTimeAlertMinutes,
   );

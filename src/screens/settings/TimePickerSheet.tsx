@@ -12,6 +12,88 @@ import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { useClockFormatter } from '../../hooks/useClockFormatter';
 
+/**
+ * The controls themselves, without a sheet around them — an hour
+ * stepper and four quarter-hour chips.
+ *
+ * Split out for the dhikr reminder editor (#29), which asks for a time
+ * inside a form that is already a modal. Nesting a modal inside a modal
+ * to collect two numbers is a platform quirk waiting to happen; the same
+ * controls, embedded, are the whole of what that form needed.
+ */
+export function TimeOfDayPicker({
+  hour,
+  minute,
+  onChangeHour,
+  onChangeMinute,
+}: {
+  hour: number;
+  minute: number;
+  onChangeHour: (h: number) => void;
+  onChangeMinute: (m: number) => void;
+}) {
+  const { t } = useTranslation();
+  const { palette } = useAppPalette();
+  const clock = useClockFormatter();
+  const label = clock(
+    `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
+  );
+  return (
+    <>
+      <View style={styles.hourRow}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('settings.hourDown', 'Hour −')}
+          hitSlop={8}
+          onPress={() => onChangeHour((hour + 23) % 24)}
+          style={[styles.stepBtn, { borderColor: palette.border }]}>
+          <Text style={[styles.stepGlyph, { color: palette.accentSolid }]}>
+            −
+          </Text>
+        </Pressable>
+        <Text style={[styles.timeValue, { color: palette.text }]}>{label}</Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('settings.hourUp', 'Hour +')}
+          hitSlop={8}
+          onPress={() => onChangeHour((hour + 1) % 24)}
+          style={[styles.stepBtn, { borderColor: palette.border }]}>
+          <Text style={[styles.stepGlyph, { color: palette.accentSolid }]}>
+            +
+          </Text>
+        </Pressable>
+      </View>
+      <View style={styles.minuteRow}>
+        {[0, 15, 30, 45].map(m => {
+          const selected = minute === m;
+          return (
+            <Pressable
+              key={m}
+              accessibilityRole="radio"
+              accessibilityState={{ selected }}
+              onPress={() => onChangeMinute(m)}
+              style={[
+                styles.chip,
+                {
+                  backgroundColor: selected ? palette.accentBg : 'transparent',
+                  borderColor: selected ? palette.accentSolid : palette.border,
+                },
+              ]}>
+              <Text
+                style={[
+                  styles.chipLabel,
+                  { color: selected ? palette.accentSolid : palette.muted },
+                ]}>
+                :{String(m).padStart(2, '0')}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </>
+  );
+}
+
 export function TimePickerSheet({
   visible,
   hour,
@@ -29,11 +111,6 @@ export function TimePickerSheet({
 }) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
-  const clock = useClockFormatter();
-  const label = clock(
-    `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
-  );
-
   return (
     <Modal
       visible={visible}
@@ -49,60 +126,12 @@ export function TimePickerSheet({
         <Text style={[styles.title, { color: palette.text }]}>
           {t('settings.ayahOfDayTime', 'Notification time')}
         </Text>
-        <View style={styles.hourRow}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('settings.hourDown', 'Hour −')}
-            hitSlop={8}
-            onPress={() => onChangeHour((hour + 23) % 24)}
-            style={[styles.stepBtn, { borderColor: palette.border }]}>
-            <Text style={[styles.stepGlyph, { color: palette.accentSolid }]}>
-              −
-            </Text>
-          </Pressable>
-          <Text style={[styles.timeValue, { color: palette.text }]}>
-            {label}
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('settings.hourUp', 'Hour +')}
-            hitSlop={8}
-            onPress={() => onChangeHour((hour + 1) % 24)}
-            style={[styles.stepBtn, { borderColor: palette.border }]}>
-            <Text style={[styles.stepGlyph, { color: palette.accentSolid }]}>
-              +
-            </Text>
-          </Pressable>
-        </View>
-        <View style={styles.minuteRow}>
-          {[0, 15, 30, 45].map(m => {
-            const selected = minute === m;
-            return (
-              <Pressable
-                key={m}
-                accessibilityRole="radio"
-                accessibilityState={{ selected }}
-                onPress={() => onChangeMinute(m)}
-                style={[
-                  styles.chip,
-                  {
-                    backgroundColor: selected
-                      ? palette.accentBg
-                      : 'transparent',
-                    borderColor: selected ? palette.accentSolid : palette.border,
-                  },
-                ]}>
-                <Text
-                  style={[
-                    styles.chipLabel,
-                    { color: selected ? palette.accentSolid : palette.muted },
-                  ]}>
-                  :{String(m).padStart(2, '0')}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        <TimeOfDayPicker
+          hour={hour}
+          minute={minute}
+          onChangeHour={onChangeHour}
+          onChangeMinute={onChangeMinute}
+        />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('common.done', 'Done')}

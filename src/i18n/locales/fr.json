@@ -360,7 +360,9 @@
     "madhab_shafii": "Chaféite",
     "madhab_hanbali": "Hanbalite",
     "madhabCustom": "Personnalisé",
-    "madhabHelp": "Chaféites, malikites et hanbalites prennent la même ombre pour le ʿasr : choisir entre eux ne change aucune heure. Le malikite nomme en plus Sobh la prière de l’aube et propose les seconds temps."
+    "madhabHelp": "Chaféites, malikites et hanbalites prennent la même ombre pour le ʿasr : choisir entre eux ne change aucune heure. Le malikite nomme en plus Sobh la prière de l’aube et propose les seconds temps.",
+    "dhikrRemindersChannel": "Rappels de dhikr",
+    "dhikrRemindersSilentChannel": "Rappels de dhikr (silencieux)"
   },
   "locationSetup": {
     "headline": "Définissez votre emplacement",
@@ -1700,5 +1702,31 @@
     "mulkHelp": "Chaque nuit à l’heure de votre choix — l’application ignore quand vous dormez, elle vous le demande.",
     "mulkTitle": "Al-Mulk",
     "mulkBody": "Avant de dormir — lisez la sourate Al-Mulk."
+  },
+  "dhikr": {
+    "remindersTitle": "Rappels de dhikr",
+    "remindersBlurb": "Tes propres rappels, à toute heure",
+    "remindersFooter": "Indépendants des horaires de prière et entièrement hors ligne — ils sonnent sans connexion et après un redémarrage.",
+    "remindersEmpty": "Aucun rappel pour l’instant. Ajoute-en un pour un dhikr, ou pour tes propres mots.",
+    "addReminder": "Ajouter un rappel",
+    "newReminder": "Nouveau rappel",
+    "editReminder": "Modifier le rappel",
+    "deleteReminder": "Supprimer le rappel",
+    "whichDhikr": "Quel dhikr",
+    "ownWords": "Tes propres mots",
+    "ownWordsHelp": "Un rappel qui dit ce que tu écris.",
+    "customTitle": "Rappel",
+    "customTitleLabel": "Titre",
+    "customBodyLabel": "Texte",
+    "days": "Jours",
+    "everyDay": "Tous les jours",
+    "sound": "Son",
+    "soundDefault": "Son de notification",
+    "soundSilent": "Silencieux",
+    "soundHelp": "Aucun enregistrement du dhikr n’est fourni : l’app ne diffuse que du contenu dont elle peut nommer la source et la licence, une voix comprise. Choisir un enregistrement à toi est l’étape suivante — voir le ticket #29.",
+    "meaning": {
+      "hawqala": "Il n’est de puissance ni de force qu’en Allah",
+      "subhanallahwabihamdih": "Gloire à Allah, et à Lui la louange"
+    }
   }
 }

@@ -35,6 +35,8 @@ import { getPrayerLiveActivityModule } from './native/PrayerLiveActivity';
 import { isMacCatalyst } from './responsive/breakpoints';
 import { rescheduleAyahOfDay } from './notifications/ayahOfDay';
 import { rescheduleFastingReminders } from './notifications/fastingReminders';
+import { rescheduleDhikrReminders } from './notifications/dhikrReminders';
+import { dhikrFingerprint } from './dhikr/dhikrReminders';
 import { rescheduleSurahReminders } from './notifications/surahReminders';
 import {
   khatmahReminderDue,
@@ -110,6 +112,7 @@ export function AppNavigationRoot() {
       // rebuild at launch, and `subscribeQuranState` below forces a sync the
       // moment the real value differs.
       const prefs = getQuranState()?.prefs;
+      const dhikrPrint = dhikrFingerprint(settings.dhikrReminders);
       const dailyPrint = dayTzFingerprint(
         new Date(now),
         String(settings.ayahOfDayEnabled),
@@ -130,6 +133,10 @@ export function AppNavigationRoot() {
         String(settings.mulkReminderEnabled),
         settings.mulkReminderHour,
         settings.mulkReminderMinute,
+        // #29. The whole list, so editing any reminder — its time, its
+        // days, its words — rewrites the schedule rather than reading as
+        // no change until tomorrow.
+        dhikrPrint,
       );
       if (!shouldResync(DAILY_RESYNC_KEY, dailyPrint, now)) return;
       markResynced(DAILY_RESYNC_KEY, dailyPrint, now);
@@ -168,6 +175,9 @@ export function AppNavigationRoot() {
         mulkHour: settings.mulkReminderHour,
         mulkMinute: settings.mulkReminderMinute,
       });
+      // The user's own reminders (#29) — the same rolling window, and
+      // the same daily resync rolls it forward.
+      void rescheduleDhikrReminders({ reminders: settings.dhikrReminders });
 
     };
     sync(true);
@@ -239,6 +249,7 @@ export function AppNavigationRoot() {
     settings.mulkReminderEnabled,
     settings.mulkReminderHour,
     settings.mulkReminderMinute,
+    settings.dhikrReminders,
   ]);
 
   // iOS: re-show the Live Activity if the user dismissed it (swipe / "Clear

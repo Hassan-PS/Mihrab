@@ -360,7 +360,9 @@
     "madhab_shafii": "沙斐仪",
     "madhab_hanbali": "罕百里",
     "madhabCustom": "自定义",
-    "madhabHelp": "沙斐仪、马立克与罕百里采用相同的晡礼影长，在三者之间选择不会改变任何时间。马立克还将破晓的主命拜称为晨礼，并提供第二时间。"
+    "madhabHelp": "沙斐仪、马立克与罕百里采用相同的晡礼影长，在三者之间选择不会改变任何时间。马立克还将破晓的主命拜称为晨礼，并提供第二时间。",
+    "dhikrRemindersChannel": "齐克尔提醒",
+    "dhikrRemindersSilentChannel": "齐克尔提醒（静音）"
   },
   "locationSetup": {
     "headline": "设置您的位置",
@@ -1700,5 +1702,31 @@
     "mulkHelp": "每晚在你选择的时间——应用不知道你何时入睡，所以由你决定。",
     "mulkTitle": "国权章",
     "mulkBody": "睡前——诵读《国权章》。"
+  },
+  "dhikr": {
+    "remindersTitle": "齐克尔提醒",
+    "remindersBlurb": "你自己的提醒，一天中任意时间",
+    "remindersFooter": "与礼拜时间无关，且完全离线——无网络时以及重启后照常提醒。",
+    "remindersEmpty": "还没有提醒。为某个齐克尔，或为你自己的文字添加一个。",
+    "addReminder": "添加提醒",
+    "newReminder": "新建提醒",
+    "editReminder": "编辑提醒",
+    "deleteReminder": "删除提醒",
+    "whichDhikr": "哪一段齐克尔",
+    "ownWords": "你自己的文字",
+    "ownWordsHelp": "提醒会显示你写下的内容。",
+    "customTitle": "提醒",
+    "customTitleLabel": "标题",
+    "customBodyLabel": "文字",
+    "days": "日期",
+    "everyDay": "每天",
+    "sound": "声音",
+    "soundDefault": "通知声音",
+    "soundSilent": "静音",
+    "soundHelp": "应用不附带齐克尔录音：它只发布能说明来源与授权的内容，人声亦然。选择你自己的录音是下一步——见议题 #29。",
+    "meaning": {
+      "hawqala": "除安拉外，无能无力",
+      "subhanallahwabihamdih": "赞主清净，一切赞颂归于他"
+    }
   }
 }

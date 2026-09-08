@@ -360,7 +360,9 @@
     "madhab_shafii": "Schafiitisch",
     "madhab_hanbali": "Hanbalitisch",
     "madhabCustom": "Benutzerdefiniert",
-    "madhabHelp": "Schafiiten, Malikiten und Hanbaliten nehmen denselben Asr-Schatten — die Wahl zwischen ihnen ändert keine Zeit. Malikitisch nennt das Morgengebet zusätzlich Subh und bietet die Zweitzeiten an."
+    "madhabHelp": "Schafiiten, Malikiten und Hanbaliten nehmen denselben Asr-Schatten — die Wahl zwischen ihnen ändert keine Zeit. Malikitisch nennt das Morgengebet zusätzlich Subh und bietet die Zweitzeiten an.",
+    "dhikrRemindersChannel": "Dhikr-Erinnerungen",
+    "dhikrRemindersSilentChannel": "Dhikr-Erinnerungen (lautlos)"
   },
   "locationSetup": {
     "headline": "Legen Sie Ihren Standort fest",
@@ -1700,5 +1702,31 @@
     "mulkHelp": "Jede Nacht zur gewählten Zeit — die App weiß nicht, wann du schläfst, also fragt sie.",
     "mulkTitle": "Al-Mulk",
     "mulkBody": "Vor dem Schlafen — lies Sure Al-Mulk."
+  },
+  "dhikr": {
+    "remindersTitle": "Dhikr-Erinnerungen",
+    "remindersBlurb": "Deine eigenen Erinnerungen, zu jeder Tageszeit",
+    "remindersFooter": "Unabhängig von den Gebetszeiten und vollständig offline — sie kommen ohne Verbindung und nach einem Neustart.",
+    "remindersEmpty": "Noch keine Erinnerungen. Füge eine für ein Dhikr hinzu — oder für eigene Worte.",
+    "addReminder": "Erinnerung hinzufügen",
+    "newReminder": "Neue Erinnerung",
+    "editReminder": "Erinnerung bearbeiten",
+    "deleteReminder": "Erinnerung löschen",
+    "whichDhikr": "Welches Dhikr",
+    "ownWords": "Eigene Worte",
+    "ownWordsHelp": "Eine Erinnerung, die sagt, was du schreibst.",
+    "customTitle": "Erinnerung",
+    "customTitleLabel": "Titel",
+    "customBodyLabel": "Text",
+    "days": "Tage",
+    "everyDay": "Täglich",
+    "sound": "Ton",
+    "soundDefault": "Benachrichtigungston",
+    "soundSilent": "Lautlos",
+    "soundHelp": "Eine Aufnahme des Dhikr liegt nicht bei: Die App liefert nur Inhalte, deren Quelle und Lizenz sie nennen kann, und dazu gehört auch eine Stimme. Eine eigene Aufnahme zu wählen kommt als Nächstes — siehe Issue #29.",
+    "meaning": {
+      "hawqala": "Es gibt keine Macht und keine Kraft außer bei Allah",
+      "subhanallahwabihamdih": "Gepriesen sei Allah, und Lob sei Ihm"
+    }
   }
 }

@@ -360,7 +360,9 @@
     "madhab_shafii": "Shafii",
     "madhab_hanbali": "Hanbali",
     "madhabCustom": "Custom",
-    "madhabHelp": "Shafii, Maliki and Hanbali take the same asr shadow, so choosing between them changes no time. Maliki also names the dawn prayer Subh and offers the second times."
+    "madhabHelp": "Shafii, Maliki and Hanbali take the same asr shadow, so choosing between them changes no time. Maliki also names the dawn prayer Subh and offers the second times.",
+    "dhikrRemindersChannel": "Dhikr reminders",
+    "dhikrRemindersSilentChannel": "Dhikr reminders (silent)"
   },
   "locationSetup": {
     "headline": "Set your location",
@@ -1700,5 +1702,31 @@
     "mulkHelp": "Every night at the time you choose — the app does not know when you sleep, so it asks.",
     "mulkTitle": "Al-Mulk",
     "mulkBody": "Before sleeping — read Surah Al-Mulk."
+  },
+  "dhikr": {
+    "remindersTitle": "Dhikr reminders",
+    "remindersBlurb": "Your own reminders, at any time of day",
+    "remindersFooter": "Independent of the prayer times, and fully offline — they fire with no connection and after a restart.",
+    "remindersEmpty": "No reminders yet. Add one for a dhikr, or for words of your own.",
+    "addReminder": "Add a reminder",
+    "newReminder": "New reminder",
+    "editReminder": "Edit reminder",
+    "deleteReminder": "Delete reminder",
+    "whichDhikr": "Which dhikr",
+    "ownWords": "Your own words",
+    "ownWordsHelp": "A reminder that says whatever you write.",
+    "customTitle": "Reminder",
+    "customTitleLabel": "Title",
+    "customBodyLabel": "Text",
+    "days": "Days",
+    "everyDay": "Every day",
+    "sound": "Sound",
+    "soundDefault": "Notification sound",
+    "soundSilent": "Silent",
+    "soundHelp": "A recorded dhikr is not bundled: the app only ships content whose source and licence it can name, and that includes a voice. Choosing a recording of your own comes next — see issue #29.",
+    "meaning": {
+      "hawqala": "There is no power nor strength except with Allah",
+      "subhanallahwabihamdih": "Glory be to Allah, and praise be to Him"
+    }
   }
 }

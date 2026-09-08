@@ -360,7 +360,9 @@
     "madhab_shafii": "Shafi‘í",
     "madhab_hanbali": "Hanbalí",
     "madhabCustom": "Personalizado",
-    "madhabHelp": "Shafi‘íes, malikíes y hanbalíes toman la misma sombra del asr, así que elegir entre ellos no cambia ninguna hora. El malikí además llama Subh a la oración del alba y ofrece los segundos tiempos."
+    "madhabHelp": "Shafi‘íes, malikíes y hanbalíes toman la misma sombra del asr, así que elegir entre ellos no cambia ninguna hora. El malikí además llama Subh a la oración del alba y ofrece los segundos tiempos.",
+    "dhikrRemindersChannel": "Recordatorios de dhikr",
+    "dhikrRemindersSilentChannel": "Recordatorios de dhikr (silenciosos)"
   },
   "locationSetup": {
     "headline": "Establece tu ubicación",
@@ -1700,5 +1702,31 @@
     "mulkHelp": "Cada noche a la hora que elijas: la app no sabe cuándo duermes, así que lo pregunta.",
     "mulkTitle": "Al-Mulk",
     "mulkBody": "Antes de dormir — lee la sura Al-Mulk."
+  },
+  "dhikr": {
+    "remindersTitle": "Recordatorios de dhikr",
+    "remindersBlurb": "Tus propios recordatorios, a cualquier hora",
+    "remindersFooter": "Independientes de los horarios de oración y totalmente sin conexión: suenan sin red y tras reiniciar.",
+    "remindersEmpty": "Aún no hay recordatorios. Añade uno para un dhikr, o para tus propias palabras.",
+    "addReminder": "Añadir un recordatorio",
+    "newReminder": "Nuevo recordatorio",
+    "editReminder": "Editar recordatorio",
+    "deleteReminder": "Eliminar recordatorio",
+    "whichDhikr": "Qué dhikr",
+    "ownWords": "Tus propias palabras",
+    "ownWordsHelp": "Un recordatorio que dice lo que tú escribas.",
+    "customTitle": "Recordatorio",
+    "customTitleLabel": "Título",
+    "customBodyLabel": "Texto",
+    "days": "Días",
+    "everyDay": "Todos los días",
+    "sound": "Sonido",
+    "soundDefault": "Sonido de notificación",
+    "soundSilent": "Silencioso",
+    "soundHelp": "No se incluye ninguna grabación del dhikr: la app solo distribuye contenido cuya fuente y licencia puede nombrar, y eso incluye una voz. Elegir una grabación propia es el paso siguiente — véase la incidencia #29.",
+    "meaning": {
+      "hawqala": "No hay poder ni fuerza sino en Allah",
+      "subhanallahwabihamdih": "Gloria a Allah, y a Él la alabanza"
+    }
   }
 }

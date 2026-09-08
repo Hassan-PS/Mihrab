@@ -22,6 +22,7 @@ import { AboutSettingsScreen } from './pages/AboutSettingsScreen';
 import { AppearanceSettingsScreen } from './pages/AppearanceSettingsScreen';
 import { AttributionsSettingsScreen } from './pages/AttributionsSettingsScreen';
 import { DailyRemindersSettingsScreen } from './pages/DailyRemindersSettingsScreen';
+import { DhikrRemindersSettingsScreen } from './pages/DhikrRemindersSettingsScreen';
 import { ExtraTimesSettingsScreen } from './pages/ExtraTimesSettingsScreen';
 import { LocationSettingsScreen } from './pages/LocationSettingsScreen';
 import { NotificationSettingsScreen } from './pages/NotificationSettingsScreen';
@@ -99,6 +100,12 @@ const ALL_SUBPAGES: readonly SettingsSubpage[] = [
         titleKey: 'settings.dailyReminders',
         blurbKey: 'settings.dailyRemindersBlurb',
         component: DailyRemindersSettingsScreen,
+      },
+      {
+        route: 'SettingsDhikrReminders',
+        titleKey: 'dhikr.remindersTitle',
+        blurbKey: 'dhikr.remindersBlurb',
+        component: DhikrRemindersSettingsScreen,
       },
     ],
   },

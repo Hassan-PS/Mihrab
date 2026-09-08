@@ -360,7 +360,9 @@
     "madhab_shafii": "Syafii",
     "madhab_hanbali": "Hanbali",
     "madhabCustom": "Khusus",
-    "madhabHelp": "Syafii, Maliki dan Hanbali memakai bayangan asar yang sama, jadi memilih di antaranya tidak mengubah waktu mana pun. Maliki juga menamai salat fajar dengan Subuh dan menyediakan waktu kedua."
+    "madhabHelp": "Syafii, Maliki dan Hanbali memakai bayangan asar yang sama, jadi memilih di antaranya tidak mengubah waktu mana pun. Maliki juga menamai salat fajar dengan Subuh dan menyediakan waktu kedua.",
+    "dhikrRemindersChannel": "Pengingat zikir",
+    "dhikrRemindersSilentChannel": "Pengingat zikir (senyap)"
   },
   "locationSetup": {
     "headline": "Tetapkan lokasi Anda",
@@ -1700,5 +1702,31 @@
     "mulkHelp": "Setiap malam pada waktu yang kamu pilih — aplikasi tidak tahu kapan kamu tidur, jadi ia bertanya.",
     "mulkTitle": "Al-Mulk",
     "mulkBody": "Sebelum tidur — bacalah Surah Al-Mulk."
+  },
+  "dhikr": {
+    "remindersTitle": "Pengingat zikir",
+    "remindersBlurb": "Pengingat Anda sendiri, kapan saja",
+    "remindersFooter": "Terpisah dari waktu salat dan sepenuhnya luring — berbunyi tanpa koneksi dan setelah dimulai ulang.",
+    "remindersEmpty": "Belum ada pengingat. Tambahkan satu untuk zikir, atau untuk kata-kata Anda sendiri.",
+    "addReminder": "Tambah pengingat",
+    "newReminder": "Pengingat baru",
+    "editReminder": "Ubah pengingat",
+    "deleteReminder": "Hapus pengingat",
+    "whichDhikr": "Zikir yang mana",
+    "ownWords": "Kata-kata Anda sendiri",
+    "ownWordsHelp": "Pengingat yang mengatakan apa pun yang Anda tulis.",
+    "customTitle": "Pengingat",
+    "customTitleLabel": "Judul",
+    "customBodyLabel": "Teks",
+    "days": "Hari",
+    "everyDay": "Setiap hari",
+    "sound": "Suara",
+    "soundDefault": "Suara notifikasi",
+    "soundSilent": "Senyap",
+    "soundHelp": "Rekaman zikir tidak disertakan: aplikasi hanya memuat konten yang sumber dan lisensinya dapat disebutkan, termasuk suara. Memilih rekaman milik Anda sendiri adalah langkah berikutnya — lihat isu #29.",
+    "meaning": {
+      "hawqala": "Tiada daya dan kekuatan kecuali dengan Allah",
+      "subhanallahwabihamdih": "Mahasuci Allah, dan segala puji bagi-Nya"
+    }
   }
 }

@@ -360,7 +360,9 @@
     "madhab_shafii": "Shafiitisk",
     "madhab_hanbali": "Hanbalitisk",
     "madhabCustom": "Anpassad",
-    "madhabHelp": "Shafiiter, malikiter och hanbaliter tar samma asr-skugga, så valet mellan dem ändrar ingen tid. Malikitisk kallar dessutom gryningsbönen Subh och erbjuder andratiderna."
+    "madhabHelp": "Shafiiter, malikiter och hanbaliter tar samma asr-skugga, så valet mellan dem ändrar ingen tid. Malikitisk kallar dessutom gryningsbönen Subh och erbjuder andratiderna.",
+    "dhikrRemindersChannel": "Dhikr-påminnelser",
+    "dhikrRemindersSilentChannel": "Dhikr-påminnelser (tysta)"
   },
   "locationSetup": {
     "headline": "Ange din plats",
@@ -1700,5 +1702,31 @@
     "mulkHelp": "Varje kväll vid tiden du väljer — appen vet inte när du sover, så den frågar.",
     "mulkTitle": "Al-Mulk",
     "mulkBody": "Före sömnen — läs sura Al-Mulk."
+  },
+  "dhikr": {
+    "remindersTitle": "Dhikr-påminnelser",
+    "remindersBlurb": "Dina egna påminnelser, när som helst på dygnet",
+    "remindersFooter": "Oberoende av bönetiderna och helt offline — de går av utan uppkoppling och efter en omstart.",
+    "remindersEmpty": "Inga påminnelser än. Lägg till en för ett dhikr, eller för egna ord.",
+    "addReminder": "Lägg till en påminnelse",
+    "newReminder": "Ny påminnelse",
+    "editReminder": "Redigera påminnelse",
+    "deleteReminder": "Ta bort påminnelse",
+    "whichDhikr": "Vilket dhikr",
+    "ownWords": "Dina egna ord",
+    "ownWordsHelp": "En påminnelse som säger det du skriver.",
+    "customTitle": "Påminnelse",
+    "customTitleLabel": "Rubrik",
+    "customBodyLabel": "Text",
+    "days": "Dagar",
+    "everyDay": "Varje dag",
+    "sound": "Ljud",
+    "soundDefault": "Aviseringsljud",
+    "soundSilent": "Tyst",
+    "soundHelp": "Ingen inspelad dhikr följer med: appen levererar bara innehåll vars källa och licens den kan namnge, och det gäller även en röst. Att välja en egen inspelning kommer härnäst — se ärende #29.",
+    "meaning": {
+      "hawqala": "Det finns ingen makt och ingen kraft utom hos Allah",
+      "subhanallahwabihamdih": "Ära vare Allah, och lov och pris tillkommer Honom"
+    }
   }
 }

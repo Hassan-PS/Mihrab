@@ -4,6 +4,7 @@ import type { NotificationSoundId } from '../notifications/notificationSounds';
 import type { PrayerOffsetMinutes } from './prayerOffsets';
 import type { AlertModeMap } from './alertModes';
 import type { ClockFormat } from '../utils/clockFormat';
+import type { DhikrReminder } from '../dhikr/dhikrReminders';
 
 export type LocationMode = 'automatic' | 'manual';
 
@@ -440,6 +441,16 @@ export type PrayerAppSettings = {
    */
   malikiSecondTimeAlertMinutes: PrePrayerReminderMinutes;
   /**
+   * The user's own dhikr reminders — issue #29. Empty by default.
+   *
+   * The first notifications in this app that are not derived from
+   * anything: a time somebody chose, for words somebody chose,
+   * independent of the prayer times, working with no connection. See
+   * `src/dhikr/dhikrReminders.ts` for the model and why the list lives
+   * here rather than in a store of its own.
+   */
+  dhikrReminders: DhikrReminder[];
+  /**
    * Ayah of the day notification — v2.7.27.
    *
    * When on, a daily notification fires at the chosen time with a
@@ -573,6 +584,8 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   malikiSecondTimesEnabled: false,
   malikiSecondTimeAlerts: [],
   malikiSecondTimeAlertMinutes: 15,
+  // #29. Nobody starts with a reminder they did not ask for.
+  dhikrReminders: [],
   // The rows are what this feature always drew, so they stay on by
   // default; the end-of-window alert is new and opts in like every other
   // notification the user did not ask for.
