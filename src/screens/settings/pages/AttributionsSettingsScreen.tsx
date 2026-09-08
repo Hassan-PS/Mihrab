@@ -131,6 +131,13 @@ export function AttributionsSettingsScreen() {
       sub: 'aliftype/amiri · SIL OFL 1.1',
       url: 'https://github.com/aliftype/amiri',
     },
+    {
+      label: t('attributions.katibehFont', {
+        defaultValue: 'Katibeh font (surah names)',
+      }),
+      sub: 'KB-Studio, Lasse Fister, Eduardo Tunni · SIL OFL 1.1',
+      url: 'https://github.com/Tarobish/Katibeh',
+    },
   ];
 
   return (

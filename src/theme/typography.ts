@@ -107,6 +107,13 @@ export const FONTS = {
     ios: 'Amiri Quran',
     default: 'AmiriQuran',
   }) as string,
+  /**
+   * Arabic calligraphy — Katibeh, a Thuluth-style display face (OFL), the
+   * hand mushaf surah headers are written in. For surah NAMES in lists
+   * and the player, and nothing else: a display face is not for reading.
+   * Family name and asset filename are both "Katibeh".
+   */
+  arabicCalligraphy: 'Katibeh' as const,
 } as const;
 
 /**
@@ -121,10 +128,17 @@ export const FONTS = {
  * roomier lineHeight (≈ 2.1× fontSize for fully-vocalised ayah text) or
  * diacritics clip.
  */
-export function arabicTextStyle(kind: 'quran' | 'body' = 'body'): {
+export function arabicTextStyle(
+  kind: 'quran' | 'body' | 'calligraphy' = 'body',
+): {
   fontFamily: string;
 } {
   return {
-    fontFamily: kind === 'quran' ? FONTS.arabicQuran : FONTS.arabicBody,
+    fontFamily:
+      kind === 'quran'
+        ? FONTS.arabicQuran
+        : kind === 'calligraphy'
+          ? FONTS.arabicCalligraphy
+          : FONTS.arabicBody,
   };
 }

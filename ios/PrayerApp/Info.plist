@@ -131,11 +131,14 @@
 	  * Amiri-Regular.ttf — https://github.com/aliftype/amiri (OFL).
 	    General Arabic body text (FONTS.arabicBody).
 	  * AmiriQuran.ttf — Quran ayahs (FONTS.arabicQuran).
+	  * Katibeh.ttf — https://github.com/Tarobish/Katibeh (OFL). Thuluth-
+	    style calligraphy for surah NAMES only (FONTS.arabicCalligraphy).
 	-->
 	<key>UIAppFonts</key>
 	<array>
 		<string>Amiri-Regular.ttf</string>
 		<string>AmiriQuran.ttf</string>
+		<string>Katibeh.ttf</string>
 	</array>
 	<!--
 	mihrab:// — how a widget says WHERE it wants to be opened.
