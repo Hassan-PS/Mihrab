@@ -34,7 +34,7 @@
  * on the list of reciters, so that is where it went: see
  * `ReciterPickerSheet`.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -78,7 +78,6 @@ import {
   setPlaybackRate,
   skipToNextAyah,
   skipToPreviousAyah,
-  stopPlayback,
   usePlaybackStatus,
 } from '../../quran/audio/playback';
 import { findReciter } from '../../quran/audio/reciters';
@@ -88,7 +87,8 @@ import {
 import { setQuranPrefs, useQuranState } from '../../quran/quranState';
 import { useBreakpoint } from '../../responsive/breakpoints';
 import { RADIUS, SPACING } from '../../theme/tokens';
-import { TYPE } from '../../theme/typography';
+import { TYPE, arabicTextStyle } from '../../theme/typography';
+import { InfoButton } from '../../components/ui/InfoSheet';
 
 /** Playback speeds, matching the reader's own chips. */
 const RATES = [0.75, 1, 1.25, 1.5, 2] as const;
@@ -452,6 +452,51 @@ function TransportIcon({
   );
 }
 
+/**
+ * One of the player's options: a value chip that cycles on a tap (speed,
+ * sleep) or an icon toggle (shuffle, keep awake, show the page). Painted
+ * only when on — the redesign's chip rule: ink for the chosen, nothing
+ * for the rest.
+ */
+function OptionChip({
+  label,
+  icon,
+  a11y,
+  on = false,
+  onPress,
+  palette,
+}: {
+  label?: string;
+  icon?: ReactNode;
+  a11y: string;
+  on?: boolean;
+  onPress: () => void;
+  palette: ReturnType<typeof useAppPalette>['palette'];
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label ? `${a11y}: ${label}` : a11y}
+      accessibilityState={{ selected: on }}
+      onPress={onPress}
+      hitSlop={6}
+      style={({ pressed }) => [
+        styles.optionChip,
+        { backgroundColor: on ? palette.accentBg : palette.controlBg },
+        pressed && styles.pressed,
+      ]}>
+      {icon}
+      {label ? (
+        <Text
+          style={[styles.optionChipText, { color: on ? palette.accentSolid : palette.text }]}
+          numberOfLines={1}>
+          {label}
+        </Text>
+      ) : null}
+    </Pressable>
+  );
+}
+
 export function TilawahScreen() {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
@@ -807,6 +852,25 @@ export function TilawahScreen() {
     setQuranPrefs({ playbackRate: rate });
     void setPlaybackRate(rate);
   }, []);
+  // One chip each for speed and sleep, cycling through the same choices
+  // the two rows of chips offered — see the options row in the header.
+  const cycleRate = useCallback(() => {
+    const i = RATES.findIndex(r => Math.abs(quran.prefs.playbackRate - r) < 0.01);
+    setRate(RATES[(i + 1) % RATES.length]);
+  }, [quran.prefs.playbackRate, setRate]);
+  const cycleSleep = useCallback(() => {
+    const i = SLEEP_CHOICES.indexOf(sleepMinutes as (typeof SLEEP_CHOICES)[number]);
+    chooseSleep(SLEEP_CHOICES[(i + 1) % SLEEP_CHOICES.length]);
+  }, [sleepMinutes, chooseSleep]);
+  const sleepLabel =
+    sleepMinutes === 0
+      ? t('quran.listenSleep', { defaultValue: 'Sleep timer' })
+      : sleepMinutes === SLEEP_END_OF_SURAH
+        ? t('quran.listenSleepSurah', { defaultValue: 'End of surah' })
+        : t('quran.listenSleepMinutes', {
+            defaultValue: '{{count}} min',
+            count: sleepMinutes,
+          });
 
   // ── Rows ────────────────────────────────────────────────────────────
 
@@ -821,12 +885,17 @@ export function TilawahScreen() {
           style={({ pressed }) => [
             styles.surahRow,
             listCap,
-            {
-              backgroundColor: isActive ? palette.accentBg : palette.card,
-              borderColor: palette.border ?? palette.muted,
-            },
+            { backgroundColor: isActive ? palette.accentBg : 'transparent' },
             pressed && styles.pressed,
           ]}>
+          {/* An inset hairline instead of a card per surah (redesign-plan
+              P2/P3): a hundred and fourteen cards was a wall. */}
+          {!palette.flatChrome ? (
+            <View
+              pointerEvents="none"
+              style={[styles.surahDivider, { backgroundColor: palette.border }]}
+            />
+          ) : null}
           <Text
             style={[
               styles.surahNumber,
@@ -863,53 +932,53 @@ export function TilawahScreen() {
 
   const header = (
     <View style={[styles.headerWrap, listCap]}>
-      {/* The word, and what it means.
-
-          "Tilawah" is the right name — it names Qur'anic recitation, and
-          it belongs to the same vocabulary as Tasbih and Duas in the tab
-          bar. But a name that half the audience has to look up is a name
-          that fails half the audience, so it never appears without this
-          line under it. One sentence, said once, at the top of the page it
-          titles. */}
-      <Text style={[styles.pageBlurb, { color: palette.muted }]}>
-        {t('quran.tilawahBlurb', {
-          defaultValue:
-            'Recitation of the Quran — it keeps playing with the screen off, and works offline once downloaded.',
-        })}
-      </Text>
-
-      {/* ── The player ────────────────────────────────────────────── */}
+      {/* ── The player ────────────────────────────────────────────────
+          One container, and the page's only one: the hero of a listening
+          screen is the thing being listened to. What used to be here —
+          an intro paragraph, a reciter card inside the card, two chip
+          rows for speed and sleep, a second row of pills under the
+          transport — was reported as "chaotic and busy" by someone who
+          only wanted to press play. It is now a name, a bar, a transport,
+          and one quiet row of everything else (redesign-plan §2.7). */}
       <View
         style={[
           styles.card,
           { backgroundColor: palette.card, borderColor: palette.border ?? palette.muted },
         ]}>
-        <Text style={[styles.nowLabel, { color: palette.muted }]}>
-          {idle
-            ? resume
-              ? t('quran.tilawahContinue', {
-                  defaultValue: 'Carry on from your reading',
-                })
-              : t('quran.tilawahBegin', { defaultValue: 'Begin with' })
-            : isListening()
-              ? t('quran.listenContinuous', { defaultValue: 'Playing through' })
-              : t('quran.listenNowPlaying', { defaultValue: 'Now playing' })}
-        </Text>
-        <Text style={[styles.nowSurah, { color: palette.text }]} numberOfLines={1}>
-          {shownSurah.romanized}
-        </Text>
-        <Text style={[styles.nowAyah, { color: palette.muted }]}>
-          {idle
-            ? `${shownSurah.arabic} · ${shownSurah.english}`
-            : `${shownSurah.arabic} · ${shownSurah.number}:${shownAyah}`}
-        </Text>
-
-        {/* The reciter is a CHOICE, and has to look like one.
-
-            It used to be a label and a coloured name on a bare row — which
-            reads as a statistic about the app rather than a control, and
-            nobody taps a statistic. It is a filled row with a chevron now,
-            the same shape as every other "opens a picker" row in the app. */}
+        <View style={styles.nowHead}>
+          <Text style={[styles.nowLabel, { color: palette.muted }]} numberOfLines={1}>
+            {idle
+              ? resume
+                ? t('quran.tilawahContinue', {
+                    defaultValue: 'Carry on from your reading',
+                  })
+                : t('quran.tilawahBegin', { defaultValue: 'Begin with' })
+              : isListening()
+                ? t('quran.listenContinuous', { defaultValue: 'Playing through' })
+                : t('quran.listenNowPlaying', { defaultValue: 'Now playing' })}
+          </Text>
+          {/* The word, and what it means — one tap away rather than a
+              paragraph above the player. "Tilawah" names Qur'anic
+              recitation; a name half the audience has to look up still
+              gets its sentence, behind the ⓘ. */}
+          <InfoButton
+            title={t('quran.listenTitle', { defaultValue: 'Tilawah' })}
+            body={t('quran.tilawahBlurb', {
+              defaultValue:
+                'Recitation of the Quran — it keeps playing with the screen off, and works offline once downloaded.',
+            })}
+          />
+        </View>
+        <View style={styles.nowNames}>
+          <Text style={[styles.nowSurah, { color: palette.text }]} numberOfLines={1}>
+            {shownSurah.romanized}
+          </Text>
+          <Text style={[styles.nowArabic, { color: palette.text }]} numberOfLines={1}>
+            {shownSurah.arabic}
+          </Text>
+        </View>
+        {/* The reciter is a CHOICE and reads as one — a line with a
+            chevron, in the tertiary style, not a second card. */}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('quran.listenReciter', {
@@ -917,27 +986,16 @@ export function TilawahScreen() {
           })}
           accessibilityHint={reciter.name}
           onPress={() => setPickerOpen(true)}
-          style={({ pressed }) => [
-            styles.reciterRow,
-            { backgroundColor: palette.controlBg },
-            pressed && styles.pressed,
-          ]}>
-          <View style={styles.reciterText}>
-            <Text style={[styles.reciterLabel, { color: palette.muted }]}>
-              {t('quran.listenReciter', { defaultValue: 'Reciter' })}
-            </Text>
-            <Text
-              style={[styles.reciterName, { color: palette.text }]}
-              numberOfLines={1}>
-              {reciter.name}
-            </Text>
-          </View>
-          <Text style={[styles.reciterChevron, { color: palette.accentSolid }]}>
-            ›
+          hitSlop={8}
+          style={({ pressed }) => [styles.reciterLine, pressed && styles.pressed]}>
+          <Text style={[styles.reciterName, { color: palette.accentSolid }]} numberOfLines={1}>
+            {reciter.name}
           </Text>
+          <Text style={[styles.reciterChevron, { color: palette.accentSolid }]}>›</Text>
         </Pressable>
 
-        {/* Where you are in the SURAH — the thing you are in the middle of. */}
+        {/* Where you are in the SURAH, with what the bar means and the
+            clock on one line under it. */}
         <Scrubber
           ratio={surahRatio}
           onSeekRatio={seekSurah}
@@ -946,20 +1004,25 @@ export function TilawahScreen() {
             defaultValue: 'Move through the surah',
           })}
         />
-        <Text style={[styles.scrubCaption, { color: palette.muted }]}>
-          {idle
-            ? t('quran.listenSurahMeta', {
-                defaultValue: '{{count}} ayahs',
-                count: shownSurah.ayahCount,
-              })
-            : t('quran.tilawahAyahOf', {
-                defaultValue: 'Ayah {{done}} of {{total}}',
-                done: shownAyah,
-                total: shownSurah.ayahCount,
-              })}
-        </Text>
-
-        {/* And where you are in the ayah, for scrubbing back over a line. */}
+        <View style={styles.scrubTimes}>
+          <Text style={[styles.scrubCaption, { color: palette.muted }]} numberOfLines={1}>
+            {idle
+              ? t('quran.listenSurahMeta', {
+                  defaultValue: '{{count}} ayahs',
+                  count: shownSurah.ayahCount,
+                })
+              : t('quran.tilawahAyahOf', {
+                  defaultValue: 'Ayah {{done}} of {{total}}',
+                  done: shownAyah,
+                  total: shownSurah.ayahCount,
+                })}
+          </Text>
+          <Text style={[styles.scrubTime, { color: palette.muted }]}>
+            {`${formatClock(progress.position)} / ${formatClock(progress.duration)}`}
+          </Text>
+        </View>
+        {/* And within the ayah, for scrubbing back over a line — a thin
+            second bar, the second thing you look at. */}
         <Scrubber
           minor
           ratio={ayahRatio}
@@ -967,45 +1030,26 @@ export function TilawahScreen() {
           palette={palette}
           label={t('quran.listenSeek', { defaultValue: 'Seek within the ayah' })}
         />
-        <View style={styles.scrubTimes}>
-          <Text style={[styles.scrubTime, { color: palette.muted }]}>
-            {formatClock(progress.position)}
-          </Text>
-          <Text style={[styles.scrubTime, { color: palette.muted }]}>
-            {formatClock(progress.duration)}
-          </Text>
-        </View>
 
-        {/* THE BIG ARROWS MOVE BY SURAH.
+        {/* THE TRANSPORT, AS A PLAYER HAS ONE.
 
-            They moved by ayah, which meant a "next" you had to press two
-            hundred and eighty-five times to leave Al-Baqarah. An ayah is
-            six seconds; the thing someone reaches for while a recitation
-            plays is the next surah. Ayah stepping did not go away — it
-            went to its own smaller pair below, where its size says what
-            it is for. */}
+            Outer pair: an ayah either way — the line you want to hear
+            again, small because it is the fine control. Inner pair: a
+            surah either way, the coarse one. Play in the middle. Shuffle
+            and stop are not transport and left the row: shuffle is in
+            the options below, and pause is what stopping means here (the
+            mini player carries the close). */}
         <View style={styles.transport}>
           <Pressable
             accessibilityRole="button"
-            accessibilityState={{ selected: shuffleOn }}
-            accessibilityLabel={t('quran.tilawahShuffle', {
-              defaultValue: 'Shuffle surahs',
+            accessibilityLabel={t('quran.listenPrevious', {
+              defaultValue: 'Previous ayah',
             })}
-            hitSlop={12}
-            onPress={toggleShuffle}
-            style={({ pressed }) => [
-              styles.transportBtn,
-              pressed && styles.pressed,
-            ]}>
-            <ShuffleIcon
-              color={
-                shuffleOn
-                  ? String(palette.accentSolid)
-                  : String(palette.mutedSolid)
-              }
-            />
+            hitSlop={10}
+            onPress={() => void skipToPreviousAyah()}
+            style={({ pressed }) => [styles.transportBtn, pressed && styles.pressed]}>
+            <Text style={[styles.ayahStepGlyph, { color: palette.muted }]}>‹</Text>
           </Pressable>
-
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('quran.tilawahPrevSurah', {
@@ -1016,7 +1060,6 @@ export function TilawahScreen() {
             style={({ pressed }) => [styles.transportBtn, pressed && styles.pressed]}>
             <TransportIcon kind="prev" color={palette.text} />
           </Pressable>
-
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={
@@ -1040,7 +1083,6 @@ export function TilawahScreen() {
               />
             )}
           </Pressable>
-
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('quran.tilawahNextSurah', {
@@ -1051,176 +1093,62 @@ export function TilawahScreen() {
             style={({ pressed }) => [styles.transportBtn, pressed && styles.pressed]}>
             <TransportIcon kind="next" color={palette.text} />
           </Pressable>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('common.stop', { defaultValue: 'Stop' })}
-            hitSlop={12}
-            onPress={() => void stopPlayback()}
-            style={({ pressed }) => [styles.transportBtn, pressed && styles.pressed]}>
-            <TransportIcon kind="stop" color={palette.muted} size={18} />
-          </Pressable>
-        </View>
-
-        {/* And the ayah, for the line you want to hear again. */}
-        <View style={styles.ayahStep}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('quran.listenPrevious', {
-              defaultValue: 'Previous ayah',
-            })}
-            onPress={() => void skipToPreviousAyah()}
-            style={({ pressed }) => [
-              styles.ayahStepBtn,
-              { backgroundColor: palette.controlBg },
-              pressed && styles.pressed,
-            ]}>
-            <Text style={[styles.ayahStepText, { color: palette.text }]}>
-              {`‹  ${t('quran.tilawahAyahWord', { defaultValue: 'Ayah' })}`}
-            </Text>
-          </Pressable>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('quran.listenNext', {
               defaultValue: 'Next ayah',
             })}
+            hitSlop={10}
             onPress={() => void skipToNextAyah()}
-            style={({ pressed }) => [
-              styles.ayahStepBtn,
-              { backgroundColor: palette.controlBg },
-              pressed && styles.pressed,
-            ]}>
-            <Text style={[styles.ayahStepText, { color: palette.text }]}>
-              {`${t('quran.tilawahAyahWord', { defaultValue: 'Ayah' })}  ›`}
-            </Text>
+            style={({ pressed }) => [styles.transportBtn, pressed && styles.pressed]}>
+            <Text style={[styles.ayahStepGlyph, { color: palette.muted }]}>›</Text>
           </Pressable>
-          <Pressable
-            accessibilityRole="switch"
-            accessibilityState={{ checked: showPage }}
-            accessibilityLabel={t('quran.tilawahShowPage', {
-              defaultValue: 'Show the page',
-            })}
-            onPress={() => setQuranPrefs({ tilawahShowPage: !showPage })}
-            style={({ pressed }) => [
-              styles.coffeeBtn,
-              {
-                backgroundColor: showPage
-                  ? palette.accentBg
-                  : palette.controlBg,
-              },
-              pressed && styles.pressed,
-            ]}>
-            <PageIcon
-              color={
-                showPage
-                  ? String(palette.accentSolid)
-                  : String(palette.mutedSolid)
-              }
-            />
-          </Pressable>
-          {/* On the secondary row rather than the transport: it is not a
-              playback control, it is about the phone. */}
-          <Pressable
-            accessibilityRole="switch"
-            accessibilityState={{ checked: keepAwake }}
-            accessibilityLabel={t('quran.tilawahKeepAwake', {
-              defaultValue: 'Keep the screen on',
-            })}
+        </View>
+
+        {/* EVERYTHING ELSE, ON ONE QUIET LINE.
+
+            Speed and the sleep timer were two labelled rows of five chips
+            each — ten controls for two settings almost nobody changes
+            twice. Each is one chip now that says its value and cycles on
+            a tap (0.75× → 1× → … → 2×; Off → 15 → 30 → 60 → end of
+            surah). Shuffle, keep-awake and show-the-page are the same
+            toggles they were, as chips in the same row, painted only when
+            they are on. */}
+        <View style={styles.optionsRow}>
+          <OptionChip
+            label={`${quran.prefs.playbackRate}×`}
+            a11y={t('quran.listenSpeed', { defaultValue: 'Speed' })}
+            onPress={cycleRate}
+            palette={palette}
+          />
+          <OptionChip
+            label={sleepLabel}
+            a11y={t('quran.listenSleep', { defaultValue: 'Sleep timer' })}
+            on={sleepMinutes !== 0}
+            onPress={cycleSleep}
+            palette={palette}
+          />
+          <OptionChip
+            icon={<ShuffleIcon color={String(shuffleOn ? palette.accentSolid : palette.mutedSolid)} />}
+            a11y={t('quran.tilawahShuffle', { defaultValue: 'Shuffle surahs' })}
+            on={shuffleOn}
+            onPress={toggleShuffle}
+            palette={palette}
+          />
+          <OptionChip
+            icon={<CoffeeIcon color={String(keepAwake ? palette.accentSolid : palette.mutedSolid)} />}
+            a11y={t('quran.tilawahKeepAwake', { defaultValue: 'Keep the screen on' })}
+            on={keepAwake}
             onPress={toggleKeepAwake}
-            style={({ pressed }) => [
-              styles.coffeeBtn,
-              {
-                backgroundColor: keepAwake
-                  ? palette.accentBg
-                  : palette.controlBg,
-              },
-              pressed && styles.pressed,
-            ]}>
-            <CoffeeIcon
-              color={
-                keepAwake
-                  ? String(palette.accentSolid)
-                  : String(palette.mutedSolid)
-              }
-            />
-          </Pressable>
-        </View>
-
-        {/* Speed */}
-        <Text style={[styles.groupLabel, { color: palette.muted }]}>
-          {t('quran.listenSpeed', { defaultValue: 'Speed' })}
-        </Text>
-        <View style={styles.chipRow}>
-          {RATES.map(rate => {
-            const on = Math.abs(quran.prefs.playbackRate - rate) < 0.01;
-            return (
-              <Pressable
-                key={rate}
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: on }}
-                accessibilityLabel={`${rate}×`}
-                onPress={() => setRate(rate)}
-                style={[
-                  styles.chip,
-                  {
-                    backgroundColor: on ? palette.accentBg : palette.controlBg,
-                    borderColor: on ? palette.accentSolid : 'transparent',
-                  },
-                ]}>
-                <Text
-                  style={[
-                    styles.chipText,
-                    { color: on ? palette.accentSolid : palette.text },
-                  ]}>
-                  {`${rate}×`}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        {/* Sleep timer */}
-        <Text style={[styles.groupLabel, { color: palette.muted }]}>
-          {t('quran.listenSleep', { defaultValue: 'Sleep timer' })}
-        </Text>
-        <View style={styles.chipRow}>
-          {SLEEP_CHOICES.map(choice => {
-            const on = sleepMinutes === choice;
-            const label =
-              choice === 0
-                ? t('quran.listenSleepOff', { defaultValue: 'Off' })
-                : choice === SLEEP_END_OF_SURAH
-                  ? t('quran.listenSleepSurah', {
-                      defaultValue: 'End of surah',
-                    })
-                  : t('quran.listenSleepMinutes', {
-                      defaultValue: '{{count}} min',
-                      count: choice,
-                    });
-            return (
-              <Pressable
-                key={choice}
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: on }}
-                accessibilityLabel={label}
-                onPress={() => chooseSleep(choice)}
-                style={[
-                  styles.chip,
-                  {
-                    backgroundColor: on ? palette.accentBg : palette.controlBg,
-                    borderColor: on ? palette.accentSolid : 'transparent',
-                  },
-                ]}>
-                <Text
-                  style={[
-                    styles.chipText,
-                    { color: on ? palette.accentSolid : palette.text },
-                  ]}>
-                  {label}
-                </Text>
-              </Pressable>
-            );
-          })}
+            palette={palette}
+          />
+          <OptionChip
+            icon={<PageIcon color={String(showPage ? palette.accentSolid : palette.mutedSolid)} />}
+            a11y={t('quran.tilawahShowPage', { defaultValue: 'Show the page' })}
+            on={showPage}
+            onPress={() => setQuranPrefs({ tilawahShowPage: !showPage })}
+            palette={palette}
+          />
         </View>
         {sleepEndsAt != null ? (
           <Text style={[styles.hint, { color: palette.muted }]}>
@@ -1381,40 +1309,38 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
   },
   root: { flex: 1 },
-  list: { padding: SPACING.lg, gap: SPACING.sm },
+  list: { padding: SPACING.lg },
   /**
    * The reading measure on iPad and Mac. 720 is QuranScreen's number, and
    * matching it is the point: the two pages sit one tap apart.
    */
   listWide: { maxWidth: 720, width: '100%', alignSelf: 'center' as const },
   headerWrap: { gap: SPACING.md, marginBottom: SPACING.sm },
-  pageBlurb: { fontSize: TYPE.footnote.fontSize, lineHeight: 19, marginTop: 2 },
   card: {
-    borderRadius: RADIUS.lg,
+    borderRadius: RADIUS.xl,
     borderWidth: StyleSheet.hairlineWidth,
     padding: SPACING.lg,
     gap: SPACING.sm,
   },
-  nowLabel: { fontSize: TYPE.caption.fontSize, fontWeight: '700', letterSpacing: 0.6 },
-  nowSurah: { fontSize: TYPE.title2.fontSize, fontWeight: '700' },
-  nowAyah: { fontSize: TYPE.footnote.fontSize },
-  // A filled row with a chevron: the shape every other picker in the app
-  // uses, so this one reads as a control rather than a readout.
-  reciterRow: {
+  nowHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  nowLabel: { fontSize: TYPE.label.fontSize, fontWeight: '600', flexShrink: 1 },
+  nowNames: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'baseline',
     justifyContent: 'space-between',
     gap: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    borderRadius: RADIUS.md,
-    marginTop: SPACING.md,
-    marginBottom: SPACING.xs,
   },
-  reciterText: { flex: 1 },
-  reciterLabel: { fontSize: TYPE.caption.fontSize, fontWeight: '700', letterSpacing: 0.5 },
-  reciterName: { fontSize: TYPE.callout.fontSize, fontWeight: '600', marginTop: 2 },
-  reciterChevron: { fontSize: TYPE.title2.fontSize, fontWeight: '700' },
+  nowSurah: { fontSize: TYPE.title1.fontSize, fontWeight: '700', flexShrink: 1 },
+  // The name as a muṣḥaf writes it — Katibeh, the calligraphic face.
+  nowArabic: {
+    fontSize: 36, // tokens-ok-line: display or Arabic scale, sized by hand
+    lineHeight: 44, // tokens-ok-line: display or Arabic scale, sized by hand
+    ...arabicTextStyle('calligraphy'),
+  },
+  // A line, not a card: the tertiary style for "a choice you can change".
+  reciterLine: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs, alignSelf: 'flex-start' },
+  reciterName: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
+  reciterChevron: { fontSize: TYPE.body.fontSize, fontWeight: '600' },
 
   // A thin track needs a tall touch target; the bar is 4pt, the finger is not.
   scrubTouch: { height: 28, justifyContent: 'center' },
@@ -1429,19 +1355,45 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.sm,
     marginStart: -6,
   },
-  scrubCaption: { fontSize: TYPE.label.fontSize, fontWeight: '600', marginTop: -2 },
-  scrubTimes: { flexDirection: 'row', justifyContent: 'space-between' },
+  scrubCaption: { fontSize: TYPE.label.fontSize, fontWeight: '600', flexShrink: 1 },
+  scrubTimes: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginTop: -SPACING.xs,
+  },
   scrubTime: { fontSize: TYPE.caption.fontSize, fontVariant: ['tabular-nums'] },
 
   transport: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: SPACING.xl,
+    gap: SPACING.lg,
     marginTop: SPACING.sm,
     marginBottom: SPACING.xs,
   },
-  transportBtn: { padding: SPACING.sm },
+  transportBtn: { padding: SPACING.sm, minWidth: 40, alignItems: 'center' },
+  // The ayah step: a glyph at the transport's ends, quiet by size.
+  ayahStepGlyph: { fontSize: TYPE.title1.fontSize, fontWeight: '400', lineHeight: 32 },
+  optionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    marginTop: SPACING.xs,
+  },
+  optionChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+    minHeight: 34,
+    minWidth: 44,
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.full,
+  },
+  optionChipText: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
   playBtn: {
     width: 64,
     height: 64,
@@ -1457,28 +1409,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: SPACING.xs,
   },
-  ayahStep: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: SPACING.md,
-    marginTop: 2,
-    marginBottom: 2,
-  },
-  ayahStepBtn: {
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.full,
-    minWidth: 92,
-    alignItems: 'center',
-  },
-  ayahStepText: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
-  coffeeBtn: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   pageCard: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.md, gap: SPACING.sm },
   pageHead: {
     flexDirection: 'row',
@@ -1489,20 +1419,6 @@ const styles = StyleSheet.create({
   mirrored: { transform: [{ scaleX: -1 }] },
   bar: { width: 5, borderRadius: 1.5 },
 
-  groupLabel: {
-    fontSize: TYPE.caption.fontSize,
-    fontWeight: '700',
-    letterSpacing: 0.6,
-    marginTop: SPACING.md,
-  },
-  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm, marginTop: SPACING.xs },
-  chip: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.full,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  chipText: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
 
   cardTitle: { fontSize: TYPE.body.fontSize, fontWeight: '700' },
   cardBody: { fontSize: TYPE.footnote.fontSize, lineHeight: 19 },
@@ -1537,7 +1453,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     borderRadius: RADIUS.md,
-    borderWidth: StyleSheet.hairlineWidth,
+    position: 'relative',
+  },
+  surahDivider: {
+    position: 'absolute',
+    bottom: 0,
+    start: SPACING.lg + 28 + SPACING.md,
+    end: 0,
+    height: StyleSheet.hairlineWidth,
   },
   surahNumber: {
     fontSize: TYPE.footnote.fontSize,
@@ -1548,6 +1471,10 @@ const styles = StyleSheet.create({
   surahNames: { flex: 1 },
   surahRoman: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
   surahMeta: { fontSize: TYPE.label.fontSize, marginTop: 1 },
-  surahArabic: { fontSize: TYPE.title3.fontSize },
+  surahArabic: {
+    fontSize: 30, // tokens-ok-line: display or Arabic scale, sized by hand
+    lineHeight: 44, // tokens-ok-line: display or Arabic scale, sized by hand
+    ...arabicTextStyle('calligraphy'),
+  },
   pressed: { opacity: 0.6 },
 });
