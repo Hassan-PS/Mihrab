@@ -11,6 +11,7 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.SpannableString
@@ -1101,7 +1102,21 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
 
       val views = RemoteViews(context.packageName, layoutId)
 
-      val click = Intent(context, MainActivity::class.java).apply {
+      // ── A WIDGET TAP HAS A DESTINATION — #27, and #31 for this one ───
+      //
+      // This was a bare MainActivity intent, which opens the app wherever
+      // it was last left. Reported in #31: "clicking on 'Next prayer'
+      // widget just opens the app wherever I was before (I was in the
+      // quran section)". Exactly the fault #27 fixed for notifications and
+      // for the Log widget, still standing here.
+      //
+      // Today is the destination for both widgets this provider draws,
+      // and it is not a guess: they show today's times, and the screen
+      // that shows today's times in full is where somebody tapping them
+      // is going. `setPackage` so the implicit VIEW cannot be answered by
+      // anything but this app.
+      val click = Intent(Intent.ACTION_VIEW, Uri.parse("mihrab://today")).apply {
+        setPackage(context.packageName)
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
       }
       val pi =
@@ -1157,8 +1172,28 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
               measuredWidthDp(context, appWidgetManager, appWidgetId),
             )
           }
-        } catch (_: Exception) {
-          showMessageOnly(views, context.getString(R.string.widget_error), isError = true, style)
+        } catch (e: Exception) {
+          // ── SAY WHAT WENT WRONG ─────────────────────────────────────
+          //
+          // This used to be `catch (_: Exception)`: the widget said
+          // "Could not load widget data" and the reason was discarded, on
+          // the device, in the one process that knew it. #31 is what that
+          // costs — a report of exactly this message from a phone nobody
+          // here owns, and no way to ask it anything.
+          //
+          // The class name goes on the card as well as into the log. It
+          // is only ever visible in a state that is already broken, it
+          // fits, and it turns a screenshot into a diagnosis. The
+          // MESSAGE is deliberately not shown: it can carry payload
+          // content, and a widget on a lock screen is not the place for
+          // it. The log gets the whole thing.
+          Log.e(WIDGET_LOG_TAG, "widget render failed", e)
+          showMessageOnly(
+            views,
+            "${context.getString(R.string.widget_error)} (${e.javaClass.simpleName})",
+            isError = true,
+            style,
+          )
         }
       }
       return views
@@ -1181,8 +1216,34 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     }
 
     /** Today's local date as yyyy-MM-dd, matching the JS `dateKey` format. */
+    /** The tag a `adb logcat -s` can be pointed at. See the catch in `buildViews`. */
+    const val WIDGET_LOG_TAG = "MihrabWidget"
+
+    /**
+     * An extra failed. The card keeps its times; the log gets the reason.
+     *
+     * Named per binder, because "the practice grid threw" and "the night
+     * line threw" are different bugs and a screenshot cannot tell them
+     * apart.
+     */
+    private fun logExtraFailure(what: String, e: Throwable) {
+      Log.w(WIDGET_LOG_TAG, "widget extra failed: $what", e)
+    }
+
     fun todayDateKey(): String {
-      val cal = java.util.Calendar.getInstance()
+      // GREGORIAN, EXPLICITLY. `Calendar.getInstance()` follows the
+      // default locale, and on a Thai or Japanese one that is a
+      // BuddhistCalendar or a JapaneseImperialCalendar — YEAR 2569, or 8,
+      // instead of 2026. The payload's `dateKey` is written by JavaScript
+      // and is always Gregorian, so on those phones no day would ever
+      // match: `selectTodayDay` returns null and the widget falls back to
+      // whatever single day the app last wrote, or says nothing at all.
+      // The device's own TIME ZONE is still what decides which day it is,
+      // which is the part that has to follow the phone.
+      val cal = java.util.GregorianCalendar(
+        java.util.TimeZone.getDefault(),
+        java.util.Locale.US,
+      )
       return String.format(
         java.util.Locale.US,
         "%04d-%02d-%02d",
@@ -1993,10 +2054,33 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         }
       }
 
-      bindNightRow(views, displayRows, layoutId)
-      bindLoggedLine(views, o, context, layoutId, describesToday)
-      bindStripHeader(context, views, layoutId, heightDp)
-      bindPracticeStrip(views, o, style, context, layoutId, heightDp, widthDp)
+      // ── THE TIMES ARE THE PROMISE; THE REST ARE EXTRAS ────────────────
+      //
+      // Everything above this line is the six times, and by here they are
+      // already on the card. Everything below is an addition to them: the
+      // night line, the logged line, the strip header, the streak and the
+      // practice grid.
+      //
+      // They used to share a fate with the times. `buildViews` wraps this
+      // whole method in one try/catch, so a throw anywhere in an EXTRA
+      // replaced a perfectly good set of prayer times with "Could not load
+      // widget data" — reported on a Huawei Nova 11i in #31, where the two
+      // widgets that draw this payload showed the error and the five that
+      // do not were fine.
+      //
+      // Whatever the throw turns out to be on that device, the shape of
+      // the failure is wrong. A practice grid that cannot be measured is a
+      // reason to draw no grid. It is not a reason to stop telling
+      // somebody when Maghrib is.
+      runCatching { bindNightRow(views, displayRows, layoutId) }
+        .onFailure { logExtraFailure("nightRow", it) }
+      runCatching { bindLoggedLine(views, o, context, layoutId, describesToday) }
+        .onFailure { logExtraFailure("loggedLine", it) }
+      runCatching { bindStripHeader(context, views, layoutId, heightDp) }
+        .onFailure { logExtraFailure("stripHeader", it) }
+      runCatching {
+        bindPracticeStrip(views, o, style, context, layoutId, heightDp, widthDp)
+      }.onFailure { logExtraFailure("practiceStrip", it) }
 
       // The alarms are NOT armed here any more — see `armWidgetAlarms`. A
       // render is the wrong place to schedule from: it only happens when a
