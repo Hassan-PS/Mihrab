@@ -1162,7 +1162,10 @@
     "listenDeleteAudio": "Ta bort {{name}} från den här enheten",
     "listenDownloadReciter": "Ladda ner {{name}}, cirka {{size}}",
     "listenDownloadRunning": "Laddar ner · {{done}} av {{total}}",
-    "shareTafsir": "Dela denna tafsir ({{edition}})"
+    "shareTafsir": "Dela denna tafsir ({{edition}})",
+    "surahAudioPartial": "{{have}} av {{total}} verser · tryck för att hämta resten",
+    "deleteSurahAudio": "Ta bort ljudet för denna sura",
+    "deleteSurahAudioFor": "Ta bort hämtat ljud för {{surah}}"
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",

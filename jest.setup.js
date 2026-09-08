@@ -211,14 +211,47 @@ jest.mock('react-native-blob-util', () => {
     exists: jest.fn(async path => {
       const asset = assetFile(path);
       if (asset) return require('fs').existsSync(asset);
-      return files.has(path);
+      if (files.has(path)) return true;
+      // A directory exists when something is under it. Without this the
+      // listing helpers above can never be reached: every caller checks
+      // `exists(dir)` first, the way the real store does.
+      const prefix = `${String(path).replace(/\/$/, '')}/`;
+      for (const key of files.keys()) if (key.startsWith(prefix)) return true;
+      return false;
     }),
     stat: jest.fn(async path => {
       if (!files.has(path)) throw new Error('ENOENT');
       return { size: files.get(path).length, path };
     }),
-    lstat: jest.fn(async () => []),
-    ls: jest.fn(async () => []),
+    /*
+     * Directory listings, backed by the same map `writeFile` fills.
+     *
+     * These used to return `[]` unconditionally, which made every
+     * directory look empty and quietly excused the store code that reads
+     * a folder instead of stat-ing 286 files from ever being tested —
+     * `reciterAudioStats`, and then `surahAudioStatus` in #30, which is
+     * the whole of "is this surah partly downloaded".
+     */
+    lstat: jest.fn(async dir => {
+      const prefix = `${String(dir).replace(/\/$/, '')}/`;
+      const out = [];
+      for (const [path, data] of files) {
+        if (!path.startsWith(prefix)) continue;
+        const rest = path.slice(prefix.length);
+        if (rest.includes('/')) continue; // one level, like the real thing
+        out.push({ filename: rest, path, size: data.length, type: 'file' });
+      }
+      return out;
+    }),
+    ls: jest.fn(async dir => {
+      const prefix = `${String(dir).replace(/\/$/, '')}/`;
+      const names = new Set();
+      for (const path of files.keys()) {
+        if (!path.startsWith(prefix)) continue;
+        names.add(path.slice(prefix.length).split('/')[0]);
+      }
+      return [...names];
+    }),
     readFile: jest.fn(async path => {
       const asset = assetFile(path);
       if (asset) return require('fs').readFileSync(asset, 'utf8');

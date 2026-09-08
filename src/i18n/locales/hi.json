@@ -1162,7 +1162,10 @@
     "listenDeleteAudio": "{{name}} को इस डिवाइस से हटाएँ",
     "listenDownloadReciter": "{{name}} डाउनलोड करें, लगभग {{size}}",
     "listenDownloadRunning": "डाउनलोड हो रहा है · {{total}} में से {{done}}",
-    "shareTafsir": "यह तफ़सीर साझा करें ({{edition}})"
+    "shareTafsir": "यह तफ़सीर साझा करें ({{edition}})",
+    "surahAudioPartial": "{{total}} में से {{have}} आयतें · बाकी डाउनलोड करने के लिए टैप करें",
+    "deleteSurahAudio": "इस सूरह का ऑडियो हटाएँ",
+    "deleteSurahAudioFor": "{{surah}} का डाउनलोड किया ऑडियो हटाएँ"
   },
   "mosques": {
     "searching": "पास की मस्जिदें ढूँढी जा रही हैं…",

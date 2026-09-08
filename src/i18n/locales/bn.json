@@ -1162,7 +1162,10 @@
     "listenDeleteAudio": "এই ডিভাইস থেকে {{name}} মুছুন",
     "listenDownloadReciter": "{{name}} ডাউনলোড করুন, প্রায় {{size}}",
     "listenDownloadRunning": "ডাউনলোড হচ্ছে · {{total}}-এর {{done}}",
-    "shareTafsir": "এই তাফসীর শেয়ার করুন ({{edition}})"
+    "shareTafsir": "এই তাফসীর শেয়ার করুন ({{edition}})",
+    "surahAudioPartial": "{{total}}-এর মধ্যে {{have}} আয়াত · বাকিটা ডাউনলোড করতে ট্যাপ করুন",
+    "deleteSurahAudio": "এই সূরার অডিও মুছুন",
+    "deleteSurahAudioFor": "{{surah}}-এর ডাউনলোড করা অডিও মুছুন"
   },
   "mosques": {
     "searching": "কাছাকাছি মসজিদ খোঁজা হচ্ছে…",

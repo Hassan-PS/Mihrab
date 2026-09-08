@@ -1162,7 +1162,10 @@
     "listenDeleteAudio": "حذف {{name}} من هذا الجهاز",
     "listenDownloadReciter": "تنزيل {{name}}، نحو {{size}}",
     "listenDownloadRunning": "جارٍ التنزيل · {{done}} من {{total}}",
-    "shareTafsir": "مشاركة هذا التفسير ({{edition}})"
+    "shareTafsir": "مشاركة هذا التفسير ({{edition}})",
+    "surahAudioPartial": "{{have}} من {{total}} آية · اضغط لتنزيل الباقي",
+    "deleteSurahAudio": "حذف صوت هذه السورة",
+    "deleteSurahAudioFor": "حذف الصوت المنزَّل لسورة {{surah}}"
   },
   "mosques": {
     "searching": "البحث عن مساجد قريبة…",

@@ -1162,7 +1162,10 @@
     "listenDeleteAudio": "{{name}} von diesem Gerät löschen",
     "listenDownloadReciter": "{{name}} herunterladen, etwa {{size}}",
     "listenDownloadRunning": "Wird geladen · {{done}} von {{total}}",
-    "shareTafsir": "Diesen Tafsir teilen ({{edition}})"
+    "shareTafsir": "Diesen Tafsir teilen ({{edition}})",
+    "surahAudioPartial": "{{have}} von {{total}} Versen · tippen, um den Rest zu laden",
+    "deleteSurahAudio": "Audio dieser Sure löschen",
+    "deleteSurahAudioFor": "Heruntergeladenes Audio für {{surah}} löschen"
   },
   "mosques": {
     "searching": "Suche nach Moscheen in der Nähe…",

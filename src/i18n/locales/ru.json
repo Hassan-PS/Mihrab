@@ -1162,7 +1162,10 @@
     "listenDeleteAudio": "Удалить {{name}} с этого устройства",
     "listenDownloadReciter": "Скачать {{name}}, около {{size}}",
     "listenDownloadRunning": "Загрузка · {{done}} из {{total}}",
-    "shareTafsir": "Поделиться этим тафсиром ({{edition}})"
+    "shareTafsir": "Поделиться этим тафсиром ({{edition}})",
+    "surahAudioPartial": "{{have}} из {{total}} аятов · нажмите, чтобы загрузить остальное",
+    "deleteSurahAudio": "Удалить аудио этой суры",
+    "deleteSurahAudioFor": "Удалить загруженное аудио суры {{surah}}"
   },
   "mosques": {
     "searching": "Ищем ближайшие мечети…",

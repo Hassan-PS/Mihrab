@@ -95,6 +95,80 @@ export type AudioDownloadHandle = {
 /** Smallest believable MP3 — anything under this is a bad download. */
 const MIN_AUDIO_BYTES = 1000;
 
+const B64 =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+/**
+ * The first `count` bytes of a base64 string, decoded.
+ *
+ * Only the prefix, because that is all anybody here wants and a whole
+ * decode of forty kilobytes to look at four bytes is a waste on a phone.
+ */
+/* eslint-disable no-bitwise -- base64 and MPEG frame syncs are bit work;
+   spelling them with arithmetic would be the same thing, less legibly. */
+export function base64Prefix(b64: string, count: number): number[] {
+  const out: number[] = [];
+  const chars = b64.replace(/[^A-Za-z0-9+/]/g, '');
+  for (let i = 0; i + 1 < chars.length && out.length < count; i += 4) {
+    const quad = [0, 1, 2, 3].map(k => B64.indexOf(chars[i + k] ?? 'A'));
+    if (quad[0] < 0 || quad[1] < 0) break;
+    out.push(((quad[0] << 2) | (quad[1] >> 4)) & 0xff);
+    if (out.length < count && quad[2] >= 0) {
+      out.push(((quad[1] << 4) | (quad[2] >> 2)) & 0xff);
+    }
+    if (out.length < count && quad[3] >= 0) {
+      out.push(((quad[2] << 6) | quad[3]) & 0xff);
+    }
+  }
+  return out.slice(0, count);
+}
+
+/**
+ * Is this actually an MP3?
+ *
+ * ── WHY A SIZE CHECK IS NOT ENOUGH ────────────────────────────────────
+ *
+ * The downloader accepted anything over a kilobyte that arrived with a
+ * 200. A captive portal — hotel wifi, a train, a corporate proxy — answers
+ * every request with 200 and a login page, and a login page is several
+ * kilobytes of HTML. That file lands in the audio folder under an ayah's
+ * name, passes every check this store had, counts as downloaded, and is
+ * silent when it is played. Offline, weeks later, with no way to tell it
+ * from a real one.
+ *
+ * Which is one of the shapes #30 describes: "downloaded audio will not
+ * play offline". Two bytes of the file say whether it is audio at all.
+ *
+ * An MP3 begins with an ID3 tag or an MPEG frame sync — eleven set bits.
+ * HTML begins with `<`, JSON with `{`, and neither survives this.
+ */
+export function looksLikeMp3(head: readonly number[]): boolean {
+  if (head.length >= 3 && head[0] === 0x49 && head[1] === 0x44 && head[2] === 0x33) {
+    return true; // "ID3"
+  }
+  return head.length >= 2 && head[0] === 0xff && (head[1] & 0xe0) === 0xe0;
+}
+/* eslint-enable no-bitwise */
+
+/**
+ * Throw — and delete — if what landed at `path` is not audio.
+ *
+ * Deleting is the point. A file left behind is a file the next status
+ * scan counts, the next repair skips, and the reader hears nothing from.
+ */
+async function verifyAudioFile(path: string, what: string): Promise<void> {
+  let head: number[] = [];
+  try {
+    const b64 = await ReactNativeBlobUtil.fs.readFile(path, 'base64');
+    head = base64Prefix(String(b64), 4);
+  } catch {
+    // Unreadable is its own failure; fall through to the throw below.
+  }
+  if (looksLikeMp3(head)) return;
+  await ReactNativeBlobUtil.fs.unlink(path).catch(() => undefined);
+  throw new Error(`${what}: not audio`);
+}
+
 /**
  * Last-resort transport: RN's own networking stack, via base64.
  *
@@ -131,6 +205,7 @@ async function fetchAyahViaRNFetch(url: string, dest: string): Promise<void> {
   if (base64.length < MIN_AUDIO_BYTES) throw new Error('ayah: truncated');
   await ReactNativeBlobUtil.fs.unlink(dest).catch(() => undefined);
   await ReactNativeBlobUtil.fs.writeFile(dest, base64, 'base64');
+  await verifyAudioFile(dest, 'ayah');
 }
 
 /**
@@ -211,6 +286,9 @@ async function fetchAyahFile(
       }
       await ReactNativeBlobUtil.fs.unlink(path).catch(() => undefined);
       await ReactNativeBlobUtil.fs.mv(tmp, path);
+      // A 200 is not proof of audio — see `looksLikeMp3`. Checked after
+      // the move so the file that gets verified is the file that stays.
+      await verifyAudioFile(path, `ayah ${surah}:${ayah}`);
       return;
     } catch (e) {
       lastError = e;
@@ -322,6 +400,121 @@ export function downloadSurahAudio(
     ayah: i + 1,
   }));
   return runAyahQueue(reciterId, queue, onProgress);
+}
+
+/**
+ * `007001.mp3` back into an ayah. Null for anything that is not one —
+ * `.part` files, a stray timings file, whatever a file manager left.
+ */
+export function parseAyahFileName(
+  name: string,
+): { surah: number; ayah: number } | null {
+  const m = /^(\d{3})(\d{3})\.mp3$/.exec(name);
+  if (!m) return null;
+  const surah = Number(m[1]);
+  const ayah = Number(m[2]);
+  if (surah < 1 || surah > 114 || ayah < 1) return null;
+  return { surah, ayah };
+}
+
+export type SurahAudioStatus = {
+  surah: number;
+  /** Ayahs in this surah. */
+  total: number;
+  /** How many of them are on disk. */
+  have: number;
+  /** The ones that are not, in order. Empty when `have === total`. */
+  missing: number[];
+};
+
+/**
+ * How much of one surah is actually on disk — issue #30.
+ *
+ * ── WHY A BOOLEAN WAS NOT ENOUGH ──────────────────────────────────────
+ *
+ * `isSurahDownloaded` answers yes or no, and the download row asked it
+ * exactly that. So a surah that is 284 ayahs of 286 looks identical to
+ * one that was never touched: "Download this surah". Tapping it repairs
+ * the gap — the queue skips valid files — but nothing ever said there
+ * was a gap, or that finishing it was two files rather than two hundred.
+ * And a reader who has listened to half a surah online has half of it on
+ * disk without knowing, then finds it stops partway through in the air.
+ *
+ * ONE directory listing, not `ayahCount` stats. `isSurahDownloaded` does
+ * 286 sequential `exists`+`stat` round trips for al-Baqarah; this reads
+ * the folder once and counts. Same floor as the downloader validates
+ * against, so "on disk" means the same thing to both.
+ */
+export async function surahAudioStatus(
+  reciterId: string,
+  surah: number,
+): Promise<SurahAudioStatus> {
+  const meta = SURAHS.find(s => s.number === surah);
+  const total = meta?.ayahCount ?? 0;
+  const present = new Set<number>();
+  try {
+    const dir = audioDir(reciterId);
+    if (await ReactNativeBlobUtil.fs.exists(dir)) {
+      const entries = await ReactNativeBlobUtil.fs.lstat(dir).catch(() => []);
+      for (const entry of entries) {
+        const ref = parseAyahFileName(String(entry.filename ?? ''));
+        if (!ref || ref.surah !== surah) continue;
+        if ((Number(entry.size) || 0) <= MIN_AUDIO_BYTES) continue;
+        present.add(ref.ayah);
+      }
+    }
+  } catch {
+    // An unreadable folder is an empty one: the answer is "download it".
+  }
+  const missing: number[] = [];
+  for (let a = 1; a <= total; a++) if (!present.has(a)) missing.push(a);
+  return { surah, total, have: total - missing.length, missing };
+}
+
+/**
+ * Download exactly these ayahs. The repair path.
+ *
+ * `downloadSurahAudio` queues the whole surah and skips what is already
+ * valid, which downloads the right bytes but reports the wrong thing: a
+ * progress bar counting to 286 when four files are missing tells somebody
+ * to expect a long wait. This queues only the gap, so the number on
+ * screen is the work that is left.
+ */
+export function downloadAyahs(
+  reciterId: string,
+  refs: ReadonlyArray<{ surah: number; ayah: number }>,
+  onProgress?: (p: AudioDownloadProgress) => void,
+): AudioDownloadHandle {
+  return runAyahQueue(reciterId, [...refs], onProgress);
+}
+
+/**
+ * Delete one surah's audio for one reciter — issue #30 asked for stored
+ * audio to be clearable, and per reciter was all there was.
+ *
+ * Returns how many files went, so the caller can say so rather than
+ * claiming a deletion that deleted nothing.
+ */
+export async function deleteSurahAudio(
+  reciterId: string,
+  surah: number,
+): Promise<number> {
+  let removed = 0;
+  try {
+    const dir = audioDir(reciterId);
+    if (!(await ReactNativeBlobUtil.fs.exists(dir))) return 0;
+    const entries = await ReactNativeBlobUtil.fs.lstat(dir).catch(() => []);
+    for (const entry of entries) {
+      const name = String(entry.filename ?? '');
+      const ref = parseAyahFileName(name);
+      if (!ref || ref.surah !== surah) continue;
+      await ReactNativeBlobUtil.fs.unlink(`${dir}/${name}`).catch(() => undefined);
+      removed += 1;
+    }
+  } catch {
+    /* nothing readable is nothing to delete */
+  }
+  return removed;
 }
 
 /** Every ayah in the book, in recitation order. */

@@ -1162,7 +1162,10 @@
     "listenDeleteAudio": "{{name}} kaydını bu cihazdan sil",
     "listenDownloadReciter": "{{name}} indir, yaklaşık {{size}}",
     "listenDownloadRunning": "İndiriliyor · {{total}} içinden {{done}}",
-    "shareTafsir": "Bu tefsiri paylaş ({{edition}})"
+    "shareTafsir": "Bu tefsiri paylaş ({{edition}})",
+    "surahAudioPartial": "{{total}} ayetten {{have}} tanesi · kalanını indirmek için dokun",
+    "deleteSurahAudio": "Bu surenin sesini sil",
+    "deleteSurahAudioFor": "{{surah}} için indirilen sesi sil"
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",
