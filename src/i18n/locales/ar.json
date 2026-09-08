@@ -537,6 +537,8 @@
       "food": "الطعام",
       "distress": "الكرب",
       "sleep": "النوم",
+      "lavatory": "الخلاء",
+      "garment": "اللباس",
       "travel": "السفر",
       "mosque": "المسجد",
       "gratitude": "الشكر",
@@ -900,7 +902,25 @@
     },
     "pronunciation": "النطق",
     "tapToCount": "اضغط للعد",
-    "shareDua": "مشاركة {{title}}"
+    "shareDua": "مشاركة {{title}}",
+    "lavatory_01_entering": {
+      "title": "دعاء دخول الخلاء"
+    },
+    "lavatory_02_leaving": {
+      "title": "دعاء الخروج من الخلاء"
+    },
+    "garment_01_dressing": {
+      "title": "دعاء لبس الثوب"
+    },
+    "garment_02_new": {
+      "title": "دعاء لبس الثوب الجديد"
+    },
+    "garment_03_for_someone_new": {
+      "title": "الدعاء لمن لبس ثوباً جديداً"
+    },
+    "garment_04_undressing": {
+      "title": "ما يقول إذا وضع الثوب"
+    }
   },
   "quran": {
     "meccan": "مكية",

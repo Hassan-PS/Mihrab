@@ -537,6 +537,8 @@
       "food": "আহার",
       "distress": "বিপদ",
       "sleep": "ঘুম",
+      "lavatory": "শৌচাগার",
+      "garment": "পোশাক",
       "travel": "সফর",
       "mosque": "মসজিদ",
       "gratitude": "কৃতজ্ঞতা",
@@ -900,7 +902,25 @@
     },
     "pronunciation": "উচ্চারণ",
     "tapToCount": "গুনতে ট্যাপ করুন",
-    "shareDua": "{{title}} শেয়ার করুন"
+    "shareDua": "{{title}} শেয়ার করুন",
+    "lavatory_01_entering": {
+      "title": "শৌচাগারে প্রবেশের সময়"
+    },
+    "lavatory_02_leaving": {
+      "title": "শৌচাগার থেকে বের হওয়ার সময়"
+    },
+    "garment_01_dressing": {
+      "title": "পোশাক পরার সময়"
+    },
+    "garment_02_new": {
+      "title": "নতুন পোশাক"
+    },
+    "garment_03_for_someone_new": {
+      "title": "নতুন পোশাক পরিহিত ব্যক্তির জন্য দোয়া"
+    },
+    "garment_04_undressing": {
+      "title": "পোশাক খোলার সময়"
+    }
   },
   "quran": {
     "meccan": "মাক্কী",

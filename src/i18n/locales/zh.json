@@ -537,6 +537,8 @@
       "food": "饮食",
       "distress": "困境",
       "sleep": "睡眠",
+      "lavatory": "如厕",
+      "garment": "穿衣",
       "travel": "旅行",
       "mosque": "清真寺",
       "gratitude": "感恩",
@@ -900,7 +902,25 @@
     },
     "pronunciation": "读音",
     "tapToCount": "点击计数",
-    "shareDua": "分享{{title}}"
+    "shareDua": "分享{{title}}",
+    "lavatory_01_entering": {
+      "title": "进入厕所时"
+    },
+    "lavatory_02_leaving": {
+      "title": "离开厕所时"
+    },
+    "garment_01_dressing": {
+      "title": "穿衣服时"
+    },
+    "garment_02_new": {
+      "title": "新衣服"
+    },
+    "garment_03_for_someone_new": {
+      "title": "对穿新衣者说"
+    },
+    "garment_04_undressing": {
+      "title": "脱衣服时"
+    }
   },
   "quran": {
     "meccan": "麦加",

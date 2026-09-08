@@ -19,6 +19,8 @@ export type DuaCategory =
   | 'food'
   | 'distress'
   | 'sleep'
+  | 'lavatory'
+  | 'garment'
   | 'travel'
   | 'mosque'
   | 'gratitude'
@@ -1464,6 +1466,82 @@ export const DUAS: ReadonlyArray<Dua> = [
       'Our Lord, do not let our hearts deviate after You have guided us, and grant us from Yourself mercy. Indeed You are the Bestower.',
     source: 'Quran 3:8',
   },
+
+  // — The lavatory, and dressing — issue #34.
+  //
+  //   Requested by a reader, and they belong here for the reason the
+  //   whole screen exists: these are the moments a person actually
+  //   passes through in a day, and a dua nobody can find is a dua
+  //   nobody says. Arabic and citations cross-checked against the
+  //   chapter footnotes in rn0x/hisn_almuslim_json, which cite the
+  //   collections directly — see docs/data-sources.md on why the
+  //   English there is not usable and these renderings are our own.
+  {
+    id: 'lavatory_01_entering',
+    category: 'lavatory',
+    titleEn: 'Entering the lavatory',
+    arabic: 'بِسْمِ ٱللَّهِ، ٱللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ ٱلْخُبُثِ وَٱلْخَبَائِثِ',
+    transliteration:
+      'Bismi-llāh. Allāhumma innī aʿūdhu bika mina-l-khubuthi wa-l-khabāʾith.',
+    translation:
+      'In the name of Allah. O Allah, I seek refuge with You from the male and female devils.',
+    source:
+      'Sahih al-Bukhari 1/45 · Sahih Muslim 1/283 — the opening bismillah from Saʿid ibn Mansur, see Fath al-Bari 1/244',
+  },
+  {
+    id: 'lavatory_02_leaving',
+    category: 'lavatory',
+    titleEn: 'Leaving the lavatory',
+    arabic: 'غُفْرَانَكَ',
+    transliteration: 'Ghufrānak.',
+    translation: 'I ask You for Your forgiveness.',
+    source:
+      'Sunan Abi Dawud, at-Tirmidhi and Ibn Majah — an-Nasa’i in ʿAmal al-Yawm wa-l-Layla',
+  },
+  {
+    id: 'garment_01_dressing',
+    category: 'garment',
+    titleEn: 'When putting on a garment',
+    arabic:
+      'ٱلْحَمْدُ لِلَّهِ ٱلَّذِي كَسَانِي هَٰذَا ٱلثَّوْبَ وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلَا قُوَّةٍ',
+    transliteration:
+      'Al-ḥamdu li-llāhi-lladhī kasānī hādhā-th-thawba wa razaqanīhi min ghayri ḥawlin minnī wa lā quwwah.',
+    translation:
+      'Praise be to Allah, who has clothed me with this garment and provided it for me, with no strength or power of my own.',
+    source:
+      'Sunan Abi Dawud, at-Tirmidhi and Ibn Majah — see Irwa’ al-Ghalil 7/47',
+  },
+  {
+    id: 'garment_02_new',
+    category: 'garment',
+    titleEn: 'A new garment',
+    arabic:
+      'ٱللَّهُمَّ لَكَ ٱلْحَمْدُ أَنْتَ كَسَوْتَنِيهِ، أَسْأَلُكَ مِنْ خَيْرِهِ وَخَيْرِ مَا صُنِعَ لَهُ، وَأَعُوذُ بِكَ مِنْ شَرِّهِ وَشَرِّ مَا صُنِعَ لَهُ',
+    transliteration:
+      'Allāhumma laka-l-ḥamdu anta kasawtanīh, asʾaluka min khayrihi wa khayri mā ṣuniʿa lah, wa aʿūdhu bika min sharrihi wa sharri mā ṣuniʿa lah.',
+    translation:
+      'O Allah, Yours is the praise — You have clothed me with it. I ask You for its good and the good of what it was made for, and I seek refuge with You from its evil and the evil of what it was made for.',
+    source: 'Sunan Abi Dawud · Jami at-Tirmidhi · al-Baghawi',
+  },
+  {
+    id: 'garment_03_for_someone_new',
+    category: 'garment',
+    titleEn: 'Said to someone in new clothes',
+    arabic: 'ٱلْبَسْ جَدِيدًا، وَعِشْ حَمِيدًا، وَمُتْ شَهِيدًا',
+    transliteration: 'Ilbas jadīdan, wa ʿish ḥamīdan, wa mut shahīdan.',
+    translation: 'Wear it anew, live a praiseworthy life, and die a martyr.',
+    source: 'Sunan Ibn Majah 2/1178 — see Sahih Ibn Majah 2/275',
+  },
+  {
+    id: 'garment_04_undressing',
+    category: 'garment',
+    titleEn: 'When taking a garment off',
+    arabic: 'بِسْمِ ٱللَّهِ',
+    transliteration: 'Bismi-llāh.',
+    translation:
+      'In the name of Allah. — “The screen between the eyes of the jinn and the nakedness of the children of Adam is that when one of them removes his garment, he says: In the name of Allah.”',
+    source: 'Jami at-Tirmidhi 2/505 — see Sahih al-Jami 3/203',
+  },
 ] as const;
 
 export const DUA_CATEGORIES: DuaCategory[] = [
@@ -1473,6 +1551,10 @@ export const DUA_CATEGORIES: DuaCategory[] = [
   'food',
   'distress',
   'sleep',
+  // Between sleep and travel because that is where they sit in a day —
+  // and because a category list is read in order (#34).
+  'lavatory',
+  'garment',
   'travel',
   'mosque',
   'gratitude',

@@ -537,6 +537,8 @@
       "food": "Yemek",
       "distress": "Sıkıntı",
       "sleep": "Uyku",
+      "lavatory": "Tuvalet",
+      "garment": "Giyinme",
       "travel": "Yolculuk",
       "mosque": "Cami",
       "gratitude": "Şükür",
@@ -900,7 +902,25 @@
     },
     "pronunciation": "Okunuş",
     "tapToCount": "Saymak için dokun",
-    "shareDua": "{{title}} paylaş"
+    "shareDua": "{{title}} paylaş",
+    "lavatory_01_entering": {
+      "title": "Tuvalete girerken"
+    },
+    "lavatory_02_leaving": {
+      "title": "Tuvaletten çıkarken"
+    },
+    "garment_01_dressing": {
+      "title": "Elbise giyerken"
+    },
+    "garment_02_new": {
+      "title": "Yeni bir elbise"
+    },
+    "garment_03_for_someone_new": {
+      "title": "Yeni elbise giyene söylenir"
+    },
+    "garment_04_undressing": {
+      "title": "Elbiseyi çıkarırken"
+    }
   },
   "quran": {
     "meccan": "Mekki",

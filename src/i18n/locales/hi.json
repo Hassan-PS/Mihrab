@@ -537,6 +537,8 @@
       "food": "भोजन",
       "distress": "विपदा",
       "sleep": "नींद",
+      "lavatory": "शौचालय",
+      "garment": "वस्त्र",
       "travel": "यात्रा",
       "mosque": "मस्जिद",
       "gratitude": "कृतज्ञता",
@@ -900,7 +902,25 @@
     },
     "pronunciation": "उच्चारण",
     "tapToCount": "गिनने के लिए टैप करें",
-    "shareDua": "{{title}} साझा करें"
+    "shareDua": "{{title}} साझा करें",
+    "lavatory_01_entering": {
+      "title": "शौचालय में प्रवेश करते समय"
+    },
+    "lavatory_02_leaving": {
+      "title": "शौचालय से बाहर आते समय"
+    },
+    "garment_01_dressing": {
+      "title": "वस्त्र पहनते समय"
+    },
+    "garment_02_new": {
+      "title": "नया वस्त्र"
+    },
+    "garment_03_for_someone_new": {
+      "title": "नए वस्त्र पहनने वाले के लिए"
+    },
+    "garment_04_undressing": {
+      "title": "वस्त्र उतारते समय"
+    }
   },
   "quran": {
     "meccan": "मक्की",

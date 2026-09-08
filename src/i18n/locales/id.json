@@ -537,6 +537,8 @@
       "food": "Makan",
       "distress": "Kesusahan",
       "sleep": "Tidur",
+      "lavatory": "Kamar kecil",
+      "garment": "Berpakaian",
       "travel": "Perjalanan",
       "mosque": "Masjid",
       "gratitude": "Syukur",
@@ -900,7 +902,25 @@
     },
     "pronunciation": "Pelafalan",
     "tapToCount": "Ketuk untuk menghitung",
-    "shareDua": "Bagikan {{title}}"
+    "shareDua": "Bagikan {{title}}",
+    "lavatory_01_entering": {
+      "title": "Ketika masuk kamar kecil"
+    },
+    "lavatory_02_leaving": {
+      "title": "Ketika keluar dari kamar kecil"
+    },
+    "garment_01_dressing": {
+      "title": "Ketika memakai pakaian"
+    },
+    "garment_02_new": {
+      "title": "Pakaian baru"
+    },
+    "garment_03_for_someone_new": {
+      "title": "Untuk orang yang memakai pakaian baru"
+    },
+    "garment_04_undressing": {
+      "title": "Ketika melepas pakaian"
+    }
   },
   "quran": {
     "meccan": "Makkiyah",

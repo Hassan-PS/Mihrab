@@ -537,6 +537,8 @@
       "food": "کھانا",
       "distress": "پریشانی",
       "sleep": "نیند",
+      "lavatory": "بیت الخلاء",
+      "garment": "لباس",
       "travel": "سفر",
       "mosque": "مسجد",
       "gratitude": "شکر",
@@ -900,7 +902,25 @@
     },
     "pronunciation": "تلفظ",
     "tapToCount": "گننے کے لیے دبائیں",
-    "shareDua": "{{title}} شیئر کریں"
+    "shareDua": "{{title}} شیئر کریں",
+    "lavatory_01_entering": {
+      "title": "بیت الخلاء میں داخل ہوتے وقت"
+    },
+    "lavatory_02_leaving": {
+      "title": "بیت الخلاء سے نکلتے وقت"
+    },
+    "garment_01_dressing": {
+      "title": "کپڑا پہنتے وقت"
+    },
+    "garment_02_new": {
+      "title": "نیا کپڑا"
+    },
+    "garment_03_for_someone_new": {
+      "title": "نیا لباس پہننے والے کے لیے"
+    },
+    "garment_04_undressing": {
+      "title": "کپڑا اتارتے وقت"
+    }
   },
   "quran": {
     "meccan": "مکی",

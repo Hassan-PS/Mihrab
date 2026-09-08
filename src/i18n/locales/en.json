@@ -537,6 +537,8 @@
       "food": "Food",
       "distress": "Distress",
       "sleep": "Sleep",
+      "lavatory": "Lavatory",
+      "garment": "Dressing",
       "travel": "Travel",
       "mosque": "Mosque",
       "gratitude": "Gratitude",
@@ -900,7 +902,25 @@
     },
     "pronunciation": "Pronunciation",
     "tapToCount": "Tap to count",
-    "shareDua": "Share {{title}}"
+    "shareDua": "Share {{title}}",
+    "lavatory_01_entering": {
+      "title": "Entering the lavatory"
+    },
+    "lavatory_02_leaving": {
+      "title": "Leaving the lavatory"
+    },
+    "garment_01_dressing": {
+      "title": "When putting on a garment"
+    },
+    "garment_02_new": {
+      "title": "A new garment"
+    },
+    "garment_03_for_someone_new": {
+      "title": "Said to someone in new clothes"
+    },
+    "garment_04_undressing": {
+      "title": "When taking a garment off"
+    }
   },
   "quran": {
     "meccan": "Meccan",

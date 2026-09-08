@@ -537,6 +537,8 @@
       "food": "Comida",
       "distress": "Aflicción",
       "sleep": "Sueño",
+      "lavatory": "Aseo",
+      "garment": "Vestirse",
       "travel": "Viaje",
       "mosque": "Mezquita",
       "gratitude": "Gratitud",
@@ -900,7 +902,25 @@
     },
     "pronunciation": "Pronunciación",
     "tapToCount": "Toca para contar",
-    "shareDua": "Compartir {{title}}"
+    "shareDua": "Compartir {{title}}",
+    "lavatory_01_entering": {
+      "title": "Al entrar en el aseo"
+    },
+    "lavatory_02_leaving": {
+      "title": "Al salir del aseo"
+    },
+    "garment_01_dressing": {
+      "title": "Al vestirse"
+    },
+    "garment_02_new": {
+      "title": "Una prenda nueva"
+    },
+    "garment_03_for_someone_new": {
+      "title": "Para quien estrena ropa"
+    },
+    "garment_04_undressing": {
+      "title": "Al quitarse la ropa"
+    }
   },
   "quran": {
     "meccan": "Mecana",

@@ -537,6 +537,8 @@
       "food": "Mahlzeit",
       "distress": "Notlage",
       "sleep": "Schlaf",
+      "lavatory": "Toilette",
+      "garment": "Kleidung",
       "travel": "Reise",
       "mosque": "Moschee",
       "gratitude": "Dankbarkeit",
@@ -900,7 +902,25 @@
     },
     "pronunciation": "Aussprache",
     "tapToCount": "Zum Zählen tippen",
-    "shareDua": "{{title}} teilen"
+    "shareDua": "{{title}} teilen",
+    "lavatory_01_entering": {
+      "title": "Beim Betreten der Toilette"
+    },
+    "lavatory_02_leaving": {
+      "title": "Beim Verlassen der Toilette"
+    },
+    "garment_01_dressing": {
+      "title": "Beim Anziehen eines Kleidungsstücks"
+    },
+    "garment_02_new": {
+      "title": "Ein neues Kleidungsstück"
+    },
+    "garment_03_for_someone_new": {
+      "title": "Für jemanden in neuer Kleidung"
+    },
+    "garment_04_undressing": {
+      "title": "Beim Ausziehen"
+    }
   },
   "quran": {
     "meccan": "Mekkanisch",

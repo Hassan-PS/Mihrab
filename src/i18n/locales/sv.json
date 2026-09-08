@@ -537,6 +537,8 @@
       "food": "Måltid",
       "distress": "Nöd",
       "sleep": "Sömn",
+      "lavatory": "Toaletten",
+      "garment": "Kläder",
       "travel": "Resa",
       "mosque": "Moské",
       "gratitude": "Tacksamhet",
@@ -900,7 +902,25 @@
     },
     "pronunciation": "Uttal",
     "tapToCount": "Tryck för att räkna",
-    "shareDua": "Dela {{title}}"
+    "shareDua": "Dela {{title}}",
+    "lavatory_01_entering": {
+      "title": "När man går in på toaletten"
+    },
+    "lavatory_02_leaving": {
+      "title": "När man lämnar toaletten"
+    },
+    "garment_01_dressing": {
+      "title": "När man tar på sig ett plagg"
+    },
+    "garment_02_new": {
+      "title": "Ett nytt plagg"
+    },
+    "garment_03_for_someone_new": {
+      "title": "Till den som bär nya kläder"
+    },
+    "garment_04_undressing": {
+      "title": "När man tar av sig ett plagg"
+    }
   },
   "quran": {
     "meccan": "Meckansk",
