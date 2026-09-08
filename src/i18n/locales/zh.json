@@ -353,7 +353,14 @@
     "malikiRowsHelp": "关闭时只发送提醒——不会在卡片或月历中添加任何内容。",
     "malikiEndAlerts": "以及时间结束时",
     "malikiEndAlertsHelp": "在礼拜成为盖达的那一刻发出第二条通知。就在那个时刻，绝不提前。",
-    "surahRemindersChannel": "章节提醒"
+    "surahRemindersChannel": "章节提醒",
+    "madhab": "教法学派",
+    "madhab_hanafi": "哈乃斐",
+    "madhab_maliki": "马立克",
+    "madhab_shafii": "沙斐仪",
+    "madhab_hanbali": "罕百里",
+    "madhabCustom": "自定义",
+    "madhabHelp": "沙斐仪、马立克与罕百里采用相同的晡礼影长，在三者之间选择不会改变任何时间。马立克还将破晓的主命拜称为晨礼，并提供第二时间。"
   },
   "locationSetup": {
     "headline": "设置您的位置",
@@ -459,7 +466,9 @@
     "Firstthird_abbr": "1/3",
     "firstTimeUntil": "首选时段至 {{time}}",
     "secondTimeFrom": "第二时段自 {{time}}",
-    "approx": "约"
+    "approx": "约",
+    "Subh": "晨礼",
+    "Subh_abbr": "晨礼"
   },
   "placeSearch": {
     "label": "搜索城市或地址",

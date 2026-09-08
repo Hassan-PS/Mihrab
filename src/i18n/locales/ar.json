@@ -353,7 +353,14 @@
     "malikiRowsHelp": "عند الإيقاف، يُنبَّه على الحدود فقط دون إضافة شيء إلى البطاقة أو الشهر.",
     "malikiEndAlerts": "وعند انتهاء الوقت",
     "malikiEndAlertsHelp": "تنبيه ثانٍ لحظة صيرورة الصلاة قضاءً. يصل في وقته تمامًا، لا قبله.",
-    "surahRemindersChannel": "تذكير بالسور"
+    "surahRemindersChannel": "تذكير بالسور",
+    "madhab": "المذهب",
+    "madhab_hanafi": "الحنفي",
+    "madhab_maliki": "المالكي",
+    "madhab_shafii": "الشافعي",
+    "madhab_hanbali": "الحنبلي",
+    "madhabCustom": "مخصص",
+    "madhabHelp": "الشافعي والمالكي والحنبلي يعتمدون ظلّ العصر نفسه، فالاختيار بينهم لا يغيّر وقتاً. والمالكي يسمّي صلاة الفجر صبحاً ويتيح الأوقات الثانية."
   },
   "locationSetup": {
     "headline": "حدّد موقعك",
@@ -459,7 +466,9 @@
     "Firstthird_abbr": "١/٣",
     "firstTimeUntil": "الوقت الاختياري إلى {{time}}",
     "secondTimeFrom": "الوقت الضروري من {{time}}",
-    "approx": "تقريبًا"
+    "approx": "تقريبًا",
+    "Subh": "الصبح",
+    "Subh_abbr": "الصبح"
   },
   "placeSearch": {
     "label": "ابحث عن مدينة أو عنوان",

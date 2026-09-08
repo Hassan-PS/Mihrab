@@ -86,6 +86,7 @@ function chipsOf(tree: ReactTestRenderer) {
 const BASE = {
   calculationMethod: 'auto' as const,
   school: 0,
+  madhab: null as null | 'hanafi' | 'maliki' | 'shafii' | 'hanbali',
   dataProvider: 'aladhan',
   dataProviderAuto: true,
   manualLatitude: 33.57,
@@ -116,6 +117,7 @@ function renderCalculation(settings: Partial<typeof BASE> = {}) {
       <CalculationCard
         onOpenMethodPicker={jest.fn()}
         onOpenOffsetsModal={jest.fn()}
+        onOpenMadhabPicker={jest.fn()}
       />,
     );
   });
@@ -213,18 +215,33 @@ describe('the alert chips', () => {
   });
 });
 
+/**
+ * The Ḥanafī warning — and who can still see it after #21.
+ *
+ * Choosing a school offers the second times under Mālikī, so the
+ * combination this warning explains is no longer reachable by picking
+ * one. It is still reachable by having had it on before the upgrade, and
+ * those installs keep the feature rather than losing it silently — so the
+ * warning stays, for exactly them. Both cases below therefore start with
+ * the switch already on, which is the only way it is drawn now.
+ */
 describe('the Ḥanafī warning', () => {
   it('replaces the help text when Ḥanafī ʿAṣr is on', () => {
-    expect(textsOf(renderCalculation({ school: 0 }))).toContain(
-      'settings.malikiSecondTimesHelp',
+    expect(
+      textsOf(renderCalculation({ school: 0, malikiSecondTimesEnabled: true })),
+    ).toContain('settings.malikiSecondTimesHelp');
+    const hanafi = textsOf(
+      renderCalculation({ school: 1, malikiSecondTimesEnabled: true }),
     );
-    const hanafi = textsOf(renderCalculation({ school: 1 }));
     expect(hanafi).toContain('settings.malikiSecondTimesHanafiWarning');
     expect(hanafi).not.toContain('settings.malikiSecondTimesHelp');
   });
 
   it('is drawn in the danger colour, not the muted one', () => {
-    const tree = renderCalculation({ school: 1 });
+    const tree = renderCalculation({
+      school: 1,
+      malikiSecondTimesEnabled: true,
+    });
     const warning = tree.root
       .findAllByType(Text)
       .find(n =>

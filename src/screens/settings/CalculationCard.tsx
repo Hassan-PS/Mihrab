@@ -15,6 +15,7 @@ import {
   providerHidesHanafiAsr,
 } from '../../settings/providerUi';
 import { getMethodLabel } from '../../settings/methods';
+import { madhabMatches, selectedMadhab } from '../../prayer/madhab';
 import type { PrayerOffsetMinutes } from '../../settings/prayerOffsets';
 import {
   SettingsBlock,
@@ -27,17 +28,22 @@ import { sharedSettingsStyles as s } from './sharedStyles';
 type CalculationCardProps = {
   onOpenMethodPicker: () => void;
   onOpenOffsetsModal: () => void;
+  /** Opens the school picker — issue #21. */
+  onOpenMadhabPicker: () => void;
 };
 
 function CalculationCardImpl({
   onOpenMethodPicker,
   onOpenOffsetsModal,
+  onOpenMadhabPicker,
 }: CalculationCardProps) {
   const { t } = useTranslation();
   const { settings, updateSettings } = usePrayerSettings();
   // `school` is 1 for Ḥanafī ʿAṣr (2:1 shadow), 0 for the 1:1 the rest of
   // the madhāhib use — including Mālikī, which is why it matters here.
   const hanafiAsr = settings.school === 1;
+  /** Custom, unless the stored school still describes the stored shadow. */
+  const madhab = selectedMadhab(settings.madhab, settings.school);
   const { palette } = useAppPalette();
 
   const coordsForEffective = useMemo(
@@ -72,13 +78,48 @@ function CalculationCardImpl({
         />
       )}
 
+      {/* THE SCHOOL, and then the shadow it implies — issue #21.
+       *
+       * The shadow switch stays underneath rather than being replaced by
+       * this row: it is how Custom is reachable, and Custom is what every
+       * existing install upgrades into. Changing it by hand drops the
+       * school back to Custom rather than leaving a school's name on a
+       * combination it does not describe. */}
+      {/* THE SCHOOL IS SHOWN EVEN WHERE THE SHADOW IS NOT.
+       *
+       * A published timetable decides ʿaṣr for you — Islamiska Förbundet
+       * prints one figure per city — so the shadow switch is hidden under
+       * those providers. The SCHOOL is not only about the shadow: under
+       * Mālikī the farḍ at dawn is Ṣubḥ (#22) and the second times are
+       * offered, and neither of those is the provider's business. Hiding
+       * this row with the switch would have left a Mālikī user in Sweden
+       * unable to say so. */}
+      <SettingsLinkRow
+        title={t('settings.madhab', 'School')}
+        value={
+          madhab
+            ? t(`settings.madhab_${madhab}`)
+            : t('settings.madhabCustom', 'Custom')
+        }
+        onPress={onOpenMadhabPicker}
+      />
       {providerHidesHanafiAsr(effectiveProvider) ? null : (
-        <SettingsToggleRow
-          title={t('settings.hanafiAsr')}
-          help={t('settings.hanafiAsrHelp')}
-          value={settings.school === 1}
-          onValueChange={v => updateSettings({ school: v ? 1 : 0 })}
-        />
+        <>
+          <SettingsToggleRow
+            title={t('settings.hanafiAsr')}
+            help={t('settings.hanafiAsrHelp')}
+            value={settings.school === 1}
+            onValueChange={v =>
+              updateSettings({
+                school: v ? 1 : 0,
+                // Hand-editing the shadow is what Custom means.
+                madhab: madhabMatches(settings.madhab, v ? 1 : 0)
+                  ? settings.madhab
+                  : null,
+              })
+            }
+          />
+        </>
       )}
 
       {/* Mālikī second times (issue #19).
@@ -98,17 +139,28 @@ function CalculationCardImpl({
        * than like two madhhabs in one table. The switch is not hidden:
        * someone may want exactly this. They should just know they are
        * asking for it. */}
-      <SettingsToggleRow
-        title={t('settings.malikiSecondTimes', 'Maliki second times')}
-        help={
-          hanafiAsr
-            ? t('settings.malikiSecondTimesHanafiWarning')
-            : t('settings.malikiSecondTimesHelp')
-        }
-        helpDanger={hanafiAsr}
-        value={settings.malikiSecondTimesEnabled}
-        onValueChange={v => updateSettings({ malikiSecondTimesEnabled: v })}
-      />
+      {/* UNDER MĀLIKĪ, or to whoever already turned it on.
+       *
+       * The red warning this replaces existed because a Ḥanafī ʿaṣr and a
+       * Mālikī boundary could be chosen together and then had to be
+       * explained. Offering the switch where the reckoning is chosen means
+       * that combination is no longer reachable by accident — but it stays
+       * visible for anyone already using it, because taking a feature away
+       * during an upgrade is worse than an odd-looking card. They see the
+       * same warning they always did. */}
+      {madhab === 'maliki' || settings.malikiSecondTimesEnabled ? (
+        <SettingsToggleRow
+          title={t('settings.malikiSecondTimes', 'Maliki second times')}
+          help={
+            hanafiAsr
+              ? t('settings.malikiSecondTimesHanafiWarning')
+              : t('settings.malikiSecondTimesHelp')
+          }
+          helpDanger={hanafiAsr}
+          value={settings.malikiSecondTimesEnabled}
+          onValueChange={v => updateSettings({ malikiSecondTimesEnabled: v })}
+        />
+      ) : null}
 
       {/* Only once it is on. Off, these are paragraphs explaining
           something the reader has not asked about; on, they are what the

@@ -1,3 +1,4 @@
+import { MADHABS, madhabMatches, type Madhab } from '../prayer/madhab';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { resolveDeviceLanguage } from '../i18n/deviceLanguage';
 import { coerceNotificationSoundId } from '../notifications/notificationSounds';
@@ -268,6 +269,14 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
   merged.malikiSecondTimeAlertMinutes = coercePrePrayerReminderMinutes(
     parsed.malikiSecondTimeAlertMinutes ?? DEFAULT_SETTINGS.malikiSecondTimeAlertMinutes,
   );
+  // #21. A stored blob naming a school this build does not know, or a
+  // school that no longer matches the ʿaṣr shadow beside it, comes back as
+  // Custom — the label for a combination no school claims. Never the other
+  // way round: a bad value must not silently move somebody's times.
+  merged.madhab = MADHABS.includes(parsed.madhab as Madhab)
+    ? (parsed.madhab as Madhab)
+    : null;
+  if (!madhabMatches(merged.madhab, merged.school)) merged.madhab = null;
   merged.widgetHighlightId = coerceWidgetHighlightId(parsed.widgetHighlightId);
   merged.widgetHighlightCustomHex = coerceWidgetHighlightHex(
     parsed.widgetHighlightCustomHex,

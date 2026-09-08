@@ -1,3 +1,4 @@
+import type { Madhab } from '../prayer/madhab';
 import type { PrePrayerReminderMinutes } from './prePrayerReminder';
 import type { NotificationSoundId } from '../notifications/notificationSounds';
 import type { PrayerOffsetMinutes } from './prayerOffsets';
@@ -106,7 +107,25 @@ export type PrayerAppSettings = {
    */
   showPracticeOnHome: boolean;
   calculationMethod: number | 'auto';
+  /**
+   * The ʿaṣr shadow: 1 for the Ḥanafī 2:1, 0 for the 1:1 the rest take.
+   * Still the thing the calculator is given — `madhab` sets it rather
+   * than replacing it, so no stored value changed meaning in #21.
+   */
   school: number;
+  /**
+   * Which school was chosen, or null for Custom — issue #21.
+   *
+   * Null on every existing install, which is what makes the upgrade cost
+   * nothing: their toggles as they stand, no school claimed, not a minute
+   * different. Picking one sets `school` and, under Mālikī, renames the
+   * farḍ at dawn to Ṣubḥ (#22). It turns nothing on: the second times
+   * add rows and fire alerts, so they keep their own toggle.
+   *
+   * See src/prayer/madhab.ts, including why four names map to two
+   * computed answers.
+   */
+  madhab: Madhab | null;
   locationMode: LocationMode;
   manualLatitude: number;
   manualLongitude: number;
@@ -487,6 +506,7 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   showPracticeOnHome: false,
   calculationMethod: 'auto',
   school: 0,
+  madhab: null,
   // Default to GPS so first-run users in Sweden (or anywhere) don't get
   // stuck on a hardcoded "manual" placeholder if they skip onboarding.
   // Onboarding's manual-entry path explicitly switches this to 'manual'

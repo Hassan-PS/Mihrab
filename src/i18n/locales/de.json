@@ -353,7 +353,14 @@
     "malikiRowsHelp": "Aus werden die Grenzen nur angekündigt — der Karte und dem Monat wird nichts hinzugefügt.",
     "malikiEndAlerts": "Und wenn die Zeit endet",
     "malikiEndAlertsHelp": "Eine zweite Benachrichtigung in dem Moment, in dem das Gebet zu Qada wird. Genau dann, nie früher.",
-    "surahRemindersChannel": "Sura-Erinnerungen"
+    "surahRemindersChannel": "Sura-Erinnerungen",
+    "madhab": "Rechtsschule",
+    "madhab_hanafi": "Hanafitisch",
+    "madhab_maliki": "Malikitisch",
+    "madhab_shafii": "Schafiitisch",
+    "madhab_hanbali": "Hanbalitisch",
+    "madhabCustom": "Benutzerdefiniert",
+    "madhabHelp": "Schafiiten, Malikiten und Hanbaliten nehmen denselben Asr-Schatten — die Wahl zwischen ihnen ändert keine Zeit. Malikitisch nennt das Morgengebet zusätzlich Subh und bietet die Zweitzeiten an."
   },
   "locationSetup": {
     "headline": "Legen Sie Ihren Standort fest",
@@ -459,7 +466,9 @@
     "Firstthird_abbr": "1/3",
     "firstTimeUntil": "Erste Zeit bis {{time}}",
     "secondTimeFrom": "Zweite Zeit ab {{time}}",
-    "approx": "ca."
+    "approx": "ca.",
+    "Subh": "Subh",
+    "Subh_abbr": "Subh"
   },
   "placeSearch": {
     "label": "Stadt oder Adresse suchen",

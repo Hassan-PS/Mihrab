@@ -353,7 +353,14 @@
     "malikiRowsHelp": "Desactivado, los límites solo se anuncian: no se añade nada a la tarjeta ni al mes.",
     "malikiEndAlerts": "Y cuando el tiempo termina",
     "malikiEndAlertsHelp": "Una segunda notificación en el momento en que la oración pasa a ser qada. A esa hora exacta, nunca antes.",
-    "surahRemindersChannel": "Recordatorios de suras"
+    "surahRemindersChannel": "Recordatorios de suras",
+    "madhab": "Escuela",
+    "madhab_hanafi": "Hanafí",
+    "madhab_maliki": "Malikí",
+    "madhab_shafii": "Shafi‘í",
+    "madhab_hanbali": "Hanbalí",
+    "madhabCustom": "Personalizado",
+    "madhabHelp": "Shafi‘íes, malikíes y hanbalíes toman la misma sombra del asr, así que elegir entre ellos no cambia ninguna hora. El malikí además llama Subh a la oración del alba y ofrece los segundos tiempos."
   },
   "locationSetup": {
     "headline": "Establece tu ubicación",
@@ -459,7 +466,9 @@
     "Firstthird_abbr": "1/3",
     "firstTimeUntil": "Primer tiempo hasta {{time}}",
     "secondTimeFrom": "Segundo tiempo desde {{time}}",
-    "approx": "aprox."
+    "approx": "aprox.",
+    "Subh": "Subh",
+    "Subh_abbr": "Subh"
   },
   "placeSearch": {
     "label": "Buscar ciudad o dirección",

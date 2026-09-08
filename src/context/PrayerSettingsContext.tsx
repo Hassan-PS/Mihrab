@@ -6,6 +6,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import { applyMadhabNaming } from '../prayer/madhab';
 import i18n from '../i18n';
 import { setActiveClockFormat } from '../utils/activeClock';
 import { loadSettings, saveSettings } from '../settings/storage';
@@ -104,7 +105,7 @@ export type NotificationsSlice = Pick<
 
 export type DataSourceSlice = Pick<
   PrayerAppSettings,
-  'dataProvider' | 'dataProviderAuto' | 'calculationMethod' | 'school'
+  'dataProvider' | 'dataProviderAuto' | 'calculationMethod' | 'school' | 'madhab'
 >;
 
 export type WidgetSlice = Pick<
@@ -167,8 +168,18 @@ export function PrayerSettingsProvider({
 
   useEffect(() => {
     if (!hydrated) return;
-    void i18n.changeLanguage(settings.language);
-  }, [hydrated, settings.language]);
+    void i18n.changeLanguage(settings.language).then(() => {
+      // AFTER the language, and on every change of either.
+      //
+      // The farḍ at dawn is Ṣubḥ under the Mālikī reckoning (#22), and
+      // that is applied as an override on the string `prayer.Fajr`
+      // resolves to rather than as a second key threaded through the
+      // twenty-nine places that ask for it — see prayer/madhab.ts. The
+      // override lives in one language's bundle, so a language change
+      // loads an untouched one and it has to be re-applied.
+      applyMadhabNaming(i18n, settings.madhab, settings.language);
+    });
+  }, [hydrated, settings.language, settings.madhab]);
 
   // The widget and Live Activity payloads are built outside React and
   // cannot subscribe to this context, so the clock preference is mirrored
@@ -315,12 +326,14 @@ export function PrayerSettingsProvider({
       dataProviderAuto: settings.dataProviderAuto,
       calculationMethod: settings.calculationMethod,
       school: settings.school,
+      madhab: settings.madhab,
     }),
     [
       settings.dataProvider,
       settings.dataProviderAuto,
       settings.calculationMethod,
       settings.school,
+      settings.madhab,
     ],
   );
 

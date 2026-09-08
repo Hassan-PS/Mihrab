@@ -21,7 +21,9 @@ import { useAppPalette } from '../../../hooks/useAppPalette';
 import { useTranslation } from 'react-i18next';
 import { CalculationCard } from '../CalculationCard';
 import { DataSourceCard } from '../DataSourceCard';
+import { MadhabModal } from '../MadhabModal';
 import { MethodModal } from '../MethodModal';
+import { asrSchoolFor, selectedMadhab } from '../../../prayer/madhab';
 import { MonthTimesCard } from '../MonthTimesCard';
 import { PrayerOffsetsModal } from '../PrayerOffsetsModal';
 import { SettingsPage } from '../SettingsPage';
@@ -33,13 +35,17 @@ export function PrayerTimesSettingsScreen() {
   const [providerModal, setProviderModal] = useState(false);
   const [methodModal, setMethodModal] = useState(false);
   const [offsetsModal, setOffsetsModal] = useState(false);
+  const [madhabModal, setMadhabModal] = useState(false);
   const deferBack = useRef(false);
-  deferBack.current = providerModal || methodModal || offsetsModal;
+  deferBack.current =
+    providerModal || methodModal || offsetsModal || madhabModal;
 
   const openProvider = useCallback(() => setProviderModal(true), []);
   const closeProvider = useCallback(() => setProviderModal(false), []);
   const openMethod = useCallback(() => setMethodModal(true), []);
   const closeMethod = useCallback(() => setMethodModal(false), []);
+  const openMadhab = useCallback(() => setMadhabModal(true), []);
+  const closeMadhab = useCallback(() => setMadhabModal(false), []);
   const openOffsets = useCallback(() => setOffsetsModal(true), []);
   const closeOffsets = useCallback(() => setOffsetsModal(false), []);
 
@@ -50,6 +56,7 @@ export function PrayerTimesSettingsScreen() {
         <CalculationCard
           onOpenMethodPicker={openMethod}
           onOpenOffsetsModal={openOffsets}
+          onOpenMadhabPicker={openMadhab}
         />
         <MonthTimesCard />
       </SettingsPage>
@@ -71,6 +78,17 @@ export function PrayerTimesSettingsScreen() {
           accentBg: palette.accentBg,
           danger: palette.danger,
         }}
+      />
+      {/* Picking a school sets the shadow it implies — and nothing that
+          fires. See src/prayer/madhab.ts. */}
+      <MadhabModal
+        visible={madhabModal}
+        current={selectedMadhab(settings.madhab, settings.school)}
+        palette={palette}
+        onSelect={m =>
+          updateSettings({ madhab: m, school: asrSchoolFor(m) })
+        }
+        onClose={closeMadhab}
       />
       <MethodModal
         visible={methodModal}

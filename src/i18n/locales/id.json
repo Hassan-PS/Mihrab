@@ -353,7 +353,14 @@
     "malikiRowsHelp": "Jika nonaktif, batas waktu hanya diberitahukan — tidak ada tambahan pada kartu atau bulan.",
     "malikiEndAlerts": "Dan saat waktunya habis",
     "malikiEndAlertsHelp": "Notifikasi kedua tepat saat salat menjadi qadha. Pada waktunya sendiri, tidak pernah lebih awal.",
-    "surahRemindersChannel": "Pengingat surah"
+    "surahRemindersChannel": "Pengingat surah",
+    "madhab": "Mazhab",
+    "madhab_hanafi": "Hanafi",
+    "madhab_maliki": "Maliki",
+    "madhab_shafii": "Syafii",
+    "madhab_hanbali": "Hanbali",
+    "madhabCustom": "Khusus",
+    "madhabHelp": "Syafii, Maliki dan Hanbali memakai bayangan asar yang sama, jadi memilih di antaranya tidak mengubah waktu mana pun. Maliki juga menamai salat fajar dengan Subuh dan menyediakan waktu kedua."
   },
   "locationSetup": {
     "headline": "Tetapkan lokasi Anda",
@@ -459,7 +466,9 @@
     "Firstthird_abbr": "1/3",
     "firstTimeUntil": "Waktu pertama sampai {{time}}",
     "secondTimeFrom": "Waktu kedua dari {{time}}",
-    "approx": "kira-kira"
+    "approx": "kira-kira",
+    "Subh": "Subuh",
+    "Subh_abbr": "Subuh"
   },
   "placeSearch": {
     "label": "Cari kota atau alamat",
