@@ -500,10 +500,72 @@ function pickNextSurah(after: number): number {
   return left[Math.floor(Math.random() * left.length)];
 }
 
-/** Whether the next surah is the next one, or any other one. */
+/**
+ * Whether the next surah is the next one, or any other one.
+ *
+ * ── WHY THIS RESHAPES THE QUEUE ──────────────────────────────────────
+ *
+ * The flag is consulted when the queue is EXTENDED, and a listen starts
+ * with two hundred ayahs already queued in reading order. So turning
+ * shuffle on mid-listen changed nothing anyone could hear: Al-Fatihah
+ * ran into Al-Baqarah, then Āl-ʿImrān, exactly as before, and the first
+ * shuffled surah was somewhere past ayah 200 — reported, correctly, as
+ * "shuffle doesn't shuffle". The mirror case was as wrong: turning it
+ * off left a shuffled tail playing.
+ *
+ * So the toggle re-shapes what is queued. The surah being recited is
+ * left whole — an ayah is a sentence in an argument, and nothing inside
+ * a surah moves — and everything queued after its last ayah is dropped
+ * and rebuilt with the new step. Only while listening: a range play has
+ * no next surah to shuffle.
+ */
 export function setShuffleSurahs(on: boolean): void {
+  const was = shuffle;
   shuffle = on;
   if (!on) heard.clear();
+  if (was !== on && listening) void reshapeListenTail();
+}
+
+/**
+ * Drop every queued ayah past the end of the surah being recited, and
+ * queue the next window from there with the current step.
+ */
+async function reshapeListenTail(): Promise<void> {
+  try {
+    const snap = await snapshotQueue();
+    if (!snap || !listening) return;
+    const { queue, idx } = snap;
+    const active = parseTrackId(String(queue[idx]?.id ?? ''));
+    if (!active) return;
+    // The first queued index that belongs to another surah.
+    let cut = idx + 1;
+    while (cut < queue.length) {
+      const ref = parseTrackId(String(queue[cut]?.id ?? ''));
+      if (!ref || ref.surah !== active.surah) break;
+      cut++;
+    }
+    // Claim the cursor before any await, like `extendListening`. It steps
+    // from the last queued ayah of this surah: the next ayah if the window
+    // happened to end mid-surah, otherwise the next surah — by whatever
+    // rule `shuffle` now says.
+    const lastKept = parseTrackId(String(queue[cut - 1]?.id ?? '')) ?? active;
+    listenCursor = nextListenRef(lastKept);
+    if (cut < queue.length) {
+      const drop: number[] = [];
+      for (let i = cut; i < queue.length; i++) drop.push(i);
+      await TrackPlayer.remove(drop);
+    }
+    // Re-checked after the await: a stop or a new listen may have landed.
+    if (!listening || !listenCursor) return;
+    const { refs, cursor } = listenWindow(listenCursor, LISTEN_WINDOW, nextListenRef);
+    listenCursor = cursor;
+    const tracks = await buildTracks(refs, status.reciterId, listenIndex);
+    listenIndex += refs.length;
+    await TrackPlayer.add(tracks);
+  } catch {
+    // Best effort: the queue that was there keeps playing, and the next
+    // top-up steps with the new flag.
+  }
 }
 
 export function isShuffling(): boolean {
@@ -647,6 +709,10 @@ export async function listenFrom(
   const prefs = getQuranState().prefs;
   setStatus({ reciterId: prefs.reciterId, loading: true, gap: null });
   const start = { surah, ayah: Math.max(1, Math.min(meta.ayahCount, ayah)) };
+  // The preference is the record; the screen pushes it on mount, but a
+  // listen started from the notification or a widget may never have had
+  // the screen open. Read it here so the first window is already shaped.
+  shuffle = prefs.shuffleSurahs;
   const { refs, cursor } = listenWindow(start, LISTEN_WINDOW, nextListenRef);
   const tracks = await buildTracks(refs, prefs.reciterId, 0);
   await TrackPlayer.reset();
@@ -683,6 +749,14 @@ export function isListening(): boolean {
  */
 export async function listenNextSurah(): Promise<void> {
   const current = status.active?.surah ?? 0;
+  // Shuffle owns "next" too: the arrow going to N+1 while the queue was
+  // going to draw from the bag was the other half of "shuffle doesn't
+  // shuffle". The bag is the same one the queue draws from, so a surah
+  // skipped past still counts as heard.
+  if (shuffle && current > 0) {
+    await listenFrom(pickNextSurah(current), 1);
+    return;
+  }
   if (current >= 114) return;
   await listenFrom(Math.max(1, current) + (current === 0 ? 0 : 1), 1);
 }
