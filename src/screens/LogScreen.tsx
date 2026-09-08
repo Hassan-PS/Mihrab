@@ -131,6 +131,8 @@ import { TYPE } from '../theme/typography';
 
 const PRAYERS: JournalPrayer[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 const STATUSES: JournalStatus[] = ['on-time', 'late', 'missed', 'qadha'];
+/** A prayer row's vertical padding: five of them and the day must fit a phone. */
+const LOG_ROW_PAD = 6;
 
 /**
  * A `YYYY-MM-DD` key back into a local Date, anchored at noon.
@@ -1197,39 +1199,14 @@ export function LogScreen() {
             </View>
           ) : null}
         </View>
-        {/* ── The day being logged ──────────────────────────────────── */}
-        {/* The same stepper the month table uses (redesign-plan §2.6); the
-            two screens step through time and drew it differently. */}
-        <Stepper
-          title={isToday ? t('journal.todayLabel') : selectedLabel}
-          subtitle={selectedHijriLine}
-          prevLabel={t('log.previousDay')}
-          nextLabel={t('log.nextDay')}
-          onPrev={() => stepDay(-1)}
-          // Tomorrow is not a thing you can have prayed.
-          onNext={canGoForward ? () => stepDay(1) : undefined}
-        />
-        {isToday ? null : (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('log.backToToday')}
-            onPress={() => setSelected(today)}
-            hitSlop={6}
-            style={styles.backToTodayRow}
-          >
-            <Text style={[styles.backToToday, { color: palette.accent }]}>
-              {t('log.backToToday')}
-            </Text>
-          </Pressable>
-        )}
         {/* ── The day, as one card you can throw sideways ───────────────
             One surface, not a stack of loose cards: the whole thing is a
             single day, it moves as a single thing, and it should look like
-            a single thing. The grabber at the top is the only part of this
-            that is decoration, and it earns its place — a panel that moves
-            when dragged but gives no sign it can be is a gesture nobody
-            discovers. `onLayout` gives the pan responder the width it needs
-            to decide what counts as a swipe. */}
+            a single thing. The stepper is its first line — the day it is,
+            the arrows to the days beside it, the ⋯ that holds everything
+            else — so the card names itself and the page spends no line
+            above it. `onLayout` gives the pan responder the width it
+            needs to decide what counts as a swipe. */}
         <Animated.View
           onLayout={e => {
             panWidth.current = e.nativeEvent.layout.width;
@@ -1244,26 +1221,22 @@ export function LogScreen() {
           ]}
           {...panResponder.panHandlers}
         >
-          {/* The panel's first line: the ⋯ that holds everything that used
-              to sit under the day (LogOptionsSheet), and the one shortcut
-              worth keeping in view. The grabber that lived here is gone —
-              the row itself is the handle, and the Stepper above already
-              says the day can change. */}
           <View
             accessibilityLabel={t('log.swipeHint', 'Swipe to change day')}
             style={styles.todayHeader}>
-            <LogOptionsButton onPress={() => setOptionsOpen(true)} />
-            <View style={{ flex: 1 }} />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('log.markAllOnTime', 'Mark all on time')}
-              onPress={markAllOnTime}
-              style={[styles.ghostBtn, { backgroundColor: palette.controlBg }]}
-            >
-              <Text style={[styles.ghostLabel, { color: palette.accent }]}>
-                {t('log.markAllOnTime', 'Mark all on time')}
-              </Text>
-            </Pressable>
+            <Stepper
+              title={isToday ? t('journal.todayLabel') : selectedLabel}
+              subtitle={selectedHijriLine}
+              prevLabel={t('log.previousDay')}
+              nextLabel={t('log.nextDay')}
+              onPrev={() => stepDay(-1)}
+              // Tomorrow is not a thing you can have prayed.
+              onNext={canGoForward ? () => stepDay(1) : undefined}
+              // On another day the title is the way back to this one.
+              onTitlePress={isToday ? undefined : () => setSelected(today)}
+              titleAccessibilityLabel={t('log.backToToday')}
+              trailing={<LogOptionsButton onPress={() => setOptionsOpen(true)} />}
+            />
           </View>
 
           <View style={styles.panelSection}>
@@ -1375,6 +1348,7 @@ export function LogScreen() {
                         <Chip
                           key={s}
                           grow
+                          compact
                           label={t(`journal.statusShort.${s}`)}
                           accessibilityLabel={t(`journal.status.${s}`)}
                           selected={current === s}
@@ -1475,6 +1449,7 @@ export function LogScreen() {
               styles.panelSection,
               styles.panelDivider,
               styles.fastRow,
+              styles.fastSection,
               { borderTopColor: palette.border ?? palette.muted },
             ]}
           >
@@ -1543,6 +1518,7 @@ export function LogScreen() {
           visible={optionsOpen}
           onClose={() => setOptionsOpen(false)}
           disabled={backfilling || !hydrated}
+          onMarkAllOnTime={markAllOnTime}
           onBackfill={runBackfill}
           onMonthFill={runMonthFill}
           onReset={() => setResetOpen(true)}
@@ -1659,7 +1635,6 @@ const styles = StyleSheet.create({
   stack: { gap: SPACING.md },
   card: { borderRadius: RADIUS.xl, padding: SPACING.lg },
   graphBlock: { gap: SPACING.md, paddingHorizontal: 2 },
-  backToTodayRow: { alignSelf: 'center', marginTop: -6 },
   /**
    * The owed drawer, between the grid and "Fill in earlier days".
    *
@@ -1686,23 +1661,12 @@ const styles = StyleSheet.create({
   owedChipText: { fontSize: TYPE.label.fontSize, fontWeight: '600' },
   owedMore: { fontSize: TYPE.caption.fontSize, alignSelf: 'center' },
   todayHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    // Inside the day card now, so it carries the card's own side padding
-    // rather than sitting flush against the screen's.
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.sm,
+    // Inside the day card, so it carries the card's own side padding.
+    paddingHorizontal: SPACING.sm,
+    paddingTop: SPACING.xs,
   },
-  backToToday: { fontSize: TYPE.label.fontSize, fontWeight: '700', marginTop: 1 },
-  ghostBtn: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.full,
-  },
-  ghostLabel: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
   /** Tighter than the settings rows: five of these and the day must fit. */
-  prayerRow: { paddingVertical: SPACING.sm },
+  prayerRow: { paddingVertical: LOG_ROW_PAD },
   prayerHead: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   prayerName: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
   prayerTime: { fontSize: TYPE.footnote.fontSize },
@@ -1738,6 +1702,7 @@ const styles = StyleSheet.create({
   saveNoteBtn: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderRadius: RADIUS.md },
   saveNoteLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '700' },
   fastRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
+  fastSection: { paddingVertical: SPACING.sm },
   fastState: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
   fastMeta: { fontSize: TYPE.footnote.fontSize, marginTop: 2 },
   fastCta: { paddingHorizontal: SPACING.lg, paddingVertical: SPACING.sm, borderRadius: RADIUS.md },

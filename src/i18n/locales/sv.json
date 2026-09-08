@@ -495,7 +495,9 @@
     "snoozeMinutes": "Minuter",
     "daruriEndsIn": "Första tiden går ut {{time}} — om {{count}} min",
     "daruriEnded": "Första tiden gick ut {{until}}",
-    "daruriExpired": "Tiden har gått ut — be den som qada"
+    "daruriExpired": "Tiden har gått ut — be den som qada",
+    "atPrayerBody": "Det är dags för {{prayer}}",
+    "nextEvent": "Nästa: {{prayer}} kl. {{time}}"
   },
   "locations": {
     "title": "Sparade platser",
@@ -1180,7 +1182,9 @@
     "audioGap": "{{surah}} {{ayah}} är inte hämtad — anslut, eller hämta suran för offline-bruk.",
     "khatmahMore": "Fler alternativ för khatmah",
     "khatmahPrevDayHelp": "Ångra dagens markering och gå tillbaka till föregående dags del.",
-    "lastReadRow": "Senast läst · {{surah}}, sida {{page}}"
+    "lastReadRow": "Senast läst · {{surah}}, sida {{page}}",
+    "autoShort": "Auto",
+    "switchToAuto": "Följ appens tema"
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",

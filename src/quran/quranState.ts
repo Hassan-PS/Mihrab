@@ -147,6 +147,13 @@ export type QuranPrefs = {
    */
   mushafPaperTone: 'paper' | 'sepia';
   /**
+   * Follow the app theme — paper when it is light, night when it is dark
+   * — instead of a fixed tone (additive; see `mushafTone.ts`). A blob
+   * from before the field keeps the fixed tone it held; a fresh install
+   * starts here.
+   */
+  mushafToneAuto: boolean;
+  /**
    * Which reading tradition the muṣḥaf is drawn in (additive).
    *
    * A string rather than a boolean because Warsh is the second of five
@@ -244,6 +251,7 @@ export const DEFAULT_QURAN_STATE: QuranState = {
     playbackRate: 1,
     mushafNightMode: false,
     mushafPaperTone: 'paper',
+    mushafToneAuto: true,
     riwayah: DEFAULT_RIWAYAH,
     riwayahNoticeSeen: false,
     keepAwake: true,
@@ -443,6 +451,10 @@ function mergeStored(raw: unknown): QuranState {
           ?.mushafPaperTone === 'sepia'
           ? 'sepia'
           : 'paper',
+      // Only an explicit true is auto: a blob written before the field
+      // existed chose a tone, and keeps it.
+      mushafToneAuto:
+        (r.prefs as { mushafToneAuto?: unknown } | undefined)?.mushafToneAuto === true,
     },
   };
 }

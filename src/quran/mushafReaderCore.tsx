@@ -51,12 +51,14 @@ import {
 import { usePlaybackStatus, type PlaybackStatus } from './audio/playback';
 import {
   mushafTone,
+  mushafToneChoice,
   nextMushafTone,
   prefsForTone,
   TONE_ORNAMENT,
   TONE_PAGE_BG,
   toneIsDark,
   type MushafTone,
+  type MushafToneChoice,
 } from './mushafTone';
 import { setSystemBarSurface } from '../navigation/systemBarSurface';
 import { mushafSurahName } from './surahName';
@@ -258,7 +260,9 @@ export function useMushafReaderCore({
   const riwayah = resolveRiwayah(quran.prefs.riwayah);
   const totalPages = totalPagesForRiwayah(riwayah);
 
-  const tone = mushafTone(quran.prefs);
+  // Resolved against the app theme, for the reader on "auto".
+  const { isDark: appDark } = useAppPalette();
+  const tone = mushafTone(quran.prefs, appDark);
   const nightMode = tone === 'night';
   // Until the stored preference has actually been read, the tone is the
   // default paper and painting on it would put a pure-white page on screen
@@ -615,7 +619,9 @@ export function useSettledMeasure(value: number, quietMs = 100): number {
 export function MushafPageHeader({
   page,
   isFullscreen,
-  tone,
+  // Kept on the API: the callers know the drawn tone, and the pill used to
+  // cycle from it. It cycles the stored CHOICE now (auto included).
+  tone: _tone,
   ornament,
   riwayah = DEFAULT_RIWAYAH,
   show = 'both',
@@ -643,6 +649,8 @@ export function MushafPageHeader({
   const { t } = useTranslation();
   const pages = pagesForRiwayah(riwayah);
   const meta = pages.find(p => p.page === page) ?? pages[0];
+  // The pill cycles the CHOICE (auto included), whatever `tone` is drawn.
+  const nextChoice = nextMushafTone(mushafToneChoice(useQuranState().prefs));
   return (
     <View
       style={[
@@ -678,29 +686,21 @@ export function MushafPageHeader({
       ) : null}
       {show !== 'label' ? (
         // The pill names the tone a tap goes TO — paper → sepia → night →
-        // paper — the way it always named "Night" on the light page.
+        // auto → paper — the way it always named "Night" on the light
+        // page. It cycles the CHOICE, not the drawn tone: on auto the
+        // page may be drawn night, and the next stop is still paper.
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={
-            nextMushafTone(tone) === 'sepia'
-              ? t('quran.switchToSepia', 'Switch to sepia page')
-              : nextMushafTone(tone) === 'night'
-                ? t('quran.switchToNight', 'Switch to night page')
-                : t('quran.switchToLight', 'Switch to light page')
-          }
+          accessibilityLabel={toneSwitchLabel(t, nextChoice)}
           hitSlop={8}
-          onPress={() => setQuranPrefs(prefsForTone(nextMushafTone(tone)))}
+          onPress={() => setQuranPrefs(prefsForTone(nextChoice))}
           style={[styles.nightPill, { borderColor: ornament }]}>
           <Text style={[styles.nightPillText, { color: ornament }]}>
             {
               // U+FE0E variation selectors force the monochrome text
               // glyphs — Android otherwise renders the sun as a colored
               // emoji, which shouts against the quiet page.
-              nextMushafTone(tone) === 'sepia'
-                ? `◐︎ ${t('quran.sepiaShort', 'Sepia')}`
-                : nextMushafTone(tone) === 'night'
-                  ? `☾︎ ${t('quran.nightShort', 'Night')}`
-                  : `☀︎ ${t('quran.lightShort', 'Light')}`
+              `${toneGlyph(nextChoice)} ${toneShortName(t, nextChoice)}`
             }
           </Text>
         </Pressable>
@@ -710,8 +710,32 @@ export function MushafPageHeader({
 }
 
 /** The glyph for the tone a tap goes TO — monochrome, see the pill. */
-export function toneGlyph(next: MushafTone): string {
-  return next === 'sepia' ? '◐︎' : next === 'night' ? '☾︎' : '☀︎';
+export function toneGlyph(next: MushafToneChoice): string {
+  return next === 'sepia' ? '◐︎' : next === 'night' ? '☾︎' : next === 'auto' ? '◑︎' : '☀︎';
+}
+
+type Translate = (key: string, fallback: string) => string;
+
+/** The pill's word for the tone a tap goes to. */
+export function toneShortName(t: Translate, next: MushafToneChoice): string {
+  return next === 'sepia'
+    ? t('quran.sepiaShort', 'Sepia')
+    : next === 'night'
+      ? t('quran.nightShort', 'Night')
+      : next === 'auto'
+        ? t('quran.autoShort', 'Auto')
+        : t('quran.lightShort', 'Light');
+}
+
+/** The control's accessibility label, for the tone a tap goes to. */
+export function toneSwitchLabel(t: Translate, next: MushafToneChoice): string {
+  return next === 'sepia'
+    ? t('quran.switchToSepia', 'Switch to sepia page')
+    : next === 'night'
+      ? t('quran.switchToNight', 'Switch to night page')
+      : next === 'auto'
+        ? t('quran.switchToAuto', 'Follow the app theme')
+        : t('quran.switchToLight', 'Switch to light page');
 }
 
 /**
@@ -722,7 +746,7 @@ export function toneGlyph(next: MushafTone): string {
  * the pill; the word the pill carried is what the label says.
  */
 export function MushafToneButton({
-  tone,
+  tone: _tone,
   color,
   backgroundColor,
 }: {
@@ -731,17 +755,14 @@ export function MushafToneButton({
   backgroundColor: ColorValue;
 }) {
   const { t } = useTranslation();
-  const next = nextMushafTone(tone);
+  // The choice, not the drawn tone: `tone` colours the button; the cycle
+  // runs over what the reader chose, auto included.
+  const choice = mushafToneChoice(useQuranState().prefs);
+  const next = nextMushafTone(choice);
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={
-        next === 'sepia'
-          ? t('quran.switchToSepia', 'Switch to sepia page')
-          : next === 'night'
-            ? t('quran.switchToNight', 'Switch to night page')
-            : t('quran.switchToLight', 'Switch to light page')
-      }
+      accessibilityLabel={toneSwitchLabel(t, next)}
       hitSlop={8}
       onPress={() => setQuranPrefs(prefsForTone(next))}
       style={[styles.toneBtn, { backgroundColor }]}>

@@ -77,8 +77,9 @@ export function MushafSurahScreen({
   const quran = useQuranState();
   const quranHydrated = useQuranHydrated();
   // Paper, sepia or night — the header's tint and the content colour
-  // follow the PAGE, not the app theme.
-  const tone = mushafTone(quran.prefs);
+  // follow the PAGE, not the app theme (on "auto" the page itself follows
+  // the theme, which is the one place the two agree by construction).
+  const tone = mushafTone(quran.prefs, palette.isDark);
 
   // Incrementing signal → the reader opens its unified sheet scrolled to
   // the recitation section (the header "Audio" button).

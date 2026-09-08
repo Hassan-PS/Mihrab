@@ -495,7 +495,9 @@
     "snoozeMinutes": "منٹ",
     "daruriEndsIn": "پہلا وقت {{time}} پر ختم — {{count}} منٹ میں",
     "daruriEnded": "پہلا وقت {{until}} پر ختم ہو گیا",
-    "daruriExpired": "وقت ختم ہو گیا — اسے قضا پڑھیں"
+    "daruriExpired": "وقت ختم ہو گیا — اسے قضا پڑھیں",
+    "atPrayerBody": "{{prayer}} کا وقت ہو گیا ہے",
+    "nextEvent": "اگلی: {{prayer}} {{time}} پر"
   },
   "locations": {
     "title": "محفوظ مقامات",
@@ -1180,7 +1182,9 @@
     "audioGap": "{{surah}} {{ayah}} ڈاؤن لوڈ نہیں ہے — انٹرنیٹ سے جُڑیں، یا آف لائن سننے کے لیے یہ سورت ڈاؤن لوڈ کریں۔",
     "khatmahMore": "ختم کے مزید اختیارات",
     "khatmahPrevDayHelp": "آج کا نشان ہٹائیں اور پچھلے دن کے حصے پر واپس جائیں۔",
-    "lastReadRow": "آخری پڑھائی · {{surah}}، صفحہ {{page}}"
+    "lastReadRow": "آخری پڑھائی · {{surah}}، صفحہ {{page}}",
+    "autoShort": "خودکار",
+    "switchToAuto": "ایپ کی تھیم کی پیروی کریں"
   },
   "mosques": {
     "searching": "قریبی مساجد تلاش کیے جا رہے ہیں…",

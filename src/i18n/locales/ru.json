@@ -495,7 +495,9 @@
     "snoozeMinutes": "Минуты",
     "daruriEndsIn": "Первое время истекает в {{time}} — через {{count}} мин",
     "daruriEnded": "Первое время истекло в {{until}}",
-    "daruriExpired": "Время вышло — прочитайте как када"
+    "daruriExpired": "Время вышло — прочитайте как када",
+    "atPrayerBody": "Время {{prayer}}",
+    "nextEvent": "Далее: {{prayer}} в {{time}}"
   },
   "locations": {
     "title": "Сохранённые места",
@@ -1180,7 +1182,9 @@
     "audioGap": "{{surah}} {{ayah}} не загружен — подключитесь или загрузите эту суру для прослушивания офлайн.",
     "khatmahMore": "Другие параметры хатмы",
     "khatmahPrevDayHelp": "Отменить сегодняшнюю отметку и вернуться к порции предыдущего дня.",
-    "lastReadRow": "Последнее чтение · {{surah}}, стр. {{page}}"
+    "lastReadRow": "Последнее чтение · {{surah}}, стр. {{page}}",
+    "autoShort": "Авто",
+    "switchToAuto": "Следовать теме приложения"
   },
   "mosques": {
     "searching": "Ищем ближайшие мечети…",

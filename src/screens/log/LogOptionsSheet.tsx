@@ -3,7 +3,8 @@
  *
  * The page used to carry, below the day being logged: a group of three
  * actions (fill in earlier days, fill three months, reset), a card with
- * the end-of-day reminder switch, and a pointer to set sync up. Each was
+ * the end-of-day reminder switch, and a pointer to set sync up — and,
+ * above the prayers, a "Mark all on time" button on a line of its own. Each was
  * worth having and none was worth a screen-height of scrolling past on
  * every visit, because the visit is "log Maghrib" and takes one tap. The
  * page is one screen now, like Today: the graph, the day, and this
@@ -31,6 +32,7 @@ export function LogOptionsSheet({
   visible,
   onClose,
   disabled,
+  onMarkAllOnTime,
   onBackfill,
   onMonthFill,
   onReset,
@@ -41,6 +43,7 @@ export function LogOptionsSheet({
   onClose: () => void;
   /** While a fill is running, or before the log has loaded. */
   disabled: boolean;
+  onMarkAllOnTime: () => void;
   onBackfill: () => void;
   onMonthFill: () => void;
   onReset: () => void;
@@ -100,6 +103,11 @@ export function LogOptionsSheet({
             {t('log.options', 'Options')}
           </Text>
           <Group>
+            <Row
+              tone="accent"
+              title={t('log.markAllOnTime', 'Mark all on time')}
+              onPress={then(onMarkAllOnTime)}
+            />
             <Row
               tone="accent"
               title={t('log.backfillAction', 'Fill in earlier days')}

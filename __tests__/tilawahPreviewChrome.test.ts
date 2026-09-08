@@ -147,7 +147,7 @@ describe('the Tilawah mark', () => {
    * the other and from the drawn controls beside them.
    */
   it.each([
-    'src/screens/quran/TilawahHeaderChip.tsx',
+    'src/screens/quran/TilawahRow.tsx',
     'src/screens/quran/MushafSurahScreen.tsx',
     'src/screens/quran/TranslationSurahScreen.tsx',
   ])('%s draws its note rather than typing one', file => {

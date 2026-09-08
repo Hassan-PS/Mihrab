@@ -442,6 +442,8 @@ export function HomeScreen() {
       alertModes: settings.prayerAlertModes,
       journalLogActionEnabled: settings.journalNotificationActionsEnabled,
       hour12: clockHour12,
+      // The shade's tint follows the app's accent, Material You included.
+      accentColor: palette.accentSolid,
     }).catch(e => console.warn('syncPrayerNotifications (effect):', e));
     // The end-of-day prompt is scheduled from the same data and the same
     // moment as the prayer alerts: it needs Isha for every day it covers,
@@ -496,6 +498,7 @@ export function HomeScreen() {
     settings.notificationSound,
     settings.adhanUsesAlarmStream,
     clockHour12,
+    palette.accentSolid,
     settings.malikiSecondTimesEnabled,
     settings.malikiSecondTimeAlerts,
     settings.malikiSecondTimeAlertMinutes,
@@ -560,6 +563,8 @@ export function HomeScreen() {
         // The resolved answer rather than the setting, so 'auto' following
         // the device counts as a change too.
         String(clockHour12),
+        // The tint is written into every card, so a new accent rewrites.
+        palette.accentSolid,
         // The second-time alerts are part of the same schedule, so a
         // change to which of them fire has to rewrite it.
         settings.malikiSecondTimesEnabled
@@ -596,6 +601,7 @@ export function HomeScreen() {
           // differ by exactly the boundaries this schedule is for.
           week: view.alertWeek,
           hour12: clockHour12,
+          accentColor: palette.accentSolid,
           daruriAlerts: settings.malikiSecondTimesEnabled
             ? settings.malikiSecondTimeAlerts
             : [],
@@ -1064,7 +1070,7 @@ export function HomeScreen() {
           carousel dots overlapped the day table and the Quran button). */}
       <CenteredColumn
         maxWidth={isDashboard ? dashCap : undefined}
-        style={styles.homeColumn}
+        style={[styles.homeColumn, !isDashboard && !isMacCatalyst && styles.fillColumn]}
         innerStyle={styles.homeColumn}>
       <PermissionBanners
         usingLocalFallback={state.usingLocalFallback ?? false}
@@ -1183,7 +1189,7 @@ export function HomeScreen() {
          */
         return (
           <>
-            {dayTable}
+            <View style={styles.fillColumn}>{dayTable}</View>
             <View style={styles.belowHero}>
               {quranShortcut}
               {ramadanCard}
@@ -1246,7 +1252,11 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xxl,
     gap: SPACING.md,
   },
-  scrollContentBleed: { paddingTop: 0, paddingHorizontal: 0 },
+  // The phone: the page is the viewport. The column grows to fill it and
+  // the hero takes whatever the table and the shortcut leave, so the sky
+  // ends where the tab bar begins rather than above a band of nothing.
+  scrollContentBleed: { paddingTop: 0, paddingHorizontal: 0, flexGrow: 1 },
+  fillColumn: { flex: 1 },
   belowHero: { paddingHorizontal: HOME_SCREEN_PADDING, gap: SPACING.md },
   // Dashboard: let the content grow to the viewport and center it
   // vertically when shorter (§B1 — kills the dead bottom half).

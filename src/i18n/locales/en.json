@@ -495,7 +495,9 @@
     "snoozeMinutes": "Minutes",
     "daruriEndsIn": "First time ends at {{time}} — in {{count}} min",
     "daruriEnded": "First time has ended at {{until}}",
-    "daruriExpired": "The time has ended — pray it as qada"
+    "daruriExpired": "The time has ended — pray it as qada",
+    "atPrayerBody": "It is time for {{prayer}}",
+    "nextEvent": "Next: {{prayer}} at {{time}}"
   },
   "locations": {
     "title": "Saved locations",
@@ -1180,7 +1182,9 @@
     "audioGap": "{{surah}} {{ayah}} is not downloaded — connect, or download this surah for offline use.",
     "khatmahMore": "More khatmah options",
     "khatmahPrevDayHelp": "Undo today’s mark and step back to the previous day’s portion.",
-    "lastReadRow": "Last read · {{surah}}, page {{page}}"
+    "lastReadRow": "Last read · {{surah}}, page {{page}}",
+    "autoShort": "Auto",
+    "switchToAuto": "Follow the app theme"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

@@ -82,7 +82,7 @@ import { surahHeaderGlyph, surahHeaderStyle } from '../quran/surahHeaderGlyph';
 import { useTabBarInset } from '../navigation/tabBarInset';
 import { useTabPageTop } from '../navigation/useTabPageTop';
 import { SyncHeaderButton } from './sync/SyncHeaderButton';
-import { TilawahHeaderChip } from './quran/TilawahHeaderChip';
+import { TilawahRow } from './quran/TilawahRow';
 import { useTabBarScroll } from '../navigation/tabBarVisibility';
 import { RADIUS, SPACING } from '../theme/tokens';
 
@@ -403,14 +403,6 @@ export function QuranScreen() {
     <View
       style={[styles.headerWrap, listCap]}
       onLayout={e => setHeaderH(e.nativeEvent.layout.height)}>
-      {/* The page's first row is what the title bar used to hold — the
-          way into Tilāwah and, once it is set up, sync — at the trailing
-          edge, where the eye lands on the way in. No title: the tab under
-          the thumb already says "Quran". */}
-      <View style={styles.pageActions}>
-        <TilawahHeaderChip />
-        <SyncHeaderButton />
-      </View>
       {/* Continue reading (QR-10). Alone only when there is no khatmah —
           with one, it is a row inside the khatmah card, so the screen never
           shows two "Continue"s with two different page numbers side by side
@@ -705,6 +697,10 @@ export function QuranScreen() {
           </>
         )}
       </View>
+
+      {/* Tilāwah, as a row under the khatmah — what is playing (or would
+          play), play/pause, next surah; the row opens the player. */}
+      <TilawahRow />
 
       {/* Verse of the day (QR-23).
 
@@ -1024,6 +1020,8 @@ export function QuranScreen() {
           link is shown only when there is a riwayah to offer at all — a
           build that knows one recitation should not advertise a picker. */}
       <View style={styles.downloadsRow}>
+        {/* Sync, once it is set up — it used to sit in the title bar. */}
+        <SyncHeaderButton />
         {riwayahOffered ? (
           <Pressable
             accessibilityRole="button"
@@ -1639,12 +1637,6 @@ const styles = StyleSheet.create({
   // window and left the other half empty (Mac audit, 2026-07-16).
   listWide: { maxWidth: 720, width: '100%', alignSelf: 'center' as const },
   headerWrap: { gap: SPACING.md, marginBottom: HEADER_GAP },
-  pageActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: SPACING.sm,
-  },
   resumeCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1898,12 +1890,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'center',
     gap: SPACING.md,
-  },
-  tilawahChip: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.full,
-    marginEnd: 'auto',
   },
   starredHeading: {
     fontSize: TYPE.label.fontSize,

@@ -141,7 +141,8 @@ const HeroToday = memo(function HeroToday({
   bleed,
   topRow,
   ownsStatusBar = false,
-  sceneTop = 0,
+  statusBarInset = 0,
+  fill = false,
   dateLine,
 }: {
   /** What the countdown is aimed at: the next prayer, or the user's pick. */
@@ -163,8 +164,16 @@ const HeroToday = memo(function HeroToday({
   topRow?: { renderLocation?: (ink: SkyInkColors) => ReactNode; qibla?: ReactNode };
   /** The status bar's glyphs follow the sky while this hero is on screen. */
   ownsStatusBar?: boolean;
-  /** The status-bar band the sky's bodies keep out of — see HeroSky. */
-  sceneTop?: number;
+  /** The status bar's height, which the sky's bodies keep out of. */
+  statusBarInset?: number;
+  /**
+   * Full-bleed: the hero grows to fill what the page leaves it, the
+   * countdown block sits at its foot, and the sky's sun, moon and stars
+   * are laid out in the room between the top row and that block — so
+   * nothing drawn is ever under the status bar, the camera, the location
+   * chip or the countdown.
+   */
+  fill?: boolean;
   /**
    * Today's date, Gregorian and Hijri — issue #23.
    *
@@ -226,9 +235,46 @@ const HeroToday = memo(function HeroToday({
    * three can be three different skies. The accent does not appear on the
    * hero at all; the countdown is the ink, and its size is its rank.
    */
-  const inkTop = skyInkAt(frame, HERO_Y.eyebrow);
-  const ink = skyInkAt(frame, HERO_Y.countdown);
-  const inkFoot = skyInkAt(frame, HERO_Y.foot);
+  /**
+   * In the growing hero the block is at the foot and the hero is as tall
+   * as the page allows, so where each element actually sits is measured:
+   * the hero's height, the top row's, the block's top and height. Until
+   * the first layout — and in the card, which does not grow — the fixed
+   * fractions the design was drawn at stand in.
+   */
+  const [heroH, setHeroH] = useState(0);
+  const [topRowH, setTopRowH] = useState(0);
+  const [block, setBlock] = useState<{ y: number; h: number } | null>(null);
+  const onHeroLayout = useCallback((e: LayoutChangeEvent) => {
+    setHeroH(Math.round(e.nativeEvent.layout.height));
+  }, []);
+  const onTopRowLayout = useCallback((e: LayoutChangeEvent) => {
+    setTopRowH(Math.round(e.nativeEvent.layout.height));
+  }, []);
+  const onBlockLayout = useCallback((e: LayoutChangeEvent) => {
+    const { y, height } = e.nativeEvent.layout;
+    setBlock({ y: Math.round(y), h: Math.round(height) });
+  }, []);
+  // The hero's box excludes the bleed, so a fraction of the SKY (which is
+  // the box plus the bleed) is offset by the bleed's top.
+  const bleedTop = bleed?.top ?? 0;
+  const bleedBottom = bleed?.bottom ?? 0;
+  const skyH = heroH + bleedTop + bleedBottom;
+  const measured = fill && heroH > 0 && block !== null;
+  const heroY = measured
+    ? {
+        eyebrow: (bleedTop + block.y) / skyH,
+        countdown: (bleedTop + block.y + block.h * 0.35) / skyH,
+        foot: (bleedTop + block.y + block.h) / skyH,
+      }
+    : HERO_Y;
+  const inkTop = skyInkAt(frame, measured ? heroY.eyebrow : HERO_Y.eyebrow);
+  const ink = skyInkAt(frame, measured ? heroY.countdown : HERO_Y.countdown);
+  const inkFoot = skyInkAt(frame, measured ? heroY.foot : HERO_Y.foot);
+  // The band the bodies keep out of: the status bar and the top row above,
+  // the countdown block (and the hero's foot padding) below.
+  const sceneTop = fill ? statusBarInset + topRowH + SPACING.md : 0;
+  const sceneBottom = fill && block ? heroH - block.y + bleedBottom : 0;
 
   /**
    * The rail measures the CURRENT interval — from the prayer that has most
@@ -257,12 +303,15 @@ const HeroToday = memo(function HeroToday({
   }, [today, now, target.at]);
 
   return (
-    <View style={[styles.hero, expanded && styles.heroExpanded]}>
+    <View
+      style={[styles.hero, expanded && styles.heroExpanded, fill && styles.heroFill]}
+      onLayout={fill ? onHeroLayout : undefined}>
       {/* The sky, under everything and out to the card's edges — and, on
           the phone, up under the status bar. */}
       <HeroSky
         frame={frame}
         sceneTop={sceneTop}
+        sceneBottom={sceneBottom}
         bleed={
           bleed ?? {
             horizontal: SPACING.xl,
@@ -286,11 +335,14 @@ const HeroToday = memo(function HeroToday({
         />
       ) : null}
       {topRow ? (
-        <View style={styles.heroTopRow}>
+        <View style={styles.heroTopRow} onLayout={fill ? onTopRowLayout : undefined}>
           <View style={styles.heroTopLeading}>{topRow.renderLocation?.(inkTop)}</View>
           {topRow.qibla}
         </View>
       ) : null}
+      {/* The room the sky's bodies move in. */}
+      {fill ? <View style={styles.heroScene} /> : null}
+      <View onLayout={fill ? onBlockLayout : undefined}>
       <Text
         style={[styles.heroEyebrow, { color: inkTop.muted }]}
         numberOfLines={1}
@@ -372,6 +424,7 @@ const HeroToday = memo(function HeroToday({
           {dateLine}
         </Text>
       ) : null}
+      </View>
     </View>
   );
 });
@@ -764,6 +817,9 @@ function TodayCardImpl({
           ? styles.cardBleed
           : [styles.card, { borderRadius: HOME_TABLE_RADIUS, ...cardEdgeStyle(palette) }]
       }>
+      {/* Full-bleed, the hero GROWS: the card fills the page and the hero
+          takes whatever the table leaves, so the sky ends at the tab bar
+          and the page has no band of nothing under the rows. */}
       <View
         style={[
           styles.heroWrap,
@@ -781,7 +837,8 @@ function TodayCardImpl({
             expanded={expanded}
             dateLine={todayDateLine}
             bleed={{ horizontal: SPACING.xl, top: heroTop, bottom: SPACING.lg }}
-            sceneTop={fullBleed ? insets.top : 0}
+            statusBarInset={fullBleed ? insets.top : 0}
+            fill={fullBleed}
             topRow={fullBleed ? { renderLocation, qibla: qiblaChip } : undefined}
             ownsStatusBar={fullBleed}
           />
@@ -864,9 +921,10 @@ const styles = StyleSheet.create({
   card: { overflow: 'hidden' },
   // Full-bleed: no radius at the top (it meets the screen edge), the
   // page's radius at the foot where the hero becomes the page.
-  cardBleed: { overflow: 'hidden' },
+  cardBleed: { overflow: 'hidden', flex: 1 },
   heroWrap: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.lg },
   heroWrapBleed: {
+    flex: 1,
     borderBottomStartRadius: HOME_TABLE_RADIUS,
     borderBottomEndRadius: HOME_TABLE_RADIUS,
     overflow: 'hidden',
@@ -882,6 +940,9 @@ const styles = StyleSheet.create({
   heroTopLeading: { flexShrink: 1, flexGrow: 1 },
   hero: {},
   heroExpanded: { paddingVertical: SPACING.md },
+  heroFill: { flex: 1 },
+  /** Grows; the sun and moon cross it. At least a moon's worth tall. */
+  heroScene: { flex: 1, minHeight: 32 },
   // Sentence case, quiet: the countdown is the thing the eye lands on and
   // the eyebrow only names what it counts to. It was an uppercase,
   // letterspaced overline — the 2016 idiom (docs/design/redesign-plan.md

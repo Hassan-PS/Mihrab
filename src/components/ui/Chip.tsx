@@ -31,6 +31,8 @@ type Props = {
   testID?: string;
   /** Fills the row with its siblings. */
   grow?: boolean;
+  /** A shorter chip, for a row of them under a line that must fit a page. */
+  compact?: boolean;
 };
 
 function ChipImpl({
@@ -44,6 +46,7 @@ function ChipImpl({
   children,
   testID,
   grow,
+  compact,
 }: Props) {
   const { palette } = useAppPalette();
   const bg = selected
@@ -68,6 +71,7 @@ function ChipImpl({
       style={({ pressed }) => [
         styles.chip,
         grow && styles.grow,
+        compact && styles.compact,
         { backgroundColor: bg },
         pressed && !selected && { backgroundColor: palette.controlBg },
         disabled && styles.disabled,
@@ -101,6 +105,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   grow: { flex: 1 },
+  compact: { minHeight: 32, paddingVertical: SPACING.xs, paddingHorizontal: SPACING.sm },
   inner: { alignItems: 'center' },
   above: { fontWeight: '600', marginBottom: 1 },
   label: { textAlign: 'center' },

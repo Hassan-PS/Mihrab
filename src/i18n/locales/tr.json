@@ -495,7 +495,9 @@
     "snoozeMinutes": "Dakika",
     "daruriEndsIn": "İlk vakit {{time}}'de bitiyor — {{count}} dk içinde",
     "daruriEnded": "İlk vakit {{until}}'de bitti",
-    "daruriExpired": "Vakit çıktı — kaza olarak kıl"
+    "daruriExpired": "Vakit çıktı — kaza olarak kıl",
+    "atPrayerBody": "{{prayer}} vakti girdi",
+    "nextEvent": "Sonraki: {{prayer}} {{time}}"
   },
   "locations": {
     "title": "Kayıtlı konumlar",
@@ -1180,7 +1182,9 @@
     "audioGap": "{{surah}} {{ayah}} indirilmemiş — bağlan ya da bu sureyi çevrimdışı dinlemek için indir.",
     "khatmahMore": "Diğer hatim seçenekleri",
     "khatmahPrevDayHelp": "Bugünün işaretini geri al ve önceki günün bölümüne dön.",
-    "lastReadRow": "Son okunan · {{surah}}, sayfa {{page}}"
+    "lastReadRow": "Son okunan · {{surah}}, sayfa {{page}}",
+    "autoShort": "Otomatik",
+    "switchToAuto": "Uygulama temasını izle"
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",

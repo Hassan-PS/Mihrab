@@ -495,7 +495,9 @@
     "snoozeMinutes": "Minuten",
     "daruriEndsIn": "Die erste Zeit endet um {{time}} — in {{count}} Min.",
     "daruriEnded": "Die erste Zeit endete um {{until}}",
-    "daruriExpired": "Die Zeit ist vorbei — bete sie als Qada"
+    "daruriExpired": "Die Zeit ist vorbei — bete sie als Qada",
+    "atPrayerBody": "Es ist Zeit für {{prayer}}",
+    "nextEvent": "Als Nächstes: {{prayer}} um {{time}}"
   },
   "locations": {
     "title": "Gespeicherte Orte",
@@ -1180,7 +1182,9 @@
     "audioGap": "{{surah}} {{ayah}} ist nicht heruntergeladen — verbinde dich, oder lade diese Sure für offline herunter.",
     "khatmahMore": "Weitere Khatmah-Optionen",
     "khatmahPrevDayHelp": "Die heutige Markierung zurücknehmen und zum Abschnitt des Vortags zurückgehen.",
-    "lastReadRow": "Zuletzt gelesen · {{surah}}, Seite {{page}}"
+    "lastReadRow": "Zuletzt gelesen · {{surah}}, Seite {{page}}",
+    "autoShort": "Auto",
+    "switchToAuto": "Dem App-Design folgen"
   },
   "mosques": {
     "searching": "Suche nach Moscheen in der Nähe…",

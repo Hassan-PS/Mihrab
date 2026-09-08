@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { RADIUS, SPACING } from '../../theme/tokens';
@@ -24,9 +24,25 @@ type Props = {
   prevLabel: string;
   nextLabel: string;
   testID?: string;
+  /** A control after the next arrow — the Log's ⋯. */
+  trailing?: ReactNode;
+  /** Makes the title a button: the Log's "back to today". */
+  onTitlePress?: () => void;
+  titleAccessibilityLabel?: string;
 };
 
-function StepperImpl({ title, subtitle, onPrev, onNext, prevLabel, nextLabel, testID }: Props) {
+function StepperImpl({
+  title,
+  subtitle,
+  onPrev,
+  onNext,
+  prevLabel,
+  nextLabel,
+  testID,
+  trailing,
+  onTitlePress,
+  titleAccessibilityLabel,
+}: Props) {
   const { palette } = useAppPalette();
   const arrow = (dir: 'prev' | 'next') => {
     const onPress = dir === 'prev' ? onPrev : onNext;
@@ -52,7 +68,12 @@ function StepperImpl({ title, subtitle, onPrev, onNext, prevLabel, nextLabel, te
   return (
     <View style={styles.row} testID={testID}>
       {arrow('prev')}
-      <View style={styles.middle}>
+      <Pressable
+        style={styles.middle}
+        disabled={!onTitlePress}
+        onPress={onTitlePress}
+        accessibilityRole={onTitlePress ? 'button' : undefined}
+        accessibilityLabel={onTitlePress ? titleAccessibilityLabel : undefined}>
         <Text
           style={[typeStyle('title3'), styles.title, { color: palette.text }]}
           numberOfLines={1}>
@@ -65,8 +86,9 @@ function StepperImpl({ title, subtitle, onPrev, onNext, prevLabel, nextLabel, te
             {subtitle}
           </Text>
         ) : null}
-      </View>
+      </Pressable>
       {arrow('next')}
+      {trailing}
     </View>
   );
 }

@@ -123,9 +123,11 @@ describe('the ink', () => {
   it('is taken per element in the hero, at that element’s height', () => {
     const card = read('src/screens/home/TodayCard.tsx');
     const hero = card.slice(card.indexOf('const HeroToday = memo('), card.indexOf('function TodayCardImpl'));
-    expect(hero).toMatch(/skyInkAt\(frame, HERO_Y\.eyebrow\)/);
-    expect(hero).toMatch(/skyInkAt\(frame, HERO_Y\.countdown\)/);
-    expect(hero).toMatch(/skyInkAt\(frame, HERO_Y\.foot\)/);
+    // Measured where the hero grows (the phone), the design's fixed
+    // fractions where it does not — each element, at its own height.
+    expect(hero).toMatch(/skyInkAt\(frame, measured \? heroY\.eyebrow : HERO_Y\.eyebrow\)/);
+    expect(hero).toMatch(/skyInkAt\(frame, measured \? heroY\.countdown : HERO_Y\.countdown\)/);
+    expect(hero).toMatch(/skyInkAt\(frame, measured \? heroY\.foot : HERO_Y\.foot\)/);
     expect(hero).not.toMatch(/palette\./);
     // The sky is the clock's, not the target's.
     expect(hero).toMatch(/skyMoment\(today, /);

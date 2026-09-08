@@ -7,6 +7,7 @@
  */
 import {
   mushafTone,
+  mushafToneChoice,
   nextMushafTone,
   prefsForTone,
   TONE_PAGE_BG,
@@ -32,11 +33,32 @@ describe('resolving the tone', () => {
   });
 });
 
-describe('the pill cycles paper → sepia → night → paper', () => {
+describe('the pill cycles paper → sepia → night → auto → paper', () => {
   it('in that order', () => {
     expect(nextMushafTone('paper')).toBe('sepia');
     expect(nextMushafTone('sepia')).toBe('night');
-    expect(nextMushafTone('night')).toBe('paper');
+    expect(nextMushafTone('night')).toBe('auto');
+    expect(nextMushafTone('auto')).toBe('paper');
+  });
+
+  it('auto follows the app theme: paper in a light app, night in a dark one', () => {
+    const prefs = prefsForTone('auto');
+    expect(mushafToneChoice(prefs)).toBe('auto');
+    expect(mushafTone(prefs, false)).toBe('paper');
+    expect(mushafTone(prefs, true)).toBe('night');
+    // A fixed tone ignores the theme.
+    expect(mushafTone(prefsForTone('sepia'), true)).toBe('sepia');
+    expect(mushafTone(prefsForTone('paper'), true)).toBe('paper');
+  });
+
+  it('a fresh install starts on auto; a blob from before the field keeps its tone', () => {
+    expect(DEFAULT_QURAN_STATE.prefs.mushafToneAuto).toBe(true);
+    const old = coerceQuranState({
+      ...DEFAULT_QURAN_STATE,
+      prefs: { ...DEFAULT_QURAN_STATE.prefs, mushafNightMode: true, mushafToneAuto: undefined },
+    });
+    expect(old.prefs.mushafToneAuto).toBe(false);
+    expect(mushafToneChoice(old.prefs)).toBe('night');
   });
 
   it('and the writes for each tone resolve back to it', () => {
@@ -48,7 +70,11 @@ describe('the pill cycles paper → sepia → night → paper', () => {
   it('leaving night lands on paper, not on whatever sepia was before', () => {
     // Night stores paper as its light tone so the cycle is the same from
     // any starting point: three taps, three tones, back where you began.
-    expect(prefsForTone('night')).toEqual({ mushafNightMode: true, mushafPaperTone: 'paper' });
+    expect(prefsForTone('night')).toEqual({
+      mushafNightMode: true,
+      mushafPaperTone: 'paper',
+      mushafToneAuto: false,
+    });
   });
 });
 

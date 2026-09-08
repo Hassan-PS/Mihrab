@@ -495,7 +495,9 @@
     "snoozeMinutes": "دقائق",
     "daruriEndsIn": "ينتهي الوقت الاختياري في {{time}} — بعد {{count}} دقيقة",
     "daruriEnded": "انتهى الوقت الاختياري في {{until}}",
-    "daruriExpired": "انتهى الوقت — صلِّها قضاءً"
+    "daruriExpired": "انتهى الوقت — صلِّها قضاءً",
+    "atPrayerBody": "حان وقت {{prayer}}",
+    "nextEvent": "التالي: {{prayer}} في {{time}}"
   },
   "locations": {
     "title": "المواقع المحفوظة",
@@ -1180,7 +1182,9 @@
     "audioGap": "الآية {{ayah}} من {{surah}} غير منزَّلة — اتصل بالإنترنت، أو نزِّل هذه السورة للاستماع دون اتصال.",
     "khatmahMore": "خيارات الختمة الأخرى",
     "khatmahPrevDayHelp": "إلغاء علامة اليوم والعودة إلى حصة اليوم السابق.",
-    "lastReadRow": "آخر قراءة · {{surah}}، صفحة {{page}}"
+    "lastReadRow": "آخر قراءة · {{surah}}، صفحة {{page}}",
+    "autoShort": "تلقائي",
+    "switchToAuto": "اتباع سمة التطبيق"
   },
   "mosques": {
     "searching": "البحث عن مساجد قريبة…",

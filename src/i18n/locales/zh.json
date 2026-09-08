@@ -495,7 +495,9 @@
     "snoozeMinutes": "分钟",
     "daruriEndsIn": "首选时段 {{time}} 结束——还有 {{count}} 分钟",
     "daruriEnded": "首选时段已于 {{until}} 结束",
-    "daruriExpired": "时间已过——请作为盖达补礼"
+    "daruriExpired": "时间已过——请作为盖达补礼",
+    "atPrayerBody": "{{prayer}}时间到了",
+    "nextEvent": "下一个：{{prayer}} {{time}}"
   },
   "locations": {
     "title": "已保存的地点",
@@ -1180,7 +1182,9 @@
     "audioGap": "{{surah}} {{ayah}} 尚未下载——请联网，或下载此章以便离线收听。",
     "khatmahMore": "更多完读计划选项",
     "khatmahPrevDayHelp": "撤销今天的标记，回到前一天的进度。",
-    "lastReadRow": "上次读到 · {{surah}}，第 {{page}} 页"
+    "lastReadRow": "上次读到 · {{surah}}，第 {{page}} 页",
+    "autoShort": "自动",
+    "switchToAuto": "跟随应用主题"
   },
   "mosques": {
     "searching": "正在查找附近的清真寺…",

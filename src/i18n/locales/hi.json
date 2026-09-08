@@ -495,7 +495,9 @@
     "snoozeMinutes": "मिनट",
     "daruriEndsIn": "पहला समय {{time}} पर खत्म — {{count}} मिनट में",
     "daruriEnded": "पहला समय {{until}} पर खत्म हो गया",
-    "daruriExpired": "वक़्त ख़त्म हो गया — इसे क़ज़ा पढ़ें"
+    "daruriExpired": "वक़्त ख़त्म हो गया — इसे क़ज़ा पढ़ें",
+    "atPrayerBody": "{{prayer}} का समय हो गया है",
+    "nextEvent": "अगला: {{prayer}} {{time}} पर"
   },
   "locations": {
     "title": "सहेजी गई जगहें",
@@ -1180,7 +1182,9 @@
     "audioGap": "{{surah}} {{ayah}} डाउनलोड नहीं है — कनेक्ट करें, या ऑफ़लाइन सुनने के लिए यह सूरह डाउनलोड करें।",
     "khatmahMore": "ख़त्म के और विकल्प",
     "khatmahPrevDayHelp": "आज का निशान हटाएँ और पिछले दिन के हिस्से पर वापस जाएँ।",
-    "lastReadRow": "अंतिम पठन · {{surah}}, पृष्ठ {{page}}"
+    "lastReadRow": "अंतिम पठन · {{surah}}, पृष्ठ {{page}}",
+    "autoShort": "स्वतः",
+    "switchToAuto": "ऐप की थीम का अनुसरण करें"
   },
   "mosques": {
     "searching": "पास की मस्जिदें ढूँढी जा रही हैं…",

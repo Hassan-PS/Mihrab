@@ -1,6 +1,8 @@
 import notifee, {
+  AndroidCategory,
   AndroidImportance,
   AndroidStyle,
+  AndroidVisibility,
   AuthorizationStatus,
   TriggerType,
 } from '@notifee/react-native';
@@ -17,6 +19,7 @@ import {
   type LoggedByDate,
 } from '../prayer/daruriTimes';
 import i18n from '../i18n';
+import { APP_ACCENT_SWATCHES } from '../settings/widgetAccent';
 import {
   getNotificationSoundOption,
   NOTIFICATION_SOUND_OPTIONS,
@@ -171,6 +174,9 @@ async function clearStaleDisplayedPrayerNotifications(
  *  in the diff-based cancellation pass.
  */
 const PRAYER_NOTIFICATION_ID_PREFIX = 'pt-';
+/** The brand green (APP_ACCENT_SWATCHES.green), for a caller with no palette to hand. */
+const DEFAULT_NOTIFICATION_ACCENT =
+  APP_ACCENT_SWATCHES.find(s => s.id === 'green')?.light ?? APP_ACCENT_SWATCHES[0].light;
 
 const PREVIEW_NOTIFICATION_ID = 'adhan_preview';
 let _previewCancelTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -347,6 +353,7 @@ export async function previewAdhanSound(
     android: {
       channelId: targets.androidChannelId,
       smallIcon: 'ic_stat_prayer',
+      color: DEFAULT_NOTIFICATION_ACCENT,
       pressAction: { id: 'default' },
     },
   });
@@ -466,6 +473,7 @@ export async function dropDaruriAlertsForLogged(
             style: { type: AndroidStyle.BIGTEXT, text: body },
             channelId: sound.androidChannelId,
             smallIcon: 'ic_stat_prayer',
+            color: DEFAULT_NOTIFICATION_ACCENT,
             pressAction: { id: 'default' },
             timeoutAfter: MAX_LINGER_MS,
           },
@@ -545,6 +553,14 @@ export async function syncPrayerNotifications(params: {
    * before the setting existed. See `settings/alertModes.ts`.
    */
   alertModes?: AlertModeMap;
+  /**
+   * The app's accent as a solid hex, for the notification's tint — the
+   * small icon, the app name in the header, the action labels. Android
+   * paints them in whatever the app declares; undeclared they take a
+   * grey that reads as a system notice, not as the app. The Material You
+   * accent counts: the shade should match the app the reader opens.
+   */
+  accentColor?: string;
 }): Promise<SyncPrayerNotificationsResult> {
   if (!params.enabled) {
     await cancelOwnedPrayerNotifications([]);
@@ -558,6 +574,10 @@ export async function syncPrayerNotifications(params: {
     }
   }
   const useAlarmStream = params.adhanUsesAlarmStream === true;
+  const accent =
+    params.accentColor && /^#[0-9a-fA-F]{6}$/.test(params.accentColor)
+      ? params.accentColor
+      : DEFAULT_NOTIFICATION_ACCENT;
   const clock = makeClockFormatter(params.hour12 === true, i18n.language);
   await ensureChannel(params.notificationSound, useAlarmStream);
   const prayerTimeSound = getNotificationSoundOption(params.notificationSound);
@@ -751,12 +771,35 @@ export async function syncPrayerNotifications(params: {
     );
     const usesAdhan = eventSound.id !== 'default';
     const atPrayerTitle = i18n.t(`prayer.${e.name}`, { defaultValue: e.name });
-    // A prayer alert says "Prayer time"; Sunrise / the night times are NOT
-    // prayers, so they show the clock time instead of the misleading
-    // "Prayer time" line (reported for the Sunrise alert).
+    /**
+     * WHAT THE CARD SAYS — v2.18.
+     *
+     * It said "Fajr" over "Prayer time": the word most people already
+     * know from the sound, and a line that told them nothing they could
+     * use. The header now carries the clock time (`subtitle`, drawn as
+     * "Mihrab · 03:37" beside the app name), the body says whose time it
+     * is, and the expanded card adds the one thing worth knowing next —
+     * the following event and its time — so a glance at the shade
+     * answers "what now, and how long have I got". Sunrise and the night
+     * marks are not prayers and are not called one: their body is the
+     * next-event line alone.
+     */
+    const nextEvent = audibleEvents[i + 1];
+    const nextLine = nextEvent
+      ? i18n.t('alertCopy.nextEvent', {
+          defaultValue: 'Next: {{prayer}} at {{time}}',
+          prayer: i18n.t(`prayer.${nextEvent.name}`, { defaultValue: nextEvent.name }),
+          time: clock.fromDate(nextEvent.at),
+        })
+      : '';
     const atPrayerBody = isNonPrayer
-      ? clock.fromDate(e.at)
-      : i18n.t('alertCopy.atPrayer');
+      ? nextLine || clock.fromDate(e.at)
+      : i18n.t('alertCopy.atPrayerBody', {
+          defaultValue: 'It is time for {{prayer}}',
+          prayer: atPrayerTitle,
+        });
+    const atPrayerExpanded =
+      isNonPrayer || !nextLine ? atPrayerBody : `${atPrayerBody}\n${nextLine}`;
     // Auto-dismiss this alert when the NEXT event is due, so a fired prayer's
     // notification never lingers into (or past) the following prayer. Capped
     // for the long Isha→Fajr gap. Android honours this even if the app is
@@ -776,6 +819,7 @@ export async function syncPrayerNotifications(params: {
         // `prayer.<name>`. Falls back to the raw English name if the
         // active locale is missing the entry.
         title: atPrayerTitle,
+        subtitle: clock.fromDate(e.at),
         body: atPrayerBody,
         data: {
           kind: 'prayer_time',
@@ -804,16 +848,24 @@ export async function syncPrayerNotifications(params: {
         android: {
           channelId: eventTargets.androidChannelId,
           smallIcon: 'ic_stat_prayer',
+          color: accent,
+          // The prayer's own instant in the header, not the moment the
+          // alarm happened to fire — a delayed alarm still says 03:37.
+          showTimestamp: true,
+          timestamp: e.at.getTime(),
+          // On the lock screen in full: a prayer time is nothing to hide,
+          // and a redacted card there is the one place the alert is read.
+          visibility: AndroidVisibility.PUBLIC,
+          // The call to prayer is an alarm; a plain alert is a reminder.
+          // Android ranks and styles the two differently.
+          category: wantsAdhan ? AndroidCategory.ALARM : AndroidCategory.REMINDER,
           pressAction: { id: 'default' },
           // Self-clear when the next prayer arrives (see timeoutAfterMs above).
           timeoutAfter: timeoutAfterMs,
-          // BigText style: shows the body in full when the notification
-          // is expanded, and gives Android more room in the collapsed
-          // grouped-summary view than a single-line ticker. The text is
-          // intentionally short; the style mostly fixes the case where a
-          // longer prayer-name title squeezed the body to a single ellipsised
-          // word (reported in v2.0.13 with Arabic locale).
-          style: { type: AndroidStyle.BIGTEXT, text: atPrayerBody },
+          // BigText style: the body in full when expanded — here with the
+          // next event on a second line — and more room in the collapsed
+          // grouped-summary view than a single-line ticker.
+          style: { type: AndroidStyle.BIGTEXT, text: atPrayerExpanded },
           // Built in prayerAlertActions so the alert and the copy a snooze
           // re-fires can never drift apart again. Non-prayer events
           // (Sunrise, the night times) carry none: there is nothing to log
@@ -846,6 +898,9 @@ export async function syncPrayerNotifications(params: {
       {
         id: notificationId,
         title: i18n.t(`prayer.${e.name}`, { defaultValue: e.name }),
+        // The prayer's clock time in the header — the reminder's whole
+        // point is the arithmetic it saves.
+        subtitle: clock.fromDate(new Date(e.at.getTime() + reminderMinutes * 60_000)),
         body: preBody,
         ios: {
           sound: reminderSound.iosSound,
@@ -854,6 +909,9 @@ export async function syncPrayerNotifications(params: {
           style: { type: AndroidStyle.BIGTEXT, text: preBody },
           channelId: reminderSound.androidChannelId,
           smallIcon: 'ic_stat_prayer',
+          color: accent,
+          visibility: AndroidVisibility.PUBLIC,
+          category: AndroidCategory.REMINDER,
           pressAction: { id: 'default' },
           // The "starts in N min" reminder auto-dismisses when the prayer
           // actually begins, so it never lingers past its own prayer.
@@ -900,6 +958,7 @@ export async function syncPrayerNotifications(params: {
           style: { type: AndroidStyle.BIGTEXT, text: body },
           channelId: reminderSound.androidChannelId,
           smallIcon: 'ic_stat_prayer',
+          color: accent,
           pressAction: { id: 'default' },
           // Gone by the time the window it is warning about has closed —
           // a banner still saying "ends in 15 min" an hour later is worse
@@ -935,6 +994,7 @@ export async function syncPrayerNotifications(params: {
           style: { type: AndroidStyle.BIGTEXT, text: body },
           channelId: reminderSound.androidChannelId,
           smallIcon: 'ic_stat_prayer',
+          color: accent,
           pressAction: { id: 'default' },
           // A statement about a state that does not change back, so it
           // keeps the ordinary floor rather than a lead-shaped timeout.

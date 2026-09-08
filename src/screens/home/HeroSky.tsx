@@ -24,6 +24,7 @@ function HeroSkyImpl({
   frame,
   bleed,
   sceneTop = 0,
+  sceneBottom = 0,
 }: {
   frame: SkyFrame;
   /**
@@ -39,6 +40,11 @@ function HeroSkyImpl({
    * status icon.
    */
   sceneTop?: number;
+  /**
+   * The same at the foot: the countdown block, which the bodies must not
+   * pass behind. The gradient still paints it.
+   */
+  sceneBottom?: number;
 }) {
   const { top, bottom, glow, stars, body } = frame;
 
@@ -50,10 +56,17 @@ function HeroSkyImpl({
     (e: LayoutChangeEvent) => setHeight(e.nativeEvent.layout.height),
     [],
   );
+  const banded = sceneTop > 0 || sceneBottom > 0;
+  const room = height - sceneTop - sceneBottom;
+  // The model places bodies in the top ~0.3 of a short card. Given a
+  // band of its own, the drawing uses the band: the top third of the
+  // card becomes the whole of the room, so the sun at its lowest sits
+  // just above the countdown (the horizon) and the moon crosses the
+  // middle of the open sky rather than hugging the location chip.
+  const spread = (fraction: number) =>
+    Math.max(0.08, Math.min(0.9, 0.1 + (fraction / 0.3) * 0.75));
   const sceneY = (fraction: number): number | `${number}%` =>
-    sceneTop > 0 && height > sceneTop
-      ? sceneTop + fraction * (height - sceneTop)
-      : `${fraction * 100}%`;
+    banded && room > 0 ? sceneTop + spread(fraction) * room : `${fraction * 100}%`;
 
   // A fixed, sparse field in the top strip: the same stars every night, so
   // the card does not twinkle from one render to the next, and none of
@@ -76,7 +89,7 @@ function HeroSkyImpl({
   return (
     <View
       pointerEvents="none"
-      onLayout={sceneTop > 0 ? onLayout : undefined}
+      onLayout={banded ? onLayout : undefined}
       style={[
         styles.fill,
         bleed && {

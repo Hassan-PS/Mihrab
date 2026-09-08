@@ -20,6 +20,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   FlatList,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -179,6 +180,28 @@ export function TranslationSurahScreen({
       // in the theme background (RootNavigator `contentStyle`); this list
       // is drawn on that background, so the pad is right here.
       contentStyle: { paddingBottom: insets.bottom, backgroundColor: palette.bg },
+      // THE APP'S CHROME, NOT THE PAGE'S. This screen and the muṣḥaf share
+      // one route and swap on the toggle, and `setOptions` accumulates:
+      // the muṣḥaf paints the header in its paper/sepia/night tone, and
+      // without these the translation reader inherited that tint over its
+      // own app-coloured list — a sepia bar on a dark page. The muṣḥaf
+      // tone is the muṣḥaf's; this reader is the app.
+      ...(Platform.OS === 'ios'
+        ? { headerBlurEffect: (palette.isDark ? 'dark' : 'light') as 'dark' | 'light' }
+        : { headerStyle: { backgroundColor: String(palette.bg) } }),
+      headerTintColor: String(palette.text),
+      // writingDirection is a valid TextStyle prop that react-navigation's
+      // narrower title-style type omits — the same cast RootNavigator makes.
+      headerTitleStyle: {
+        color: palette.text,
+        writingDirection: isArabic ? 'rtl' : 'ltr',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
+      headerLargeTitleStyle: {
+        color: palette.text,
+        writingDirection: isArabic ? 'rtl' : 'ltr',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
       // The NAME follows the app language.
       title: surahName(surah),
       headerRight: () => (
@@ -252,6 +275,8 @@ export function TranslationSurahScreen({
     isArabic,
     palette.accentSolid,
     palette.bg,
+    palette.text,
+    palette.isDark,
     insets.bottom,
     t,
     toggleMushaf,

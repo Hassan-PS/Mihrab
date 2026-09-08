@@ -495,7 +495,9 @@
     "snoozeMinutes": "Minutos",
     "daruriEndsIn": "El primer tiempo acaba a las {{time}} — en {{count}} min",
     "daruriEnded": "El primer tiempo acabó a las {{until}}",
-    "daruriExpired": "El tiempo ha terminado: rézala como qada"
+    "daruriExpired": "El tiempo ha terminado: rézala como qada",
+    "atPrayerBody": "Es la hora de {{prayer}}",
+    "nextEvent": "Siguiente: {{prayer}} a las {{time}}"
   },
   "locations": {
     "title": "Ubicaciones guardadas",
@@ -1180,7 +1182,9 @@
     "audioGap": "{{surah}} {{ayah}} no está descargada — conéctate, o descarga esta sura para escucharla sin conexión.",
     "khatmahMore": "Más opciones de la jatma",
     "khatmahPrevDayHelp": "Deshace la marca de hoy y vuelve a la porción del día anterior.",
-    "lastReadRow": "Última lectura · {{surah}}, página {{page}}"
+    "lastReadRow": "Última lectura · {{surah}}, página {{page}}",
+    "autoShort": "Auto",
+    "switchToAuto": "Seguir el tema de la app"
   },
   "mosques": {
     "searching": "Buscando mezquitas cercanas…",

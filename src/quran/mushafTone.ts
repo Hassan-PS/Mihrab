@@ -22,26 +22,58 @@ import type { QuranPrefs } from './quranState';
 
 export type MushafTone = 'paper' | 'sepia' | 'night';
 
-/** The tone the preferences resolve to. */
-export function mushafTone(
-  prefs: Pick<QuranPrefs, 'mushafNightMode' | 'mushafPaperTone'>,
-): MushafTone {
+/**
+ * What the reader CHOSE — one of the three tones, or "auto": paper when
+ * the app is light and night when it is dark, following the theme the
+ * way the rest of the app does. Auto is a third additive field
+ * (`mushafToneAuto`), so a blob from before it reads as the choice it
+ * held; a fresh install starts on auto.
+ */
+export type MushafToneChoice = MushafTone | 'auto';
+
+type TonePrefs = Pick<QuranPrefs, 'mushafNightMode' | 'mushafPaperTone'> & {
+  mushafToneAuto?: boolean;
+};
+
+/** The stored choice, auto included. */
+export function mushafToneChoice(prefs: TonePrefs): MushafToneChoice {
+  if (prefs.mushafToneAuto) return 'auto';
   if (prefs.mushafNightMode) return 'night';
   return prefs.mushafPaperTone === 'sepia' ? 'sepia' : 'paper';
 }
 
-/** What the page-header pill cycles to on a tap: paper → sepia → night → paper. */
-export function nextMushafTone(tone: MushafTone): MushafTone {
-  return tone === 'paper' ? 'sepia' : tone === 'sepia' ? 'night' : 'paper';
+/**
+ * The tone the page is actually drawn in. `appDark` is the app theme as
+ * resolved on the device (light/dark/system, Material You included), and
+ * matters only on auto.
+ */
+export function mushafTone(prefs: TonePrefs, appDark = false): MushafTone {
+  const choice = mushafToneChoice(prefs);
+  if (choice === 'auto') return appDark ? 'night' : 'paper';
+  return choice;
 }
 
-/** The preference writes that put the reader on `tone`. */
+/** What the tone control cycles to on a tap: paper → sepia → night → auto → paper. */
+export function nextMushafTone(choice: MushafToneChoice): MushafToneChoice {
+  return choice === 'paper'
+    ? 'sepia'
+    : choice === 'sepia'
+      ? 'night'
+      : choice === 'night'
+        ? 'auto'
+        : 'paper';
+}
+
+/** The preference writes that put the reader on `choice`. */
 export function prefsForTone(
-  tone: MushafTone,
-): Pick<QuranPrefs, 'mushafNightMode' | 'mushafPaperTone'> {
-  return tone === 'night'
-    ? { mushafNightMode: true, mushafPaperTone: 'paper' }
-    : { mushafNightMode: false, mushafPaperTone: tone };
+  choice: MushafToneChoice,
+): Pick<QuranPrefs, 'mushafNightMode' | 'mushafPaperTone' | 'mushafToneAuto'> {
+  if (choice === 'auto') {
+    return { mushafNightMode: false, mushafPaperTone: 'paper', mushafToneAuto: true };
+  }
+  return choice === 'night'
+    ? { mushafNightMode: true, mushafPaperTone: 'paper', mushafToneAuto: false }
+    : { mushafNightMode: false, mushafPaperTone: choice, mushafToneAuto: false };
 }
 
 /** The page's ground. */

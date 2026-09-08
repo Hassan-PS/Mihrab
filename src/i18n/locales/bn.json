@@ -495,7 +495,9 @@
     "snoozeMinutes": "মিনিট",
     "daruriEndsIn": "প্রথম ওয়াক্ত {{time}}-এ শেষ — {{count}} মিনিট পরে",
     "daruriEnded": "প্রথম ওয়াক্ত {{until}}-এ শেষ হয়েছে",
-    "daruriExpired": "সময় শেষ — এটি কাযা হিসেবে পড়ুন"
+    "daruriExpired": "সময় শেষ — এটি কাযা হিসেবে পড়ুন",
+    "atPrayerBody": "{{prayer}} এর সময় হয়েছে",
+    "nextEvent": "পরবর্তী: {{prayer}} {{time}}-এ"
   },
   "locations": {
     "title": "সংরক্ষিত অবস্থান",
@@ -1180,7 +1182,9 @@
     "audioGap": "{{surah}} {{ayah}} ডাউনলোড করা নেই — সংযোগ নিন, অথবা অফলাইনে শোনার জন্য এই সূরাটি ডাউনলোড করুন।",
     "khatmahMore": "খতমের আরও বিকল্প",
     "khatmahPrevDayHelp": "আজকের চিহ্ন বাতিল করে আগের দিনের অংশে ফিরে যান।",
-    "lastReadRow": "শেষ পড়া · {{surah}}, পৃষ্ঠা {{page}}"
+    "lastReadRow": "শেষ পড়া · {{surah}}, পৃষ্ঠা {{page}}",
+    "autoShort": "স্বয়ংক্রিয়",
+    "switchToAuto": "অ্যাপের থিম অনুসরণ করুন"
   },
   "mosques": {
     "searching": "কাছাকাছি মসজিদ খোঁজা হচ্ছে…",
