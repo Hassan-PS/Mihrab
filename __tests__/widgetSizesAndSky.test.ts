@@ -80,6 +80,8 @@ describe('one RemoteViews per size the launcher can show', () => {
     'PrayerWidgetStreakProvider',
     'PrayerWidgetReadingProvider',
     'PrayerWidgetSkyProvider',
+    'PrayerWidgetHijriProvider',
+    'PrayerWidgetTasbihProvider',
   ])('%s draws through it', name => {
     expect(kt(name)).toMatch(/WidgetSizing\.responsive\(/);
   });
@@ -90,6 +92,8 @@ describe('one RemoteViews per size the launcher can show', () => {
       'PrayerWidgetStreakProvider',
       'PrayerWidgetReadingProvider',
       'PrayerWidgetSkyProvider',
+      'PrayerWidgetHijriProvider',
+      'PrayerWidgetTasbihProvider',
     ]) {
       const src = kt(name);
       expect(src).not.toMatch(/PrayerWidgetProvider\.sizeDp\(/);
@@ -106,6 +110,22 @@ describe('one RemoteViews per size the launcher can show', () => {
     expect(provider).toMatch(/buildViews\(context, id, json, style, providerName, size\.widthDp, size\.heightDp\)/);
     expect(kt('PrayerWidgetLogProvider')).toMatch(/private fun buildViews\(base: Context, widthDp: Int, heightDp: Int\)/);
     expect(kt('PrayerWidgetStreakProvider')).toMatch(/fun buildViews\(base: Context, widthDp: Int, heightDp: Int\)/);
+  });
+
+  it('Hijri and Tasbih drop a line at a short size instead of clipping it', () => {
+    const hijri = kt('PrayerWidgetHijriProvider');
+    expect(hijri).toMatch(/const val SHORT_HEIGHT_DP = 52/);
+    expect(hijri).toMatch(/const val NARROW_WIDTH_DP = 170/);
+    expect(hijri).toMatch(/R\.id\.hijri_year, if \(short\) View\.GONE else View\.VISIBLE/);
+    expect(hijri).toMatch(/nextMonth\.isEmpty\(\) \|\| short \|\| narrow/);
+    // The layout's own floor stays below the threshold, so the short variant is reachable.
+    expect(read(RES, 'xml', 'prayer_widget_hijri_info.xml')).toMatch(/android:minResizeHeight="40dp"/);
+    const tasbih = kt('PrayerWidgetTasbihProvider');
+    expect(tasbih).toMatch(/const val SHORT_HEIGHT_DP = 110/);
+    expect(tasbih).toMatch(/R\.id\.tasbih_today, if \(short\) View\.GONE else View\.VISIBLE/);
+    expect(read(RES, 'xml', 'prayer_widget_tasbih_info.xml')).toMatch(/android:minResizeHeight="100dp"/);
+    // Size 0 is "unknown" and draws the full card — the pre-12 callers with no launcher to ask.
+    for (const src of [hijri, tasbih]) expect(src).toMatch(/heightDp in 1 until SHORT_HEIGHT_DP/);
   });
 });
 

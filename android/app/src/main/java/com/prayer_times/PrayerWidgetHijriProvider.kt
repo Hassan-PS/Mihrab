@@ -51,16 +51,42 @@ class PrayerWidgetHijriProvider : AppWidgetProvider() {
     appWidgetManager: AppWidgetManager,
     appWidgetIds: IntArray,
   ) {
-    for (id in appWidgetIds) appWidgetManager.updateAppWidget(id, buildViews(context))
+    for (id in appWidgetIds) appWidgetManager.updateAppWidget(id, responsiveViews(context, appWidgetManager, id))
+  }
+
+  override fun onAppWidgetOptionsChanged(
+    context: Context,
+    appWidgetManager: AppWidgetManager,
+    appWidgetId: Int,
+    newOptions: android.os.Bundle,
+  ) {
+    super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
+    appWidgetManager.updateAppWidget(appWidgetId, responsiveViews(context, appWidgetManager, appWidgetId))
   }
 
   companion object {
+    /**
+     * Below this height the card is one line: the day and month, at their
+     * own size, with the year and the next-month column gone rather than
+     * cut through the middle. The layout's minimum is 40dp and the year
+     * line alone needs the card to be past 52.
+     */
+    const val SHORT_HEIGHT_DP = 52
+
+    /** Below this width the next-month column would push the date to its smallest size; it goes first. */
+    const val NARROW_WIDTH_DP = 170
 
     fun requestUpdate(context: Context) {
       val mgr = AppWidgetManager.getInstance(context)
       val ids = mgr.getAppWidgetIds(ComponentName(context, PrayerWidgetHijriProvider::class.java))
-      for (id in ids) mgr.updateAppWidget(id, buildViews(context))
+      for (id in ids) mgr.updateAppWidget(id, responsiveViews(context, mgr, id))
     }
+
+    /** One RemoteViews per size the launcher can show — see WidgetSizing. */
+    private fun responsiveViews(context: Context, mgr: AppWidgetManager, appWidgetId: Int): RemoteViews =
+      WidgetSizing.responsive(context, mgr, appWidgetId) { size ->
+        buildViews(context, size.widthDp, size.heightDp)
+      }
 
     private fun hijri(context: Context): JSONObject? {
       // Parsed once per version of the payload rather than once per
@@ -72,12 +98,16 @@ class PrayerWidgetHijriProvider : AppWidgetProvider() {
       return root.optJSONObject("hijri")
     }
 
-    fun buildViews(base: Context): RemoteViews =
+    fun buildViews(base: Context, widthDp: Int = 0, heightDp: Int = 0): RemoteViews =
       // A throw anywhere below becomes a Mihrab error card with the class
       // name on it, never the launcher's "Can't load widget". See WidgetErrorCard.
-      WidgetErrorCard.guard(base, R.layout.prayer_widget_hijri, "hijri") { render(base) }
+      WidgetErrorCard.guard(base, R.layout.prayer_widget_hijri, "hijri") { render(base, widthDp, heightDp) }
 
-    private fun render(base: Context): RemoteViews {
+    private fun render(base: Context, widthDp: Int, heightDp: Int): RemoteViews {
+      // A size of 0 means "unknown" (a caller with no launcher to ask): the
+      // full card, as before.
+      val short = heightDp in 1 until SHORT_HEIGHT_DP
+      val narrow = widthDp in 1 until NARROW_WIDTH_DP
       // Every label below comes out of the string table, so the context has to
       // be the one that speaks Mihrab's language before anything is read from
       // it. See PrayerWidgetProvider.localized.
@@ -117,10 +147,11 @@ class PrayerWidgetHijriProvider : AppWidgetProvider() {
       // a quantity, and it has no thousands separator. The iOS side learned
       // that when SwiftUI rendered 1448 as "1 448".
       views.setTextViewText(R.id.hijri_year, h.optInt("year", 0).toString())
+      views.setViewVisibility(R.id.hijri_year, if (short) View.GONE else View.VISIBLE)
 
       val nextMonth = h.optString("nextMonthName")
       val inDays = h.optInt("nextMonthInDays", 0)
-      if (nextMonth.isEmpty()) {
+      if (nextMonth.isEmpty() || short || narrow) {
         views.setViewVisibility(R.id.hijri_next_column, View.GONE)
       } else {
         views.setViewVisibility(R.id.hijri_next_column, View.VISIBLE)

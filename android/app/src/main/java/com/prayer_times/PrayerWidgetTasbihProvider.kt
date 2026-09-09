@@ -50,10 +50,28 @@ class PrayerWidgetTasbihProvider : AppWidgetProvider() {
     appWidgetManager: AppWidgetManager,
     appWidgetIds: IntArray,
   ) {
-    for (id in appWidgetIds) appWidgetManager.updateAppWidget(id, buildViews(context))
+    for (id in appWidgetIds) appWidgetManager.updateAppWidget(id, responsiveViews(context, appWidgetManager, id))
+  }
+
+  override fun onAppWidgetOptionsChanged(
+    context: Context,
+    appWidgetManager: AppWidgetManager,
+    appWidgetId: Int,
+    newOptions: android.os.Bundle,
+  ) {
+    super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
+    appWidgetManager.updateAppWidget(appWidgetId, responsiveViews(context, appWidgetManager, appWidgetId))
   }
 
   companion object {
+    /**
+     * Below this height the "today" footer line goes, so the count, its
+     * target and the cycle dots keep their room. The label, the count and
+     * the dots need about 80dp inside the card; the layout's minimum is 100
+     * and the footer is the one line the card can do without.
+     */
+    const val SHORT_HEIGHT_DP = 110
+
     const val ACTION_TASBIH_TAP = "com.prayer_times.ACTION_WIDGET_TASBIH_TAP"
     const val EXTRA_ACTION = "tasbih_action"
 
@@ -65,8 +83,14 @@ class PrayerWidgetTasbihProvider : AppWidgetProvider() {
     fun requestUpdate(context: Context) {
       val mgr = AppWidgetManager.getInstance(context)
       val ids = mgr.getAppWidgetIds(ComponentName(context, PrayerWidgetTasbihProvider::class.java))
-      for (id in ids) mgr.updateAppWidget(id, buildViews(context))
+      for (id in ids) mgr.updateAppWidget(id, responsiveViews(context, mgr, id))
     }
+
+    /** One RemoteViews per size the launcher can show — see WidgetSizing. */
+    private fun responsiveViews(context: Context, mgr: AppWidgetManager, appWidgetId: Int): RemoteViews =
+      WidgetSizing.responsive(context, mgr, appWidgetId) { size ->
+        buildViews(context, size.widthDp, size.heightDp)
+      }
 
     /**
      * Record a tap and redraw immediately.
@@ -95,12 +119,15 @@ class PrayerWidgetTasbihProvider : AppWidgetProvider() {
       return root.optJSONObject("tasbih")
     }
 
-    fun buildViews(base: Context): RemoteViews =
+    fun buildViews(base: Context, widthDp: Int = 0, heightDp: Int = 0): RemoteViews =
       // A throw anywhere below becomes a Mihrab error card with the class
       // name on it, never the launcher's "Can't load widget". See WidgetErrorCard.
-      WidgetErrorCard.guard(base, R.layout.prayer_widget_tasbih, "tasbih") { render(base) }
+      WidgetErrorCard.guard(base, R.layout.prayer_widget_tasbih, "tasbih") { render(base, widthDp, heightDp) }
 
-    private fun render(base: Context): RemoteViews {
+    private fun render(base: Context, widthDp: Int, heightDp: Int): RemoteViews {
+      // A size of 0 means "unknown" (a caller with no launcher to ask): the
+      // full card, as before.
+      val short = heightDp in 1 until SHORT_HEIGHT_DP
       // Every label below comes out of the string table, so the context has to
       // be the one that speaks Mihrab's language before anything is read from
       // it. See PrayerWidgetProvider.localized.
@@ -171,6 +198,7 @@ class PrayerWidgetTasbihProvider : AppWidgetProvider() {
         R.id.tasbih_today,
         footerLine(context, projected.todayTotal, t.optInt("todayRounds", 0)),
       )
+      views.setViewVisibility(R.id.tasbih_today, if (short) View.GONE else View.VISIBLE)
 
       for (i in DOTS.indices) {
         if (i >= total) {
