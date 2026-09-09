@@ -1,0 +1,7 @@
+• A new Today screen: one page, no scrolling, with a sky behind the countdown that follows the day — night and its moon, dawn, noon, sunset.
+• Log a prayer with one tap, from Today.
+• Surah names in the muṣḥaf's own calligraphy, throughout the Quran.
+• Tilāwah is a player: continue where you stopped, play, next, shuffle.
+• A Sky widget for the home screen, and steadier widgets.
+• The muṣḥaf's tone can follow the app's theme.
+• Every screen redrawn: quieter chrome, one voice of colour.
