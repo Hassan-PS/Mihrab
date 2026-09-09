@@ -66,3 +66,41 @@ export async function cachedDaysFrom(
   }
   return extra;
 }
+
+/**
+ * How many days BEHIND today the Today card can be turned to.
+ *
+ * A week, to match the week ahead: the card swipes back to log a prayer
+ * that was missed on the day, or to see what yesterday's Isha was, and a
+ * week is as far as either question reaches. Beyond that the Log's own
+ * history is the surface.
+ */
+export const PAST_DAYS = 7;
+
+/**
+ * Yesterday and the days before it, STRICTLY FROM CACHE, nearest first —
+ * `[0]` is yesterday — stopping at the first day that isn't there.
+ *
+ * Cache-only for the same reason the widget window is: the past is
+ * looked at, not waited for, and a swipe must never fire a fetch. The
+ * current month is always on disk (it was fetched for today), so the
+ * days that are missing are the ones across a month boundary the cache
+ * never held — and a card that stops at the 1st is honest about that.
+ */
+export async function cachedDaysBefore(
+  params: DayWindowParams,
+  now: Date,
+): Promise<TimingsMap[]> {
+  const past: TimingsMap[] = [];
+  for (let i = 1; i <= PAST_DAYS; i++) {
+    let day: TimingsMap | null = null;
+    try {
+      day = await getCachedPrayerTimes({ ...params, date: addDays(now, -i) });
+    } catch {
+      break;
+    }
+    if (!day) break;
+    past.push(day);
+  }
+  return past;
+}

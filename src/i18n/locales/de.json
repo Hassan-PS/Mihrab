@@ -95,7 +95,8 @@
     "qiblaChipHint": "Öffnet den Qibla-Kompass",
     "alertOverrideOnce": "{{mode}} nur dieses Mal · Zurücksetzen",
     "alertOverrideA11y": "{{prayer}} ist nur dieses Mal auf {{mode}} gestellt",
-    "alertOverrideResetHint": "Stellt {{mode}} wieder her"
+    "alertOverrideResetHint": "Stellt {{mode}} wieder her",
+    "yesterday": "Gestern"
   },
   "errors": {
     "locationNeededTitle": "Standort erforderlich",
@@ -1234,7 +1235,9 @@
     "notYet": "Noch nicht – die Zeit ist noch nicht gekommen",
     "quickLogMark": "{{prayer}} als gebetet markieren",
     "quickLogLogged": "{{prayer}} eingetragen: {{status}}. Tippen zum Rückgängigmachen",
-    "quickLogNotYet": "{{prayer}} ist noch nicht eingetreten"
+    "quickLogNotYet": "{{prayer}} ist noch nicht eingetreten",
+    "passedTitle": "{{prayer}} eintragen · {{day}}",
+    "passedBody": "Ihre Zeit ist vorbei. Wurde sie rechtzeitig verrichtet oder nachgeholt?"
   },
   "events": {
     "islamicNewYear": "Islamisches Neujahr",

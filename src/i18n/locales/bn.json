@@ -95,7 +95,8 @@
     "qiblaChipHint": "কিবলা কম্পাস খোলে",
     "alertOverrideOnce": "{{mode}} শুধু এইবার · রিসেট",
     "alertOverrideA11y": "{{prayer}} শুধু এইবারের জন্য {{mode}} করা আছে",
-    "alertOverrideResetHint": "{{mode}} ফিরিয়ে আনে"
+    "alertOverrideResetHint": "{{mode}} ফিরিয়ে আনে",
+    "yesterday": "গতকাল"
   },
   "errors": {
     "locationNeededTitle": "অবস্থান প্রয়োজন",
@@ -1234,7 +1235,9 @@
     "notYet": "এখনো না — এর সময় আসেনি",
     "quickLogMark": "{{prayer}} পড়া হয়েছে বলে চিহ্নিত করুন",
     "quickLogLogged": "{{prayer}} লগ করা হয়েছে: {{status}}। বাতিল করতে ট্যাপ করুন",
-    "quickLogNotYet": "{{prayer}} এর সময় এখনও আসেনি"
+    "quickLogNotYet": "{{prayer}} এর সময় এখনও আসেনি",
+    "passedTitle": "{{prayer}} লগ করুন · {{day}}",
+    "passedBody": "এর সময় পেরিয়ে গেছে। এটি কি সময়মতো পড়া হয়েছিল, নাকি কাযা করা হয়েছে?"
   },
   "events": {
     "islamicNewYear": "ইসলামি নববর্ষ",

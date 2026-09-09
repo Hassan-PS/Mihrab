@@ -41,7 +41,6 @@ const TABULAR_REQUIRED = [
 const FONT_CLAMP_REQUIRED = [
   'src/screens/home/PrayerRow.tsx',
   'src/screens/home/TodayCard.tsx',
-  'src/screens/home/DayStrip.tsx',
   'src/screens/compass/BearingHeader.tsx',
   'src/screens/compass/SignalIndicator.tsx',
   // CompassDial is one SVG now (redesign-plan §4): its numerals are drawn,

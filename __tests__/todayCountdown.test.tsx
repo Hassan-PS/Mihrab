@@ -125,8 +125,7 @@ function renderCard(): ReactTestRenderer {
         resetKey="test"
         getDayLabel={() => 'Today'}
         getDayDate={() => '23 August'}
-        getDayShort={() => 'SU'}
-        getDayNumber={() => '23'}
+        getWeekday={() => 'Sunday'}
       />,
     );
   });

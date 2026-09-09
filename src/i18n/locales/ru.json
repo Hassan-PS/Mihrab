@@ -95,7 +95,8 @@
     "qiblaChipHint": "Открывает компас киблы",
     "alertOverrideOnce": "{{mode}} только в этот раз · Сбросить",
     "alertOverrideA11y": "{{prayer}} — {{mode}} только в этот раз",
-    "alertOverrideResetHint": "Возвращает {{mode}}"
+    "alertOverrideResetHint": "Возвращает {{mode}}",
+    "yesterday": "Вчера"
   },
   "errors": {
     "locationNeededTitle": "Требуется местоположение",
@@ -1234,7 +1235,9 @@
     "notYet": "Ещё нет — время не наступило",
     "quickLogMark": "Отметить {{prayer}} как совершённую",
     "quickLogLogged": "{{prayer}} записана: {{status}}. Нажмите, чтобы отменить",
-    "quickLogNotYet": "Время {{prayer}} ещё не наступило"
+    "quickLogNotYet": "Время {{prayer}} ещё не наступило",
+    "passedTitle": "Отметить {{prayer}} · {{day}}",
+    "passedBody": "Её время прошло. Совершена вовремя или восполнена?"
   },
   "events": {
     "islamicNewYear": "Исламский новый год",

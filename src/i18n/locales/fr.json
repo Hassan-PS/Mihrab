@@ -95,7 +95,8 @@
     "qiblaChipHint": "Ouvre la boussole Qibla",
     "alertOverrideOnce": "{{mode}} juste cette fois · Réinitialiser",
     "alertOverrideA11y": "{{prayer}} est sur {{mode}} juste cette fois",
-    "alertOverrideResetHint": "Rétablit {{mode}}"
+    "alertOverrideResetHint": "Rétablit {{mode}}",
+    "yesterday": "Hier"
   },
   "errors": {
     "locationNeededTitle": "Emplacement nécessaire",
@@ -1234,7 +1235,9 @@
     "notYet": "Pas encore — son heure n’est pas venue",
     "quickLogMark": "Marquer {{prayer}} comme priée",
     "quickLogLogged": "{{prayer}} enregistrée : {{status}}. Touchez pour annuler",
-    "quickLogNotYet": "{{prayer}} n’est pas encore arrivée"
+    "quickLogNotYet": "{{prayer}} n’est pas encore arrivée",
+    "passedTitle": "Consigner {{prayer}} · {{day}}",
+    "passedBody": "Son heure est passée. A-t-elle été priée à l’heure, ou rattrapée ?"
   },
   "events": {
     "islamicNewYear": "Nouvel an hijri",

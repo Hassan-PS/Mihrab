@@ -20,12 +20,16 @@ describe('useQuickLog', () => {
     expect(src).toMatch(/hydratedRef\.current = store\.hydrated/);
   });
 
-  it('refuses to toggle before it has', () => {
+  it('refuses to toggle — or to record an answer — before it has', () => {
     const toggle = src.slice(src.indexOf('const toggle = useCallback('));
-    const guard = toggle.indexOf('if (!hydratedRef.current) return;');
-    const write = toggle.indexOf('durableEncryptedSet(JOURNAL_KEY');
+    const guard = toggle.indexOf("if (!hydratedRef.current) return 'nothing';");
+    const write = toggle.indexOf('await persist(');
     expect(guard).toBeGreaterThan(-1);
     expect(guard).toBeLessThan(write);
+    const record = src.slice(src.indexOf('const record = useCallback('));
+    expect(record.indexOf('if (!hydratedRef.current) return;')).toBeLessThan(
+      record.indexOf('await persist('),
+    );
   });
 });
 

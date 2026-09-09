@@ -67,8 +67,14 @@ import {
   startOfLocalDay,
 } from '../../utils/prayerTimes';
 import { isRtlLanguage } from '../../i18n/layoutDirection';
-import { DayStrip, type DayStripEntry } from './DayStrip';
-import { isSalah, quickLogPhase, useQuickLog } from '../../journal/quickLog';
+import {
+  isSalah,
+  quickLogPhase,
+  useQuickLog,
+  type PassedPrayerAnswer,
+} from '../../journal/quickLog';
+import type { JournalPrayer } from '../../journal/journal';
+import { LogPassedPrayerSheet } from './LogPassedPrayerSheet';
 import { HeroSky } from './HeroSky';
 import { HERO_Y, skyFrame, skyInkAt, skyMoment, type SkyInkColors } from './skyModel';
 import { setHeroSkyBand } from './heroSkyBand';
@@ -82,7 +88,7 @@ import {
 import { clearNativeAlertOverride } from '../../native/MihrabLiveActivity';
 import { ymdLocal } from '../../notifications/scheduling';
 import { QiblaChipCorner } from './QiblaChip';
-import { HOME_SCREEN_PADDING, HOME_TABLE_RADIUS } from './tokens';
+import { HOME_TABLE_RADIUS } from './tokens';
 import { RADIUS, SPACING } from '../../theme/tokens';
 import { TYPE } from '../../theme/typography';
 
@@ -95,6 +101,14 @@ export type TodayCardProps = {
   /** Today first, then the next six days. */
   week: TimingsMap[];
   /**
+   * The days before today, nearest first — `past[0]` is yesterday — as
+   * far back as the cache reaches. The table turns back through these
+   * (a prayer missed on the day is logged where it happened, not on a
+   * strip that only looked forward); the hero, the countdown and the
+   * alerts never read them.
+   */
+  past?: TimingsMap[];
+  /**
    * Today's times UNFILTERED — with Sunrise whatever the rows setting
    * says — for the sky, which needs the sunrise to know where dawn ends.
    * The rows themselves come from `week`, which carries only what is
@@ -104,13 +118,12 @@ export type TodayCardProps = {
   nextInfo: { name: string; at: Date } | null;
   /** Changing this returns the strip to today (e.g. the user moved city). */
   resetKey: string;
+  /** "Today", "Tomorrow", "Yesterday", else the weekday — for a11y. */
   getDayLabel: (dayOffset: number) => string;
   getDayDate: (dayOffset: number) => string;
   getHijriDate?: (dayOffset: number) => string;
-  /** Two-letter weekday for the strip chips. */
-  getDayShort: (dayOffset: number) => string;
-  /** Day of month for the strip chips. */
-  getDayNumber: (dayOffset: number) => string;
+  /** The weekday's name, whatever day it is — the line over the table. */
+  getWeekday: (dayOffset: number) => string;
   onOpenMonth?: () => void;
   /**
    * Qibla bearing in degrees from true north, or null when there is no
@@ -160,7 +173,6 @@ const HeroToday = memo(function HeroToday({
   ownsStatusBar = false,
   statusBarInset = 0,
   fill = false,
-  dateLine,
 }: {
   /** What the countdown is aimed at: the next prayer, or the user's pick. */
   target: { name: string; at: Date };
@@ -198,16 +210,6 @@ const HeroToday = memo(function HeroToday({
    * chip or the countdown.
    */
   fill?: boolean;
-  /**
-   * Today's date, Gregorian and Hijri — issue #23.
-   *
-   * Every other day's hero says which day it is; today's said only how
-   * long until the next prayer, and the Hijri date was on the widget but
-   * nowhere in the app. It goes at the foot of the hero rather than the
-   * head: what someone opens this screen for is the number, and a date
-   * above it would be a line to read past.
-   */
-  dateLine?: string;
 }) {
   const { t } = useTranslation();
   const clock = useClockFormatter();
@@ -488,14 +490,6 @@ const HeroToday = memo(function HeroToday({
           </View>
         </View>
       ) : null}
-      {dateLine ? (
-        <Text
-          style={[styles.heroTodayDate, { color: inkFoot.muted }]}
-          numberOfLines={1}
-          maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
-          {dateLine}
-        </Text>
-      ) : null}
       </View>
     </View>
   );
@@ -503,13 +497,13 @@ const HeroToday = memo(function HeroToday({
 
 function TodayCardImpl({
   week,
+  past,
   nextInfo,
   resetKey,
   getDayLabel,
   getDayDate,
   getHijriDate,
-  getDayShort,
-  getDayNumber,
+  getWeekday,
   onOpenMonth,
   qiblaBearing,
   onOpenQibla,
@@ -534,24 +528,31 @@ function TodayCardImpl({
   const [chosenKey, setChosenKey] = useState<string | null>(null);
   const rtl = isRtlLanguage(i18n.language);
 
-  // A new city (or a fresh week of data) puts the strip back on today.
+  /**
+   * The pages, in the order they are swiped: the past, oldest first, then
+   * today and the week ahead. `selected` is an OFFSET from today — negative
+   * behind it — so every rule below that says "offset === 0" still means
+   * today; only the pager translates between offsets and page indices.
+   */
+  const pastDays = useMemo(() => past ?? [], [past]);
+  const pages = useMemo(
+    () => pastDays.slice().reverse().concat(week),
+    [pastDays, week],
+  );
+  const todayIndex = pastDays.length;
+  const dayAt = useCallback(
+    (offset: number): TimingsMap | undefined =>
+      offset < 0 ? pastDays[-offset - 1] : week[offset],
+    [pastDays, week],
+  );
+
+  // A new city (or a fresh week of data) puts the table back on today.
   useEffect(() => setSelected(0), [resetKey]);
   useEffect(() => setChosenKey(null), [resetKey]);
-  // Never leave the selection pointing past the end of a shorter week.
+  // Never leave the selection pointing off either end.
   useEffect(() => {
-    setSelected(s => (s < week.length ? s : 0));
-  }, [week.length]);
-
-  const days: DayStripEntry[] = useMemo(
-    () =>
-      week.map((_, offset) => ({
-        offset,
-        dow: getDayShort(offset),
-        dom: getDayNumber(offset),
-        a11yLabel: `${getDayLabel(offset)} — ${getDayDate(offset)}`,
-      })),
-    [week, getDayShort, getDayNumber, getDayLabel, getDayDate],
-  );
+    setSelected(s => (s < week.length && s >= -pastDays.length ? s : 0));
+  }, [week.length, pastDays.length]);
 
   /**
    * The days are PAGES under one hero.
@@ -577,17 +578,18 @@ function TodayCardImpl({
   const scrollToDay = useCallback(
     (offset: number, animated: boolean) => {
       if (pageWidth <= 0) return;
-      pagerRef.current?.scrollToIndex({ index: offset, animated });
+      pagerRef.current?.scrollToIndex({ index: offset + todayIndex, animated });
     },
-    [pageWidth],
+    [pageWidth, todayIndex],
   );
   const onPageSettled = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
       if (pageWidth <= 0) return;
       const page = Math.round(e.nativeEvent.contentOffset.x / pageWidth);
-      setSelected(Math.max(0, Math.min(week.length - 1, page)));
+      const offset = page - todayIndex;
+      setSelected(Math.max(-pastDays.length, Math.min(week.length - 1, offset)));
     },
-    [pageWidth, week.length],
+    [pageWidth, todayIndex, pastDays.length, week.length],
   );
   const pageLayout = useCallback(
     (_: unknown, index: number) => ({
@@ -725,18 +727,6 @@ function TodayCardImpl({
       }, ''),
     [clock],
   );
-  /**
-   * Today's date on today's card — issue #23.
-   *
-   * Built from the same two callbacks the other days' hero already uses,
-   * so the Gregorian half is formatted once for the whole card and the
-   * Hijri half cannot drift from the one on the widget.
-   */
-  const todayDateLine = useMemo(() => {
-    const gregorian = getDayDate(0);
-    const hijri = getHijriDate?.(0);
-    return hijri ? `${gregorian} · ${hijri}` : gregorian;
-  }, [getDayDate, getHijriDate]);
   const handleSelect = useCallback(
     (offset: number) => {
       setSelected(offset);
@@ -793,6 +783,40 @@ function TodayCardImpl({
   const quickLog = useQuickLog();
   const tomorrow = week[1];
   const logNow = new Date();
+  /**
+   * The question a tap on a passed prayer opens — see quickLog.ts. Holds
+   * the prayer and the day it is about; the sheet reads the labels off it
+   * and `answerPassed` writes the answer to that day.
+   */
+  const [question, setQuestion] = useState<{
+    prayer: JournalPrayer;
+    offset: number;
+  } | null>(null);
+  const toggleLog = useCallback(
+    async (prayer: JournalPrayer, dayTimings: TimingsMap, offset: number) => {
+      const day = addDays(startOfLocalDay(new Date()), offset);
+      const outcome = await quickLog.toggle(prayer, dayTimings, {
+        day,
+        tomorrow: dayAt(offset + 1),
+      });
+      if (outcome === 'ask') setQuestion({ prayer, offset });
+    },
+    [quickLog, dayAt],
+  );
+  const answerPassed = useCallback(
+    (status: PassedPrayerAnswer) => {
+      const q = question;
+      setQuestion(null);
+      if (!q) return;
+      void quickLog.record(
+        q.prayer,
+        addDays(startOfLocalDay(new Date()), q.offset),
+        status,
+      );
+    },
+    [question, quickLog],
+  );
+  const dismissQuestion = useCallback(() => setQuestion(null), []);
 
   /**
    * Re-render at the instant a preferred window closes today, so the
@@ -860,8 +884,15 @@ function TodayCardImpl({
    * pretends a tap on Thursday changes Thursday.
    */
   const renderDay = (offset: number) => {
-    const dayTimings = week[offset] ?? {};
+    const dayTimings = dayAt(offset) ?? {};
     const isToday = offset === 0;
+    // A day behind us: every prayer on it has come, and each one can be
+    // recorded — that is what the table turns back for. Nothing else
+    // that is live on today's rows belongs on it.
+    const isPast = offset < 0;
+    const loggable = isToday || isPast;
+    const day = addDays(startOfLocalDay(logNow), offset);
+    const nextDay = dayAt(offset + 1);
     const rows = DISPLAY_ORDER.filter(key => dayTimings[key]);
     const overrideKey = overrideKeyFor(offset, dayTimings, rows);
     const timeSample = timeSampleFor(dayTimings, rows);
@@ -935,24 +966,24 @@ function TodayCardImpl({
         onResetAlertMode={overrideKey === key ? resetOverride : undefined}
         timeSample={timeSample}
         log={
-          isToday && isSalah(key)
+          loggable && isSalah(key)
             ? {
-                status: quickLog.statusOf(key),
+                status: quickLog.statusOf(key, day),
                 // Until the journal has been read there is nothing to
                 // show and nothing safe to record: the ring at a whisper,
                 // exactly as for a prayer whose time has not come.
                 phase: quickLog.hydrated
-                  ? quickLogPhase(key, dayTimings, logNow, tomorrow)
+                  ? quickLogPhase(key, dayTimings, logNow, nextDay, day)
                   : 'not-yet',
               }
             : undefined
         }
         onToggleLog={
-          isToday && isSalah(key)
-            ? () => void quickLog.toggle(key, dayTimings, tomorrow)
+          loggable && isSalah(key)
+            ? () => void toggleLog(key, dayTimings, offset)
             : undefined
         }
-        hasCheckColumn={isToday}
+        hasCheckColumn={loggable}
         dense={dense}
       />
     ));
@@ -986,7 +1017,6 @@ function TodayCardImpl({
             skyToday={skyTimings}
             tomorrowFajr={tomorrow?.Fajr}
             expanded={expanded}
-            dateLine={todayDateLine}
             bleed={{ horizontal: SPACING.xl, top: heroTop, bottom: SPACING.lg }}
             statusBarInset={fullBleed ? insets.top : 0}
             fill={fullBleed}
@@ -1011,7 +1041,66 @@ function TodayCardImpl({
       </View>
 
       <View style={fullBleed ? styles.tableBleed : null}>
-        <DayStrip days={days} selected={selected} onSelect={handleSelect} />
+        {/* THE DAY LINE, where the week strip was. The strip put seven
+            chips where the eye lands under the hero and answered "which
+            day am I looking at" with a highlighted 9 — and could not look
+            back. This says it in words: the weekday, the two dates, and
+            on the trailing edge a mark that reads "Today" while the table
+            shows today and becomes the way back once it has been swiped
+            off it. The days themselves are the swipe, both ways. */}
+        <View
+          style={[
+            styles.dayLine,
+            { borderBottomColor: palette.border ?? palette.muted },
+          ]}
+          accessibilityRole="header"
+          accessibilityLabel={`${getDayLabel(selected)} — ${getDayDate(selected)}`}>
+          <View style={styles.dayLineText}>
+            <Text
+              style={[styles.dayLineWeekday, { color: palette.text }]}
+              numberOfLines={1}
+              maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
+              {getWeekday(selected)}
+            </Text>
+            <Text
+              style={[styles.dayLineDates, { color: palette.muted }]}
+              numberOfLines={1}
+              maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
+              {getHijriDate
+                ? `${getDayDate(selected)} · ${getHijriDate(selected)}`
+                : getDayDate(selected)}
+            </Text>
+          </View>
+          {selected === 0 ? (
+            <View
+              style={[styles.todayMark, { backgroundColor: palette.accentBg }]}
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants">
+              <Text
+                style={[styles.todayMarkLabel, { color: palette.accent }]}
+                maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
+                {t('home.today')}
+              </Text>
+            </View>
+          ) : (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('home.backToToday', 'Back to today')}
+              onPress={() => handleSelect(0)}
+              hitSlop={8}
+              style={({ pressed }) => [
+                styles.todayMark,
+                { backgroundColor: palette.accentSolid },
+                pressed && { opacity: 0.7 },
+              ]}>
+              <Text
+                style={[styles.todayMarkLabel, { color: palette.onAccent }]}
+                maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
+                {t('home.backToToday', 'Back to today')}
+              </Text>
+            </Pressable>
+          )}
+        </View>
 
         <View onLayout={onTableLayout}>
           {pageWidth > 0 ? (
@@ -1021,24 +1110,38 @@ function TodayCardImpl({
               pagingEnabled
               showsHorizontalScrollIndicator={false}
               bounces={false}
-              // Seven pages, all light: mount them all so a swipe never
-              // lands on a blank page mid-render.
-              initialNumToRender={week.length}
-              data={week}
-              keyExtractor={(_, index) => String(index)}
+              // Two weeks of pages, all light: mount them all so a swipe
+              // never lands on a blank page mid-render — and open on
+              // today, which is not the first of them any more.
+              initialNumToRender={pages.length}
+              initialScrollIndex={todayIndex}
+              data={pages}
+              keyExtractor={(_, index) => String(index - todayIndex)}
               getItemLayout={pageLayout}
               onMomentumScrollEnd={onPageSettled}
               // Nested in the page's vertical scroll: this one owns only
               // clearly horizontal drags.
               nestedScrollEnabled
               renderItem={({ index }) => (
-                <View style={{ width: pageWidth }}>{renderDay(index)}</View>
+                <View style={{ width: pageWidth }}>{renderDay(index - todayIndex)}</View>
               )}
             />
           ) : (
             renderDay(0)
           )}
         </View>
+        <LogPassedPrayerSheet
+          question={
+            question
+              ? {
+                  prayer: t(`prayer.${question.prayer}`),
+                  day: `${getDayLabel(question.offset)} · ${getDayDate(question.offset)}`,
+                }
+              : null
+          }
+          onAnswer={answerPassed}
+          onCancel={dismissQuestion}
+        />
 
         {onOpenMonth ? (
           <Pressable
@@ -1086,7 +1189,30 @@ const styles = StyleSheet.create({
     borderBottomEndRadius: HOME_TABLE_RADIUS,
     overflow: 'hidden',
   },
-  tableBleed: { paddingHorizontal: HOME_SCREEN_PADDING },
+  // No side padding: the rows are the page's now, edge to edge, and they
+  // carry the hero's own inset (`SPACING.xl`) themselves — see PrayerRow.
+  // The 16dp this used to add kept the table inside the ghost of the
+  // card it once sat in, a step in from where the hero's text begins.
+  tableBleed: {},
+  dayLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  dayLineText: { flexShrink: 1, flexGrow: 1 },
+  dayLineWeekday: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
+  dayLineDates: { fontSize: TYPE.footnote.fontSize, marginTop: 1 },
+  todayMark: {
+    borderRadius: RADIUS.full,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs + 2,
+  },
+  todayMarkLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
   heroTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1142,7 +1268,6 @@ const styles = StyleSheet.create({
   heroSeconds: { fontSize: TYPE.title2.fontSize, fontWeight: '600', marginStart: -3 },
   heroSecondsExpanded: { fontSize: 28 }, // tokens-ok-line: display or Arabic scale, sized by hand
   heroAt: { fontSize: TYPE.title3.fontSize, fontWeight: '600' },
-  heroTodayDate: { fontSize: TYPE.footnote.fontSize, marginTop: SPACING.md },
   railWrap: { marginTop: SPACING.md },
   railTrack: { height: 5, borderRadius: RADIUS.xs, overflow: 'hidden' },
   railFill: { height: '100%', borderRadius: RADIUS.xs },
@@ -1156,7 +1281,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.xl,
     paddingVertical: SPACING.md,
     borderTopWidth: StyleSheet.hairlineWidth,
   },

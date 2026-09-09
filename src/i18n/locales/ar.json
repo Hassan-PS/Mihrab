@@ -95,7 +95,8 @@
     "qiblaChipHint": "يفتح بوصلة القبلة",
     "alertOverrideOnce": "{{mode}} هذه المرة فقط · إعادة",
     "alertOverrideA11y": "{{prayer}} مضبوطة على {{mode}} هذه المرة فقط",
-    "alertOverrideResetHint": "يعيد {{mode}}"
+    "alertOverrideResetHint": "يعيد {{mode}}",
+    "yesterday": "أمس"
   },
   "errors": {
     "locationNeededTitle": "الموقع مطلوب",
@@ -1234,7 +1235,9 @@
     "notYet": "ليس بعد — لم يحن وقتها",
     "quickLogMark": "تسجيل صلاة {{prayer}}",
     "quickLogLogged": "سُجّلت {{prayer}}: {{status}}. اضغط للتراجع",
-    "quickLogNotYet": "لم يدخل وقت {{prayer}} بعد"
+    "quickLogNotYet": "لم يدخل وقت {{prayer}} بعد",
+    "passedTitle": "تسجيل {{prayer}} · {{day}}",
+    "passedBody": "مضى وقتها. هل صُلّيت في وقتها أم قُضيت؟"
   },
   "events": {
     "islamicNewYear": "رأس السنة الهجرية",

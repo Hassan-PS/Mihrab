@@ -362,21 +362,27 @@ function PrayerRowImpl({
 export const PrayerRow = memo(PrayerRowImpl);
 
 const styles = StyleSheet.create({
+  // The row's inset is the hero's: its name begins where the hero's text
+  // does and its time ends where the hero's rail does (`SPACING.xl` on
+  // both sides), and the row itself runs edge to edge — the current
+  // prayer's tint and the bar at its start reach the screen's edge. It
+  // used to sit a step in on both sides, inside the ghost of the card it
+  // was drawn in before the page went full-bleed.
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: HOME_ROW_PADDING_V,
-    paddingHorizontal: SPACING.lg,
-    paddingStart: SPACING.xl,
+    paddingHorizontal: SPACING.xl,
     position: 'relative',
   },
   rowDense: { paddingVertical: SPACING.sm },
+  // Inset to the same edge as the text above it, on both sides.
   divider: {
     position: 'absolute',
     bottom: 0,
-    start: 20,
-    end: 0,
+    start: SPACING.xl,
+    end: SPACING.xl,
     height: StyleSheet.hairlineWidth,
   },
   nameWrap: {

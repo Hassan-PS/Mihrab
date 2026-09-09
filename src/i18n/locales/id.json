@@ -95,7 +95,8 @@
     "qiblaChipHint": "Membuka kompas kiblat",
     "alertOverrideOnce": "{{mode}} kali ini saja · Setel ulang",
     "alertOverrideA11y": "{{prayer}} disetel ke {{mode}} kali ini saja",
-    "alertOverrideResetHint": "Mengembalikan {{mode}}"
+    "alertOverrideResetHint": "Mengembalikan {{mode}}",
+    "yesterday": "Kemarin"
   },
   "errors": {
     "locationNeededTitle": "Lokasi diperlukan",
@@ -1234,7 +1235,9 @@
     "notYet": "Belum — waktunya belum tiba",
     "quickLogMark": "Tandai {{prayer}} sudah ditunaikan",
     "quickLogLogged": "{{prayer}} dicatat: {{status}}. Ketuk untuk membatalkan",
-    "quickLogNotYet": "Waktu {{prayer}} belum masuk"
+    "quickLogNotYet": "Waktu {{prayer}} belum masuk",
+    "passedTitle": "Catat {{prayer}} · {{day}}",
+    "passedBody": "Waktunya telah lewat. Apakah dikerjakan tepat waktu, atau diqadha?"
   },
   "events": {
     "islamicNewYear": "Tahun Baru Hijriyah",

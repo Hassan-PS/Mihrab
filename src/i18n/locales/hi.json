@@ -95,7 +95,8 @@
     "qiblaChipHint": "क़िबला कम्पास खोलता है",
     "alertOverrideOnce": "{{mode}} सिर्फ़ इस बार · रीसेट",
     "alertOverrideA11y": "{{prayer}} सिर्फ़ इस बार {{mode}} पर है",
-    "alertOverrideResetHint": "{{mode}} वापस लाता है"
+    "alertOverrideResetHint": "{{mode}} वापस लाता है",
+    "yesterday": "कल (बीता)"
   },
   "errors": {
     "locationNeededTitle": "स्थान की आवश्यकता है",
@@ -1234,7 +1235,9 @@
     "notYet": "अभी नहीं — इसका समय नहीं आया",
     "quickLogMark": "{{prayer}} को पढ़ी गई के रूप में चिह्नित करें",
     "quickLogLogged": "{{prayer}} दर्ज: {{status}}। पूर्ववत करने के लिए टैप करें",
-    "quickLogNotYet": "{{prayer}} का समय अभी नहीं आया"
+    "quickLogNotYet": "{{prayer}} का समय अभी नहीं आया",
+    "passedTitle": "{{prayer}} दर्ज करें · {{day}}",
+    "passedBody": "इसका समय बीत चुका है। क्या यह समय पर पढ़ी गई, या क़ज़ा की गई?"
   },
   "events": {
     "islamicNewYear": "इस्लामी नववर्ष",

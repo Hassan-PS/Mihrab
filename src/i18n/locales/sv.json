@@ -95,7 +95,8 @@
     "qiblaChipHint": "Öppnar Qibla-kompassen",
     "alertOverrideOnce": "{{mode}} bara denna gång · Återställ",
     "alertOverrideA11y": "{{prayer}} är inställd på {{mode}} bara denna gång",
-    "alertOverrideResetHint": "Återställer {{mode}}"
+    "alertOverrideResetHint": "Återställer {{mode}}",
+    "yesterday": "Igår"
   },
   "errors": {
     "locationNeededTitle": "Plats krävs",
@@ -1234,7 +1235,9 @@
     "notYet": "Inte än – tiden har inte kommit",
     "quickLogMark": "Markera {{prayer}} som bedd",
     "quickLogLogged": "{{prayer}} loggad: {{status}}. Tryck för att ångra",
-    "quickLogNotYet": "{{prayer}} har inte infallit ännu"
+    "quickLogNotYet": "{{prayer}} har inte infallit ännu",
+    "passedTitle": "Logga {{prayer}} · {{day}}",
+    "passedBody": "Dess tid har passerat. Bads den i tid, eller togs den igen?"
   },
   "events": {
     "islamicNewYear": "Islamiskt nyår",

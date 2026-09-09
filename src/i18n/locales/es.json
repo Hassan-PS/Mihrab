@@ -95,7 +95,8 @@
     "qiblaChipHint": "Abre la brújula de la alquibla",
     "alertOverrideOnce": "{{mode}} solo esta vez · Restablecer",
     "alertOverrideA11y": "{{prayer}} está en {{mode}} solo esta vez",
-    "alertOverrideResetHint": "Restablece {{mode}}"
+    "alertOverrideResetHint": "Restablece {{mode}}",
+    "yesterday": "Ayer"
   },
   "errors": {
     "locationNeededTitle": "Ubicación necesaria",
@@ -1234,7 +1235,9 @@
     "notYet": "Aún no: todavía no es su hora",
     "quickLogMark": "Marcar {{prayer}} como rezada",
     "quickLogLogged": "{{prayer}} registrada: {{status}}. Toca para deshacer",
-    "quickLogNotYet": "{{prayer}} aún no ha llegado"
+    "quickLogNotYet": "{{prayer}} aún no ha llegado",
+    "passedTitle": "Registrar {{prayer}} · {{day}}",
+    "passedBody": "Su tiempo ya pasó. ¿Se rezó a tiempo o se recuperó?"
   },
   "events": {
     "islamicNewYear": "Año Nuevo islámico",

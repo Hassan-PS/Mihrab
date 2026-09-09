@@ -287,6 +287,7 @@ export function HomeScreen() {
   const view = useMemo(() => {
     if (state.phase !== 'ready') return null;
     const { today, tomorrow, week } = state;
+    const past = state.past ?? [];
     const mk = (tg: {
       Sunrise: boolean;
       Midnight: boolean;
@@ -296,6 +297,7 @@ export function HomeScreen() {
       today: filterOptionalTimes(today, tg),
       tomorrow: tomorrow ? filterOptionalTimes(tomorrow, tg) : undefined,
       week: week.map(d => filterOptionalTimes(d, tg)),
+      past: past.map(d => filterOptionalTimes(d, tg)),
     });
     const table = mk({
       Sunrise: settings.sunriseEnabled,
@@ -316,15 +318,22 @@ export function HomeScreen() {
     // about a boundary was to also draw it — which is what #19's reporter
     // asked not to have. `malikiSecondTimeRows` decides the drawing; the
     // week below always carries them so the schedule can find them.
-    const tableWithDaruri = settings.malikiSecondTimesEnabled
+    // Injected over the whole span the table can turn to — the past
+    // days first, in date order, then the week — since each day's Ishāʾ
+    // boundary reads the next day's Fajr; then split back apart.
+    const span = settings.malikiSecondTimesEnabled
       ? injectDaruriTimes(
-          table.week,
-          state.baseDate,
+          table.past.slice().reverse().concat(table.week),
+          addDays(state.baseDate, -table.past.length),
           state.latitude,
           state.longitude,
           // `school` is 1 for Ḥanafī ʿAṣr (the 2:1 shadow), 0 otherwise.
           settings.school === 1 ? 2 : 1,
         )
+      : null;
+    const tableWithDaruri = span ? span.slice(table.past.length) : null;
+    const pastWithDaruri = span
+      ? span.slice(0, table.past.length).reverse()
       : null;
     const drawDaruri =
       tableWithDaruri != null && settings.malikiSecondTimeRows;
@@ -334,6 +343,7 @@ export function HomeScreen() {
             today: tableWithDaruri[0],
             tomorrow: tableWithDaruri[1],
             week: tableWithDaruri,
+            past: pastWithDaruri ?? table.past,
           }
         : table,
       /**
@@ -900,41 +910,26 @@ export function HomeScreen() {
     (dayOffset: number): string => {
       if (dayOffset === 0) return t('home.today');
       if (dayOffset === 1) return t('home.tomorrow');
+      if (dayOffset === -1) return t('home.yesterday');
       return addDays(new Date(), dayOffset).toLocaleDateString(i18n.language, {
         weekday: 'long',
       });
     },
     [t, i18n.language],
   );
+  /** The weekday's name for any day, today included — the table's day line. */
+  const getWeekday = useCallback(
+    (dayOffset: number): string =>
+      addDays(new Date(), dayOffset).toLocaleDateString(i18n.language, {
+        weekday: 'long',
+      }),
+    [i18n.language],
+  );
   const getDayDate = useCallback(
     (dayOffset: number): string =>
       addDays(new Date(), dayOffset).toLocaleDateString(i18n.language, {
         day: 'numeric',
         month: 'short',
-      }),
-    [i18n.language],
-  );
-  /**
-   * Short weekday for a strip chip.
-   *
-   * Whatever the locale's own "short" form is, and no truncation on top of
-   * it: cutting to three characters turned the Arabic week into الس/الأ/الا/
-   * الث/الأ/الخ/الج — where الأحد (Sunday) and الأربعاء (Wednesday) both
-   * became "الأ". Scripts that do not abbreviate keep their whole word, and
-   * the strip scrolls if the week is wider than the card.
-   */
-  const getDayShort = useCallback(
-    (dayOffset: number): string =>
-      addDays(new Date(), dayOffset)
-        .toLocaleDateString(i18n.language, { weekday: 'short' })
-        .replace(/[.,]\s*$/, ''),
-    [i18n.language],
-  );
-  /** Day of month for a strip chip, in the app language's numerals. */
-  const getDayNumber = useCallback(
-    (dayOffset: number): string =>
-      addDays(new Date(), dayOffset).toLocaleDateString(i18n.language, {
-        day: 'numeric',
       }),
     [i18n.language],
   );
@@ -1118,6 +1113,7 @@ export function HomeScreen() {
         const dayTable = (
           <TodayCard
             week={view.table.week}
+            past={view.table.past}
             // The raw day, Sunrise included whatever the rows say: the sky
             // needs it to know where dawn ends.
             skyTimings={state.phase === 'ready' ? state.today : undefined}
@@ -1126,8 +1122,7 @@ export function HomeScreen() {
             getDayLabel={getDayLabel}
             getDayDate={getDayDate}
             getHijriDate={getHijriDate}
-            getDayShort={getDayShort}
-            getDayNumber={getDayNumber}
+            getWeekday={getWeekday}
             onOpenMonth={handleOpenMonth}
             qiblaBearing={qiblaBearing}
             onOpenQibla={handleOpenQibla}

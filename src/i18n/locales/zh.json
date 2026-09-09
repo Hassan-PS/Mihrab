@@ -95,7 +95,8 @@
     "qiblaChipHint": "打开朝拜方向指南针",
     "alertOverrideOnce": "{{mode}}（仅此一次）· 重置",
     "alertOverrideA11y": "{{prayer}} 仅此一次设为{{mode}}",
-    "alertOverrideResetHint": "恢复为{{mode}}"
+    "alertOverrideResetHint": "恢复为{{mode}}",
+    "yesterday": "昨天"
   },
   "errors": {
     "locationNeededTitle": "需要位置",
@@ -1234,7 +1235,9 @@
     "notYet": "还未到——时间尚未到来",
     "quickLogMark": "将{{prayer}}标记为已礼",
     "quickLogLogged": "{{prayer}}已记录：{{status}}。点按可撤销",
-    "quickLogNotYet": "{{prayer}}时间尚未到"
+    "quickLogNotYet": "{{prayer}}时间尚未到",
+    "passedTitle": "记录{{prayer}} · {{day}}",
+    "passedBody": "时间已过。是按时礼的，还是补礼的？"
   },
   "events": {
     "islamicNewYear": "伊斯兰新年",

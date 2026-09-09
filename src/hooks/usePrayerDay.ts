@@ -23,7 +23,9 @@ import type { PrayerAppSettings } from '../settings/types';
 import type { TimingsMap } from '../types/prayer';
 import { addDays, startOfLocalDay } from '../utils/prayerTimes';
 import {
+  PAST_DAYS,
   WIDGET_WINDOW_DAYS,
+  cachedDaysBefore,
   cachedDaysFrom,
 } from '../prayer/widgetDayWindow';
 
@@ -83,6 +85,13 @@ export type PrayerDayState =
        * takes everything the cache can give it. Never shorter than `week`.
        */
       widgetWeek: TimingsMap[];
+      /**
+       * The days BEFORE today, nearest first — `past[0]` is yesterday — as
+       * far back as the cache reaches, at most `PAST_DAYS`. Gapless, like
+       * `week`. The Today card turns back through these; nothing else
+       * reads them. Absent on a state written before this field existed.
+       */
+      past?: TimingsMap[];
       /** True when showing on-device fallback times because the network/provider failed. */
       usingLocalFallback?: boolean;
       /**
@@ -261,6 +270,33 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
               )
             : offsettedWeek;
 
+        // The week behind, from the cache alone, through the same offset
+        // and night-time pipeline. Nearest first is how it is stored;
+        // the pipeline wants chronological order (the night times of one
+        // day read the next day's Fajr), so it runs on the reversed list
+        // and the result is turned back.
+        const pastRaw = await cachedDaysBefore(
+          {
+            provider,
+            latitude,
+            longitude,
+            calculationMethod: settings.calculationMethod,
+            school: settings.school,
+          },
+          now,
+        );
+        const offsettedPast =
+          pastRaw.length > 0
+            ? injectNightTimes(
+                applyOffsetsToWeek(
+                  pastRaw.slice().reverse().concat(weekTimings[0]),
+                  settings.prayerOffsets,
+                ),
+              )
+                .slice(0, pastRaw.length)
+                .reverse()
+            : [];
+
         if (gen !== loadGenerationRef.current) return;
 
         setState(prev => ({
@@ -275,6 +311,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
           tomorrow: offsettedWeek[1],
           week: offsettedWeek,
           widgetWeek: offsettedWidgetWeek,
+          past: offsettedPast,
           backgroundRefreshing: needsCacheFill,
         }));
 
@@ -333,13 +370,40 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
             throw new Error('Local adhan calculation failed');
           }
 
+          // And the week behind, oldest first, so one pipeline run below
+          // covers the whole span in chronological order.
+          const localPast: TimingsMap[] = [];
+          for (let i = PAST_DAYS; i >= 1; i--) {
+            try {
+              localPast.push(
+                computeLocalAdhanTimes({
+                  latitude,
+                  longitude,
+                  date: addDays(now, -i),
+                  calculationMethod: settings.calculationMethod,
+                  school: settings.school,
+                }).timings,
+              );
+            } catch {
+              localPast.length = 0;
+              break;
+            }
+          }
+
           if (gen !== loadGenerationRef.current) return;
 
           // Apply per-prayer offsets to the local-adhan fallback too —
           // the user's adjustment must be honored even when offline.
-          const offsettedLocalWindow = injectNightTimes(
-            applyOffsetsToWeek(localWeek, settings.prayerOffsets),
+          const offsettedLocalSpan = injectNightTimes(
+            applyOffsetsToWeek(
+              localPast.concat(localWeek),
+              settings.prayerOffsets,
+            ),
           );
+          const offsettedLocalPast = offsettedLocalSpan
+            .slice(0, localPast.length)
+            .reverse();
+          const offsettedLocalWindow = offsettedLocalSpan.slice(localPast.length);
           const offsettedLocalWeek = offsettedLocalWindow.slice(0, WEEK_DAYS);
 
           setState(prev => ({
@@ -353,6 +417,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
             tomorrow: offsettedLocalWeek[1],
             week: offsettedLocalWeek,
             widgetWeek: offsettedLocalWindow,
+            past: offsettedLocalPast,
             usingLocalFallback: true,
             backgroundRefreshing: false,
           }));

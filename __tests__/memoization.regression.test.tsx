@@ -24,7 +24,6 @@ import {
 } from '../src/components/HeaderToolbarIcons';
 import { PrayerRow } from '../src/screens/home/PrayerRow';
 import { TodayCard } from '../src/screens/home/TodayCard';
-import { DayStrip } from '../src/screens/home/DayStrip';
 
 // Track how many times a renderspy notes a render. Used by parent harnesses.
 function makeRenderSpy() {
@@ -119,12 +118,6 @@ describe('home leaf components are memo-wrapped', () => {
   test('TodayCard is memo-wrapped', () => {
     expect(
       (TodayCard as unknown as { $$typeof: symbol }).$$typeof,
-    ).toBeDefined();
-  });
-
-  test('DayStrip is memo-wrapped', () => {
-    expect(
-      (DayStrip as unknown as { $$typeof: symbol }).$$typeof,
     ).toBeDefined();
   });
 });

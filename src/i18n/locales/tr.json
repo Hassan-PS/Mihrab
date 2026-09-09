@@ -95,7 +95,8 @@
     "qiblaChipHint": "Kıble pusulasını açar",
     "alertOverrideOnce": "{{mode}} yalnızca bu seferlik · Sıfırla",
     "alertOverrideA11y": "{{prayer}} yalnızca bu seferlik {{mode}} olarak ayarlı",
-    "alertOverrideResetHint": "{{mode}} ayarını geri yükler"
+    "alertOverrideResetHint": "{{mode}} ayarını geri yükler",
+    "yesterday": "Dün"
   },
   "errors": {
     "locationNeededTitle": "Konum gerekli",
@@ -1234,7 +1235,9 @@
     "notYet": "Henüz değil — vakti gelmedi",
     "quickLogMark": "{{prayer}} kılındı olarak işaretle",
     "quickLogLogged": "{{prayer}} kaydedildi: {{status}}. Geri almak için dokunun",
-    "quickLogNotYet": "{{prayer}} vakti henüz girmedi"
+    "quickLogNotYet": "{{prayer}} vakti henüz girmedi",
+    "passedTitle": "{{prayer}} kaydet · {{day}}",
+    "passedBody": "Vakti geçti. Vaktinde mi kılındı, yoksa kaza mı edildi?"
   },
   "events": {
     "islamicNewYear": "Hicri yılbaşı",

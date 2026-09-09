@@ -31,13 +31,13 @@ describe('the window', () => {
     expect(quickLogPhase('Dhuhr', day, at('16:19'))).toBe('in-window');
     expect(quickLogPhase('Dhuhr', day, at('16:20'))).toBe('after-window');
     expect(quickLogStatus('Dhuhr', day, at('13:00'))).toBe('on-time');
-    expect(quickLogStatus('Dhuhr', day, at('17:00'))).toBe('late');
+    expect(quickLogStatus('Dhuhr', day, at('17:00'))).toBe('ask');
     expect(quickLogStatus('Dhuhr', day, at('12:00'))).toBeNull();
   });
 
   it("Fajr's window ends at sunrise, not at Dhuhr", () => {
     expect(quickLogStatus('Fajr', day, at('06:00'))).toBe('on-time');
-    expect(quickLogStatus('Fajr', day, at('06:30'))).toBe('late');
+    expect(quickLogStatus('Fajr', day, at('06:30'))).toBe('ask');
   });
 
   it("Isha's window runs to tomorrow's Fajr when it is known, else to midnight", () => {
@@ -57,6 +57,33 @@ describe('the window', () => {
     expect(quickLogStatus('Fajr', odd, at('05:00'))).toBe('on-time');
   });
 
+  /**
+   * The window belongs to the DAY OF THE CARD. Turned back to yesterday
+   * at breakfast, every prayer on it has come — except its Isha, which
+   * runs until this morning's Fajr and is still open before it.
+   */
+  it('reads the window against the card’s day, not the clock’s', () => {
+    const yesterday = new Date(2026, 8, 7);
+    const tomorrowDay = new Date(2026, 8, 9);
+    // 04:00 on the 8th, looking at the 7th: Isha still open, the rest passed.
+    const early = new Date(2026, 8, 8, 4, 0);
+    expect(quickLogPhase('Isha', day, early, day, yesterday)).toBe('in-window');
+    expect(quickLogPhase('Maghrib', day, early, day, yesterday)).toBe('after-window');
+    expect(quickLogPhase('Fajr', day, early, day, yesterday)).toBe('after-window');
+    // Noon on the 8th, looking at the 7th: everything has passed.
+    expect(quickLogPhase('Isha', day, at('12:00'), day, yesterday)).toBe('after-window');
+    // Looking at the 9th: nothing has come, whatever the hour.
+    expect(quickLogPhase('Fajr', day, at('23:00'), day, tomorrowDay)).toBe('not-yet');
+  });
+
+  it('records on time inside the window and ASKS once it has closed', () => {
+    expect(quickLogStatus('Dhuhr', day, at('13:00'))).toBe('on-time');
+    expect(quickLogStatus('Dhuhr', day, at('17:00'))).toBe('ask');
+    expect(quickLogStatus('Dhuhr', day, at('12:00'))).toBeNull();
+    const yesterday = new Date(2026, 8, 7);
+    expect(quickLogStatus('Dhuhr', day, at('12:00'), day, yesterday)).toBe('ask');
+  });
+
   it('knows the five', () => {
     expect(SALAH).toEqual(['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']);
     expect(isSalah('Sunrise')).toBe(false);
@@ -70,17 +97,28 @@ describe('the row and the card', () => {
   const check = read('src/screens/home/LogCheck.tsx');
   const quick = read('src/journal/quickLog.ts');
 
-  it('holds the check slot on today’s rows only, so names line up there and nowhere else', () => {
+  it('holds the check slot on loggable rows only, so names line up there and nowhere else', () => {
     expect(row).toMatch(/<LogCheck[\s\S]*?\/>\s*\) : hasCheckColumn \? \(\s*<View style=\{styles\.checkSlot\} \/>\s*\) : null\}/);
     expect(row).toMatch(/checkSlot: \{ width: LOG_CHECK_SIZE, marginEnd: SPACING\.md \}/);
-    expect(card).toMatch(/hasCheckColumn=\{isToday\}/);
+    expect(card).toMatch(/hasCheckColumn=\{loggable\}/);
   });
 
-  it('offers the check on today’s salāh only', () => {
-    // Per page: only the today page (offset 0) gets a check.
+  it('offers the check on today’s and the past days’ salāh, never on a day ahead', () => {
     expect(card).toMatch(/const isToday = offset === 0;/);
-    expect(card).toMatch(/isToday && isSalah\(key\)/);
-    expect(card).toMatch(/quickLog\.toggle\(key, dayTimings, tomorrow\)/);
+    expect(card).toMatch(/const isPast = offset < 0;/);
+    expect(card).toMatch(/const loggable = isToday \|\| isPast;/);
+    expect(card).toMatch(/loggable && isSalah\(key\)/);
+    // The tap goes through the card's handler, which opens the question
+    // when the model says 'ask'.
+    expect(card).toMatch(/toggleLog\(key, dayTimings, offset\)/);
+    expect(card).toMatch(/if \(outcome === 'ask'\) setQuestion\(\{ prayer, offset \}\)/);
+  });
+
+  it('asks with two answers, on time or made up, and a way out', () => {
+    const sheet = read('src/screens/home/LogPassedPrayerSheet.tsx');
+    expect(sheet).toMatch(/ANSWERS: readonly PassedPrayerAnswer\[\] = \['on-time', 'qadha'\]/);
+    expect(sheet).toMatch(/common\.cancel/);
+    expect(quick).toMatch(/PassedPrayerAnswer = Extract<LoggedStatus, 'on-time' \| 'qadha'>/);
   });
 
   it('is a checkbox that cannot be pressed before its time', () => {
@@ -93,8 +131,8 @@ describe('the row and the card', () => {
     for (const s of ['primePractice({ journal: next })', 'durableEncryptedSet(JOURNAL_KEY', 'syncEndOfDayReminderForDay(date, next)', 'dropDaruriAlertsForLogged(date, loggedPrayersOn(next, date))']) {
       expect(quick).toContain(s);
     }
-    // A second tap un-logs — a tombstone, never a deletion.
-    expect(quick).toMatch(/next = clearEntry\(prev, date, prayer\)/);
+    // A second tap un-logs — a tombstone, never a deletion — and never asks.
+    expect(quick).toMatch(/await persist\(clearEntry\(prev, date, prayer\), date\);\s*return 'written';/);
   });
 
   it('names the check in every locale', () => {
@@ -103,6 +141,8 @@ describe('the row and the card', () => {
       expect(j.quickLogMark).toContain('{{prayer}}');
       expect(j.quickLogLogged).toContain('{{status}}');
       expect(j.quickLogNotYet).toContain('{{prayer}}');
+      expect(j.passedTitle).toContain('{{prayer}}');
+      expect(typeof j.passedBody).toBe('string');
     }
   });
 });

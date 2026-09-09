@@ -44,9 +44,11 @@ describe('the setting exists and defaults to what the app already did', () => {
 describe('drawing and announcing are separate', () => {
   it('injects the boundaries whenever the feature is on', () => {
     // NOT gated on the rows — the alert week needs them either way.
+    // Over the whole span the table can turn to, then split back apart.
     expect(HOME).toMatch(
-      /const tableWithDaruri =\s*settings\.malikiSecondTimesEnabled\s*\?\s*injectDaruriTimes\(/,
+      /const span =\s*settings\.malikiSecondTimesEnabled\s*\?\s*injectDaruriTimes\(/,
     );
+    expect(HOME).toMatch(/const tableWithDaruri = span \? span\.slice\(table\.past\.length\) : null;/);
   });
 
   it('draws them only when the rows are asked for', () => {
