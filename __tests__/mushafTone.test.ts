@@ -14,6 +14,7 @@ import {
   toneIsDark,
 } from '../src/quran/mushafTone';
 import { coerceQuranState, DEFAULT_QURAN_STATE } from '../src/quran/quranState';
+import { toneGlyph } from '../src/quran/mushafReaderCore';
 
 describe('resolving the tone', () => {
   it('night wins whatever the paper tone says', () => {
@@ -109,5 +110,43 @@ describe('the grounds', () => {
     const [r, g, b] = [0, 2, 4].map(i => parseInt(hex.slice(i, i + 2), 16));
     expect(r).toBeGreaterThan(b);
     expect((r + g + b) / 3).toBeGreaterThan(200);
+  });
+});
+
+/**
+ * The tone control's glyph.
+ *
+ * In the page bar the button carries the glyph ALONE — no word beside it —
+ * so every step of the cycle has to be told apart by its drawing. Auto was
+ * `◑︎` against sepia's `◐︎`: the same disc, filled on the other side, a few
+ * pixels apart at 17pt. It is a letter now, which is also the honest
+ * distinction — the other three are tones, and auto is a rule.
+ */
+describe('the glyph the tone control shows', () => {
+  it('gives auto a letter, and keeps a tone for each tone', () => {
+    expect(toneGlyph('auto')).toBe('A');
+    expect(toneGlyph('paper')).toBe('☀︎');
+    expect(toneGlyph('sepia')).toBe('◐︎');
+    expect(toneGlyph('night')).toBe('☾︎');
+  });
+
+  it('never repeats a glyph across the cycle', () => {
+    const glyphs = ['paper', 'sepia', 'night', 'auto'].map(c =>
+      toneGlyph(c as Parameters<typeof toneGlyph>[0]),
+    );
+    expect(new Set(glyphs).size).toBe(glyphs.length);
+  });
+
+  it('walks paper → sepia → night → auto → paper, and the glyph follows', () => {
+    let choice: Parameters<typeof toneGlyph>[0] = 'paper';
+    const seen: string[] = [];
+    for (let i = 0; i < 4; i++) {
+      seen.push(toneGlyph(choice));
+      choice = nextMushafTone(choice);
+    }
+    expect(seen).toEqual(['☀︎', '◐︎', '☾︎', 'A']);
+    // Back where it started, so the letter is one stop of a ring and not
+    // a dead end.
+    expect(choice).toBe('paper');
   });
 });

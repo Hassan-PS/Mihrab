@@ -709,9 +709,20 @@ export function MushafPageHeader({
   );
 }
 
-/** The glyph for the tone a tap goes TO — monochrome, see the pill. */
+/**
+ * The glyph for the tone a tap goes TO — monochrome, see the pill.
+ *
+ * AUTO IS A LETTER, not a fourth disc. It was `◑︎`, a half circle filled
+ * on the other side from sepia's `◐︎` — a distinction of a few pixels at
+ * this size, and in the page bar, where the button carries the glyph
+ * ALONE with no word beside it, the two steps of the cycle were not
+ * telling apart. "A" says which one it is at a glance and cannot be
+ * mistaken for a phase of anything: the sun, the moon and the half-lit
+ * disc stay the three tones, and the letter is the one step that is not a
+ * tone at all but a rule — follow the app.
+ */
 export function toneGlyph(next: MushafToneChoice): string {
-  return next === 'sepia' ? '◐︎' : next === 'night' ? '☾︎' : next === 'auto' ? '◑︎' : '☀︎';
+  return next === 'sepia' ? '◐︎' : next === 'night' ? '☾︎' : next === 'auto' ? 'A' : '☀︎';
 }
 
 type Translate = (key: string, fallback: string) => string;
@@ -766,7 +777,16 @@ export function MushafToneButton({
       hitSlop={8}
       onPress={() => setQuranPrefs(prefsForTone(next))}
       style={[styles.toneBtn, { backgroundColor }]}>
-      <Text style={[styles.toneGlyph, { color }]}>{toneGlyph(next)}</Text>
+      <Text
+        style={[
+          styles.toneGlyph,
+          // The letter needs the weight the symbols have by their own
+          // drawing, or "A" reads as text dropped into a row of icons.
+          next === 'auto' && styles.toneGlyphLetter,
+          { color },
+        ]}>
+        {toneGlyph(next)}
+      </Text>
     </Pressable>
   );
 }
@@ -954,6 +974,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   toneGlyph: { fontSize: TYPE.body.fontSize, lineHeight: 20 },
+  toneGlyphLetter: { fontWeight: '700' },
   pageFooter: {
     flexDirection: 'row',
     alignItems: 'center',
