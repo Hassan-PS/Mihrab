@@ -169,8 +169,16 @@ function HeroSkyImpl({
         },
       ]}>
       <Svg
-        width={size.width > 0 ? size.width : '100%'}
-        height={size.height > 0 ? size.height : '100%'}>
+        // ROUNDED UP, NOT AS MEASURED. A layout width is a fraction of a
+        // dp — a 1280px screen at 3x measures 426.667 — and the surface
+        // is laid out on whole dp, so the sky was painted 426dp wide and
+        // the last TWO device pixels of the screen stayed the page's
+        // colour: a dark hairline down the right edge of the hero,
+        // measured on a Pixel 10 Pro. A whole dp over is at most a pixel
+        // of overdraw, and the wrap clips it (heroWrapBleed, overflow
+        // hidden), so the sky reaches the edge on any density.
+        width={size.width > 0 ? Math.ceil(size.width) : '100%'}
+        height={size.height > 0 ? Math.ceil(size.height) : '100%'}>
         <Defs>
           <LinearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
             <Stop offset="0" stopColor={top} />

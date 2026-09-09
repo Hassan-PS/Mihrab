@@ -336,12 +336,21 @@ describe('the open sky, on every phone and every table', () => {
     expect(scene.y(0.12) - MOON / 2).toBeGreaterThanOrEqual(116);
   });
 
-  it('measures before it is banded, and draws the SVG at its measured size', () => {
+  it('measures before it is banded, and draws the SVG a whole dp over its measured size', () => {
     const sky = read('src/screens/home/HeroSky.tsx');
     // Not gated on the band: the size is what keeps the gradient on the hero.
     expect(sky).toMatch(/onLayout=\{onLayout\}/);
-    expect(sky).toMatch(/width=\{size\.width > 0 \? size\.width : '100%'\}/);
-    expect(sky).toMatch(/height=\{size\.height > 0 \? size\.height : '100%'\}/);
+    // ROUNDED UP. A layout width is a fraction of a dp — 1280px at 3x
+    // measures 426.667 — and the surface is laid out on whole dp, so the
+    // sky was painted 426dp wide and the last two device pixels of the
+    // screen stayed the page's colour: a hairline down the hero's right
+    // edge, measured on a Pixel 10 Pro. The wrap clips the overdraw.
+    expect(sky).toMatch(/width=\{size\.width > 0 \? Math\.ceil\(size\.width\) : '100%'\}/);
+    expect(sky).toMatch(/height=\{size\.height > 0 \? Math\.ceil\(size\.height\) : '100%'\}/);
+    // And the clip that makes the overdraw safe.
+    expect(read('src/screens/home/TodayCard.tsx')).toMatch(
+      /heroWrapBleed: \{[^}]*overflow: 'hidden'/s,
+    );
   });
 });
 
@@ -413,5 +422,30 @@ describe('the rows adapt to the phone and to the table', () => {
     expect(rail).toMatch(/\.sort\(\(a, b\) => a\.at\.getTime\(\) - b\.at\.getTime\(\)\)/);
     // And before Fajr it runs from LAST night's Isha, not from nothing.
     expect(rail).toMatch(/yesterday\.setDate\(yesterday\.getDate\(\) - 1\)/);
+  });
+});
+
+/**
+ * The hero's top row is on the page's edge, not floating inside it.
+ *
+ * The location chip fills a flexible slot and carries its own touch
+ * padding, so it stretched across the room between the edge and the Qibla
+ * chip and centred its pin in that — a void between the chip and the edge,
+ * and the city out of line with the countdown and the date below it.
+ */
+describe('the hero top row sits on the page edge', () => {
+  const card = read('src/screens/home/TodayCard.tsx');
+
+  it('sizes the location slot to its chip and pulls the chip onto the edge', () => {
+    expect(card).toMatch(/heroTopLeading: \{[^}]*alignItems: 'flex-start'[^}]*\}/s);
+    expect(card).toMatch(/heroTopLeading: \{[^}]*marginStart: -SPACING\.sm[^}]*\}/s);
+  });
+
+  it('cancels exactly the padding the chip carries', () => {
+    // The pull is the chip's own horizontal padding, so the pin's edge
+    // lands where the hero's text begins — no more, no less.
+    expect(read('src/screens/home/LocationChip.tsx')).toMatch(
+      /headerPin: \{\s*paddingHorizontal: SPACING\.sm/,
+    );
   });
 });

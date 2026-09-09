@@ -104,14 +104,33 @@ export const MUSHAF_LINES_PER_PAGE = 15;
 export const WORD_SPACE_EM = 0.25;
 
 /**
- * The band the word space may move inside (`docs/mushaf-fidelity-rules.md`).
- * Below the minimum the QPC letterforms, which interlock by design, start to
- * touch. Above the maximum a line stops looking like a line of the mushaf and
- * starts looking like justified web text pulled apart, so it is centred at its
- * natural width instead — short lines are meant to be short.
+ * The band the word space may move inside on a FRAMED PLATE — pages 1 and
+ * 2 (`docs/mushaf-fidelity-rules.md`). Below the minimum the QPC
+ * letterforms, which interlock by design, start to touch. Above the
+ * maximum a plate's line stops looking like a line of the mushaf and
+ * starts looking like justified web text pulled apart, so it is centred at
+ * its natural width instead — a plate's short lines are meant to be short.
+ *
+ * An ordinary page's lines are NOT held to this: they are set at the space
+ * the print asks for, however wide, up to `WORD_SPACE_CEILING_EM`. See
+ * `lineSpaceEm` for the ten lines that taught us the difference.
  */
 export const WORD_SPACE_MIN_EM = 0.2;
 export const WORD_SPACE_MAX_EM = 0.75;
+
+/**
+ * The widest gap ANY line may be set at, framed plates aside.
+ *
+ * Not a matter of taste — `WORD_SPACE_MAX_EM` is that, and it governs the
+ * plates. This is the guard on the data: a line whose words sum to almost
+ * nothing would otherwise be stretched across the measure by a gap of any
+ * size at all. The widest gap the print itself asks for anywhere in the
+ * muṣḥaf is 1.942 em (page 604, line 14, in An-Nās), so a line that wants
+ * more than two ems per gap is not a line the print set — it is a line
+ * whose data is wrong, and it comes out short and centred where it can be
+ * seen rather than silently pulled apart.
+ */
+export const WORD_SPACE_CEILING_EM = 2;
 
 /**
  * Advance of `space` (U+0020) and no-break space (U+00A0) in the bundled
@@ -296,20 +315,52 @@ export function pageBlockEm(layout: MushafPageLayout): number {
 
 /**
  * The space this line is set at, in ems — solved so the line spans the
- * measure exactly, then held inside the band.
+ * measure exactly.
  *
- * A line that would need more than the band allows is returned at the nominal
- * space and comes out short; the renderer centres it, which is what the print
- * does with the line that closes a surah and what the fidelity rules mandate
- * for anything else that cannot reach the measure honestly.
+ * ── WHY A LINE MAY BE SET WIDER THAN THE BAND ─────────────────────────
+ *
+ * This used to hand back the NOMINAL space to any line that needed more
+ * than `WORD_SPACE_MAX_EM`, so the line came out short and the renderer
+ * centred it. That is right for a line the print itself sets short, and
+ * wrong for one it sets flush — and the difference is not the size of the
+ * gap. Page 177 line 12 (Al-Anfāl 8:6–7) needed 0.776 em, a whisker over
+ * the 0.75 band, and was drawn at 81% of the measure with a void at each
+ * end: the reported bug.
+ *
+ * Every page was then measured. Ten lines across 177, 205, 400, 443, 511
+ * and 604 ask for more than the band — 0.776 to 1.942 em — and every one
+ * of them is an ORDINARY MID-SURAH LINE: none carries the `centered`
+ * flag, none closes a surah, and the print sets all ten flush to the
+ * measure. They ask for a wide gap only because the print set them with
+ * few words and wide spacing, which is exactly what `natural` records.
+ * Refusing to follow the print there is what made the voids.
+ *
+ * The cautionary case the band was drawn around — page 1's basmalah,
+ * 6.7 em of text across a 12 em plate — is on a FRAMED page, and framed
+ * pages keep the band and the centring: their short lines are short in
+ * the print too. Everything else follows the print and is capped only by
+ * `WORD_SPACE_CEILING_EM`, a guard against corrupt data rather than a
+ * matter of taste.
+ *
+ * See docs/mushaf-fidelity-rules.md §1.
  */
-export function lineSpaceEm(line: MushafLine, measureEm: number): number {
+export function lineSpaceEm(
+  line: MushafLine,
+  measureEm: number,
+  opts?: { framed?: boolean },
+): number {
   if (line.kind !== 'ayah') return WORD_SPACE_EM;
   const gaps = lineGapCount(line);
   if (gaps === 0 || line.centered) return WORD_SPACE_EM;
   const required = (measureEm - line.natural) / gaps;
-  if (required > WORD_SPACE_MAX_EM) return WORD_SPACE_EM;
-  return required < WORD_SPACE_MIN_EM ? WORD_SPACE_MIN_EM : required;
+  // The plates: unchanged. A line that cannot reach the measure inside the
+  // band sits at the nominal space and is centred.
+  if (opts?.framed) {
+    if (required > WORD_SPACE_MAX_EM) return WORD_SPACE_EM;
+    return required < WORD_SPACE_MIN_EM ? WORD_SPACE_MIN_EM : required;
+  }
+  if (required < WORD_SPACE_MIN_EM) return WORD_SPACE_MIN_EM;
+  return Math.min(required, WORD_SPACE_CEILING_EM);
 }
 
 /**
@@ -317,9 +368,13 @@ export function lineSpaceEm(line: MushafLine, measureEm: number): number {
  * invariant the renderer depends on, since a line wider than its box loses its
  * last word to the platform's single-line truncation.
  */
-export function lineWidthEm(line: MushafLine, measureEm: number): number {
+export function lineWidthEm(
+  line: MushafLine,
+  measureEm: number,
+  opts?: { framed?: boolean },
+): number {
   if (line.kind !== 'ayah') return 0;
-  return line.natural + lineSpaceEm(line, measureEm) * lineGapCount(line);
+  return line.natural + lineSpaceEm(line, measureEm, opts) * lineGapCount(line);
 }
 
 /**

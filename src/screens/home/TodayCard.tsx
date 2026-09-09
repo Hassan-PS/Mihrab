@@ -1017,7 +1017,24 @@ const styles = StyleSheet.create({
     gap: SPACING.md,
     marginBottom: SPACING.md,
   },
-  heroTopLeading: { flexShrink: 1, flexGrow: 1 },
+  /**
+   * The location chip, ON the hero's content edge.
+   *
+   * The chip is a pressable with its own touch padding, and it fills a
+   * flexible slot — so it stretched across the room between the edge and
+   * the Qibla chip and centred its pin inside that, leaving a void to the
+   * chip's left and putting the city out of line with the countdown and
+   * the date beneath it. `flex-start` sizes the slot's child to its
+   * content, and the negative start margin cancels the chip's padding so
+   * the pin's own edge lands where the hero's text begins; the tap target
+   * keeps its full size.
+   */
+  heroTopLeading: {
+    flexShrink: 1,
+    flexGrow: 1,
+    alignItems: 'flex-start',
+    marginStart: -SPACING.sm,
+  },
   hero: {},
   heroExpanded: { paddingVertical: SPACING.md },
   heroFill: { flexGrow: 1, flexShrink: 0, flexBasis: 'auto' },

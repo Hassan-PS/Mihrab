@@ -13,6 +13,7 @@ import {
   MUSHAF_LINE_BOX_SLACK_EM,
   MUSHAF_SPACE_ADVANCE_EM,
   WORD_SPACE_EM,
+  WORD_SPACE_CEILING_EM,
   WORD_SPACE_MAX_EM,
   WORD_SPACE_MIN_EM,
   ayahsOnPage,
@@ -266,13 +267,14 @@ describe('mushaf line spacing', () => {
     }
   });
 
-  it('keeps the word space inside the band, or leaves the line unstretched', () => {
-    for (let page = 1; page <= TOTAL_PAGES; page++) {
+  it('keeps a plate\'s word space inside the band, or leaves the line unstretched', () => {
+    for (const page of [1, 2]) {
+      expect(isFramedPage(page)).toBe(true);
       const layout = getPageLayout(page)!;
       const measureEm = pageMeasureEm(layout);
       for (const [i, line] of layout.lines.entries()) {
         if (line.kind !== 'ayah') continue;
-        const space = lineSpaceEm(line, measureEm);
+        const space = lineSpaceEm(line, measureEm, { framed: true });
         // Either the line justified — and then its space is in the band — or
         // it could not reach the measure honestly and sits at the nominal
         // space, to be centred (docs/mushaf-fidelity-rules.md).
@@ -285,6 +287,58 @@ describe('mushaf line spacing', () => {
           );
         }
       }
+    }
+  });
+
+  /**
+   * Every ordinary page follows the print, however wide the gap it asks
+   * for — the muṣḥaf sets these lines flush, and holding them to the
+   * plates' band drew them short with a void at each end (page 177 line
+   * 12, Al-Anfāl 8:6–7, reported at 2.18.1).
+   */
+  it('sets every ordinary line flush to the measure, whatever gap that takes', () => {
+    const short: string[] = [];
+    let widest = 0;
+    for (let page = 1; page <= TOTAL_PAGES; page++) {
+      if (isFramedPage(page)) continue;
+      const layout = getPageLayout(page)!;
+      const measureEm = pageMeasureEm(layout);
+      for (const [i, line] of layout.lines.entries()) {
+        if (line.kind !== 'ayah' || line.centered) continue;
+        if (lineGapCount(line) === 0) continue;
+        const space = lineSpaceEm(line, measureEm);
+        widest = Math.max(widest, space);
+        expect(space).toBeGreaterThanOrEqual(WORD_SPACE_MIN_EM - 1e-9);
+        expect(space).toBeLessThanOrEqual(WORD_SPACE_CEILING_EM + 1e-9);
+        const width = lineWidthEm(line, measureEm);
+        if (Math.abs(width - measureEm) > 1e-9) {
+          short.push(`page ${page} line ${i + 1} at ${((width / measureEm) * 100).toFixed(1)}%`);
+        }
+      }
+    }
+    // Not one of them falls short: no line of the print asks for more than
+    // the ceiling, so the ceiling never has to bite.
+    expect(short).toEqual([]);
+    expect(widest).toBeLessThanOrEqual(WORD_SPACE_CEILING_EM);
+    expect(widest).toBeGreaterThan(WORD_SPACE_MAX_EM);
+  });
+
+  /** The lines the old band dropped, named — page 177's is the reported one. */
+  it('draws the ten lines the band used to drop at their full measure', () => {
+    for (const [page, index] of [
+      [177, 12], [205, 1], [205, 2], [400, 6], [400, 14],
+      [400, 15], [443, 10], [443, 13], [511, 10], [604, 14],
+    ] as const) {
+      const layout = getPageLayout(page)!;
+      const measureEm = pageMeasureEm(layout);
+      const line = layout.lines[index - 1];
+      expect(line.kind).toBe('ayah');
+      if (line.kind !== 'ayah') continue;
+      // Each is an ordinary mid-surah line: the print sets it flush.
+      expect(line.centered).toBe(false);
+      const space = lineSpaceEm(line, measureEm);
+      expect(space).toBeGreaterThan(WORD_SPACE_MAX_EM);
+      expect(lineWidthEm(line, measureEm)).toBeCloseTo(measureEm, 9);
     }
   });
 

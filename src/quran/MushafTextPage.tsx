@@ -210,6 +210,9 @@ function MushafTextPage({
     return sameAyah(selected ?? playing ?? null, w) ? colors.selection : null;
   };
 
+  // The plates are set by their own rules — see `lineSpaceEm`.
+  const framed = isFramedPage(page);
+
   return (
     <View style={[{ width }, style]}>
       {layout.lines.map((line, index) => (
@@ -223,6 +226,7 @@ function MushafTextPage({
           fontFamily={fontFamily}
           colors={colors}
           marks={lineMarks(line, tintOf)}
+          framed={framed}
           onPress={handlePress}
           onLongPress={handleLongPress}
         />
@@ -272,6 +276,11 @@ type LineViewProps = {
   colors: MushafTextPageProps['colors'];
   /** See `lineMarks`: one colour per word, or '' for a bare line. */
   marks: string;
+  /**
+   * A framed plate (pages 1–2), whose short lines are short in the print
+   * and are centred rather than stretched — see `lineSpaceEm`.
+   */
+  framed: boolean;
   onPress: (w: MushafWord) => void;
   onLongPress: (w: MushafWord) => void;
 };
@@ -285,6 +294,7 @@ const LineView = React.memo(function LineView({
   fontFamily,
   colors,
   marks,
+  framed,
   onPress,
   onLongPress,
 }: LineViewProps) {
@@ -332,7 +342,7 @@ const LineView = React.memo(function LineView({
   // The gaps are nested <Text> nodes inside that paragraph, which is not a new
   // break in the run: the page font has no space glyph, so every gap was
   // already a fallback run of its own — this one just has a width we know.
-  const spaceEm = lineSpaceEm(line, measureEm);
+  const spaceEm = lineSpaceEm(line, measureEm, { framed });
   const space = spaceEm * fontSize;
   const lineWidth = line.natural * fontSize + space * lineGapCount(line);
   // The box the line is drawn in. The slack was reserved out of the page
