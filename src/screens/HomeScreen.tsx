@@ -8,6 +8,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Animated,
   Platform,
   ScrollView,
   StyleSheet,
@@ -63,6 +64,7 @@ import { useNonReadyPhaseElement } from './home/usePhaseRouting';
 import { HOME_SCREEN_PADDING } from './home/tokens';
 import { useTabBarInset } from '../navigation/tabBarInset';
 import { useTabBarScroll } from '../navigation/tabBarVisibility';
+import { HomeStatusBand } from './home/HomeStatusBand';
 import { rescheduleEndOfDayLogReminders } from '../notifications/endOfDayLog';
 import { rescheduleDuaReminders } from '../notifications/duaReminders';
 import {
@@ -235,6 +237,25 @@ export function HomeScreen() {
   const tabBarInset = useTabBarInset();
   // The bar gets out of the way while reading — see tabBarVisibility.ts.
   const tabBarScroll = useTabBarScroll();
+  /**
+   * The page's scroll offset, for the band behind the status bar — see
+   * `HomeStatusBand`. An Animated.Value rather than state: the band's
+   * colour and its fade are the only things that follow the scroll, and
+   * re-rendering the whole page sixty times a second to move them would
+   * be a poor trade. Not the native driver, because a colour is what is
+   * being animated.
+   */
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const onScroll = useMemo(
+    () =>
+      Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+        useNativeDriver: false,
+        // The tab bar hides itself from the same gesture; it was here
+        // first and keeps its handler.
+        listener: tabBarScroll.onScroll,
+      }),
+    [scrollY, tabBarScroll.onScroll],
+  );
   // Focus + foreground; see the watchdog effect below and useIsActive.
   const homeActive = useIsActive();
   const [tourVisible, setTourVisible] = useState(false);
@@ -1043,7 +1064,10 @@ export function HomeScreen() {
       ) : null}
     <ScrollView
       ref={scrollRef}
-      {...tabBarScroll}
+      // The phone tracks the offset for the status band; everywhere else
+      // the tab bar's own handler is all there is to run.
+      onScroll={!isDashboard && !isMacCatalyst ? onScroll : tabBarScroll.onScroll}
+      scrollEventThrottle={16}
       style={[styles.scroll, { backgroundColor: palette.bg }]}
       contentContainerStyle={[
         styles.scrollContent,
@@ -1211,6 +1235,15 @@ export function HomeScreen() {
         onClose={() => setTourVisible(false)}
       />
     </ScrollView>
+    {/* Over the page, and only on the phone's full-bleed hero: the
+        dashboard's card does not run under the status bar. */}
+    {!isDashboard && !isMacCatalyst ? (
+      <HomeStatusBand
+        scrollY={scrollY}
+        insetTop={insets.top}
+        pageColor={String(palette.bg)}
+      />
+    ) : null}
     </View>
   );
 }

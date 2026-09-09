@@ -131,7 +131,6 @@ describe('the bar can always be got back', () => {
     // it is a counter, not a reading surface, and hiding the bar under a
     // thumb that is tapping is the opposite of what was asked for.
     for (const screen of [
-      'HomeScreen',
       'QuranScreen',
       'DuasScreen',
       'LogScreen',
@@ -146,5 +145,22 @@ describe('the bar can always be got back', () => {
       // failure this whole audit exists to catch.
       expect(src).toContain('{...tabBarScroll}');
     }
+  });
+
+  it('Today moves it too, through the handler it shares with the status band', () => {
+    // The one screen that does not spread the hook. Today follows its own
+    // scroll as well — the band behind the status bar is coloured from it
+    // (`HomeStatusBand`) — so the offset goes through an Animated.event,
+    // and the tab bar's handler rides along as that event's listener. The
+    // guarantee is the same one the spread gives everywhere else: the
+    // hook's result reaches the ScrollView.
+    const src = readFileSync(
+      path.join(__dirname, '..', 'src', 'screens', 'HomeScreen.tsx'),
+      'utf8',
+    );
+    expect(src).toContain('useTabBarScroll');
+    expect(src).toMatch(/listener: tabBarScroll\.onScroll/);
+    // And on the dashboard, where there is no band, it is handed over whole.
+    expect(src).toMatch(/onScroll=\{!isDashboard && !isMacCatalyst \? onScroll : tabBarScroll\.onScroll\}/);
   });
 });

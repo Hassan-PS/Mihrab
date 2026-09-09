@@ -69,6 +69,7 @@ import { DayStrip, type DayStripEntry } from './DayStrip';
 import { isSalah, quickLogPhase, useQuickLog } from '../../journal/quickLog';
 import { HeroSky } from './HeroSky';
 import { HERO_Y, skyFrame, skyInkAt, skyMoment, type SkyInkColors } from './skyModel';
+import { setHeroSkyBand } from './heroSkyBand';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { QiblaChip } from './QiblaChip';
 import { PrayerRow } from './PrayerRow';
@@ -293,6 +294,18 @@ const HeroToday = memo(function HeroToday({
         foot: (bleedTop + block.y + block.h) / skyH,
       }
     : HERO_Y;
+  /**
+   * The band behind the status bar wears this sky — it is the one view
+   * that has to know the gradient without being inside it. Published only
+   * by the phone's growing hero: the card on a dashboard does not run
+   * under the status bar, so nothing there has a strip to cover. See
+   * `heroSkyBand.ts`.
+   */
+  useEffect(() => {
+    if (!fill || !(skyH > 0)) return;
+    return setHeroSkyBand({ top: frame.top, bottom: frame.bottom, skyH });
+  }, [fill, frame.top, frame.bottom, skyH]);
+
   const inkTop = skyInkAt(frame, measured ? heroY.eyebrow : HERO_Y.eyebrow);
   const ink = skyInkAt(frame, measured ? heroY.countdown : HERO_Y.countdown);
   const inkFoot = skyInkAt(frame, measured ? heroY.foot : HERO_Y.foot);
