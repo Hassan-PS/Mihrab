@@ -44,6 +44,7 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
   fun takeLogQueue(promise: Promise) {
     try {
       val entries = WidgetLogQueue.take(reactContext)
+      if (entries.isNotEmpty()) forceNextFanout()
       promise.resolve(WidgetLogQueue.serialize(entries))
       // NO REDRAW HERE. See takeTasbihQueue below for the whole story: the
       // hand-over is not the moment the app owns these taps, it is the
@@ -66,6 +67,7 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
   fun takeTasbihQueue(promise: Promise) {
     try {
       val entries = WidgetTasbihQueue.take(reactContext)
+      if (entries.isNotEmpty()) forceNextFanout()
       promise.resolve(WidgetTasbihQueue.serialize(entries))
       // NO REDRAW HERE, AND THIS IS THE WHOLE OF THE BUG IT USED TO CAUSE.
       //
@@ -112,11 +114,31 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
         } catch (e: Exception) {
           ""
         }
-      reactContext
-        .getSharedPreferences(PrayerWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
+      val prefs = reactContext.getSharedPreferences(PrayerWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
+      // The app pushes the payload from more than one place at launch — the
+      // focus pass, the data effect, each state phase that settles — and
+      // most of those pushes are byte-identical. Every one used to fan out a
+      // full redraw of every placed widget, up to three size variants each
+      // and a painted bitmap for Sky and Log: ten redraws per widget in the
+      // first second of every launch, on the launcher's main thread. A push
+      // that changes nothing, within a minute of the last one that was
+      // drawn, is stored and left at that. The minute keeps "open the app"
+      // a real refresh — the sky moves with the clock even when the payload
+      // does not — and every other path to a redraw (a prayer time passing,
+      // the half-hour period, a placement, an appearance change) is
+      // untouched.
+      val now = System.currentTimeMillis()
+      val unchanged = json == prefs.getString(PrayerWidgetProvider.PREFS_KEY, null)
+      val drawnRecently = now - prefs.getLong(PREFS_LAST_FANOUT_MS, 0L) in 0..FANOUT_COALESCE_MS
+      if (unchanged && drawnRecently) {
+        promise.resolve(null)
+        return
+      }
+      prefs
         .edit()
         .putString(PrayerWidgetProvider.PREFS_KEY, json)
         .putString(PrayerWidgetProvider.PREFS_LANGUAGE, language)
+        .putLong(PREFS_LAST_FANOUT_MS, now)
         .apply()
       // Every widget kind reads the same payload, so every one of them has
       // to be told — and `requestUpdate` is the ONE place that knows the
@@ -186,7 +208,28 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
     }
   }
 
+  /**
+   * The card has projected taps the app has not written yet. Whatever the
+   * app's next payload says — even if it says exactly what the last one did,
+   * because the app judged the taps already counted — the card must be
+   * redrawn from it, so the projection gives way to the truth. Clearing the
+   * fan-out mark makes `setData`'s coalescing step stand aside once.
+   */
+  private fun forceNextFanout() {
+    reactContext
+      .getSharedPreferences(PrayerWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
+      .edit()
+      .remove(PREFS_LAST_FANOUT_MS)
+      .apply()
+  }
+
   companion object {
     const val NAME = "PrayerWidget"
+
+    /** When the last `setData` fanned a redraw out, epoch ms. */
+    const val PREFS_LAST_FANOUT_MS = "payload_last_fanout_ms"
+
+    /** An identical payload inside this window after a drawn one is stored, not redrawn. */
+    const val FANOUT_COALESCE_MS = 60_000L
   }
 }

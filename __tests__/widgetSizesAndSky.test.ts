@@ -245,3 +245,40 @@ describe('every provider degrades to a Mihrab error card', () => {
     expect(src).toMatch(/Log\.e\(PrayerWidgetProvider\.WIDGET_LOG_TAG/);
   });
 });
+
+/**
+ * The launch burst is one redraw, not ten. The app pushes the same payload
+ * several times in the first second; `setData` stores an unchanged payload
+ * and redraws only when the last drawn one is over a minute old — and a
+ * taken tap queue always forces the next redraw, so a projected tap never
+ * outlives the app's verdict on it.
+ */
+describe('setData coalesces identical pushes', () => {
+  const module = kt('PrayerWidgetModule');
+
+  it('skips the fan-out for an unchanged payload drawn within the window', () => {
+    expect(module).toMatch(/val unchanged = json == prefs\.getString\(PrayerWidgetProvider\.PREFS_KEY, null\)/);
+    expect(module).toMatch(/in 0\.\.FANOUT_COALESCE_MS/);
+    expect(module).toMatch(/if \(unchanged && drawnRecently\) \{\s*promise\.resolve\(null\)\s*return\s*\}/);
+    expect(module).toMatch(/const val FANOUT_COALESCE_MS = 60_000L/);
+  });
+
+  it('still stores the payload and marks the draw when it does redraw', () => {
+    expect(module).toMatch(/\.putString\(PrayerWidgetProvider\.PREFS_KEY, json\)[\s\S]*?\.putLong\(PREFS_LAST_FANOUT_MS, now\)[\s\S]*?PrayerWidgetProvider\.requestUpdate\(reactContext\)/);
+  });
+
+  it('a taken tap queue forces the next redraw', () => {
+    expect(module).toMatch(/WidgetLogQueue\.take\(reactContext\)\s*if \(entries\.isNotEmpty\(\)\) forceNextFanout\(\)/);
+    expect(module).toMatch(/WidgetTasbihQueue\.take\(reactContext\)\s*if \(entries\.isNotEmpty\(\)\) forceNextFanout\(\)/);
+    expect(module).toMatch(/\.remove\(PREFS_LAST_FANOUT_MS\)/);
+  });
+
+  it('appearance and UI-hint changes are never coalesced', () => {
+    const appearance = module.slice(
+      module.indexOf('fun setAndroidWidgetAppearance'),
+      module.indexOf('private fun forceNextFanout'),
+    );
+    expect(appearance).not.toMatch(/FANOUT_COALESCE_MS|PREFS_LAST_FANOUT_MS/);
+    expect(appearance).toMatch(/PrayerWidgetProvider\.requestUpdate\(reactContext\)/);
+  });
+});

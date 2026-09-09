@@ -293,6 +293,17 @@ two single-day facts are drawn only when `payloadDescribesToday`.
   capped at 60 boundaries, `.after(last + 2h)`. Tasbih was `.never` and is
   not any more.
 
+And with the app open, **`setData`** — every payload push from JS fans a
+redraw out to every placed card, with one exception: a push whose JSON is
+byte-identical to the stored one, arriving within a minute of the last push
+that was drawn, is stored and not redrawn. The app pushes from the Home
+focus pass, the data effect and each settling state phase at launch, and
+before this every widget redrew about ten times in the first second —
+three size variants each, a painted bitmap for Sky and Log. Opening the app
+after a longer gap still redraws everything (the sky moves with the clock
+even when the payload does not), and a taken tap queue clears the mark so
+the next push always redraws, whatever it says.
+
 `ACTION_SCREEN_ON` and `ACTION_WALLPAPER_CHANGED` are gone from all seven
 receivers. Neither can be delivered to a manifest-declared receiver, and
 declaring them made the refresh story look far better covered than it was.
