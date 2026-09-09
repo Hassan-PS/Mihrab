@@ -1151,16 +1151,9 @@ export function QuranScreen() {
           </Text>
         </View>
         <Text
-          // Multi-word names ("آل عمران") were wrapping at the space on
-          // narrow rows and the second word vanished (reported:
-          // Aal-i-Imran showing only "آل"). A no-break space makes the
-          // name unwrappable, so Yoga measures the full single-line width
-          // and the flexible left column shrinks instead. numberOfLines +
-          // adjustsFontSizeToFit stay as a graceful-degradation net for
-          // extreme font-scale settings.
           numberOfLines={1}
-          adjustsFontSizeToFit
-          minimumFontScale={0.6}
+          // NO adjustsFontSizeToFit HERE — see the note above `arabic`.
+          allowFontScaling={false}
           // A drawing of the header, not text — the row's own label names
           // the surah for screen readers.
           accessible={false}
@@ -1203,8 +1196,8 @@ export function QuranScreen() {
       </View>
       <Text
         numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.6}
+        // NO adjustsFontSizeToFit HERE — see the note above `arabic`.
+        allowFontScaling={false}
         accessible={false}
         importantForAccessibility="no"
         style={[styles.arabic, { color: palette.text }]}>
@@ -1830,10 +1823,40 @@ const styles = StyleSheet.create({
   romanized: { fontSize: TYPE.body.fontSize, fontWeight: '600' },
   english: { fontSize: TYPE.label.fontSize, marginTop: 2 },
   pageHint: { fontSize: TYPE.caption.fontSize, marginTop: 2, fontVariant: ['tabular-nums'] },
-  // flexShrink: 0 — the name keeps its intrinsic single-line width (made
-  // unwrappable via NBSP); the flexible left column yields instead.
-  // The name as the muṣḥaf writes it — see surahHeaderGlyph.ts. Not text:
-  // one drawn glyph per surah, at the one size the name has everywhere.
+  /**
+   * The name as the muṣḥaf writes it — see surahHeaderGlyph.ts. Not text:
+   * one drawn glyph per surah, at one size everywhere, and never shrunk
+   * to fit.
+   *
+   * `adjustsFontSizeToFit` used to sit on both rows that draw this, as a
+   * net for extreme font-scale settings. On iOS it turned two of the 114
+   * names — Maryam and Al-Qāri'ah — into a 4pt speck, the same names on
+   * every launch, while their neighbours drew correctly. Android and Mac
+   * Catalyst were both fine.
+   *
+   * Why 4pt: on the new architecture that prop sends the text through
+   * `NSTextStorage+FontScaling`, which binary-searches a scale and, when
+   * the search ends without one, applies its initial
+   * `lastRatioWhichFits = 0.02` — clamped to a hard-coded 4pt floor.
+   * 34pt × 0.02 is 0.68pt, so 4pt is exactly what a name that "never fit"
+   * comes out at, and `minimumFontScale` cannot raise that floor: iOS
+   * reads `minimumFontSize` out of the paragraph attributes and only
+   * Android forwards the scale prop (see BaseParagraphProps and
+   * HostPlatformParagraphProps). The net had no floor on iOS at all.
+   *
+   * Why those two names and not the other 112 is a matter of the width
+   * Yoga hands the view against what that file measures — a port of the
+   * search run outside the app, over all 114 glyphs at the pixel-rounded
+   * width, does NOT collapse any of them, so the trigger lives in the
+   * real row and not in the glyphs. Which is the argument for not running
+   * the search at all rather than for tuning its inputs.
+   *
+   * The drawing does not need the net. `flexShrink: 0` keeps its measured
+   * width and the flexible left column gives way — which is what made the
+   * multi-word names ("آل عمران") whole again — and `allowFontScaling`
+   * off keeps a 310% text setting from growing a decorative glyph out of
+   * its row while the row's own words, the ones being read, still grow.
+   */
   arabic: {
     flexShrink: 0,
     ...surahHeaderStyle(),
