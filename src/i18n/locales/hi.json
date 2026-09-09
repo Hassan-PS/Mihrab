@@ -470,6 +470,7 @@
     "Firstthird": "पहली तिहाई",
     "Firstthird_abbr": "1/3",
     "firstTimeUntil": "पहला समय {{time}} तक",
+    "secondTimeUntil": "दूसरा समय {{time}} तक",
     "secondTimeFrom": "दूसरा समय {{time}} से",
     "approx": "लगभग",
     "Subh": "सुब्ह",

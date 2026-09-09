@@ -470,6 +470,7 @@
     "Firstthird": "Sepertiga awal",
     "Firstthird_abbr": "1/3",
     "firstTimeUntil": "Waktu pertama sampai {{time}}",
+    "secondTimeUntil": "Waktu kedua sampai {{time}}",
     "secondTimeFrom": "Waktu kedua dari {{time}}",
     "approx": "kira-kira",
     "Subh": "Subuh",

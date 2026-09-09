@@ -534,8 +534,11 @@ export async function syncWithFolder(
     return { wrote: null, read, learned, forgotten, merged, skipped };
   }
 
+  // Strict as well: a snapshot is what the other devices merge from, and
+  // one that says "no journal" because ours could not be read is a claim
+  // we cannot stand behind.
   const snapshot = buildSnapshot(
-    await collectData(),
+    await collectData({ strict: true }),
     options.selection ?? everything(),
     now.toISOString(),
   );

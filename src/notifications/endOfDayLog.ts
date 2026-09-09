@@ -285,7 +285,9 @@ export function fillDayOnTime(
  * Returns true when something was written.
  */
 export async function logAllPrayersOnTime(date: string): Promise<boolean> {
-  const raw = await durableEncryptedGet(JOURNAL_KEY).catch(() => null);
+  // Strict: this fills a whole day and writes the journal back, so a read
+  // that fails must stop it, not hand it an empty journal to fill in.
+  const raw = await durableEncryptedGet(JOURNAL_KEY, { strict: true });
   let entries: JournalEntry[] = [];
   if (raw) {
     try {

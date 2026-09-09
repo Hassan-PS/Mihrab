@@ -470,6 +470,7 @@
     "Firstthird": "Första tredjedelen",
     "Firstthird_abbr": "1/3",
     "firstTimeUntil": "Första tiden till {{time}}",
+    "secondTimeUntil": "Andra tiden till {{time}}",
     "secondTimeFrom": "Andra tiden från {{time}}",
     "approx": "ca",
     "Subh": "Subh",

@@ -410,20 +410,33 @@ export function LogScreen() {
     return sub;
   }, []);
 
+  /**
+   * Bumped by the "try again" button of the load-failed alert, so a read
+   * that failed can be repeated without leaving the tab.
+   */
+  const [loadAttempt, setLoadAttempt] = useState(0);
   useEffect(() => {
     let cancelled = false;
+    // STRICT reads, and a failure is a failure. These used to swallow
+    // their errors into null, which read as "nothing logged yet": the
+    // screen hydrated onto three empty stores, drew a blank record, and
+    // the next tap wrote that blank record plus one entry back to disk
+    // (issue #38). Now a store that exists and cannot be read leaves the
+    // screen unhydrated — every write below refuses until it is.
     void Promise.all([
-      durableEncryptedGet(JOURNAL_KEY).catch(() => null),
-      durableEncryptedGet(FASTING_KEY).catch(() => null),
-      durableEncryptedGet(SUNNAH_KEY).catch(() => null),
+      durableEncryptedGet(JOURNAL_KEY, { strict: true }),
+      durableEncryptedGet(FASTING_KEY, { strict: true }),
+      durableEncryptedGet(SUNNAH_KEY, { strict: true }),
     ])
       .then(([j, f, s]) => {
         if (cancelled) return;
         if (j) setEntries(coerceJournalEntries(JSON.parse(j)));
         if (f) setFasts(coerceFastEntries(JSON.parse(f)));
         if (s) setSunnahLog(coerceSunnahLog(JSON.parse(s)));
+        setHydrated(true);
       })
       .catch(e => {
+        if (cancelled) return;
         console.warn('LogScreen load failed:', e);
         Alert.alert(
           t('journal.loadFailedTitle', 'Could not load journal'),
@@ -431,15 +444,29 @@ export function LogScreen() {
             'journal.loadFailedBody',
             'Your data is safe on disk but could not be read right now. Please try opening the journal again.',
           ),
+          [
+            { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+            {
+              text: t('common.tryAgain', 'Try again'),
+              onPress: () => setLoadAttempt(n => n + 1),
+            },
+          ],
         );
-      })
-      .finally(() => {
-        if (!cancelled) setHydrated(true);
       });
     return () => {
       cancelled = true;
     };
-  }, [t]);
+  }, [t, loadAttempt]);
+
+  /**
+   * The one lock on every write this screen makes. `entries`, `fasts` and
+   * `sunnah` start empty and fill in when the read above lands; a write
+   * before that — or after a read that failed — would be "empty plus this
+   * tap", and that is how a record is lost. Read through a ref so the
+   * persist callbacks below need not be rebuilt for it.
+   */
+  const hydratedRef = useRef(hydrated);
+  hydratedRef.current = hydrated;
 
   /**
    * Anything that writes practice data from OUTSIDE this screen — the
@@ -459,6 +486,7 @@ export function LogScreen() {
     /** `dates` names the days this write touched — one, normally; every
      *  backfilled day when the button below is used. */
     async (next: JournalEntry[], dates: string[] = [selectedRef.current]) => {
+      if (!hydratedRef.current) return;
       const prev = entries;
       setEntries(next);
       // Published before the write, not after it. Encrypting and writing a
@@ -494,6 +522,7 @@ export function LogScreen() {
 
   const persistFasts = useCallback(
     async (next: FastEntry[]) => {
+      if (!hydratedRef.current) return;
       const prev = fasts;
       setFasts(next);
       primePractice({ fasts: next });
@@ -510,6 +539,7 @@ export function LogScreen() {
 
   const persistSunnah = useCallback(
     async (next: SunnahLog) => {
+      if (!hydratedRef.current) return;
       const prev = sunnah;
       setSunnahLog(next);
       primePractice({ sunnah: next });
@@ -971,7 +1001,7 @@ export function LogScreen() {
       // not one we may overwrite.
       let stored: JournalEntry[];
       try {
-        const raw = await durableEncryptedGet(JOURNAL_KEY);
+        const raw = await durableEncryptedGet(JOURNAL_KEY, { strict: true });
         stored = raw ? coerceJournalEntries(JSON.parse(raw)) : [];
       } catch (e) {
         console.warn('LogScreen backfill: journal unreadable', e);
@@ -1042,8 +1072,8 @@ export function LogScreen() {
         // planning against a stale render value is how a fill becomes a
         // replacement.
         const [j, f] = await Promise.all([
-          durableEncryptedGet(JOURNAL_KEY),
-          durableEncryptedGet(FASTING_KEY),
+          durableEncryptedGet(JOURNAL_KEY, { strict: true }),
+          durableEncryptedGet(FASTING_KEY, { strict: true }),
         ]);
         storedJournal = j ? coerceJournalEntries(JSON.parse(j)) : [];
         storedFasts = f ? coerceFastEntries(JSON.parse(f)) : [];

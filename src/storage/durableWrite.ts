@@ -99,6 +99,82 @@ const FALLBACK_PREFIX = 'prayerapp.unprotected.';
 
 const fallbackKey = (key: string) => `${FALLBACK_PREFIX}${key}`;
 
+/**
+ * ── THE WITNESS, and why a failed read is not an empty one ────────────
+ *
+ * Every writer of an encrypted record does the same thing: read the blob,
+ * add one entry, write the blob back. When the read FAILS — a Keystore
+ * that is wedged for a second, a Keychain still locked, a native module
+ * mid-hiccup — `durableEncryptedGet` used to answer `null`, which is also
+ * the honest answer on a first launch. The writer could not tell the two
+ * apart, treated the journal as empty, and wrote back a journal of one
+ * entry. A year of someone's record, replaced by the prayer they had just
+ * tapped (issue #38).
+ *
+ * The two ARE distinguishable, with one plaintext bit: has this key ever
+ * been written to the encrypted store on this device? Written here on
+ * every successful encrypted write, never removed. A failed read of a key
+ * that was witnessed is a read of data that EXISTS and cannot be reached
+ * right now; a failed read of a key nobody ever wrote is a first launch.
+ * `strict` readers get the difference as a thrown error, and a writer that
+ * cannot read must not write. The Homebrew macOS channel, whose Keychain
+ * never works, never witnesses anything (its writes land in the fallback
+ * and its reads come from there), so nothing changes for it.
+ *
+ * The witness carries no data — not a length, not a hash — so a storage
+ * dump learns only that the app has been used.
+ */
+const WITNESS_PREFIX = 'prayerapp.witness.';
+const witnessKey = (key: string) => `${WITNESS_PREFIX}${key}`;
+/** Keys witnessed this session, so the bit is written once, not per save. */
+const witnessed = new Set<string>();
+
+const ENCRYPTED_READ_ERROR = 'EncryptedReadError';
+
+/**
+ * True for the error a strict `durableEncryptedGet` throws when the store
+ * holds a value it cannot hand over. Checked by name, not by class: a
+ * subclass of Error does not survive every transpiler's `instanceof`.
+ */
+export function isEncryptedReadError(e: unknown): boolean {
+  return e instanceof Error && e.name === ENCRYPTED_READ_ERROR;
+}
+
+function encryptedReadError(key: string, cause: unknown): Error {
+  const err = new Error(
+    `${key} is stored but could not be read: ${
+      cause instanceof Error ? cause.message : String(cause)
+    }`,
+  );
+  err.name = ENCRYPTED_READ_ERROR;
+  return err;
+}
+
+async function markWitnessed(key: string): Promise<void> {
+  if (witnessed.has(key)) return;
+  try {
+    await AsyncStorage.setItem(witnessKey(key), '1');
+    witnessed.add(key);
+  } catch {
+    /* best effort: without the bit a failed read degrades to the old
+       behaviour, which is no worse than before it existed */
+  }
+}
+
+async function wasWitnessed(key: string): Promise<boolean> {
+  if (witnessed.has(key)) return true;
+  try {
+    return (await AsyncStorage.getItem(witnessKey(key))) != null;
+  } catch {
+    return false;
+  }
+}
+
+/** Tests only: forget which keys this session has seen written. */
+export function resetEncryptedWitnesses(): void {
+  witnessed.clear();
+}
+
 /** True once anything has had to go to the plaintext fallback. */
 let degraded = false;
 
@@ -136,6 +212,7 @@ export async function durableEncryptedSet(
   for (let i = 0; i < attempts; i++) {
     try {
       await EncryptedStorage.setItem(key, value);
+      await markWitnessed(key);
       // Drain any plaintext copy the moment the real store takes a value,
       // so a Keychain that comes back does not leave one behind.
       try {
@@ -176,10 +253,18 @@ export async function durableEncryptedSet(
  * Same retry semantics for reads. Distinguishes "key absent" (returns
  * null on first try) from "I/O failed". Absent keys are not retried —
  * a missing key is a valid "first launch" state.
+ *
+ * `strict` is for READERS THAT ARE ABOUT TO WRITE. When every attempt
+ * fails, there is no plaintext copy, and the key has been written before
+ * (see the witness above), a strict read throws instead of answering
+ * null — because null would be taken for "nothing here", and the write
+ * that follows would replace the record with one entry. A plain read
+ * keeps the old contract: it never throws, and a store that will not
+ * answer reads as absent.
  */
 export async function durableEncryptedGet(
   key: string,
-  options: { attempts?: number } = {},
+  options: { attempts?: number; strict?: boolean } = {},
 ): Promise<string | null> {
   const attempts = options.attempts ?? DEFAULT_ATTEMPTS;
   let lastErr: unknown;
@@ -208,7 +293,15 @@ export async function durableEncryptedGet(
     return stored;
   }
 
-  // Nothing anywhere. Reported as absent rather than thrown, because every
+  // Nothing anywhere. For a strict reader that is the end of the road IF
+  // the key has been written before: the value exists and cannot be read,
+  // and the caller must not overwrite what it could not see.
+  if (options.strict && lastErr && (await wasWitnessed(key))) {
+    degraded = true;
+    throw encryptedReadError(key, lastErr);
+  }
+
+  // Otherwise reported as absent rather than thrown, because every plain
   // caller already treats a failed read as absent and because the platform
   // this happens on has no Keychain to come back to — throwing forever is
   // how sync ended up unable to start at all. The cost is that a Keychain

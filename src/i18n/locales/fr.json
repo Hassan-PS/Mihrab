@@ -470,6 +470,7 @@
     "Firstthird": "Premier tiers",
     "Firstthird_abbr": "1/3",
     "firstTimeUntil": "Premier temps jusqu'à {{time}}",
+    "secondTimeUntil": "Second temps jusqu'à {{time}}",
     "secondTimeFrom": "Second temps à partir de {{time}}",
     "approx": "env.",
     "Subh": "Sobh",

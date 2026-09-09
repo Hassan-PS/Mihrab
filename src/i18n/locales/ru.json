@@ -470,6 +470,7 @@
     "Firstthird": "Первая треть",
     "Firstthird_abbr": "1/3",
     "firstTimeUntil": "Первое время до {{time}}",
+    "secondTimeUntil": "Второе время до {{time}}",
     "secondTimeFrom": "Второе время с {{time}}",
     "approx": "прибл.",
     "Subh": "Субх",

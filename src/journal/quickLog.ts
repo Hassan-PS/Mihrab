@@ -126,6 +126,8 @@ export function useQuickLog(): QuickLog {
   const store = usePracticeHistory();
   const journalRef = useRef<JournalEntry[]>(store.journal);
   journalRef.current = store.journal;
+  const hydratedRef = useRef(store.hydrated);
+  hydratedRef.current = store.hydrated;
   const today = dayKey();
 
   const statusOf = useCallback(
@@ -136,6 +138,12 @@ export function useQuickLog(): QuickLog {
 
   const toggle = useCallback(
     async (prayer: JournalPrayer, timings: TimingsMap, tomorrow?: TimingsMap) => {
+      // NEVER FROM AN UNHYDRATED STORE. Before the read lands (or after a
+      // read that failed) `journal` is the empty array the hook starts
+      // with, and "that plus this prayer" written to disk is the user's
+      // whole record replaced by one entry. The check is drawn as
+      // not-yet until then (TodayCard), and this is the second lock.
+      if (!hydratedRef.current) return;
       const prev = journalRef.current;
       const date = dayKey();
       const current = prev.find(e => e.date === date && e.prayer === prayer);

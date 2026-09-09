@@ -470,6 +470,7 @@
     "Firstthird": "الثلث الأول",
     "Firstthird_abbr": "١/٣",
     "firstTimeUntil": "الوقت الاختياري إلى {{time}}",
+    "secondTimeUntil": "الوقت الضروري إلى {{time}}",
     "secondTimeFrom": "الوقت الضروري من {{time}}",
     "approx": "تقريبًا",
     "Subh": "الصبح",

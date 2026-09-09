@@ -69,17 +69,31 @@ function asObject(v: unknown): Record<string, unknown> {
  * Every read is independently guarded: one unreadable store must not stop
  * the other five being exported. Someone whose Keychain entry was lost in a
  * device migration should still get their Quran bookmarks out.
+ *
+ * EXCEPT when the result is about to be written back. A merge takes what
+ * this returns as the local side, unions the peer's copy onto it, and
+ * writes the result over the stores — so a journal that exists and could
+ * not be read must not come back as an empty journal here, or the union
+ * is "the peer's entries" and the local ones are gone. `strict` lets that
+ * read fail out loud (see `durableEncryptedGet`); the export path keeps
+ * the lenient reads, because a backup of what CAN be read beats none.
  */
-export async function collectData(): Promise<SnapshotData> {
+export async function collectData(
+  options: { strict?: boolean } = {},
+): Promise<SnapshotData> {
+  const enc = (key: string) =>
+    options.strict
+      ? durableEncryptedGet(key, { strict: true })
+      : durableEncryptedGet(key).catch(() => null);
   const [journal, fasting, dhikr, sunnah, quran, settings, location] =
     await Promise.all([
-      durableEncryptedGet(JOURNAL_KEY).catch(() => null),
-      durableEncryptedGet(FASTING_KEY).catch(() => null),
-      durableEncryptedGet(DHIKR_KEY).catch(() => null),
-      durableEncryptedGet(SUNNAH_KEY).catch(() => null),
+      enc(JOURNAL_KEY),
+      enc(FASTING_KEY),
+      enc(DHIKR_KEY),
+      enc(SUNNAH_KEY),
       AsyncStorage.getItem(QURAN_STORAGE_KEY).catch(() => null),
       AsyncStorage.getItem(SETTINGS_KEY).catch(() => null),
-      durableEncryptedGet(LOCATION_KEY).catch(() => null),
+      enc(LOCATION_KEY),
     ]);
   const base = emptyData();
   return {
@@ -174,7 +188,8 @@ export async function applySnapshot(
   snapshot: Snapshot,
   accept: SyncSelection,
 ): Promise<ApplyResult> {
-  const before = await collectData();
+  // Strict: what this reads is what the merge writes back over.
+  const before = await collectData({ strict: true });
   const after = mergeData(before, snapshot, accept);
   const applied = {} as SyncSelection;
   for (const key of Object.keys(accept) as Array<keyof SyncSelection>) {

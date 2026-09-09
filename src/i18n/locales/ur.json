@@ -470,6 +470,7 @@
     "Firstthird": "پہلی تہائی",
     "Firstthird_abbr": "1/3",
     "firstTimeUntil": "پہلا وقت {{time}} تک",
+    "secondTimeUntil": "دوسرا وقت {{time}} تک",
     "secondTimeFrom": "دوسرا وقت {{time}} سے",
     "approx": "تقریباً",
     "Subh": "صبح",

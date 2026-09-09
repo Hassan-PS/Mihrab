@@ -470,6 +470,7 @@
     "Firstthird": "前三分之一",
     "Firstthird_abbr": "1/3",
     "firstTimeUntil": "首选时段至 {{time}}",
+    "secondTimeUntil": "必要时段至 {{time}}",
     "secondTimeFrom": "第二时段自 {{time}}",
     "approx": "约",
     "Subh": "晨礼",

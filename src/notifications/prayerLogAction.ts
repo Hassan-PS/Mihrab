@@ -186,7 +186,11 @@ export async function logPrayerOnTime(
   prayer: JournalPrayer,
   now: Date = new Date(),
 ): Promise<boolean> {
-  const raw = await durableEncryptedGet(JOURNAL_KEY).catch(() => null);
+  // Strict, and the failure is allowed out: a journal that exists and
+  // cannot be read right now is not one this write may replace with a
+  // single entry (issue #38). The caller's catch keeps the tap from
+  // crashing anything; the entry is lost, the record is not.
+  const raw = await durableEncryptedGet(JOURNAL_KEY, { strict: true });
   let entries: JournalEntry[] = [];
   if (raw) {
     try {
@@ -224,7 +228,7 @@ export async function logSunnahFor(
   const max = SUNNAH_UNITS[prayer] ?? 0;
   const field = fieldFor(prayer);
   if (max <= 0 || !field) return false;
-  const raw = await durableEncryptedGet(SUNNAH_KEY).catch(() => null);
+  const raw = await durableEncryptedGet(SUNNAH_KEY, { strict: true });
   let log: SunnahLog = {};
   if (raw) {
     try {

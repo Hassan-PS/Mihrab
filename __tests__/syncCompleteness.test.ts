@@ -175,7 +175,14 @@ const STAYS: Record<string, string> = {
     'already made against that key. Carrying the prefix itself would mean ' +
     'sending another device a copy of a secret the Keychain exists to keep ' +
     'off the wire',
-
+  'prayerapp.witness.':
+    'a prefix, not a store — under it durableWrite keeps one plaintext bit ' +
+    'per encrypted key saying the key has been written on THIS device, so a ' +
+    'read that fails can be told apart from a first launch (issue #38). It ' +
+    'is a fact about this device\'s store, not about the user, and it must ' +
+    'not travel: carried to a new phone it would say the journal exists ' +
+    'there before anything had been written, and every strict read on a ' +
+    'wedged store would then refuse rather than start fresh',
 };
 
 describe('every store is either carried or deliberately left', () => {

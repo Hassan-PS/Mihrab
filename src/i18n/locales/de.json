@@ -470,6 +470,7 @@
     "Firstthird": "Erstes Drittel",
     "Firstthird_abbr": "1/3",
     "firstTimeUntil": "Erste Zeit bis {{time}}",
+    "secondTimeUntil": "Zweite Zeit bis {{time}}",
     "secondTimeFrom": "Zweite Zeit ab {{time}}",
     "approx": "ca.",
     "Subh": "Subh",

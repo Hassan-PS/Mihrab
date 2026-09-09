@@ -46,6 +46,9 @@ jest.mock('react-i18next', () => ({
       if (key === 'prayer.firstTimeUntil') {
         return `First time until ${(vars as { time: string }).time}`;
       }
+      if (key === 'prayer.secondTimeUntil') {
+        return `Second time until ${(vars as { time: string }).time}`;
+      }
       if (key === 'prayer.approx') return 'approx.';
       return key;
     },
@@ -109,6 +112,17 @@ describe('the second-time line', () => {
   it('marks a modelled boundary as approximate', () => {
     const lines = render({ daruriAt: '19:44', daruriApprox: true });
     expect(lines).toContain('First time until approx. 19:44');
+  });
+
+  /**
+   * Issue #38 (2): once the preferred window has closed, the line turns
+   * to the second window's end rather than staying on a boundary that is
+   * already behind the reader.
+   */
+  it('says when the second window closes, once the first has', () => {
+    const lines = render({ daruriAt: '04:30', daruriPhase: 'second' });
+    expect(lines).toContain('Second time until 04:30');
+    expect(lines.some(l => l.includes('First time'))).toBe(false);
   });
 
   it('leaves the row alone where the sky produced no boundary', () => {

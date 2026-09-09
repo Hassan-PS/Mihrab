@@ -47,10 +47,28 @@ export type PracticeData = {
 };
 
 const EMPTY: PracticeData = { journal: [], fasts: [], dhikr: {}, sunnah: {} };
+/**
+ * How long a hook waits before asking again after a read that failed.
+ * Each attempt already retries three times inside `durableEncryptedGet`;
+ * this is the pause between those rounds while the store stays wedged.
+ */
+const READ_RETRY_MS = 3_000;
 
 let cache: PracticeData | null = null;
 let inFlight: Promise<PracticeData> | null = null;
+/**
+ * A value a writer published before the first read landed — see
+ * `primePractice`. Laid over the read when it arrives, never over EMPTY.
+ */
+let pendingPrime: Partial<PracticeData> | null = null;
 const listeners = new Set<() => void>();
+
+/** Tests only: forget everything this module holds in memory. */
+export function _resetPracticeStore(): void {
+  cache = null;
+  inFlight = null;
+  pendingPrime = null;
+}
 
 /** ISO day key in LOCAL time — the day the user is living in, not UTC. */
 export function dayKey(d: Date = new Date()): string {
@@ -91,12 +109,25 @@ function parseOr<T>(raw: string | null, coerce: (v: unknown) => T, fallback: T):
   }
 }
 
+/**
+ * Read the four stores, STRICTLY.
+ *
+ * Everything that writes practice data from a screen writes what this
+ * module handed it, plus one entry. So a read that fails must not come
+ * back as an empty store: the screens would show a blank record with
+ * `hydrated: true`, the user would log the prayer they can see is
+ * missing, and the write would replace the record with that one entry
+ * (issue #38 — a journal gone, a sunnah log that survived only because
+ * nothing wrote it that day). A strict read throws for a key that has
+ * been written before and cannot be read now; the throw leaves `cache`
+ * null and `hydrated` false, and the next read tries again.
+ */
 async function readAll(): Promise<PracticeData> {
   const [journalRaw, fastRaw, dhikrRaw, sunnahRaw] = await Promise.all([
-    durableEncryptedGet(JOURNAL_KEY).catch(() => null),
-    durableEncryptedGet(FASTING_KEY).catch(() => null),
-    durableEncryptedGet(DHIKR_KEY).catch(() => null),
-    durableEncryptedGet(SUNNAH_KEY).catch(() => null),
+    durableEncryptedGet(JOURNAL_KEY, { strict: true }),
+    durableEncryptedGet(FASTING_KEY, { strict: true }),
+    durableEncryptedGet(DHIKR_KEY, { strict: true }),
+    durableEncryptedGet(SUNNAH_KEY, { strict: true }),
   ]);
   return {
     journal: parseOr(journalRaw, coerceJournalEntries, [] as JournalEntry[]),
@@ -108,14 +139,23 @@ async function readAll(): Promise<PracticeData> {
   };
 }
 
-/** Read everything, using the cache when it is warm. */
+/**
+ * Read everything, using the cache when it is warm.
+ *
+ * REJECTS when a store that holds data cannot be read (see `readAll`).
+ * Nothing is cached then, so the next call reads again; a hook that was
+ * waiting stays unhydrated rather than showing an empty record.
+ */
 export async function loadPractice(): Promise<PracticeData> {
   if (cache) return cache;
   if (!inFlight) {
     inFlight = readAll()
       .then(data => {
-        cache = data;
-        return data;
+        // A writer may have published while this read was on its way; its
+        // value is newer than the disk's and goes on top.
+        cache = pendingPrime ? { ...data, ...pendingPrime } : data;
+        pendingPrime = null;
+        return cache;
       })
       .finally(() => {
         inFlight = null;
@@ -162,13 +202,38 @@ export function notifyPracticeChanged(): void {
  * failed write calls this again with the old value to put it back.
  */
 export function primePractice(patch: Partial<PracticeData>): void {
-  cache = { ...(cache ?? EMPTY), ...patch };
-  listeners.forEach(fn => fn());
+  if (cache) {
+    cache = { ...cache, ...patch };
+    listeners.forEach(fn => fn());
+    return;
+  }
+  // NOT HYDRATED — or just invalidated by `notifyPracticeChanged`, with the
+  // re-read still on its way. This used to build the cache as EMPTY plus
+  // the patch, and publish it: a journal write arriving in that window
+  // told every subscriber the fasting and sunnah logs were empty, with
+  // `hydrated: true`, and the next tap on either wrote that emptiness to
+  // disk. The patch is held instead and laid over the read when it lands
+  // (`loadPractice`), and the subscribers hear about it then.
+  pendingPrime = { ...(pendingPrime ?? {}), ...patch };
+  void loadPractice()
+    .then(() => listeners.forEach(fn => fn()))
+    .catch(() => {
+      /* the store is unreadable; the hooks stay unhydrated, which is the
+         truthful state, and the disk write the caller is making carries
+         its own error handling */
+    });
 }
 
 /** Record one completed dhikr set for today (the counter reached its target). */
 export async function recordDhikrSet(when: Date = new Date()): Promise<void> {
-  const data = await loadPractice();
+  let data: PracticeData;
+  try {
+    data = await loadPractice();
+  } catch (e) {
+    // A log we cannot read is not one we may rewrite — see `readAll`.
+    console.warn('recordDhikrSet: practice store unreadable, not written', e);
+    return;
+  }
   const key = dayKey(when);
   const next: DhikrLog = { ...data.dhikr, [key]: (data.dhikr[key] ?? 0) + 1 };
   try {
@@ -197,11 +262,23 @@ export function usePracticeToday(): PracticeToday {
 
   const refresh = useCallback(() => {
     let cancelled = false;
-    void loadPractice().then(d => {
-      if (!cancelled) setData(d);
-    });
+    let retry: ReturnType<typeof setTimeout> | null = null;
+    const read = () => {
+      void loadPractice()
+        .then(d => {
+          if (!cancelled) setData(d);
+        })
+        .catch(() => {
+          // Unreadable: stay unhydrated, and ask again in a moment — a
+          // store that was wedged for a second should not leave the
+          // screen blank until something else happens to change.
+          if (!cancelled) retry = setTimeout(read, READ_RETRY_MS);
+        });
+    };
+    read();
     return () => {
       cancelled = true;
+      if (retry) clearTimeout(retry);
     };
   }, []);
 
@@ -249,10 +326,16 @@ export function usePracticeHistory(): {
 
   useEffect(() => {
     let cancelled = false;
+    let retry: ReturnType<typeof setTimeout> | null = null;
     const read = () => {
-      void loadPractice().then(d => {
-        if (!cancelled) setData(d);
-      });
+      void loadPractice()
+        .then(d => {
+          if (!cancelled) setData(d);
+        })
+        .catch(() => {
+          // As in `usePracticeToday`: unhydrated, and try again shortly.
+          if (!cancelled) retry = setTimeout(read, READ_RETRY_MS);
+        });
     };
     read();
     const listener = () => read();
@@ -260,6 +343,7 @@ export function usePracticeHistory(): {
     return () => {
       cancelled = true;
       listeners.delete(listener);
+      if (retry) clearTimeout(retry);
     };
   }, []);
 

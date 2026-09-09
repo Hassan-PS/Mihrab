@@ -54,6 +54,14 @@ type PrayerRowProps = {
    */
   daruriAt?: string;
   /**
+   * Which window `daruriAt` closes — issue #38 (2). 'first' (the default)
+   * is the preferred window, and the line reads "First time until"; once
+   * that has passed on today's card the same line turns to the SECOND
+   * window's end, "Second time until", so what is left of it is on the
+   * row rather than nowhere. See `daruriRowState`.
+   */
+  daruriPhase?: 'first' | 'second';
+  /**
    * True when that boundary is a model of something the eye judges — the
    * stars fading, the sun yellowing — rather than a solar position. The
    * row says "approx." for those, because printing all five in the same
@@ -154,6 +162,7 @@ function PrayerRowImpl({
   isSecondary,
   isLast,
   daruriAt,
+  daruriPhase = 'first',
   daruriApprox = false,
   alertMode,
   onCycleAlertMode,
@@ -245,14 +254,22 @@ function PrayerRowImpl({
             style={[styles.daruri, { color: palette.muted }]}
             numberOfLines={1}
             maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
-            {t('prayer.firstTimeUntil', {
-              defaultValue: 'First time until {{time}}',
+            {t(
+              daruriPhase === 'second'
+                ? 'prayer.secondTimeUntil'
+                : 'prayer.firstTimeUntil',
+              {
+              defaultValue:
+                daruriPhase === 'second'
+                  ? 'Second time until {{time}}'
+                  : 'First time until {{time}}',
               time: daruriApprox
                 ? `${t('prayer.approx', { defaultValue: 'approx.' })} ${clock(
                     daruriAt,
                   )}`
                 : clock(daruriAt),
-            })}
+              },
+            )}
           </Text>
         ) : null}
         {/* Under the name for the same reason the line above is, and for

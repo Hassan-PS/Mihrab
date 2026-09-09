@@ -810,6 +810,65 @@ export function daruriWindowEnd(
 }
 
 /**
+ * What the row under a prayer's name should say right now — issue #38 (2).
+ *
+ * Before the preferred window closes the row says when it will:
+ * "First time until 21:06". That line used to stay exactly as it was after
+ * 21:06 — a boundary in the past, presented as if it were still ahead —
+ * and the one thing a reader wants at that point, HOW LONG THE SECOND
+ * WINDOW RUNS, was nowhere on the card. So:
+ *
+ *   'first'  — the preferred window is open; `at` is when it closes.
+ *   'second' — it has closed and the prayer is unlogged; `at` is when the
+ *              second window closes (the next prayer, in the book's own
+ *              terms — see DARURI_END_OF), so what is left can be seen.
+ *   null     — nothing to say: no boundary for this day, the second
+ *              window has closed too, or the prayer is already logged.
+ *              A logged prayer has answered the question the line asks.
+ *
+ * `week[0]` is the day the card shows and `baseDay` its date; Maghrib's
+ * and Ishāʾ's second windows end on `week[1]`, and when that day is not
+ * loaded the answer is null rather than a guess. `approx` is carried
+ * for the first window only — the modelled boundaries are the isfār and
+ * iṣfirār angles; the second window's end is always one of the card's
+ * own rows.
+ */
+export function daruriRowState(
+  week: TimingsMap[],
+  baseDay: Date,
+  key: DaruriKey,
+  now: Date,
+  logged: boolean,
+): { phase: 'first' | 'second'; at: string; approx: boolean } | null {
+  const firstEnd = week[0]?.[key];
+  if (!firstEnd) return null;
+  const approx = DARURI_CONFIDENCE[key] === 'modelled';
+  let firstEndAt: Date;
+  try {
+    const dayStart = startOfLocalDay(baseDay);
+    firstEndAt = combineLocalDateAndTime(dayStart, firstEnd);
+    // Ishāʾ's boundary can fall after midnight and then belongs to the
+    // next date — the same rule `buildDaruriAlertEvents` applies.
+    if (key === 'IshaDaruri' && week[0]?.Maghrib) {
+      if (firstEndAt < combineLocalDateAndTime(dayStart, week[0].Maghrib)) {
+        firstEndAt = addDays(firstEndAt, 1);
+      }
+    }
+  } catch {
+    return null;
+  }
+  if (now.getTime() < firstEndAt.getTime()) {
+    return { phase: 'first', at: firstEnd, approx };
+  }
+  if (logged) return null;
+  const end = daruriWindowEnd(week, baseDay, 0, key);
+  if (!end || now.getTime() >= end.getTime()) return null;
+  const { row, tomorrow } = DARURI_END_OF[key];
+  const at = week[tomorrow ? 1 : 0]?.[row];
+  return at ? { phase: 'second', at, approx: false } : null;
+}
+
+/**
  * "This prayer is now qaḍāʾ" — the other end of the window, issue #19.
  *
  * The start alert answers "the preferred time is over"; a reader still

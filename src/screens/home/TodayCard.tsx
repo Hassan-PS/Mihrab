@@ -54,6 +54,8 @@ import {
 import { DISPLAY_ORDER, OPTIONAL_TIME_KEYS } from '../../types/prayer';
 import {
   DARURI_CONFIDENCE,
+  DARURI_KEYS,
+  daruriRowState,
   type DaruriKey,
 } from '../../prayer/daruriTimes';
 import type { TimingsMap } from '../../types/prayer';
@@ -792,6 +794,40 @@ function TodayCardImpl({
   const tomorrow = week[1];
   const logNow = new Date();
 
+  /**
+   * Re-render at the instant a preferred window closes today, so the
+   * line under that row turns from "first time until" to "second time
+   * until" AT the boundary — issue #38 (2). Two of the five boundaries
+   * are prayer rows and the card re-renders for those anyway; the isfār
+   * and iṣfirār angles are not, and without this the line would sit on
+   * a boundary already behind it until the next prayer came in. One
+   * timeout to the nearest boundary ahead, re-armed when it fires; the
+   * card carries no per-second clock, and this does not add one.
+   */
+  const [daruriTick, setDaruriTick] = useState(0);
+  useEffect(() => {
+    const today = week[0];
+    if (!today) return undefined;
+    const nowMs = Date.now();
+    let next = Infinity;
+    for (const k of DARURI_KEYS) {
+      const clockOf = today[k];
+      if (!clockOf) continue;
+      try {
+        const at = combineLocalDateAndTime(new Date(nowMs), clockOf).getTime();
+        if (at > nowMs && at < next) next = at;
+      } catch {
+        /* a malformed boundary is a line not drawn, not a timer */
+      }
+    }
+    if (!Number.isFinite(next)) return undefined;
+    const id = setTimeout(
+      () => setDaruriTick(n => n + 1),
+      Math.min(next - nowMs + 250, 0x7fffffff),
+    );
+    return () => clearTimeout(id);
+  }, [week, daruriTick]);
+
   const clearChosen = useCallback(() => setChosenKey(null), []);
   const aimAt = useCallback(
     (key: string) => setChosenKey(current => (current === key ? null : key)),
@@ -832,6 +868,27 @@ function TodayCardImpl({
     // A Mālikī boundary is a second line on the row, so a table carrying
     // them weighs two rows more than its count says.
     const withDaruri = rows.some(key => dayTimings[`${key}Daruri`]);
+    const daruriRows: Record<
+      string,
+      { phase: 'first' | 'second'; at: string; approx: boolean } | null
+    > = {};
+    for (const key of rows) {
+      const daruriKey = `${key}Daruri` as DaruriKey;
+      if (!dayTimings[daruriKey]) continue;
+      daruriRows[key] = isToday
+        ? daruriRowState(
+            week,
+            logNow,
+            daruriKey,
+            logNow,
+            isSalah(key) && quickLog.statusOf(key) != null,
+          )
+        : {
+            phase: 'first',
+            at: dayTimings[daruriKey],
+            approx: DARURI_CONFIDENCE[daruriKey] === 'modelled',
+          };
+    }
     const dense = fullBleed && (shortScreen || rows.length + (withDaruri ? 2 : 0) > DENSE_ABOVE_ROWS);
     return rows.map((key, rowIndex) => (
       <PrayerRow
@@ -848,11 +905,13 @@ function TodayCardImpl({
         isLast={rowIndex === rows.length - 1}
         // Mālikī second times (issue #19). The boundaries ride in the
         // same map under keys nothing else iterates, so a row that has
-        // one shows it and every other row is unchanged.
-        daruriAt={dayTimings[`${key}Daruri`]}
-        daruriApprox={
-          DARURI_CONFIDENCE[`${key}Daruri` as DaruriKey] === 'modelled'
-        }
+        // one shows it and every other row is unchanged. On today's card
+        // the line follows the clock — first window, then second, then
+        // nothing (issue #38); another day's card states the first
+        // boundary and leaves it at that.
+        daruriAt={daruriRows[key]?.at}
+        daruriPhase={daruriRows[key]?.phase}
+        daruriApprox={daruriRows[key]?.approx}
         // Only on today's card. On yesterday's or tomorrow's the
         // control would still change a setting for every day, which
         // is not what a tap on a past row looks like it does.
@@ -879,7 +938,12 @@ function TodayCardImpl({
           isToday && isSalah(key)
             ? {
                 status: quickLog.statusOf(key),
-                phase: quickLogPhase(key, dayTimings, logNow, tomorrow),
+                // Until the journal has been read there is nothing to
+                // show and nothing safe to record: the ring at a whisper,
+                // exactly as for a prayer whose time has not come.
+                phase: quickLog.hydrated
+                  ? quickLogPhase(key, dayTimings, logNow, tomorrow)
+                  : 'not-yet',
               }
             : undefined
         }
