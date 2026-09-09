@@ -10,7 +10,7 @@
  * both, so the foreground and headless paths cannot drift into disagreeing
  * about the size of the window.
  */
-import { getCachedPrayerTimes } from './prayerStorage';
+import { getCachedPrayerTimes, getStoredPrayerTimes } from './prayerStorage';
 import type { PrayerAppSettings } from '../settings/types';
 import type { TimingsMap } from '../types/prayer';
 import { addDays } from '../utils/prayerTimes';
@@ -78,14 +78,16 @@ export async function cachedDaysFrom(
 export const PAST_DAYS = 7;
 
 /**
- * Yesterday and the days before it, STRICTLY FROM CACHE, nearest first —
+ * Yesterday and the days before it, FROM THE DEVICE ALONE, nearest first —
  * `[0]` is yesterday — stopping at the first day that isn't there.
  *
- * Cache-only for the same reason the widget window is: the past is
- * looked at, not waited for, and a swipe must never fire a fetch. The
- * current month is always on disk (it was fetched for today), so the
- * days that are missing are the ones across a month boundary the cache
- * never held — and a card that stops at the 1st is honest about that.
+ * Never a fetch, for the same reason the widget window never fetches:
+ * the past is looked at, not waited for, and a swipe must not fire a
+ * request. "The device" is the prepared dataset where the provider has
+ * one and the cache otherwise (`getStoredPrayerTimes`) — not the cache
+ * alone, which the dataset providers never write to. The current month
+ * is on hand either way, so the days that are missing are the ones
+ * across a boundary nothing held, and a card that stops there is honest.
  */
 export async function cachedDaysBefore(
   params: DayWindowParams,
@@ -95,7 +97,7 @@ export async function cachedDaysBefore(
   for (let i = 1; i <= PAST_DAYS; i++) {
     let day: TimingsMap | null = null;
     try {
-      day = await getCachedPrayerTimes({ ...params, date: addDays(now, -i) });
+      day = await getStoredPrayerTimes({ ...params, date: addDays(now, -i) });
     } catch {
       break;
     }

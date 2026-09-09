@@ -96,7 +96,9 @@
     "alertOverrideOnce": "{{mode}} только в этот раз · Сбросить",
     "alertOverrideA11y": "{{prayer}} — {{mode}} только в этот раз",
     "alertOverrideResetHint": "Возвращает {{mode}}",
-    "yesterday": "Вчера"
+    "yesterday": "Вчера",
+    "startReading": "Начать чтение",
+    "startReadingHint": "Аль-Фатиха, страница 1"
   },
   "errors": {
     "locationNeededTitle": "Требуется местоположение",

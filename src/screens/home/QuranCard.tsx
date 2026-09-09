@@ -1,16 +1,25 @@
 /**
  * Home's Quran card (design review 2b) — four states, one card.
  *
- * It never disappears and never falls back to a generic "Open the Quran":
- * whichever of the four states is true, the card says something the reader
- * did not already know. The state itself is chosen by `selectQuranCardState`
- * so this file only has to draw.
+ * It never disappears: whichever of the four states is true, the card is
+ * the way into the muṣḥaf — continue, the khatmah's next page, today's
+ * portion done, or start. The state itself is chosen by
+ * `selectQuranCardState` so this file only has to draw.
+ *
+ * It no longer reads a verse. The ayah of the day was drawn here when
+ * nothing had been started, and a card that is sometimes a shortcut and
+ * sometimes a passage of scripture was two things on one spot; Today is
+ * the times, and this is the door. The verse keeps its notification.
+ *
+ * One row, low: an icon, a line, a line under it, a bar when there is a
+ * plan. It sits under a table that fills the screen, and every point of
+ * height here is a point the hero gives up.
  *
  * The progress bar exists only when a plan does. Without a khatmah there is
  * nothing to be a fraction of, and an empty bar would invent a goal the user
  * never set.
  */
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect } from 'react';
 import {
   InteractionManager,
   Pressable,
@@ -24,15 +33,12 @@ import { useAppPalette } from '../../hooks/useAppPalette';
 import { GlassSurface } from '../../components/GlassSurface';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { TABULAR_MAX_FONT_SCALE } from '../../theme/textScale';
-import { TYPE, arabicTextStyle } from '../../theme/typography';
-import { findSurah, loadSurah } from '../../quran/quran';
+import { TYPE } from '../../theme/typography';
+import { findSurah } from '../../quran/quran';
 import { surahName } from '../../quran/surahName';
 import { useQuranState } from '../../quran/quranState';
 import { warmMushafLayout } from '../../quran/mushafLayout';
 import { selectQuranCardState } from '../../quran/quranCardState';
-import { useVerseOfTheDay } from '../../quran/useVerseOfTheDay';
-import { getAyahTranslation } from '../../quran/translations';
-import { useActiveEdition } from '../../quran/useActiveEdition';
 import { HOME_TABLE_RADIUS } from './tokens';
 import { RADIUS, SPACING } from '../../theme/tokens';
 
@@ -65,16 +71,6 @@ function QuranCardImpl({ onOpenAt, onOpenQuran }: Props) {
   const { palette } = useAppPalette();
   const quran = useQuranState();
   const card = selectQuranCardState(quran);
-  const votd = useVerseOfTheDay();
-  const edition = useActiveEdition();
-  const [votdArabic, setVotdArabic] = useState('');
-  // Fetched alongside the Arabic below rather than read in the render
-  // body: the editions have moved off the JS bundle, so this is a read
-  // from disk now. It also cannot be a hook down in the `card.kind ===
-  // 'ayah'` branch where it used to be computed — that branch is
-  // conditional, and hooks are not.
-  const [votdTranslation, setVotdTranslation] = useState('');
-
   // A card that says "Continue" into the muṣḥaf is a reader about to open
   // it. Bring the page-layout data in now, after the home screen has
   // settled, rather than in the middle of the push transition when the
@@ -88,27 +84,6 @@ function QuranCardImpl({ onOpenAt, onOpenQuran }: Props) {
     );
     return () => task.cancel();
   }, [readsMushaf, riwayah]);
-
-  // Only the empty state shows the verse, so only it pays for the surah load.
-  const needsVerse = card.kind === 'ayah';
-  useEffect(() => {
-    if (!needsVerse) return;
-    let cancelled = false;
-    void loadSurah(votd.surah).then(loaded => {
-      if (cancelled || !loaded) return;
-      setVotdArabic(loaded.arabic[votd.ayah - 1] ?? '');
-    });
-    getAyahTranslation(edition, votd.surah, votd.ayah)
-      .then(text => {
-        if (!cancelled) setVotdTranslation(text);
-      })
-      .catch(() => {
-        if (!cancelled) setVotdTranslation('');
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [needsVerse, votd, edition]);
 
   const surahLabel = (n: number) => {
     const meta = findSurah(n);
@@ -133,56 +108,6 @@ function QuranCardImpl({ onOpenAt, onOpenQuran }: Props) {
       </Pressable>
     </GlassSurface>
   );
-
-  if (card.kind === 'ayah') {
-    const verseRef = `${surahLabel(votd.surah)} ${votd.surah}:${votd.ayah}`;
-    const translation = votdTranslation;
-    return (
-      <GlassSurface
-        style={[
-          styles.card,
-          { borderRadius: HOME_TABLE_RADIUS, ...cardEdgeStyle(palette) },
-        ]}>
-        <View style={styles.verseBody}>
-          <Text style={[styles.eyebrow, { color: palette.muted }]}>
-            {t('quran.ayahOfDayTitle', 'Ayah of the day')}
-          </Text>
-          {votdArabic ? (
-            <Text
-              style={[styles.verseArabic, { color: palette.text }]}
-              numberOfLines={3}>
-              {votdArabic}
-            </Text>
-          ) : null}
-          <Text
-            style={[styles.verseMeaning, { color: palette.muted }]}
-            numberOfLines={3}>
-            {translation ? `${translation} — ${verseRef}` : verseRef}
-          </Text>
-        </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('home.readItIn', {
-            defaultValue: 'Read it in {{surah}}',
-            surah: surahLabel(votd.surah),
-          })}
-          onPress={() => onOpenAt(votd.surah, undefined, votd.ayah)}
-          style={({ pressed }: { pressed: boolean }) => [
-            styles.verseAction,
-            { borderTopColor: palette.border ?? palette.muted },
-            pressed && { opacity: 0.75 },
-          ]}>
-          <QuranBookIcon color={palette.accentSolid} size={20} />
-          <Text style={[styles.verseActionLabel, { color: palette.accent }]}>
-            {t('home.readItIn', {
-              defaultValue: 'Read it in {{surah}}',
-              surah: surahLabel(votd.surah),
-            })}
-          </Text>
-        </Pressable>
-      </GlassSurface>
-    );
-  }
 
   if (card.kind === 'done') {
     return shell(
@@ -222,18 +147,18 @@ function QuranCardImpl({ onOpenAt, onOpenQuran }: Props) {
     );
   }
 
-  const lastRead = card.kind === 'khatmah' ? card.lastRead : card.lastRead;
+  const lastRead = card.kind === 'start' ? null : card.lastRead;
   const continueLabel = lastRead
     ? t('home.continueAt', {
         defaultValue: 'Continue · {{surah}} {{ref}}',
         surah: surahLabel(lastRead.surah),
         ref: `${lastRead.surah}:${lastRead.ayah}`,
       })
-    : t('home.quranShortcut', 'Open the Quran');
+    : t('home.startReading', 'Start reading');
 
   return shell(
     <>
-      <QuranBookIcon color={palette.accentSolid} size={26} />
+      <QuranBookIcon color={palette.accentSolid} size={20} />
       <View style={styles.body}>
         <Text style={[styles.title, { color: palette.text }]} numberOfLines={1}>
           {continueLabel}
@@ -257,21 +182,26 @@ function QuranCardImpl({ onOpenAt, onOpenQuran }: Props) {
             </Text>
             <ProgressBar value={card.progress} />
           </>
-        ) : (
+        ) : lastRead ? (
           <Text
             style={[styles.subtitle, { color: palette.muted }]}
             numberOfLines={1}
             maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
             {t('home.pageNumber', {
               defaultValue: 'page {{page}}',
-              page: lastRead?.page ?? 1,
+              page: lastRead.page ?? 1,
             })}
+          </Text>
+        ) : (
+          <Text style={[styles.subtitle, { color: palette.muted }]} numberOfLines={1}>
+            {t('home.startReadingHint', 'Al-Fātiḥah, page 1')}
           </Text>
         )}
       </View>
-      {/* A bookmark but no plan: the khatmah offer rides along as a chip
-          rather than becoming its own empty-state screen. */}
-      {card.kind === 'continue' ? (
+      {/* No plan yet — a bookmark or nothing at all: the khatmah offer
+          rides along as a chip rather than becoming its own empty-state
+          screen. */}
+      {card.kind === 'continue' || card.kind === 'start' ? (
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('quran.startKhatmah', 'Start a khatmah')}
@@ -300,45 +230,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.md,
     paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.lg,
+    paddingVertical: SPACING.md,
   },
   body: { flex: 1, minWidth: 0 },
-  title: { fontSize: TYPE.body.fontSize, fontWeight: '700' },
-  subtitle: { fontSize: TYPE.footnote.fontSize, marginTop: 2 },
-  track: { height: 4, borderRadius: 2, marginTop: SPACING.sm, overflow: 'hidden' },
+  title: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
+  subtitle: { fontSize: TYPE.caption.fontSize, marginTop: 1 },
+  track: { height: 3, borderRadius: 2, marginTop: SPACING.sm, overflow: 'hidden' },
   fill: { height: '100%', borderRadius: 2 },
   tick: {
-    width: 26,
-    height: 26,
-    borderRadius: RADIUS.md,
+    width: 20,
+    height: 20,
+    borderRadius: RADIUS.sm,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tickGlyph: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
+  tickGlyph: { fontSize: TYPE.footnote.fontSize, fontWeight: '700' },
   trailingAction: { fontSize: TYPE.footnote.fontSize, fontWeight: '700' },
-  chip: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderRadius: RADIUS.full },
+  chip: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.xs + 2, borderRadius: RADIUS.full },
   chipLabel: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
-  eyebrow: {
-    fontSize: TYPE.label.fontSize,
-    fontWeight: '600',
-  },
-  verseBody: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg, paddingBottom: SPACING.md },
-  verseArabic: {
-    fontSize: TYPE.title2.fontSize,
-    lineHeight: 44,
-    textAlign: 'right',
-    writingDirection: 'rtl',
-    marginTop: SPACING.sm,
-    ...arabicTextStyle('body'),
-  },
-  verseMeaning: { fontSize: TYPE.footnote.fontSize, marginTop: SPACING.xs },
-  verseAction: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    borderTopWidth: StyleSheet.hairlineWidth,
-  },
-  verseActionLabel: { flex: 1, fontSize: TYPE.callout.fontSize, fontWeight: '700' },
 });

@@ -57,8 +57,8 @@ function ymd(ts: number): string {
 }
 
 describe('selectQuranCardState', () => {
-  it('shows the verse of the day when nothing has been started', () => {
-    expect(selectQuranCardState(base, NOW)).toEqual({ kind: 'ayah' });
+  it('offers the way in when nothing has been started — never a verse to read here', () => {
+    expect(selectQuranCardState(base, NOW)).toEqual({ kind: 'start' });
   });
 
   it('offers to continue when a bookmark exists but no plan', () => {
@@ -101,7 +101,7 @@ describe('selectQuranCardState', () => {
   it('never reports a completed plan as running', () => {
     const finished = plan({ completedAt: NOW - DAY, pagesRead: 604 });
     expect(selectQuranCardState({ ...base, khatmah: [finished] }, NOW)).toEqual({
-      kind: 'ayah',
+      kind: 'start',
     });
   });
 

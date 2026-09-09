@@ -16,6 +16,8 @@ import { cachedDaysBefore, PAST_DAYS } from '../src/prayer/widgetDayWindow';
 const mockCached = jest.fn();
 jest.mock('../src/prayer/prayerStorage', () => ({
   getCachedPrayerTimes: (...a: unknown[]) => mockCached(...a),
+  // The device-only reader: dataset first, then the cache, never a fetch.
+  getStoredPrayerTimes: (...a: unknown[]) => mockCached(...a),
 }));
 
 const read = (p: string) =>
@@ -52,6 +54,19 @@ describe('the days behind today', () => {
     mockCached.mockRejectedValue(new Error('disk'));
     await expect(cachedDaysBefore(params, now)).resolves.toEqual([]);
   });
+
+  it('read through the dataset rung, which the cache never holds', () => {
+    // The two dataset providers are served before the cache and never
+    // written to it — a cache-only reader saw nothing for them.
+    const src = readFileSync(join(__dirname, '..', 'src/prayer/widgetDayWindow.ts'), 'utf8');
+    expect(src).toMatch(/getStoredPrayerTimes\(\{ \.\.\.params, date: addDays\(now, -i\) \}\)/);
+    const storage = readFileSync(join(__dirname, '..', 'src/prayer/prayerStorage.ts'), 'utf8');
+    const fn = storage.slice(storage.indexOf('export async function getStoredPrayerTimes'), storage.indexOf('export async function getOrFetchPrayerTimes'));
+    expect(fn).toMatch(/getIslamiskaForbundetDatasetTimes/);
+    expect(fn).toMatch(/getHabousDatasetTimes/);
+    expect(fn).toMatch(/return getCachedPrayerTimes\(params\);/);
+    expect(fn).not.toMatch(/fetchWithLocalLastResort/);
+  });
 });
 
 describe('the pages', () => {
@@ -82,14 +97,16 @@ describe('the day line', () => {
 
   it('says the weekday and both dates of the day on show', () => {
     expect(card).toMatch(/\{getWeekday\(selected\)\}/);
-    expect(card).toMatch(/`\$\{getDayDate\(selected\)\} · \$\{getHijriDate\(selected\)\}`/);
+    expect(card).toMatch(/\{getDayDate\(selected\)\}/);
+    expect(card).toMatch(/\{getHijriDate\(selected\)\}/);
     // The weekday is the weekday, today included — "Today" is the mark's word.
     expect(home).toMatch(/const getWeekday = useCallback\([\s\S]*?weekday: 'long'/);
   });
 
   it('marks today, and turns into the way back once the table has left it', () => {
-    const line = card.slice(card.indexOf('styles.dayLine,'), card.indexOf('onLayout={onTableLayout}'));
-    expect(line).toMatch(/selected === 0 \?[\s\S]*?t\('home\.today'\)[\s\S]*?: \([\s\S]*?onPress=\{\(\) => handleSelect\(0\)\}[\s\S]*?home\.backToToday/);
+    const line = card.slice(card.indexOf('style={styles.dayLine}'), card.indexOf('onLayout={onTableLayout}'));
+    // The mark is not a control; the way back is one, named for a11y.
+    expect(line).toMatch(/selected === 0 \?[\s\S]*?styles\.todayDot[\s\S]*?t\('home\.today'\)[\s\S]*?: \([\s\S]*?accessibilityLabel=\{t\('home\.backToToday'[\s\S]*?onPress=\{\(\) => handleSelect\(0\)\}/);
   });
 
   it('names yesterday for the sheet and for screen readers', () => {

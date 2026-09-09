@@ -110,9 +110,10 @@ describe('nothing reads a translation during a render any more', () => {
   const read = (p: string) =>
     require('fs').readFileSync(require('path').join(__dirname, '..', p), 'utf-8');
 
+  // QuranCard is not in the list any more: it no longer reads a verse at
+  // all — the ayah of the day left Today, and the card is only the door.
   it.each([
     'src/quran/mushaf/AyahActionSheet.tsx',
-    'src/screens/home/QuranCard.tsx',
     'src/screens/QuranScreen.tsx',
   ])('%s fetches it into state instead', (file: string) => {
     const src = read(file);

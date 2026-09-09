@@ -10,8 +10,10 @@
  *   khatmah  — a plan is running and pages remain for today
  *   done     — the plan is running and today's portion is finished
  *   continue — a bookmark exists but no plan
- *   ayah     — nothing started; show the verse of the day instead of an
- *              empty shelf, since a first run has neither of the above
+ *   start    — nothing started: the door into the muṣḥaf, and the offer
+ *              of a khatmah. It used to show the verse of the day here;
+ *              that is a reading, and Today is not where one is read —
+ *              the card's job is the way in, in every state.
  *
  * The review's own note is the reason this is a selector and not four
  * branches inside the view: four states in one card is four code paths, and
@@ -29,7 +31,7 @@ import {
 } from './quranState';
 
 export type QuranCardState =
-  | { kind: 'ayah' }
+  | { kind: 'start' }
   | { kind: 'continue'; lastRead: LastRead }
   | {
       kind: 'khatmah';
@@ -119,5 +121,5 @@ export function selectQuranCardState(
   }
 
   if (lastRead) return { kind: 'continue', lastRead };
-  return { kind: 'ayah' };
+  return { kind: 'start' };
 }

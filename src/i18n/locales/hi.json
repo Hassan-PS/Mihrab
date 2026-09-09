@@ -96,7 +96,9 @@
     "alertOverrideOnce": "{{mode}} सिर्फ़ इस बार · रीसेट",
     "alertOverrideA11y": "{{prayer}} सिर्फ़ इस बार {{mode}} पर है",
     "alertOverrideResetHint": "{{mode}} वापस लाता है",
-    "yesterday": "कल (बीता)"
+    "yesterday": "कल (बीता)",
+    "startReading": "पढ़ना शुरू करें",
+    "startReadingHint": "अल-फ़ातिहा, पृष्ठ 1"
   },
   "errors": {
     "locationNeededTitle": "स्थान की आवश्यकता है",

@@ -96,7 +96,9 @@
     "alertOverrideOnce": "{{mode}} هذه المرة فقط · إعادة",
     "alertOverrideA11y": "{{prayer}} مضبوطة على {{mode}} هذه المرة فقط",
     "alertOverrideResetHint": "يعيد {{mode}}",
-    "yesterday": "أمس"
+    "yesterday": "أمس",
+    "startReading": "ابدأ القراءة",
+    "startReadingHint": "الفاتحة، الصفحة ١"
   },
   "errors": {
     "locationNeededTitle": "الموقع مطلوب",

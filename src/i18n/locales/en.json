@@ -96,7 +96,9 @@
     "alertOverrideOnce": "{{mode}} just this once · Reset",
     "alertOverrideA11y": "{{prayer}} is set to {{mode}} just this once",
     "alertOverrideResetHint": "Restores {{mode}}",
-    "yesterday": "Yesterday"
+    "yesterday": "Yesterday",
+    "startReading": "Start reading",
+    "startReadingHint": "Al-Fātiḥah, page 1"
   },
   "errors": {
     "locationNeededTitle": "Location needed",

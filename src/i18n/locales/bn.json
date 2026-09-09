@@ -96,7 +96,9 @@
     "alertOverrideOnce": "{{mode}} শুধু এইবার · রিসেট",
     "alertOverrideA11y": "{{prayer}} শুধু এইবারের জন্য {{mode}} করা আছে",
     "alertOverrideResetHint": "{{mode}} ফিরিয়ে আনে",
-    "yesterday": "গতকাল"
+    "yesterday": "গতকাল",
+    "startReading": "পড়া শুরু করুন",
+    "startReadingHint": "আল-ফাতিহা, পৃষ্ঠা ১"
   },
   "errors": {
     "locationNeededTitle": "অবস্থান প্রয়োজন",

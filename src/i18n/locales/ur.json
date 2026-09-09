@@ -96,7 +96,9 @@
     "alertOverrideOnce": "{{mode}} صرف اس بار · ری سیٹ",
     "alertOverrideA11y": "{{prayer}} صرف اس بار {{mode}} پر ہے",
     "alertOverrideResetHint": "{{mode}} بحال کرتا ہے",
-    "yesterday": "گزشتہ کل"
+    "yesterday": "گزشتہ کل",
+    "startReading": "پڑھنا شروع کریں",
+    "startReadingHint": "الفاتحہ، صفحہ ۱"
   },
   "errors": {
     "locationNeededTitle": "مقام درکار ہے۔",

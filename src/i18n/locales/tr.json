@@ -96,7 +96,9 @@
     "alertOverrideOnce": "{{mode}} yalnızca bu seferlik · Sıfırla",
     "alertOverrideA11y": "{{prayer}} yalnızca bu seferlik {{mode}} olarak ayarlı",
     "alertOverrideResetHint": "{{mode}} ayarını geri yükler",
-    "yesterday": "Dün"
+    "yesterday": "Dün",
+    "startReading": "Okumaya başla",
+    "startReadingHint": "Fâtiha, sayfa 1"
   },
   "errors": {
     "locationNeededTitle": "Konum gerekli",

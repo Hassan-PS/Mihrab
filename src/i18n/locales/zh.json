@@ -96,7 +96,9 @@
     "alertOverrideOnce": "{{mode}}（仅此一次）· 重置",
     "alertOverrideA11y": "{{prayer}} 仅此一次设为{{mode}}",
     "alertOverrideResetHint": "恢复为{{mode}}",
-    "yesterday": "昨天"
+    "yesterday": "昨天",
+    "startReading": "开始阅读",
+    "startReadingHint": "法谛海，第 1 页"
   },
   "errors": {
     "locationNeededTitle": "需要位置",

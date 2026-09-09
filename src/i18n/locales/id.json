@@ -96,7 +96,9 @@
     "alertOverrideOnce": "{{mode}} kali ini saja · Setel ulang",
     "alertOverrideA11y": "{{prayer}} disetel ke {{mode}} kali ini saja",
     "alertOverrideResetHint": "Mengembalikan {{mode}}",
-    "yesterday": "Kemarin"
+    "yesterday": "Kemarin",
+    "startReading": "Mulai membaca",
+    "startReadingHint": "Al-Fatihah, halaman 1"
   },
   "errors": {
     "locationNeededTitle": "Lokasi diperlukan",

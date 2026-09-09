@@ -393,6 +393,47 @@ async function fetchWithLocalLastResort(
   }
 }
 
+/**
+ * A day's times from what is ALREADY ON THE DEVICE, or null — never a fetch.
+ *
+ * The same first two rungs as `getOrFetchPrayerTimes` — the prepared
+ * dataset where the provider has one, then the cache — and nothing after
+ * them. This exists because the two dataset providers are never written
+ * to the cache (the dataset is read first and is the authority, so caching
+ * its answer would only let it go stale), which meant a cache-only reader
+ * saw NOTHING for a Swedish or Moroccan user — the Today card could not
+ * turn back a single day for exactly the people the datasets serve.
+ * The dataset lookup answers from its own on-device copy and seed and
+ * never waits on the network, so this stays a read.
+ */
+export async function getStoredPrayerTimes(
+  params: Omit<StoredPrayerData, 'months'> & { date: Date },
+): Promise<TimingsMap | null> {
+  if (
+    params.provider === 'islamiska_forbundet' ||
+    params.provider === 'habous'
+  ) {
+    try {
+      const ds =
+        params.provider === 'habous'
+          ? await getHabousDatasetTimes({
+              latitude: params.latitude,
+              longitude: params.longitude,
+              date: params.date,
+            })
+          : await getIslamiskaForbundetDatasetTimes({
+              latitude: params.latitude,
+              longitude: params.longitude,
+              date: params.date,
+            });
+      return ds.timings;
+    } catch {
+      /* dataset miss — the cache may still have it */
+    }
+  }
+  return getCachedPrayerTimes(params);
+}
+
 export async function getOrFetchPrayerTimes(
   params: Omit<StoredPrayerData, 'months'> & { date: Date },
 ): Promise<TimingsMap> {

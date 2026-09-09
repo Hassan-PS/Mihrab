@@ -96,7 +96,9 @@
     "alertOverrideOnce": "{{mode}} nur dieses Mal · Zurücksetzen",
     "alertOverrideA11y": "{{prayer}} ist nur dieses Mal auf {{mode}} gestellt",
     "alertOverrideResetHint": "Stellt {{mode}} wieder her",
-    "yesterday": "Gestern"
+    "yesterday": "Gestern",
+    "startReading": "Mit dem Lesen beginnen",
+    "startReadingHint": "Al-Fātiḥa, Seite 1"
   },
   "errors": {
     "locationNeededTitle": "Standort erforderlich",

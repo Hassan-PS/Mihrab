@@ -1049,10 +1049,7 @@ function TodayCardImpl({
             shows today and becomes the way back once it has been swiped
             off it. The days themselves are the swipe, both ways. */}
         <View
-          style={[
-            styles.dayLine,
-            { borderBottomColor: palette.border ?? palette.muted },
-          ]}
+          style={styles.dayLine}
           accessibilityRole="header"
           accessibilityLabel={`${getDayLabel(selected)} — ${getDayDate(selected)}`}>
           <View style={styles.dayLineText}>
@@ -1061,23 +1058,32 @@ function TodayCardImpl({
               numberOfLines={1}
               maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
               {getWeekday(selected)}
+              <Text style={[styles.dayLineDate, { color: palette.muted }]}>
+                {'  '}
+                {getDayDate(selected)}
+              </Text>
             </Text>
-            <Text
-              style={[styles.dayLineDates, { color: palette.muted }]}
-              numberOfLines={1}
-              maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
-              {getHijriDate
-                ? `${getDayDate(selected)} · ${getHijriDate(selected)}`
-                : getDayDate(selected)}
-            </Text>
+            {getHijriDate ? (
+              <Text
+                style={[styles.dayLineHijri, { color: palette.muted }]}
+                numberOfLines={1}
+                maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
+                {getHijriDate(selected)}
+              </Text>
+            ) : null}
           </View>
+          {/* The mark: a dot and the word while the table shows today —
+              not a control, nothing to press — and the word alone, in
+              the accent, as the way back once it does not. No pill, no
+              fill: a line of type on the page, like the row's names. */}
           {selected === 0 ? (
             <View
-              style={[styles.todayMark, { backgroundColor: palette.accentBg }]}
+              style={styles.todayMark}
               accessibilityElementsHidden
               importantForAccessibility="no-hide-descendants">
+              <View style={[styles.todayDot, { backgroundColor: palette.accentSolid }]} />
               <Text
-                style={[styles.todayMarkLabel, { color: palette.accent }]}
+                style={[styles.todayMarkLabel, { color: palette.muted }]}
                 maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
                 {t('home.today')}
               </Text>
@@ -1087,16 +1093,17 @@ function TodayCardImpl({
               accessibilityRole="button"
               accessibilityLabel={t('home.backToToday', 'Back to today')}
               onPress={() => handleSelect(0)}
-              hitSlop={8}
-              style={({ pressed }) => [
-                styles.todayMark,
-                { backgroundColor: palette.accentSolid },
-                pressed && { opacity: 0.7 },
-              ]}>
+              hitSlop={10}
+              style={({ pressed }) => [styles.todayMark, pressed && { opacity: 0.6 }]}>
               <Text
-                style={[styles.todayMarkLabel, { color: palette.onAccent }]}
+                style={[styles.todayBackGlyph, { color: palette.accent }]}
                 maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
-                {t('home.backToToday', 'Back to today')}
+                {selected < 0 ? (rtl ? '‹' : '›') : rtl ? '›' : '‹'}
+              </Text>
+              <Text
+                style={[styles.todayBackLabel, { color: palette.accent }]}
+                maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
+                {t('home.today')}
               </Text>
             </Pressable>
           )}
@@ -1194,25 +1201,35 @@ const styles = StyleSheet.create({
   // The 16dp this used to add kept the table inside the ghost of the
   // card it once sat in, a step in from where the hero's text begins.
   tableBleed: {},
+  /**
+   * The day line: the weekday in the row's own type, the date beside it
+   * in the muted ink, the Hijri date under it — and no rule beneath, the
+   * first row's divider is the rule. It sits on the same inset as the
+   * hero's text and the rows' names, so the three read as one column.
+   */
   dayLine: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     justifyContent: 'space-between',
     gap: SPACING.md,
     paddingHorizontal: SPACING.xl,
-    paddingTop: SPACING.md,
-    paddingBottom: SPACING.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.sm,
   },
   dayLineText: { flexShrink: 1, flexGrow: 1 },
-  dayLineWeekday: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
-  dayLineDates: { fontSize: TYPE.footnote.fontSize, marginTop: 1 },
+  dayLineWeekday: { fontSize: TYPE.title3.fontSize, fontWeight: '700' },
+  dayLineDate: { fontSize: TYPE.callout.fontSize, fontWeight: '500' },
+  dayLineHijri: { fontSize: TYPE.footnote.fontSize, marginTop: 2 },
   todayMark: {
-    borderRadius: RADIUS.full,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xs + 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    paddingBottom: 3,
   },
+  todayDot: { width: 6, height: 6, borderRadius: 3 },
   todayMarkLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
+  todayBackGlyph: { fontSize: TYPE.title3.fontSize, fontWeight: '600', lineHeight: 20 },
+  todayBackLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '700' },
   heroTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
