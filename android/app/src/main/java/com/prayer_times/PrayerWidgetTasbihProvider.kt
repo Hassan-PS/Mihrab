@@ -95,7 +95,12 @@ class PrayerWidgetTasbihProvider : AppWidgetProvider() {
       return root.optJSONObject("tasbih")
     }
 
-    fun buildViews(base: Context): RemoteViews {
+    fun buildViews(base: Context): RemoteViews =
+      // A throw anywhere below becomes a Mihrab error card with the class
+      // name on it, never the launcher's "Can't load widget". See WidgetErrorCard.
+      WidgetErrorCard.guard(base, R.layout.prayer_widget_tasbih, "tasbih") { render(base) }
+
+    private fun render(base: Context): RemoteViews {
       // Every label below comes out of the string table, so the context has to
       // be the one that speaks Mihrab's language before anything is read from
       // it. See PrayerWidgetProvider.localized.

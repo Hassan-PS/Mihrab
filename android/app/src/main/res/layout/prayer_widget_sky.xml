@@ -67,7 +67,7 @@
                 android:ellipsize="end" />
 
             <!-- The open sky the sun and moon cross. -->
-            <View
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1" />

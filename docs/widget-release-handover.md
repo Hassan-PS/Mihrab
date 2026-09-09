@@ -315,6 +315,21 @@ declaring them made the refresh story look far better covered than it was.
   payload with no `rows` is still refused outright.
 - **Android redraws each widget behind its own guard**, so one card cannot
   take down the other seven.
+- **A throw inside any Android render is a Mihrab card, not the launcher's.**
+  Next-prayer and Sky catch their own render; Streak, Reading, Hijri, Tasbih
+  and Log go through `WidgetErrorCard.guard`. Whatever throws, the user sees
+  the card in their own colours with "Couldn't load widget (ClassName)" —
+  the class, never the message — and the whole exception is in logcat under
+  `MihrabWidget`. Only `Exception` is caught; an `Error` is meant to surface.
+- **A layout that the launcher will not inflate cannot ship.** RemoteViews
+  accepts an allow-list of view classes, and a layout with anything else in
+  it — a bare `<View>` spacer, `<Space>`, a Material widget — fails on the
+  LAUNCHER side with "Class not allowed to be inflated", where no guard of
+  ours can reach it: the user sees "Can't load widget" and nothing else.
+  The Sky widget shipped one build with a `<View>` spacer and did exactly
+  that. `widgetSizesAndSky.test.ts` now holds every `prayer_widget*.xml`,
+  live and preview, to the list; spacers are `FrameLayout`, decorative shapes
+  are `ImageView`.
 - **Tap queues** discard entries older than fourteen days at drain, are
   capped at 4000 entries, and are dropped entirely when the install marker
   says they were queued on a different device — the log queue's entries name

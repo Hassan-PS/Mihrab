@@ -3,6 +3,7 @@ package com.prayer_times
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import android.util.SizeF
 import android.widget.RemoteViews
 import kotlin.math.roundToInt
@@ -63,6 +64,10 @@ object WidgetSizing {
   ): RemoteViews {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
       val sizes = sizesFor(mgr, appWidgetId)
+      // One line per draw, so a "wrong variant" report can be read against
+      // the sizes the launcher actually offered. Debug level: silent in a
+      // release logcat unless asked for.
+      Log.d(PrayerWidgetProvider.WIDGET_LOG_TAG, "sizes for widget $appWidgetId: $sizes")
       if (sizes.isNotEmpty()) {
         // Distinct dp sizes only: two SizeF that round to the same dp would
         // draw the same card twice, and the map is keyed on the SizeF the

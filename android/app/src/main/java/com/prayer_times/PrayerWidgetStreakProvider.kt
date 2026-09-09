@@ -126,7 +126,12 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
       return Math.ceil((PADDING_DP + BREATHING_DP + text * scale).toDouble()).toInt()
     }
 
-    fun buildViews(base: Context, widthDp: Int, heightDp: Int): RemoteViews {
+    fun buildViews(base: Context, widthDp: Int, heightDp: Int): RemoteViews =
+      // A throw anywhere below becomes a Mihrab error card with the class
+      // name on it, never the launcher's "Can't load widget". See WidgetErrorCard.
+      WidgetErrorCard.guard(base, R.layout.prayer_widget_streak, "streak") { render(base, widthDp, heightDp) }
+
+    private fun render(base: Context, widthDp: Int, heightDp: Int): RemoteViews {
       // Every label below comes out of the string table, so the context has to
       // be the one that speaks Mihrab's language before anything is read from
       // it. See PrayerWidgetProvider.localized.

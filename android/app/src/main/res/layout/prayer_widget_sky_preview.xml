@@ -12,12 +12,13 @@
     android:padding="12dp">
 
     <!-- The moon, as the drawn sky places it in the open room. -->
-    <View
+    <ImageView
         android:layout_width="22dp"
         android:layout_height="22dp"
         android:layout_gravity="center_horizontal|top"
         android:layout_marginTop="34dp"
-        android:background="@drawable/widget_sky_preview_moon" />
+        android:importantForAccessibility="no"
+        android:src="@drawable/widget_sky_preview_moon" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -34,7 +35,7 @@
             android:maxLines="1"
             android:ellipsize="end" />
 
-        <View
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1" />

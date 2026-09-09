@@ -264,7 +264,12 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
     /** As many days as the payload carries. See PRACTICE_WINDOW_DAYS. */
     private const val MAX_GRID_DAYS = 210
 
-    private fun buildViews(base: Context, widthDp: Int, heightDp: Int): RemoteViews {
+    private fun buildViews(base: Context, widthDp: Int, heightDp: Int): RemoteViews =
+      // A throw anywhere below becomes a Mihrab error card with the class
+      // name on it, never the launcher's "Can't load widget". See WidgetErrorCard.
+      WidgetErrorCard.guard(base, R.layout.prayer_widget_log, "log") { render(base, widthDp, heightDp) }
+
+    private fun render(base: Context, widthDp: Int, heightDp: Int): RemoteViews {
       // Every label below comes out of the string table, so the context has to
       // be the one that speaks Mihrab's language before anything is read from
       // it. See PrayerWidgetProvider.localized.

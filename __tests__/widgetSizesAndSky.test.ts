@@ -172,3 +172,76 @@ describe('the Sky widget is the hero', () => {
     }
   });
 });
+
+/**
+ * "Can't load widget" — the launcher refuses whole layouts over one class.
+ *
+ * RemoteViews inflates only an allow-list of view classes; anything else
+ * (a bare <View> spacer, <Space>, a Material widget) throws
+ * "Class not allowed to be inflated" on the launcher side, where no
+ * try/catch of ours can turn it into a Mihrab error card. The Sky widget
+ * shipped once with a <View> spacer and showed exactly that. Every layout
+ * a widget provider inflates — live and preview — is held to the list.
+ */
+describe('every widget layout inflates under RemoteViews', () => {
+  // https://developer.android.com/reference/android/widget/RemoteViews (API 31+, without the
+  // collection views this app does not use).
+  const ALLOWED = new Set([
+    'FrameLayout', 'LinearLayout', 'RelativeLayout', 'GridLayout',
+    'TextView', 'ImageView', 'ImageButton', 'Button', 'Chronometer', 'ProgressBar',
+    'AnalogClock', 'TextClock', 'ViewFlipper', 'AdapterViewFlipper',
+    'ListView', 'GridView', 'StackView',
+  ]);
+  const layoutDir = path.join(RES, 'layout');
+  const layouts = readdirSync(layoutDir).filter(f => /^prayer_widget.*\.xml$/.test(f));
+
+  it('covers the live and the preview layouts', () => {
+    expect(layouts.length).toBeGreaterThanOrEqual(19);
+    expect(layouts).toContain('prayer_widget_sky.xml');
+    expect(layouts).toContain('prayer_widget_sky_preview.xml');
+  });
+
+  for (const f of layouts) {
+    it(`${f} uses only allow-listed classes`, () => {
+      const src = read(layoutDir, f);
+      const classes = [...src.matchAll(/^\s*<([A-Za-z][A-Za-z0-9_.]*)/gm)].map(m => m[1]);
+      expect(classes.length).toBeGreaterThan(0);
+      const offenders = classes.filter(c => !ALLOWED.has(c));
+      expect(offenders).toEqual([]);
+    });
+  }
+});
+
+/**
+ * A throw in ANY provider's render is a Mihrab error card, not the
+ * launcher's. Next-prayer and Sky catch their own; the rest go through
+ * WidgetErrorCard.guard, and the guard itself never trusts the state it
+ * is called in.
+ */
+describe('every provider degrades to a Mihrab error card', () => {
+  const guarded = ['Streak', 'Reading', 'Hijri', 'Tasbih', 'Log'];
+  for (const name of guarded) {
+    it(`PrayerWidget${name}Provider.buildViews is guarded`, () => {
+      const src = kt(`PrayerWidget${name}Provider`);
+      expect(src).toMatch(/fun buildViews\([^)]*\): RemoteViews =\s*(\/\/[^\n]*\n\s*)*WidgetErrorCard\.guard\(base, R\.layout\.prayer_widget_[a-z]*, "[a-z]+"\) \{ render\(/);
+      expect(src).toMatch(/private fun render\(base: Context/);
+    });
+  }
+
+  it('Next-prayer and Sky put the class name on the card themselves', () => {
+    expect(provider).toMatch(/widget_error\)\} \(\$\{e\.javaClass\.simpleName\}\)/);
+    expect(kt('PrayerWidgetSkyProvider')).toMatch(/widget_error\)\} \(\$\{e\.javaClass\.simpleName\}\)/);
+  });
+
+  it('the guard shows the class name, not the message, and survives a broken context', () => {
+    const src = kt('WidgetErrorCard');
+    expect(src).toMatch(/catch \(e: Exception\)/);
+    expect(src).not.toMatch(/catch \(e: Throwable\)/);
+    expect(src).toMatch(/e\.javaClass\.simpleName/);
+    expect(src).not.toMatch(/e\.message/);
+    expect(src).toMatch(/try \{ PrayerWidgetProvider\.localized\(base\) \} catch/);
+    expect(src).toMatch(/R\.id\.widget_placeholder, View\.VISIBLE/);
+    expect(src).toMatch(/R\.id\.widget_content, View\.GONE/);
+    expect(src).toMatch(/Log\.e\(PrayerWidgetProvider\.WIDGET_LOG_TAG/);
+  });
+});
