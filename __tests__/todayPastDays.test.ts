@@ -91,22 +91,58 @@ describe('the pages', () => {
   });
 });
 
-describe('the day line', () => {
+describe('the day bar', () => {
   const card = read('src/screens/home/TodayCard.tsx');
   const home = read('src/screens/HomeScreen.tsx');
+  const bar = card.slice(
+    card.indexOf('<View style={styles.dayBar}>'),
+    card.indexOf('onLayout={onTableLayout}'),
+  );
 
   it('says the weekday and both dates of the day on show', () => {
-    expect(card).toMatch(/\{getWeekday\(selected\)\}/);
-    expect(card).toMatch(/\{getDayDate\(selected\)\}/);
-    expect(card).toMatch(/\{getHijriDate\(selected\)\}/);
-    // The weekday is the weekday, today included — "Today" is the mark's word.
+    expect(bar).toMatch(/\{getWeekday\(selected\)\}/);
+    expect(bar).toMatch(/\{getDayDate\(selected\)\}/);
+    expect(bar).toMatch(/getHijriDate\(selected\)/);
+    // The weekday is the weekday, today included — "Today" is the dot's word.
     expect(home).toMatch(/const getWeekday = useCallback\([\s\S]*?weekday: 'long'/);
   });
 
-  it('marks today, and turns into the way back once the table has left it', () => {
-    const line = card.slice(card.indexOf('style={styles.dayLine}'), card.indexOf('onLayout={onTableLayout}'));
-    // The mark is not a control; the way back is one, named for a11y.
-    expect(line).toMatch(/selected === 0 \?[\s\S]*?styles\.todayDot[\s\S]*?t\('home\.today'\)[\s\S]*?: \([\s\S]*?accessibilityLabel=\{t\('home\.backToToday'[\s\S]*?onPress=\{\(\) => handleSelect\(0\)\}/);
+  it('steps a day at each edge, and stops at the ends of the record', () => {
+    expect(bar).toMatch(/log\.previousDay[\s\S]*?handleSelect\(selected - 1\)/);
+    expect(bar).toMatch(/log\.nextDay[\s\S]*?handleSelect\(selected \+ 1\)/);
+    expect(bar).toMatch(/disabled=\{!canGoBack\}/);
+    expect(bar).toMatch(/disabled=\{!canGoForward\}/);
+    expect(card).toMatch(/const canGoBack = selected > -pastDays\.length;/);
+    expect(card).toMatch(/const canGoForward = selected < week\.length - 1;/);
+    // The chevrons are drawn, not typed, and they mirror in RTL.
+    expect(bar).toMatch(/<Chevron back=\{!rtl\}/);
+    expect(bar).toMatch(/<Chevron back=\{rtl\}/);
+  });
+
+  /**
+   * Nothing in the bar is a box: the step arrows are a stroked path with
+   * a hit slop, and the way back is a word in the accent. They were a
+   * quotation-mark glyph inside a filled circle.
+   */
+  it('draws the arrows as ink rather than buttons', () => {
+    expect(card).toMatch(/const CHEVRON_SIZE = 20;/);
+    expect(card).toMatch(/strokeWidth=\{1\.75\}/);
+    expect(card).toMatch(/strokeLinecap="round"/);
+    expect(card).toMatch(/dayStep: \{ padding: SPACING\.xs/);
+    // No fill, no radius, on any part of the bar.
+    const bar_styles = card.slice(card.indexOf('  dayBar: {'), card.indexOf('  tableBleed:'));
+    expect(bar_styles).not.toMatch(/backgroundColor/);
+    expect(bar_styles).not.toMatch(/borderRadius: RADIUS\.full/);
+    expect(bar).not.toMatch(/palette\.controlBg/);
+    expect(bar).not.toMatch(/palette\.accentBg/);
+  });
+
+  it('marks today with a dot, and is the way back once the table has left it', () => {
+    expect(bar).toMatch(/disabled=\{onToday\}/);
+    expect(bar).toMatch(/onPress=\{\(\) => handleSelect\(0\)\}/);
+    expect(bar).toMatch(/onToday \?[\s\S]*?styles\.todayDot/);
+    expect(bar).toMatch(/home\.backToToday/);
+    expect(card).toMatch(/const onToday = selected === 0;/);
   });
 
   it('names yesterday for the sheet and for screen readers', () => {
@@ -121,6 +157,22 @@ describe('the day line', () => {
   it('no longer repeats today’s date under the countdown', () => {
     expect(card).not.toMatch(/dateLine/);
   });
+
+  /**
+   * A tablet held upright: the hero must not grow into the page's slack,
+   * and the day must sit in the middle of the page rather than the sky
+   * filling it — see HOME_ROOMY_MIN_HEIGHT.
+   */
+  it('stops the hero growing on a roomy page, and centres the day', () => {
+    expect(home).toMatch(/const isRoomy =[\s\S]*?screenWidth >= BREAKPOINT_REGULAR &&[\s\S]*?screenHeight >= HOME_ROOMY_MIN_HEIGHT/);
+    expect(home).toMatch(/!isRoomy && styles\.fillColumn/);
+    expect(home).toMatch(/scrollContentRoomy: \{[\s\S]*?justifyContent: 'center'/);
+    expect(home).toMatch(/roomy=\{isRoomy\}/);
+    expect(card).toMatch(/roomy\s*\?\s*styles\.cardRoomy\s*:\s*styles\.cardBleed/);
+    expect(card).toMatch(/const roomyHeroHeight = roomy/);
+    // The status bar is the page's on a roomy page, not the sky's.
+    expect(card).toMatch(/ownsStatusBar=\{fullBleed && !roomy\}/);
+  });
 });
 
 describe('the edges', () => {
@@ -132,7 +184,7 @@ describe('the edges', () => {
     expect(row).not.toMatch(/paddingStart: SPACING\.xl/);
     expect(row).toMatch(/divider: \{[\s\S]*?start: SPACING\.xl,\s*end: SPACING\.xl,/);
     expect(card).toMatch(/tableBleed: \{\},/);
-    expect(card).toMatch(/dayLine: \{[\s\S]*?paddingHorizontal: SPACING\.xl,/);
+    expect(card).toMatch(/dayBar: \{[\s\S]*?paddingHorizontal: SPACING\.xl,/);
     expect(card).toMatch(/monthRow: \{[\s\S]*?paddingHorizontal: SPACING\.xl,/);
   });
 });

@@ -34,6 +34,7 @@ import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import { useIsActive } from '../../hooks/useIsActive';
 import { useAppPalette } from '../../hooks/useAppPalette';
@@ -88,9 +89,36 @@ import {
 import { clearNativeAlertOverride } from '../../native/MihrabLiveActivity';
 import { ymdLocal } from '../../notifications/scheduling';
 import { QiblaChipCorner } from './QiblaChip';
-import { HOME_TABLE_RADIUS } from './tokens';
+import { HOME_SCREEN_PADDING, HOME_TABLE_RADIUS } from './tokens';
 import { RADIUS, SPACING } from '../../theme/tokens';
 import { TYPE } from '../../theme/typography';
+
+/**
+ * The day bar's step arrow: a stroked chevron, drawn rather than typed.
+ *
+ * It was the typographic ‹ › in a filled circle, which is two dated
+ * idioms at once — a glyph whose weight and vertical placement belong to
+ * a quotation mark, inside a button-shaped container the rest of this
+ * screen stopped using in the redesign (redesign-plan P4: a control is
+ * ink, not a box). This is the same 1.75pt round-capped stroke as the
+ * check beside a prayer and the marks on the compass, with nothing behind
+ * it and a generous hit slop instead.
+ */
+const CHEVRON_SIZE = 20;
+function Chevron({ back, color }: { back: boolean; color: string }) {
+  return (
+    <Svg width={CHEVRON_SIZE} height={CHEVRON_SIZE} viewBox="0 0 20 20">
+      <Path
+        d={back ? 'M12.25 4.25 L6.5 10 L12.25 15.75' : 'M7.75 4.25 L13.5 10 L7.75 15.75'}
+        stroke={color}
+        strokeWidth={1.75}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+    </Svg>
+  );
+}
 
 /** Below this window height the rows go dense — see `renderDay`. */
 export const DENSE_BELOW_HEIGHT = 720;
@@ -142,6 +170,20 @@ export type TodayCardProps = {
    * the rows sit on the page beneath it, not in a card.
    */
   fullBleed?: boolean;
+  /**
+   * A tablet held upright (see `HOME_ROOMY_MIN_HEIGHT`): full-bleed, but
+   * the hero does NOT grow into the page's slack.
+   *
+   * On a phone the hero takes whatever the table leaves, because that is
+   * a few dozen points and the alternative is a band of nothing under the
+   * rows. Here the slack is most of the screen: the same rule gave the
+   * sky six hundred points of empty middle, sank the countdown to the
+   * waist of the page, and left the hero's white status-bar ink over the
+   * cream margin beside the column, where it cannot be read. So the hero
+   * takes a measured height, keeps its corners, stays clear of the status
+   * bar, and the column centres itself in the page instead.
+   */
+  roomy?: boolean;
   /** The location chip for the hero's top row, drawn in the sky's ink. */
   renderLocation?: (ink: SkyInkColors) => ReactNode;
 };
@@ -509,6 +551,7 @@ function TodayCardImpl({
   onOpenQibla,
   expanded = false,
   fullBleed = false,
+  roomy = false,
   renderLocation,
   skyTimings,
 }: TodayCardProps) {
@@ -727,6 +770,10 @@ function TodayCardImpl({
       }, ''),
     [clock],
   );
+  /** Which way the day bar can step, and whether it is on today. */
+  const onToday = selected === 0;
+  const canGoBack = selected > -pastDays.length;
+  const canGoForward = selected < week.length - 1;
   const handleSelect = useCallback(
     (offset: number) => {
       setSelected(offset);
@@ -870,7 +917,19 @@ function TodayCardImpl({
   // Full-bleed: the hero's top padding clears the status bar; the sky
   // bleeds up under it. The card chrome — radius, edge, glass — is gone:
   // the hero is a panel of the page, and the rows sit on the page.
-  const heroTop = fullBleed ? insets.top + SPACING.md : SPACING.lg;
+  // Roomy: the hero is a panel inside the page, so it takes the page's
+  // own top padding rather than clearing the status bar.
+  const heroTop = fullBleed && !roomy ? insets.top + SPACING.md : SPACING.lg;
+  /**
+   * The hero's height on a roomy page: about a third of the window, never
+   * under 300 and never over 460. A third keeps the sky the backdrop it
+   * is meant to be while leaving the sun or the moon somewhere to sit;
+   * the floor is the countdown block plus a strip of sky, and the ceiling
+   * stops a 13-inch iPad from turning the hero back into the page.
+   */
+  const roomyHeroHeight = roomy
+    ? Math.round(Math.min(Math.max(windowHeight * 0.34, 300), 460))
+    : undefined;
   const Outer = fullBleed ? View : GlassSurface;
   const qiblaChip =
     fullBleed && qiblaBearing != null ? (
@@ -993,7 +1052,9 @@ function TodayCardImpl({
     <Outer
       style={
         fullBleed
-          ? styles.cardBleed
+          ? roomy
+            ? styles.cardRoomy
+            : styles.cardBleed
           : [styles.card, { borderRadius: HOME_TABLE_RADIUS, ...cardEdgeStyle(palette) }]
       }>
       {/* Full-bleed, the hero GROWS: the card fills the page and the hero
@@ -1003,7 +1064,8 @@ function TodayCardImpl({
         style={[
           styles.heroWrap,
           { paddingTop: heroTop },
-          fullBleed && styles.heroWrapBleed,
+          fullBleed && !roomy && styles.heroWrapBleed,
+          roomy && [styles.heroWrapRoomy, { height: roomyHeroHeight }],
           // Full-bleed, the sky IS the wrap's ground — a tint under it
           // would show as a band wherever the two disagreed by a pixel.
           { backgroundColor: fullBleed ? 'transparent' : palette.accentBg },
@@ -1018,10 +1080,12 @@ function TodayCardImpl({
             tomorrowFajr={tomorrow?.Fajr}
             expanded={expanded}
             bleed={{ horizontal: SPACING.xl, top: heroTop, bottom: SPACING.lg }}
-            statusBarInset={fullBleed ? insets.top : 0}
+            statusBarInset={fullBleed && !roomy ? insets.top : 0}
             fill={fullBleed}
             topRow={fullBleed ? { renderLocation, qibla: qiblaChip } : undefined}
-            ownsStatusBar={fullBleed}
+            // Not on a roomy page: the hero is not under the status bar
+            // there, so the bar takes the page's ink like every other tab.
+            ownsStatusBar={fullBleed && !roomy}
           />
         ) : null}
         {/* Parked in the corner rather than in the hero's own markup, and
@@ -1048,65 +1112,91 @@ function TodayCardImpl({
             on the trailing edge a mark that reads "Today" while the table
             shows today and becomes the way back once it has been swiped
             off it. The days themselves are the swipe, both ways. */}
-        <View
-          style={styles.dayLine}
-          accessibilityRole="header"
-          accessibilityLabel={`${getDayLabel(selected)} — ${getDayDate(selected)}`}>
-          <View style={styles.dayLineText}>
-            <Text
-              style={[styles.dayLineWeekday, { color: palette.text }]}
-              numberOfLines={1}
-              maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
-              {getWeekday(selected)}
-              <Text style={[styles.dayLineDate, { color: palette.muted }]}>
-                {'  '}
-                {getDayDate(selected)}
-              </Text>
-            </Text>
-            {getHijriDate ? (
+        {/* THE DAY BAR.
+            A drawn chevron at each edge steps a day; the block between
+            them says which day is on show, in both calendars, and is the
+            way back to today once the table has been turned off it.
+
+            It replaced a line of type with a dot at the end, which said
+            what day it was and offered nothing to do about it: the only
+            way to another day was a swipe nobody could see. Nothing here
+            is in a box — the chevrons are ink with a hit slop, and "back
+            to today" is a word in the accent rather than a tinted pill,
+            because every other control on this page reads that way. */}
+        <View style={styles.dayBar}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('log.previousDay', 'Previous day')}
+            accessibilityState={{ disabled: !canGoBack }}
+            disabled={!canGoBack}
+            onPress={() => handleSelect(selected - 1)}
+            hitSlop={14}
+            style={({ pressed }) => [
+              styles.dayStep,
+              !canGoBack && styles.dayStepOff,
+              pressed && canGoBack && styles.dayStepPressed,
+            ]}>
+            <Chevron back={!rtl} color={String(palette.muted)} />
+          </Pressable>
+
+          <Pressable
+            accessibilityRole={onToday ? 'header' : 'button'}
+            accessibilityLabel={
+              onToday
+                ? `${getDayLabel(selected)} — ${getDayDate(selected)}`
+                : `${getDayLabel(selected)} — ${getDayDate(selected)}. ${t('home.backToToday', 'Back to today')}`
+            }
+            disabled={onToday}
+            onPress={() => handleSelect(0)}
+            style={({ pressed }) => [
+              styles.dayFace,
+              pressed && !onToday && styles.dayStepPressed,
+            ]}>
+            <View style={styles.dayFaceLine}>
+              {onToday ? (
+                <View
+                  style={[styles.todayDot, { backgroundColor: palette.accentSolid }]}
+                />
+              ) : null}
               <Text
-                style={[styles.dayLineHijri, { color: palette.muted }]}
+                style={[styles.dayWeekday, { color: palette.text }]}
                 numberOfLines={1}
                 maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
-                {getHijriDate(selected)}
-              </Text>
-            ) : null}
-          </View>
-          {/* The mark: a dot and the word while the table shows today —
-              not a control, nothing to press — and the word alone, in
-              the accent, as the way back once it does not. No pill, no
-              fill: a line of type on the page, like the row's names. */}
-          {selected === 0 ? (
-            <View
-              style={styles.todayMark}
-              accessibilityElementsHidden
-              importantForAccessibility="no-hide-descendants">
-              <View style={[styles.todayDot, { backgroundColor: palette.accentSolid }]} />
-              <Text
-                style={[styles.todayMarkLabel, { color: palette.muted }]}
-                maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
-                {t('home.today')}
+                {getWeekday(selected)}
+                <Text style={[styles.dayDate, { color: palette.muted }]}>
+                  {'  '}
+                  {getDayDate(selected)}
+                </Text>
               </Text>
             </View>
-          ) : (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('home.backToToday', 'Back to today')}
-              onPress={() => handleSelect(0)}
-              hitSlop={10}
-              style={({ pressed }) => [styles.todayMark, pressed && { opacity: 0.6 }]}>
-              <Text
-                style={[styles.todayBackGlyph, { color: palette.accent }]}
-                maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
-                {selected < 0 ? (rtl ? '‹' : '›') : rtl ? '›' : '‹'}
-              </Text>
-              <Text
-                style={[styles.todayBackLabel, { color: palette.accent }]}
-                maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
-                {t('home.today')}
-              </Text>
-            </Pressable>
-          )}
+            <Text
+              style={[styles.dayHijri, { color: palette.muted }]}
+              numberOfLines={1}
+              maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
+              {getHijriDate ? getHijriDate(selected) : ''}
+              {onToday ? null : (
+                <Text style={[styles.dayBack, { color: palette.accent }]}>
+                  {'   '}
+                  {t('home.backToToday', 'Back to today')}
+                </Text>
+              )}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('log.nextDay', 'Next day')}
+            accessibilityState={{ disabled: !canGoForward }}
+            disabled={!canGoForward}
+            onPress={() => handleSelect(selected + 1)}
+            hitSlop={14}
+            style={({ pressed }) => [
+              styles.dayStep,
+              !canGoForward && styles.dayStepOff,
+              pressed && canGoForward && styles.dayStepPressed,
+            ]}>
+            <Chevron back={rtl} color={String(palette.muted)} />
+          </Pressable>
         </View>
 
         <View onLayout={onTableLayout}>
@@ -1187,6 +1277,8 @@ const styles = StyleSheet.create({
   // boundaries) squash the hero to nothing; with basis auto the hero keeps
   // its own height and the page scrolls the little it then has to.
   cardBleed: { overflow: 'hidden', flexGrow: 1, flexShrink: 0, flexBasis: 'auto' },
+  // Roomy: natural height, and the page centres it — see `roomy`.
+  cardRoomy: { overflow: 'hidden' },
   heroWrap: { paddingHorizontal: SPACING.xl, paddingBottom: SPACING.lg },
   heroWrapBleed: {
     flexGrow: 1,
@@ -1200,36 +1292,49 @@ const styles = StyleSheet.create({
   // carry the hero's own inset (`SPACING.xl`) themselves — see PrayerRow.
   // The 16dp this used to add kept the table inside the ghost of the
   // card it once sat in, a step in from where the hero's text begins.
+  // Roomy: a panel with all four corners, inset from the page's edges
+  // like the cards on every other tab.
+  heroWrapRoomy: {
+    flexGrow: 0,
+    flexShrink: 0,
+    borderRadius: HOME_TABLE_RADIUS,
+    overflow: 'hidden',
+    marginHorizontal: HOME_SCREEN_PADDING,
+  },
   tableBleed: {},
   /**
-   * The day line: the weekday in the row's own type, the date beside it
-   * in the muted ink, the Hijri date under it — and no rule beneath, the
-   * first row's divider is the rule. It sits on the same inset as the
-   * hero's text and the rows' names, so the three read as one column.
+   * The day bar: a chevron at each edge and the day between them.
+   *
+   * It sits on the same inset as the hero's text and the rows' names, so
+   * the three read as one column, and it carries no rule of its own —
+   * the first row's divider is the rule.
    */
-  dayLine: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    gap: SPACING.md,
-    paddingHorizontal: SPACING.xl,
-    paddingTop: SPACING.lg,
-    paddingBottom: SPACING.sm,
-  },
-  dayLineText: { flexShrink: 1, flexGrow: 1 },
-  dayLineWeekday: { fontSize: TYPE.title3.fontSize, fontWeight: '700' },
-  dayLineDate: { fontSize: TYPE.callout.fontSize, fontWeight: '500' },
-  dayLineHijri: { fontSize: TYPE.footnote.fontSize, marginTop: 2 },
-  todayMark: {
+  dayBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm,
-    paddingBottom: 3,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.sm,
   },
-  todayDot: { width: 6, height: 6, borderRadius: 3 },
-  todayMarkLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
-  todayBackGlyph: { fontSize: TYPE.title3.fontSize, fontWeight: '600', lineHeight: 20 },
-  todayBackLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '700' },
+  /** Ink with a hit slop, not a button with a fill. */
+  dayStep: { padding: SPACING.xs, alignItems: 'center', justifyContent: 'center' },
+  /** At either end of the record there is nowhere to step. */
+  dayStepOff: { opacity: 0.25 },
+  dayStepPressed: { opacity: 0.55 },
+  /** The day itself — the bar's middle, and the way back to today. */
+  dayFace: {
+    flexGrow: 1,
+    flexShrink: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: SPACING.sm,
+  },
+  dayFaceLine: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
+  todayDot: { width: 5, height: 5, borderRadius: 2.5 },
+  dayWeekday: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
+  dayDate: { fontWeight: '400' },
+  dayHijri: { fontSize: TYPE.caption.fontSize, marginTop: 2 },
+  dayBack: { fontWeight: '700' },
   heroTopRow: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -55,7 +55,12 @@ import { PracticeCard } from './home/PracticeCard';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { TodaySummary } from './home/TodaySummary';
 import { CenteredColumn } from '../responsive/CenteredColumn';
-import { isMacCatalyst, HOME_DASHBOARD_MIN_WIDTH } from '../responsive/breakpoints';
+import {
+  isMacCatalyst,
+  BREAKPOINT_REGULAR,
+  HOME_DASHBOARD_MIN_WIDTH,
+  HOME_ROOMY_MIN_HEIGHT,
+} from '../responsive/breakpoints';
 import { HeaderPlaybackBar } from '../quran/audio/HeaderPlaybackBar';
 import { HomeHeaderControls } from '../navigation/HomeHeaderControls';
 import { MihrabHeaderTitle } from '../navigation/MihrabHeaderTitle';
@@ -163,6 +168,16 @@ export function HomeScreen() {
   // under ~440pt and the tools grid crams — the centered single column
   // reads far better in that band (Mac audit 2026-07-16, plan v2 §B4).
   const isDashboard = screenWidth >= HOME_DASHBOARD_MIN_WIDTH;
+  /**
+   * A tablet held upright: wide enough to be one, tall enough that the
+   * day does not fill the page. The hero stops growing and the column
+   * centres itself — see `HOME_ROOMY_MIN_HEIGHT`.
+   */
+  const isRoomy =
+    !isDashboard &&
+    !isMacCatalyst &&
+    screenWidth >= BREAKPOINT_REGULAR &&
+    screenHeight >= HOME_ROOMY_MIN_HEIGHT;
   // Adapt to the window instead of a fixed cap: up to 1360pt of content
   // on big Mac windows, with the main column taking a proportional share
   // (clamped so the day table keeps a comfortable measure).
@@ -1068,6 +1083,9 @@ export function HomeScreen() {
         styles.scrollContent,
         // The phone's hero runs edge to edge; the rows pad themselves.
         !isDashboard && !isMacCatalyst && styles.scrollContentBleed,
+        // Roomy: the content is a block in the middle of the page rather
+        // than a page-height column.
+        isRoomy && styles.scrollContentRoomy,
         // Breathing room under the last card — and NOTHING for the tab
         // bar or the safe area. The bar is in flow, so the scroll view
         // already ends above it, and the bar's own bottom margin already
@@ -1089,11 +1107,18 @@ export function HomeScreen() {
           carousel dots overlapped the day table and the Quran button). */}
       <CenteredColumn
         maxWidth={isDashboard ? dashCap : undefined}
-        style={[styles.homeColumn, !isDashboard && !isMacCatalyst && styles.fillColumn]}
+        style={[
+          styles.homeColumn,
+          !isDashboard && !isMacCatalyst && !isRoomy && styles.fillColumn,
+        ]}
         // Both wrappers: on a wide-but-not-dashboard window (a tablet held
         // upright) the column is capped and gets an inner View, and the
-        // hero can only grow to the page's foot if that one grows too.
-        innerStyle={[styles.homeColumn, !isDashboard && !isMacCatalyst && styles.fillColumn]}>
+        // hero can only grow to the page's foot if that one grows too —
+        // which is exactly what a roomy page must NOT do.
+        innerStyle={[
+          styles.homeColumn,
+          !isDashboard && !isMacCatalyst && !isRoomy && styles.fillColumn,
+        ]}>
       <PermissionBanners
         usingLocalFallback={state.usingLocalFallback ?? false}
         exactAlarmDenied={exactAlarmDenied}
@@ -1128,6 +1153,7 @@ export function HomeScreen() {
             onOpenQibla={handleOpenQibla}
             expanded={isDashboard}
             fullBleed={fullBleed}
+            roomy={isRoomy}
             renderLocation={
               fullBleed
                 ? ink => (
@@ -1214,7 +1240,7 @@ export function HomeScreen() {
          */
         return (
           <>
-            <View style={styles.fillColumn}>{dayTable}</View>
+            <View style={isRoomy ? undefined : styles.fillColumn}>{dayTable}</View>
             <View style={styles.belowHero}>
               {quranShortcut}
               {ramadanCard}
@@ -1298,5 +1324,12 @@ const styles = StyleSheet.create({
   scrollContentDash: {
     flexGrow: 1,
     justifyContent: 'center',
+  },
+  // Same idea as the dashboard's, for a tablet held upright: the day is a
+  // block centred in the page, with air above and below it.
+  scrollContentRoomy: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingVertical: SPACING.xl,
   },
 });

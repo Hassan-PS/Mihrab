@@ -133,3 +133,24 @@ export const isMacCatalyst: boolean =
  * hero carries the header's contents itself.
  */
 export const HOME_DASHBOARD_MIN_WIDTH = 1180;
+
+/**
+ * A page with room to spare — a tablet held upright — measured on the
+ * SHORT axis as well as the long one.
+ *
+ * The phone's Today screen grows its hero into whatever the table and the
+ * Quran row leave over, because on a phone that slack is a few dozen
+ * points and the alternative is a band of nothing under the rows. On an
+ * iPad in portrait the same rule hands the sky six hundred points of
+ * empty middle: the countdown sinks to the waist of the screen, the day
+ * sits under it, and the drawing that is meant to be a background becomes
+ * the whole page. It also puts the hero's white status-bar ink over the
+ * page's cream margin, where it cannot be read.
+ *
+ * So past this size the hero stops growing, takes a measured height, and
+ * the whole column centres itself in the page instead — see TodayCard's
+ * `roomy`. 700 is the regular breakpoint (the narrowest tablet); 900
+ * points of height is the point at which the day no longer fills the
+ * page on its own.
+ */
+export const HOME_ROOMY_MIN_HEIGHT = 900;

@@ -377,11 +377,17 @@ describe('the hero grows but never shrinks under its text', () => {
       expect(m![0]).not.toMatch(/\bflex: 1\b/);
     }
     expect(home).toMatch(/fillColumn: \{ flexGrow: 1, flexShrink: 0, flexBasis: 'auto' \}/);
-    // Both of CenteredColumn's wrappers — on a tablet held upright the
-    // column is capped and gains an inner View, which grew nowhere and
-    // left the hero a third of the page over a void of two thirds.
-    expect(home).toMatch(/style=\{\[styles\.homeColumn, !isDashboard && !isMacCatalyst && styles\.fillColumn\]\}/);
-    expect(home).toMatch(/innerStyle=\{\[styles\.homeColumn, !isDashboard && !isMacCatalyst && styles\.fillColumn\]\}/);
+    // BOTH of CenteredColumn's wrappers, and only where growing is what
+    // the page wants. On a phone the hero takes the slack the table
+    // leaves, and the inner View a capped column gains has to grow too or
+    // the hero sits a third of the page over a void of two thirds.
+    //
+    // A tablet held upright is the opposite case and is excluded here:
+    // there the slack is most of the screen, and growing into it is the
+    // bug rather than the fix (see `isRoomy`, and todayPastDays.test).
+    const grows = home.match(/!isDashboard && !isMacCatalyst && !isRoomy && styles\.fillColumn/g);
+    expect(grows).toHaveLength(2);
+    expect(home).toMatch(/const isRoomy =/);
   });
 
   it('the Log gives up graph height on a short phone, never the day', () => {
