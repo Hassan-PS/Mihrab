@@ -114,3 +114,6 @@
 "widget_description_tall" = "Samma sex tider med stad, hijridatum och aktivitetsgrafen. 4×2 — krymp den så blir den enradsremsan.";
 "widget_name_log_tall" = "Mihrab · Logga idag (hög)";
 "widget_description_log_tall" = "Tryck på en bön för att logga den i tid, med nedräkning till nästa och aktivitetsgrafen. 4×2 — krymp den så blir den enradskortet.";
+"widget_name_sky" = "Mihrab · Himmel";
+"widget_description_sky" = "Nästa bön under dagens himmel — natt med månen, gryning, middag, solnedgång — med nedräkningen. 2×2 till 4×3.";
+"widget_preview_sky_next" = "Fajr · 03:38";

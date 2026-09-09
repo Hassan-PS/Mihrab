@@ -189,4 +189,8 @@
     <string name="widget_description_tall">Samma sex tider med stad, hijridatum och aktivitetsgrafen. 4\u00d72 \u2014 krymp den så blir den enradsremsan.</string>
     <string name="widget_name_log_tall">Mihrab \u00b7 Logga idag (hög)</string>
     <string name="widget_description_log_tall">Tryck på en bön för att logga den i tid, med nedräkning till nästa och aktivitetsgrafen. 4\u00d72 \u2014 krymp den så blir den enradskortet.</string>
+    <!-- Mihrab · Sky — the hero on the home screen (PrayerWidgetSkyProvider). -->
+    <string name="widget_name_sky">Mihrab · Himmel</string>
+    <string name="widget_description_sky">Nästa bön under dagens himmel — natt med månen, gryning, middag, solnedgång — med nedräkningen. 2×2 till 4×3.</string>
+    <string name="widget_preview_sky_next">Fajr · 03:38</string>
 </resources>

@@ -114,3 +114,6 @@
 "widget_description_tall" = "Los mismos seis horarios con la ciudad, la fecha hijri y el gráfico de práctica. 4×2 — redúcelo y se convierte en la franja de una fila.";
 "widget_name_log_tall" = "Mihrab · Registrar hoy (alto)";
 "widget_description_log_tall" = "Toca una oración para registrarla a tiempo, con la cuenta regresiva a la siguiente y el gráfico de práctica. 4×2 — redúcelo y se convierte en la tarjeta de una fila.";
+"widget_name_sky" = "Mihrab · Cielo";
+"widget_description_sky" = "La próxima oración bajo el cielo del día — noche con la luna, alba, mediodía, atardecer — con la cuenta atrás. De 2×2 a 4×3.";
+"widget_preview_sky_next" = "Fayr · 03:38";

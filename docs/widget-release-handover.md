@@ -204,6 +204,25 @@ started:
   hold one more line, not from raising a ceiling. There is no room for that
   line today — at 321dp the graph already reaches the bottom of the card.
 
+## Answered: how a widget is the right size
+
+Every Android provider that decides anything from its size — the prayer
+strip and list, Log today, Streak, Continue reading, Sky — renders through
+`WidgetSizing.responsive`. On Android 12+ that is ONE `RemoteViews` per size
+in `OPTION_APPWIDGET_SIZES`, combined into the platform's size map, so the
+launcher picks the drawing for the size it is actually showing — per
+orientation, per resize, without asking the provider again. Below 12 it is
+the single measured pair from `sizeDp`, orientation resolved as before.
+
+The rule this imposes on every `bind*`: it is a pure function of the
+`(widthDp, heightDp)` it is handed. Nothing inside a render may read the
+options bundle or call `sizeDp` — a render that peeks at "the current size"
+defeats the map. `widgetSizesAndSky.test.ts` pins this.
+
+The size bands themselves (`STRIP_*`, `LOG_*`, `GRID_MIN_HEIGHT_DP` …) are
+unchanged; what changed is that they are now evaluated against the size the
+launcher will draw rather than a guess about it.
+
 ## Answered: how a widget stays true
 
 This section used to be titled "Open: does every widget see a change the

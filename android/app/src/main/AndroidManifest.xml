@@ -104,6 +104,21 @@
           android:resource="@xml/prayer_widget_info" />
       </receiver>
 
+      <!-- Mihrab · Sky: the Today hero on the home screen. -->
+      <receiver
+        android:name=".PrayerWidgetSkyProvider"
+        android:exported="true"
+        android:label="@string/widget_name_sky">
+        <intent-filter>
+          <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+          <action android:name="android.intent.action.BOOT_COMPLETED" />
+          <action android:name="com.prayer_times.ACTION_PRAYER_TIME_ELAPSED" />
+        </intent-filter>
+        <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/prayer_widget_sky_info" />
+      </receiver>
+
       <receiver
         android:name=".PrayerWidgetSmallProvider"
         android:exported="true"

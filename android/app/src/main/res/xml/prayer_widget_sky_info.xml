@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Mihrab · Sky — the app's hero on the home screen. See PrayerWidgetSkyProvider.
+
+  2x2 to 4x3. Every size the launcher can show is drawn by the provider as a
+  function of that size (WidgetSizing), so the resize range here is a range
+  the card is actually right across, not a hope.
+
+  updatePeriodMillis is the half hour the prayer cards use: the countdown is
+  a Chronometer and ticks itself, the sky's gradient moves by the hour, and
+  the prayer-boundary alarm redraws at the moments that matter.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="com.prayer_times.PrayerWidgetConfigureActivity"
+    android:widgetFeatures="reconfigurable|configuration_optional"
+    android:description="@string/widget_description_sky"
+    android:initialLayout="@layout/prayer_widget_sky"
+    android:minWidth="110dp"
+    android:minHeight="110dp"
+    android:previewImage="@mipmap/ic_launcher"
+    android:previewLayout="@layout/prayer_widget_sky_preview"
+    android:resizeMode="horizontal|vertical"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="70dp"
+    android:maxResizeWidth="400dp"
+    android:maxResizeHeight="400dp"
+    android:updatePeriodMillis="1800000"
+    android:widgetCategory="home_screen"
+    android:targetCellWidth="2"
+    android:targetCellHeight="2" />

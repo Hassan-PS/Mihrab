@@ -114,3 +114,6 @@
 "widget_description_tall" = "Keenam waktu yang sama dengan kota, tanggal Hijriah, dan grafik praktik. 4×2 — perkecil dan akan menjadi strip satu baris.";
 "widget_name_log_tall" = "Mihrab · Catat hari ini (tinggi)";
 "widget_description_log_tall" = "Ketuk salat untuk mencatatnya tepat waktu, lengkap dengan hitungan mundur ke salat berikutnya dan grafik praktik. 4×2 — perkecil dan akan menjadi kartu satu baris.";
+"widget_name_sky" = "Mihrab · Langit";
+"widget_description_sky" = "Salat berikutnya di bawah langit hari itu — malam berbulan, fajar, siang, senja — dengan hitung mundur. 2×2 sampai 4×3.";
+"widget_preview_sky_next" = "Subuh · 03:38";

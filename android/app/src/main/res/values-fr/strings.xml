@@ -201,4 +201,8 @@
     <string name="widget_description_tall">Les mêmes six heures avec la ville, la date hégirienne et le graphique de pratique. 4\u00d72 \u2014 réduisez-le, et il devient la bande à une ligne.</string>
     <string name="widget_name_log_tall">Mihrab \u00b7 Journal du jour (haut)</string>
     <string name="widget_description_log_tall">Touchez une prière pour la noter à l\'heure, avec le compte à rebours de la suivante et le graphique de pratique. 4\u00d72 \u2014 réduisez-le, et il devient la carte à une ligne.</string>
+    <!-- Mihrab · Sky — the hero on the home screen (PrayerWidgetSkyProvider). -->
+    <string name="widget_name_sky">Mihrab · Ciel</string>
+    <string name="widget_description_sky">La prochaine prière sous le ciel du jour — nuit avec la lune, aube, midi, coucher du soleil — avec le décompte. De 2×2 à 4×3.</string>
+    <string name="widget_preview_sky_next">Fajr · 03:38</string>
 </resources>

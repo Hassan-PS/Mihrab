@@ -13,6 +13,14 @@
  * given a direct code point, so rendering does not depend on `liga`, and
  * the digits and unused glyphs were dropped. 151 KB.
  *
+ * THE ADVANCES WERE WIDENED. As shipped by quran.com, several glyphs draw
+ * past their own advance width — Yūsuf by a quarter of an em, so the
+ * first letter of the name (its rightmost, the ي) fell outside the box a
+ * Text measures for it and was cut off; a dozen more overhang by a hair.
+ * Every glyph's advance is now its ink's right edge plus 40 units (about
+ * a point at this size), so no name is clipped and every name keeps the
+ * same margin. The drawings themselves are untouched.
+ *
  * Why not the Complex's header font (QCF4_QBSML), which the reader's own
  * pages use above each surah: those headers are drawn as one piece with
  * the word سورة, whose tail sweeps under the name — the word cannot be

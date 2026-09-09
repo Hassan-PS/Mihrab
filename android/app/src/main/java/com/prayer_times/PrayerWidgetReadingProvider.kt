@@ -56,7 +56,7 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
     appWidgetIds: IntArray,
   ) {
     for (id in appWidgetIds) {
-      appWidgetManager.updateAppWidget(id, buildViews(context, widthDp(context, appWidgetManager, id), heightDp(context, appWidgetManager, id)))
+      appWidgetManager.updateAppWidget(id, responsiveViews(context, appWidgetManager, id))
     }
   }
 
@@ -69,7 +69,7 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
     super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
     appWidgetManager.updateAppWidget(
       appWidgetId,
-      buildViews(context, widthDp(context, appWidgetManager, appWidgetId), heightDp(context, appWidgetManager, appWidgetId)),
+      responsiveViews(context, appWidgetManager, appWidgetId),
     )
   }
 
@@ -78,16 +78,16 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
     fun requestUpdate(context: Context) {
       val mgr = AppWidgetManager.getInstance(context)
       val ids = mgr.getAppWidgetIds(ComponentName(context, PrayerWidgetReadingProvider::class.java))
-      for (id in ids) mgr.updateAppWidget(id, buildViews(context, widthDp(context, mgr, id), heightDp(context, mgr, id)))
+      for (id in ids) mgr.updateAppWidget(id, responsiveViews(context, mgr, id))
     }
 
+    /** One RemoteViews per size the launcher can show — see WidgetSizing. */
+    private fun responsiveViews(context: Context, mgr: AppWidgetManager, appWidgetId: Int): RemoteViews =
+      WidgetSizing.responsive(context, mgr, appWidgetId) { size ->
+        buildViews(context, size.widthDp, size.heightDp)
+      }
+
     /** The card's real size, or 0 when the launcher has not measured yet. */
-    private fun heightDp(context: Context, mgr: AppWidgetManager, appWidgetId: Int): Int =
-      PrayerWidgetProvider.sizeDp(context, mgr, appWidgetId).second
-
-    private fun widthDp(context: Context, mgr: AppWidgetManager, appWidgetId: Int): Int =
-      PrayerWidgetProvider.sizeDp(context, mgr, appWidgetId).first
-
     /**
      * Below this the two columns cannot both be read, so the side one goes.
      * Four launcher cells is roughly 250dp; 200 leaves slack for launchers

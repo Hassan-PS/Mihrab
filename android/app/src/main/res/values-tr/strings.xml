@@ -169,4 +169,8 @@
     <string name="widget_description_tall">Aynı altı vakit; şehir, hicri tarih ve ibadet grafiğiyle birlikte. 4\u00d72 \u2014 küçültün, tek satırlık şeride dönüşür.</string>
     <string name="widget_name_log_tall">Mihrab \u00b7 Bugünü kaydet (yüksek)</string>
     <string name="widget_description_log_tall">Bir namazı vaktinde kıldığınızı kaydetmek için dokunun, sıradakine geri sayım ve ibadet grafiğiyle birlikte. 4\u00d72 \u2014 küçültün, tek satırlık karta dönüşür.</string>
+    <!-- Mihrab · Sky — the hero on the home screen (PrayerWidgetSkyProvider). -->
+    <string name="widget_name_sky">Mihrab · Gökyüzü</string>
+    <string name="widget_description_sky">Günün gökyüzü altında sonraki namaz — ayıyla gece, şafak, öğle, gün batımı — geri sayımla. 2×2\'den 4×3\'e.</string>
+    <string name="widget_preview_sky_next">İmsak · 03:38</string>
 </resources>

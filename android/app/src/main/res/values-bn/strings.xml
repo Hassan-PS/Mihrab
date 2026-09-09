@@ -174,4 +174,8 @@
     <string name="widget_description_tall">শহর, হিজরি তারিখ ও চর্চার গ্রাফসহ একই ছয়টি সময়। 4\u00d72 \u2014 এটি ছোট করলে এটি এক-সারির স্ট্রিপ হয়ে যায়।</string>
     <string name="widget_name_log_tall">Mihrab \u00b7 আজকের লগ (উঁচু)</string>
     <string name="widget_description_log_tall">সময়মতো লগ করতে একটি নামাযে ট্যাপ করুন, সাথে পরবর্তীটির কাউন্টডাউন ও চর্চার গ্রাফ। 4\u00d72 \u2014 এটি ছোট করলে এটি এক-সারির কার্ড হয়ে যায়।</string>
+    <!-- Mihrab · Sky — the hero on the home screen (PrayerWidgetSkyProvider). -->
+    <string name="widget_name_sky">মিহরাব · আকাশ</string>
+    <string name="widget_description_sky">দিনের আকাশের নিচে পরবর্তী নামাজ — চাঁদসহ রাত, ভোর, দুপুর, সূর্যাস্ত — কাউন্টডাউনের সাথে। ২×২ থেকে ৪×৩।</string>
+    <string name="widget_preview_sky_next">ফজর · 03:38</string>
 </resources>

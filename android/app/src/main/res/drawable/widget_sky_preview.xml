@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The night sky, for the Sky widget's picker preview — the two colours the
+  drawn sky uses for the night passage (SkyWidgetPainter.NIGHT_TOP/BOTTOM),
+  with the card's corners. A preview is never updated by a provider, so the
+  sky here is the one the widget is most often placed under.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:angle="270"
+        android:startColor="#0B1230"
+        android:endColor="#1E2B5A" />
+    <corners android:radius="@dimen/widget_card_radius" />
+</shape>

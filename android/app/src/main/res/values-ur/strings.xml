@@ -174,4 +174,8 @@
     <string name="widget_description_tall">وہی چھ اوقات، شہر، ہجری تاریخ اور عمل کے گراف کے ساتھ۔ 4\u00d72 \u2014 اسے کم کریں تو یہ ایک قطار والی پٹی بن جاتا ہے۔</string>
     <string name="widget_name_log_tall">محراب \u00b7 آج کا اندراج (اونچا)</string>
     <string name="widget_description_log_tall">کسی نماز کو وقت پر درج کرنے کے لیے تھپتھپائیں، ساتھ ہی اگلی نماز کی الٹی گنتی اور عمل کا گراف۔ 4\u00d72 \u2014 اسے کم کریں تو یہ ایک قطار والا کارڈ بن جاتا ہے۔</string>
+    <!-- Mihrab · Sky — the hero on the home screen (PrayerWidgetSkyProvider). -->
+    <string name="widget_name_sky">محراب · آسمان</string>
+    <string name="widget_description_sky">دن کے آسمان کے نیچے اگلی نماز — چاند کے ساتھ رات، فجر، دوپہر، غروب — گنتی کے ساتھ۔ ۲×۲ سے ۴×۳ تک۔</string>
+    <string name="widget_preview_sky_next">فجر · 03:38</string>
 </resources>

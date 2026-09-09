@@ -114,3 +114,6 @@
 "widget_description_tall" = "The same six times with the city, the Hijri date and the practice graph. 4×2 — shrink it and it becomes the one-row strip.";
 "widget_name_log_tall" = "Mihrab · Log today (tall)";
 "widget_description_log_tall" = "Tap a prayer to log it on time, with the countdown to the next and the practice graph. 4×2 — shrink it and it becomes the one-row card.";
+"widget_name_sky" = "Mihrab · Sky";
+"widget_description_sky" = "The next prayer under the day's sky — night with the moon, dawn, noon, sunset — with the countdown. 2×2 to 4×3.";
+"widget_preview_sky_next" = "Fajr · 03:38";

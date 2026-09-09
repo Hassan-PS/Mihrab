@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The picker preview for "Mihrab · Sky" — the real layout with sample values,
+  over the night sky the widget is most often placed under. Kept in step with
+  prayer_widget_sky.xml by hand. Height is match_parent: the picker sizes the
+  box from targetCellWidth/Height.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_sky_preview"
+    android:padding="12dp">
+
+    <!-- The moon, as the drawn sky places it in the open room. -->
+    <View
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_gravity="center_horizontal|top"
+        android:layout_marginTop="34dp"
+        android:background="@drawable/widget_sky_preview_moon" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_preview_header"
+            android:textColor="#C7FFFFFF"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_preview_sky_next"
+            android:textColor="#C7FFFFFF"
+            android:textSize="13sp"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="2:40:12"
+            android:textColor="#FFFFFF"
+            android:textSize="34sp"
+            android:fontFamily="sans-serif"
+            android:textStyle="bold"
+            android:includeFontPadding="false"
+            android:maxLines="1" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/widget_preview_hijri_full"
+            android:textColor="#C7FFFFFF"
+            android:textSize="11sp"
+            android:layout_marginTop="2dp"
+            android:maxLines="1" />
+    </LinearLayout>
+</FrameLayout>

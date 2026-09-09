@@ -179,4 +179,8 @@
     <string name="widget_description_tall">Los mismos seis horarios con la ciudad, la fecha hijri y el gráfico de práctica. 4\u00d72 \u2014 redúcelo y se convierte en la franja de una fila.</string>
     <string name="widget_name_log_tall">Mihrab \u00b7 Registrar hoy (alto)</string>
     <string name="widget_description_log_tall">Toca una oración para registrarla a tiempo, con la cuenta regresiva a la siguiente y el gráfico de práctica. 4\u00d72 \u2014 redúcelo y se convierte en la tarjeta de una fila.</string>
+    <!-- Mihrab · Sky — the hero on the home screen (PrayerWidgetSkyProvider). -->
+    <string name="widget_name_sky">Mihrab · Cielo</string>
+    <string name="widget_description_sky">La próxima oración bajo el cielo del día — noche con la luna, alba, mediodía, atardecer — con la cuenta atrás. De 2×2 a 4×3.</string>
+    <string name="widget_preview_sky_next">Fayr · 03:38</string>
 </resources>

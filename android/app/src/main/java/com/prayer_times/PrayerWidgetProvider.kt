@@ -385,6 +385,9 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       return first..last
     }
 
+    /** The strip's columns: Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha. */
+    private const val STRIP_COLUMNS = 6
+
     /** The size the layout declares, and the floor below which it stops. */
     private const val TIME_MAX_SP = 17f
     private const val TIME_MIN_SP = 10f
@@ -415,8 +418,15 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * rounded slab behind two lines of centred text. The box wraps its
      * contents, which is the shape the highlight is meant to be.
      *
-     * Slots 6 and 7 are the night rows, which are never highlighted; their
-     * ids are here only to keep the arrays the same length.
+     * Slots 6, 7 and 8 are the night rows, which are never highlighted;
+     * their ids are here only to keep the arrays the same length — and
+     * THE SAME LENGTH IS THE WHOLE POINT. Issue #31: this array had eight
+     * entries while the other three had nine, so a phone with all three
+     * night marks on (Sunrise + five prayers + three = nine rows) indexed
+     * `COL_BOXES[8]`, threw ArrayIndexOutOfBoundsException, and every
+     * prayer widget on that phone read "Could not load widget data". The
+     * column binder also indexes this array with `getOrNull` now, so the
+     * lengths can never again decide whether a card renders.
      */
     private val COL_BOXES =
       intArrayOf(
@@ -428,6 +438,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         R.id.widget_col_5_box,
         R.id.widget_col_6_box,
         R.id.widget_col_7_box,
+        R.id.widget_col_8_box,
       )
     private val COL_LABELS =
       intArrayOf(
@@ -487,7 +498,13 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       val json = prefs.getString(PREFS_KEY, null)
       val style = readWidgetStyle(prefs)
       for (id in ids) {
-        val views = buildViews(context, appWidgetManager, id, json, style)
+        // One RemoteViews per size the launcher can show — see WidgetSizing.
+        // The provider's intent (which picker entry) is read once; every
+        // other decision is a function of the size handed in.
+        val providerName = appWidgetManager.getAppWidgetInfo(id)?.provider?.className
+        val views = WidgetSizing.responsive(context, appWidgetManager, id) { size ->
+          buildViews(context, id, json, style, providerName, size.widthDp, size.heightDp)
+        }
         appWidgetManager.updateAppWidget(id, views)
       }
     }
@@ -619,6 +636,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       PrayerWidgetReadingProvider::class.java,
       PrayerWidgetHijriProvider::class.java,
       PrayerWidgetTasbihProvider::class.java,
+      PrayerWidgetSkyProvider::class.java,
     )
 
     /** Whether the user has any Mihrab widget on a home screen at all. */
@@ -685,6 +703,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       draw(context) { PrayerWidgetReadingProvider.requestUpdate(context) }
       draw(context) { PrayerWidgetHijriProvider.requestUpdate(context) }
       draw(context) { PrayerWidgetTasbihProvider.requestUpdate(context) }
+      draw(context) { PrayerWidgetSkyProvider.requestUpdate(context) }
     }
 
     /** One widget's redraw, contained. */
@@ -1035,10 +1054,9 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
      * them into one picker entry needs.
      */
     private fun selectLayout(
-      context: Context,
-      appWidgetManager: AppWidgetManager,
-      appWidgetId: Int,
       providerName: String?,
+      width: Int,
+      height: Int,
     ): Int {
       val preferred = when (providerName) {
         PrayerWidgetSmallProvider::class.java.name -> R.layout.prayer_widget_small
@@ -1055,30 +1073,12 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       }
       if (preferred == R.layout.prayer_widget_small) return preferred
 
-      // getAppWidgetOptions never returns null in practice, but a launcher
-      // that has not measured the widget yet reports 0 — which must read as
-      // "no opinion", not as "zero high", or every widget would collapse to
-      // the compact line on first draw.
-      val opts = try {
-        appWidgetManager.getAppWidgetOptions(appWidgetId)
-      } catch (_: Exception) {
-        null
-      }
-      val landscape =
-        context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-      // MIN_HEIGHT is the LANDSCAPE height — see sizeDp. Every threshold
-      // below is a real card height in dp now, which is a number that means
-      // the same thing on a launcher whose cells are a different shape.
-      val height = opts?.getInt(
-        if (landscape) AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT
-        else AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT,
-        0,
-      ) ?: 0
-      val width = opts?.getInt(
-        if (landscape) AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH
-        else AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH,
-        0,
-      ) ?: 0
+      // A launcher that has not measured the widget yet reports 0 — which
+      // must read as "no opinion", not as "zero high", or every widget
+      // would collapse to the compact line on first draw. The size itself
+      // comes from the caller: on Android 12+ one call per size the
+      // launcher can show (WidgetSizing), below that the single measured
+      // pair from `sizeDp`, orientation already resolved.
       if (height <= 0) return preferred
 
       return when {
@@ -1092,13 +1092,14 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
 
     private fun buildViews(
       context: Context,
-      appWidgetManager: AppWidgetManager,
       appWidgetId: Int,
       json: String?,
       style: WidgetStyle,
+      providerName: String?,
+      widthDp: Int,
+      heightDp: Int,
     ): RemoteViews {
-      val providerName = appWidgetManager.getAppWidgetInfo(appWidgetId)?.provider?.className
-      val layoutId = selectLayout(context, appWidgetManager, appWidgetId, providerName)
+      val layoutId = selectLayout(providerName, widthDp, heightDp)
 
       val views = RemoteViews(context.packageName, layoutId)
 
@@ -1162,15 +1163,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
               style,
             )
           } else {
-            applyJson(
-              views,
-              root,
-              style,
-              context,
-              layoutId,
-              measuredHeightDp(context, appWidgetManager, appWidgetId),
-              measuredWidthDp(context, appWidgetManager, appWidgetId),
-            )
+            applyJson(views, root, style, context, layoutId, heightDp, widthDp)
           }
         } catch (e: Exception) {
           // ── SAY WHAT WENT WRONG ─────────────────────────────────────
@@ -1351,7 +1344,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
 
     /** The entry in `days[]` that applies to the current local date, or null
      *  when there is no `days[]` / no match. */
-    private fun selectTodayDay(o: JSONObject): JSONObject? {
+    fun selectTodayDay(o: JSONObject): JSONObject? {
       val days = o.optJSONArray("days") ?: return null
       if (days.length() == 0) return null
       val todayKey = todayDateKey()
@@ -1732,20 +1725,6 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       return earliest
     }
 
-    /** The launcher's own measurement, or 0 when it has not measured yet. */
-    private fun measuredHeightDp(
-      context: Context,
-      mgr: AppWidgetManager,
-      appWidgetId: Int,
-    ): Int = sizeDp(context, mgr, appWidgetId).second
-
-    /** The same, across. The grid needs both to know how many weeks fit. */
-    private fun measuredWidthDp(
-      context: Context,
-      mgr: AppWidgetManager,
-      appWidgetId: Int,
-    ): Int = sizeDp(context, mgr, appWidgetId).first
-
     /**
      * Four launcher rows. Below this the practice strip would eat the space
      * the prayer times need, and the times are why the widget is there.
@@ -2027,7 +2006,13 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       // other — see `stripTimeSizeSp`. Measured across ALL the visible times
       // and applied to all of them, because a row where one column is 12sp
       // and the next is 17sp is worse than a row that is uniformly smaller.
-      val shown = displayRows.take(COL_LABELS.size)
+      // How many column slots THIS layout has. The list (narrow-and-tall)
+      // stacks every row it is given, night marks included; the strip has
+      // six columns and draws the night marks on their own line below
+      // (`bindNightRow`). Sizing the strip's times as if nine columns shared
+      // its width made them a third smaller than the row could hold.
+      val slots = if (layoutId == R.layout.prayer_widget) COL_LABELS.size else STRIP_COLUMNS
+      val shown = displayRows.take(slots)
       val timeSizeSp = stripTimeSizeSp(
         context,
         shown.map { displayTime(it) },
@@ -2035,7 +2020,7 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       )
 
       for (i in COL_LABELS.indices) {
-        if (i >= displayRows.size) {
+        if (i >= shown.size) {
           views.setViewVisibility(COL_WRAPPERS[i], View.GONE)
           continue
         }
@@ -2067,10 +2052,11 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
         views.setTextColor(COL_LABELS[i], col)
         views.setTextColor(COL_TIMES[i], col)
 
-        if (highlight) {
-          views.setInt(COL_BOXES[i], "setBackgroundResource", R.drawable.widget_row_highlight)
-        } else {
-          views.setInt(COL_BOXES[i], "setBackgroundResource", 0)
+        // `getOrNull`: a slot without a box (there is none, but see #31)
+        // is a highlight not drawn, never a card not drawn.
+        val box = COL_BOXES.getOrNull(i)
+        if (box != null) {
+          views.setInt(box, "setBackgroundResource", if (highlight) R.drawable.widget_row_highlight else 0)
         }
       }
 

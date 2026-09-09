@@ -114,3 +114,6 @@
 "widget_description_tall" = "Aynı altı vakit; şehir, hicri tarih ve ibadet grafiğiyle birlikte. 4×2 — küçültün, tek satırlık şeride dönüşür.";
 "widget_name_log_tall" = "Mihrab · Bugünü kaydet (yüksek)";
 "widget_description_log_tall" = "Bir namazı vaktinde kıldığınızı kaydetmek için dokunun, sıradakine geri sayım ve ibadet grafiğiyle birlikte. 4×2 — küçültün, tek satırlık karta dönüşür.";
+"widget_name_sky" = "Mihrab · Gökyüzü";
+"widget_description_sky" = "Günün gökyüzü altında sonraki namaz — ayıyla gece, şafak, öğle, gün batımı — geri sayımla. 2×2'den 4×3'e.";
+"widget_preview_sky_next" = "İmsak · 03:38";

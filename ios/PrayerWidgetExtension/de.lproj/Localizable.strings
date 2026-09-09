@@ -114,3 +114,6 @@
 "widget_description_tall" = "Die gleichen sechs Zeiten mit Stadt, Hijri-Datum und dem Praxisdiagramm. 4×2 — verkleinern, und daraus wird der einzeilige Streifen.";
 "widget_name_log_tall" = "Mihrab · Heute eintragen (hoch)";
 "widget_description_log_tall" = "Gebet antippen, um es pünktlich einzutragen, mit Countdown zum nächsten und dem Praxisdiagramm. 4×2 — verkleinern, und daraus wird die einzeilige Karte.";
+"widget_name_sky" = "Mihrab · Himmel";
+"widget_description_sky" = "Das nächste Gebet unter dem Himmel des Tages — Nacht mit Mond, Morgendämmerung, Mittag, Sonnenuntergang — mit Countdown. 2×2 bis 4×3.";
+"widget_preview_sky_next" = "Fadschr · 03:38";

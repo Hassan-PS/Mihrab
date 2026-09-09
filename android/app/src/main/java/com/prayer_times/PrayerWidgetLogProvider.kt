@@ -53,7 +53,7 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
     appWidgetIds: IntArray,
   ) {
     for (id in appWidgetIds) {
-      appWidgetManager.updateAppWidget(id, buildViews(context, id))
+      appWidgetManager.updateAppWidget(id, responsiveViews(context, appWidgetManager, id))
     }
   }
 
@@ -76,7 +76,7 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
     newOptions: android.os.Bundle,
   ) {
     super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
-    appWidgetManager.updateAppWidget(appWidgetId, buildViews(context, appWidgetId))
+    appWidgetManager.updateAppWidget(appWidgetId, responsiveViews(context, appWidgetManager, appWidgetId))
   }
 
   companion object {
@@ -110,9 +110,18 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
         PrayerWidgetLogLargeProvider::class.java,
       )) {
         val ids = mgr.getAppWidgetIds(ComponentName(context, cls))
-        for (id in ids) mgr.updateAppWidget(id, buildViews(context, id))
+        for (id in ids) mgr.updateAppWidget(id, responsiveViews(context, mgr, id))
       }
     }
+
+    /**
+     * One RemoteViews per size the launcher can show — see WidgetSizing.
+     * Everything below is a function of (width, height) and nothing else.
+     */
+    private fun responsiveViews(context: Context, mgr: AppWidgetManager, appWidgetId: Int): RemoteViews =
+      WidgetSizing.responsive(context, mgr, appWidgetId) { size ->
+        buildViews(context, size.widthDp, size.heightDp)
+      }
 
     /**
      * Record a tap and redraw immediately.
@@ -255,7 +264,7 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
     /** As many days as the payload carries. See PRACTICE_WINDOW_DAYS. */
     private const val MAX_GRID_DAYS = 210
 
-    private fun buildViews(base: Context, appWidgetId: Int): RemoteViews {
+    private fun buildViews(base: Context, widthDp: Int, heightDp: Int): RemoteViews {
       // Every label below comes out of the string table, so the context has to
       // be the one that speaks Mihrab's language before anything is read from
       // it. See PrayerWidgetProvider.localized.
@@ -302,8 +311,8 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
         accent,
         root,
       )
-      bindGrid(context, views, appWidgetId, accent)
-      bindCompact(context, views, appWidgetId)
+      bindGrid(context, views, widthDp, heightDp, accent)
+      bindCompact(context, views, heightDp)
       return views
     }
 
@@ -322,12 +331,7 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
      * on 31 or later, and the alternative is a second layout file kept in
      * step by hand.
      */
-    private fun bindCompact(context: Context, views: RemoteViews, appWidgetId: Int) {
-      val (_, heightDp) = PrayerWidgetProvider.sizeDp(
-        context,
-        AppWidgetManager.getInstance(context),
-        appWidgetId,
-      )
+    private fun bindCompact(context: Context, views: RemoteViews, heightDp: Int) {
       // 0 is a launcher that has not measured yet: the roomy card is the
       // safer guess, because the tight one on a tall card looks like a bug
       // while the reverse only looks tight for one frame.
@@ -401,16 +405,12 @@ open class PrayerWidgetLogProvider : AppWidgetProvider() {
     private fun bindGrid(
       context: Context,
       views: RemoteViews,
-      appWidgetId: Int,
+      widthDp: Int,
+      heightDp: Int,
       accent: Int,
     ) {
       val practice = payloadRoot(context)?.optJSONObject("practice")
       val since = practice?.optString("since")?.ifEmpty { null }
-      val (widthDp, heightDp) = PrayerWidgetProvider.sizeDp(
-        context,
-        AppWidgetManager.getInstance(context),
-        appWidgetId,
-      )
       // An unmeasured card (0) draws no graph. The other way round — the
       // launcher has not measured, so assume there is room — puts a graph
       // on a card that may be one row tall, and it takes the space out of

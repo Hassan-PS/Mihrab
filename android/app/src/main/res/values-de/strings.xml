@@ -179,4 +179,8 @@
     <string name="widget_description_tall">Die gleichen sechs Zeiten mit Stadt, Hijri-Datum und dem Praxisdiagramm. 4\u00d72 \u2014 verkleinern, und daraus wird der einzeilige Streifen.</string>
     <string name="widget_name_log_tall">Mihrab \u00b7 Heute eintragen (hoch)</string>
     <string name="widget_description_log_tall">Gebet antippen, um es pünktlich einzutragen, mit Countdown zum nächsten und dem Praxisdiagramm. 4\u00d72 \u2014 verkleinern, und daraus wird die einzeilige Karte.</string>
+    <!-- Mihrab · Sky — the hero on the home screen (PrayerWidgetSkyProvider). -->
+    <string name="widget_name_sky">Mihrab · Himmel</string>
+    <string name="widget_description_sky">Das nächste Gebet unter dem Himmel des Tages — Nacht mit Mond, Morgendämmerung, Mittag, Sonnenuntergang — mit Countdown. 2×2 bis 4×3.</string>
+    <string name="widget_preview_sky_next">Fadschr · 03:38</string>
 </resources>

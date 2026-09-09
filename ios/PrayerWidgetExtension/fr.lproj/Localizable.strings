@@ -114,3 +114,6 @@
 "widget_description_tall" = "Les mêmes six heures avec la ville, la date hégirienne et le graphique de pratique. 4×2 — réduisez-le, et il devient la bande à une ligne.";
 "widget_name_log_tall" = "Mihrab · Journal du jour (haut)";
 "widget_description_log_tall" = "Touchez une prière pour la noter à l'heure, avec le compte à rebours de la suivante et le graphique de pratique. 4×2 — réduisez-le, et il devient la carte à une ligne.";
+"widget_name_sky" = "Mihrab · Ciel";
+"widget_description_sky" = "La prochaine prière sous le ciel du jour — nuit avec la lune, aube, midi, coucher du soleil — avec le décompte. De 2×2 à 4×3.";
+"widget_preview_sky_next" = "Fajr · 03:38";

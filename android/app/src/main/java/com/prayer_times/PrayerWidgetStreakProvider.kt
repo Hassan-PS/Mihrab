@@ -54,7 +54,7 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
     appWidgetIds: IntArray,
   ) {
     for (id in appWidgetIds) {
-      appWidgetManager.updateAppWidget(id, buildViews(context, id, appWidgetManager))
+      appWidgetManager.updateAppWidget(id, responsiveViews(context, appWidgetManager, id))
     }
   }
 
@@ -65,7 +65,7 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
     newOptions: android.os.Bundle,
   ) {
     super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
-    appWidgetManager.updateAppWidget(appWidgetId, buildViews(context, appWidgetId, appWidgetManager))
+    appWidgetManager.updateAppWidget(appWidgetId, responsiveViews(context, appWidgetManager, appWidgetId))
   }
 
   companion object {
@@ -73,8 +73,14 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
     fun requestUpdate(context: Context) {
       val mgr = AppWidgetManager.getInstance(context)
       val ids = mgr.getAppWidgetIds(ComponentName(context, PrayerWidgetStreakProvider::class.java))
-      for (id in ids) mgr.updateAppWidget(id, buildViews(context, id, mgr))
+      for (id in ids) mgr.updateAppWidget(id, responsiveViews(context, mgr, id))
     }
+
+    /** One RemoteViews per size the launcher can show — see WidgetSizing. */
+    private fun responsiveViews(context: Context, mgr: AppWidgetManager, appWidgetId: Int): RemoteViews =
+      WidgetSizing.responsive(context, mgr, appWidgetId) { size ->
+        buildViews(context, size.widthDp, size.heightDp)
+      }
 
     private fun practice(context: Context): JSONObject? {
       // Parsed once per version of the payload rather than once per
@@ -120,7 +126,7 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
       return Math.ceil((PADDING_DP + BREATHING_DP + text * scale).toDouble()).toInt()
     }
 
-    fun buildViews(base: Context, appWidgetId: Int, mgr: AppWidgetManager): RemoteViews {
+    fun buildViews(base: Context, widthDp: Int, heightDp: Int): RemoteViews {
       // Every label below comes out of the string table, so the context has to
       // be the one that speaks Mihrab's language before anything is read from
       // it. See PrayerWidgetProvider.localized.
@@ -144,7 +150,6 @@ class PrayerWidgetStreakProvider : AppWidgetProvider() {
       views.setViewVisibility(R.id.widget_placeholder, View.GONE)
       views.setViewVisibility(R.id.widget_content, View.VISIBLE)
 
-      val (widthDp, heightDp) = PrayerWidgetProvider.sizeDp(context, mgr, appWidgetId)
 
       // How many lines the card can actually hold.
       //

@@ -169,4 +169,8 @@
     <string name="widget_description_tall">Keenam waktu yang sama dengan kota, tanggal Hijriah, dan grafik praktik. 4\u00d72 \u2014 perkecil dan akan menjadi strip satu baris.</string>
     <string name="widget_name_log_tall">Mihrab \u00b7 Catat hari ini (tinggi)</string>
     <string name="widget_description_log_tall">Ketuk salat untuk mencatatnya tepat waktu, lengkap dengan hitungan mundur ke salat berikutnya dan grafik praktik. 4\u00d72 \u2014 perkecil dan akan menjadi kartu satu baris.</string>
+    <!-- Mihrab · Sky — the hero on the home screen (PrayerWidgetSkyProvider). -->
+    <string name="widget_name_sky">Mihrab · Langit</string>
+    <string name="widget_description_sky">Salat berikutnya di bawah langit hari itu — malam berbulan, fajar, siang, senja — dengan hitung mundur. 2×2 sampai 4×3.</string>
+    <string name="widget_preview_sky_next">Subuh · 03:38</string>
 </resources>

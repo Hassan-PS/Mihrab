@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Mihrab · Sky — the app's hero on the home screen. See PrayerWidgetSkyProvider.
+
+  Three layers in the shell: the card (recoloured like every other card, so
+  the corners and inset match while the sky is loading), the sky bitmap
+  drawn at the card's exact size with the same rounded corners, and the
+  text over it. The text takes its ink from the sky at bind time.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_shell"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/widget_card_inset">
+
+    <ImageView
+        android:id="@+id/widget_card"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_card"
+        android:contentDescription="@null"
+        android:importantForAccessibility="no" />
+
+    <!-- The sky, drawn to the card's size — never scaled, so the moon is a moon. -->
+    <ImageView
+        android:id="@+id/widget_sky"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:contentDescription="@null"
+        android:importantForAccessibility="no"
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/widget_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/widget_placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textColor="#9AA0A6"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/widget_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <!-- The city, as the hero's top row has it. -->
+            <TextView
+                android:id="@+id/widget_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#C7FFFFFF"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <!-- The open sky the sun and moon cross. -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <!-- "Fajr · 03:38" -->
+            <TextView
+                android:id="@+id/widget_next_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#C7FFFFFF"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <!--
+                The countdown, ticked by the system. Chronometer IS a
+                TextView, so the size and colour actions the provider sends
+                land on it; its size follows the card (see the provider).
+            -->
+            <Chronometer
+                android:id="@+id/widget_remaining"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:textSize="34sp"
+                android:fontFamily="sans-serif"
+                android:textStyle="bold"
+                android:includeFontPadding="false"
+                android:maxLines="1" />
+
+            <!-- "Wed, 9 Sep · 27 Rabi I 1448" -->
+            <TextView
+                android:id="@+id/widget_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#C7FFFFFF"
+                android:textSize="11sp"
+                android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+        </LinearLayout>
+    </FrameLayout>
+</FrameLayout>
