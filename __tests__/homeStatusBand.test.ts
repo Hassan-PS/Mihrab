@@ -157,3 +157,46 @@ describe('the band is wired to the page', () => {
     expect(band).toMatch(/luminance\(pageColor\) < INK_SWITCH_LUMINANCE/);
   });
 });
+
+/**
+ * And on every other tab, where there is no sky — only a page.
+ *
+ * No tab draws a header any more, so a scrolled page rode up behind the
+ * clock and the status icons on all of them, not just Today. The strip on
+ * those pages already IS the page's colour, so the band is simply always
+ * there: invisible at rest, and the thing that hides what scrolls under
+ * it. One band in the tabs' shared layout covers the five tabs and every
+ * page inside them.
+ */
+describe('the tabs that are not Today', () => {
+  const tabs = read('src/navigation/MainTabs.tsx');
+  const band = read('src/navigation/StatusBarBand.tsx');
+
+  it('gets the band from the layout every tab shares', () => {
+    expect(tabs).toContain("import { StatusBarBand } from './StatusBarBand';");
+    expect(tabs).toMatch(
+      /route\.name !== 'TodayTab' \? <StatusBarBand color=\{palette\.bg\} \/> : null/,
+    );
+  });
+
+  it('paints the page\'s own colour, at the status bar\'s height', () => {
+    expect(band).toMatch(/height: insets\.top/);
+    expect(band).toMatch(/backgroundColor: color/);
+    // Nothing to cover where the window has no status bar over it.
+    expect(band).toMatch(/if \(insets\.top <= 0\) return null;/);
+  });
+
+  it('never takes a touch', () => {
+    expect(band).toMatch(/pointerEvents="none"/);
+  });
+
+  it('leaves Today to its own band — the sky has to show at rest', () => {
+    // Both exist, and neither is on the other's screen: the flat band is
+    // in the tabs' layout, the sky band inside Today.
+    expect(read('src/screens/HomeScreen.tsx')).toContain('<HomeStatusBand');
+    // The elements, not the names: each file NAMES the other in a comment,
+    // which is the point — they are two halves of one idea.
+    expect(read('src/screens/HomeScreen.tsx')).not.toMatch(/<StatusBarBand/);
+    expect(tabs).not.toMatch(/<HomeStatusBand/);
+  });
+});

@@ -43,6 +43,7 @@ import {
   useTabBarBottom,
 } from './tabBarInset';
 import { TabBarScrim } from './TabBarScrim';
+import { StatusBarBand } from './StatusBarBand';
 import { showTabBar, useTabBarHidden } from './tabBarVisibility';
 import { HomeScreen } from '../screens/HomeScreen';
 import { QuranScreen } from '../screens/QuranScreen';
@@ -138,6 +139,14 @@ export function MainTabs() {
             headerless={!(route.name === 'TodayTab' && todayHeader)}
           />
           {children}
+          {/* Over the page, at the other end: the strip behind the status
+              bar. Every tab pads its content clear of it, so a band of the
+              page's own colour is invisible until something scrolls up
+              into it — and then it is the thing that keeps the page's text
+              off the clock. Today is not here: its sky runs under the
+              status bar on purpose and it covers the strip itself, with
+              the sky's own colour (`HomeStatusBand`). */}
+          {route.name !== 'TodayTab' ? <StatusBarBand color={palette.bg} /> : null}
           {/* Under the bar, over the page: the fade that keeps the two from
               colliding. Same `slide` as the bar, so it leaves with it. */}
           <TabBarScrim bg={palette.bg} slide={slide} />

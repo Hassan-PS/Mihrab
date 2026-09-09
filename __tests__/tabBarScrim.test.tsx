@@ -58,9 +58,17 @@ describe('TabBarScrim', () => {
 
   it('is mounted under every tab, on the same slide value as the bar', () => {
     // In `screenLayout`, after the screen, so it paints over the page and
-    // under the bar.
-    expect(mainTabs).toMatch(
-      /\{children\}[\s\S]{0,300}<TabBarScrim bg=\{palette\.bg\} slide=\{slide\}/,
+    // under the bar. The status-bar band sits between the two now — the
+    // other end of the same window — so this looks for the order rather
+    // than for one following hard on the other.
+    const layout = mainTabs.slice(
+      mainTabs.indexOf('screenLayout='),
+      mainTabs.indexOf('screenOptions='),
+    );
+    expect(layout).toContain('{children}');
+    expect(layout).toMatch(/<TabBarScrim bg=\{palette\.bg\} slide=\{slide\}/);
+    expect(layout.indexOf('{children}')).toBeLessThan(
+      layout.indexOf('<TabBarScrim'),
     );
   });
 });
