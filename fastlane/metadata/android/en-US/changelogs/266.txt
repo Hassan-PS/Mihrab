@@ -1,0 +1,4 @@
+• A prayer log that could not be read is no longer written over. A moment's storage hiccup could leave the Log looking empty, and the next tap replaced your whole record with that one prayer. Every writer now refuses until the record can be read.
+• Once a prayer's first time has passed, its row says when the second time ends.
+• The sun crosses the sky once, from where it rises to where it sets.
+• The sky no longer mirrors in right-to-left languages.

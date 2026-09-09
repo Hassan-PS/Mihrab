@@ -1,0 +1,4 @@
+• En bönelogg som inte kunde läsas skrivs inte längre över. Ett kort lagringsfel kunde få loggen att se tom ut, och nästa tryck ersatte hela din historik med den ena bönen. Nu vägrar varje skrivning tills loggen kan läsas.
+• När en böns första tid har passerat visar raden när den andra tiden tar slut.
+• Solen går över himlen en gång, från där den går upp till där den går ner.
+• Himlen speglas inte längre i höger-till-vänster-språk.
