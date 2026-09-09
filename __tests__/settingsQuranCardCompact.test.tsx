@@ -86,11 +86,30 @@ function textsOf(tree: ReactTestRenderer): string[] {
   return out;
 }
 
+/**
+ * Mounted trees are collected and unmounted after each test.
+ *
+ * The card reads the practice history, which loads asynchronously; a tree
+ * left mounted resolves that load AFTER the test has ended and sets state
+ * on an unmounted-in-spirit component. React reports that, and in
+ * `--runInBand` — which CI uses — the report lands in whichever suite runs
+ * next. Unmounting runs the effect's cleanup, which is what tells the load
+ * nobody is listening any more.
+ */
+const mounted: ReactTestRenderer[] = [];
+
+afterEach(async () => {
+  await act(async () => {
+    while (mounted.length) mounted.pop()!.unmount();
+  });
+});
+
 async function render(): Promise<ReactTestRenderer> {
   let tree!: ReactTestRenderer;
   await act(async () => {
     tree = create(<QuranCard />);
   });
+  mounted.push(tree);
   return tree;
 }
 

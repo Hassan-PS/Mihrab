@@ -406,3 +406,80 @@ jest.mock('@notifee/react-native', () => ({
     SET_EXACT_AND_ALLOW_WHILE_IDLE: 3,
   },
 }));
+
+/**
+ * A `window` React can report an uncaught error through.
+ *
+ * React 19's dev renderer reports anything a render throws — and anything
+ * a floating promise sets state with after a test has ended — by
+ * dispatching an `error` event on `window`. The React Native jest
+ * environment provides a `window` object, but not that method, so the
+ * REPORT threw where the thing being reported was a warning: a
+ * `TypeError: window.dispatchEvent is not a function` raised at the top
+ * level, after Jest had printed "Test Suites: 311 passed", which took the
+ * process out with exit code 1 and no failing test to point at.
+ *
+ * It only bit in `--runInBand` — which is what CI runs — because the
+ * suites then share one environment and one of them leaves a component
+ * mounted whose late `setData` lands in the next.
+ *
+ * So: give the reporter somewhere to report. The warning goes to the
+ * console, where a warning belongs, and the run's exit code goes back to
+ * meaning "a test failed".
+ */
+if (typeof global.window === 'object' && global.window !== null) {
+  for (const method of ['dispatchEvent', 'addEventListener', 'removeEventListener']) {
+    if (typeof global.window[method] !== 'function') {
+      global.window[method] = () => true;
+    }
+  }
+}
+
+
+/**
+ * EVERY TREE A TEST MOUNTS IS UNMOUNTED WHEN THAT TEST ENDS.
+ *
+ * `react-test-renderer` keeps a mounted tree alive until someone unmounts
+ * it, and most suites here never do — which is harmless while Jest gives
+ * each suite its own worker, and is not harmless under `--runInBand`,
+ * which is what CI runs. There the suites share one environment: a tree
+ * left mounted goes on subscribing, ticking and resolving into the NEXT
+ * suite, by which time its module registry has been reset — so the render
+ * throws `useWindowDimensions is not a function`, React reports an
+ * uncaught error, and the run ends with exit code 1 after printing "311
+ * passed". A green suite and a red process, with nothing to point at.
+ *
+ * Rather than chase the leak from suite to suite, the harness guarantees
+ * the invariant: `create` records what it made, and each test's teardown
+ * unmounts it — which runs the effect cleanups, cancels the subscriptions
+ * and settles the pending state before the next suite starts. A test that
+ * wants a tree to outlive it can unmount it itself; unmounting twice is a
+ * no-op.
+ */
+try {
+  const testRenderer = require('react-test-renderer');
+  const mountedTrees = [];
+  const createTree = testRenderer.create.bind(testRenderer);
+  testRenderer.create = (...args) => {
+    const tree = createTree(...args);
+    mountedTrees.push(tree);
+    return tree;
+  };
+  afterEach(() => {
+    if (!mountedTrees.length) return;
+    testRenderer.act(() => {
+      while (mountedTrees.length) {
+        const tree = mountedTrees.pop();
+        try {
+          tree.unmount();
+        } catch (e) {
+          // Already unmounted by the test, or torn down with its module
+          // registry — either way there is nothing left to clean up.
+        }
+      }
+    });
+  });
+} catch (e) {
+  // react-test-renderer is not installed in every environment this file
+  // is loaded in; the suites that do not render do not need this.
+}
