@@ -1,19 +1,26 @@
 #!/usr/bin/env python3
 """Rebuild the README and website imagery from a screenshot set.
 
-Sources live in `branding/screenshots-2.14/` — device captures at their own
-resolutions (Android 1080x2400, iPhone 1206x2622, a Mac desktop capture with
-the app window inside it). This script is what turns them into the fixed
-shapes the README and the site ask for, so the next set can be dropped in
-and the same command run again.
+Sources live in `branding/screenshots-2.18/` — device captures at their own
+resolutions (Android 1080x2400, iPhone 1320x2868, an Android tablet at
+2560x1600). This script is what turns them into the fixed shapes the README
+and the site ask for, so the next set can be dropped in and the same command
+run again.
 
   python3 branding/tools/build_shots.py
 
 Phone shots are scaled to 1800 tall and centre-cropped to 810 wide, which is
 the 9:20 box the site's gallery declares (`aspect-ratio: 9 / 20`) and the
-size the README's grid has always used. The Mac window is found by scanning
-for the light rectangle inside the wallpaper rather than by hardcoded
-coordinates, so a differently-placed window still crops correctly.
+size the README's grid has always used.
+
+THE SPREAD is the wide one, and it comes from a TABLET now. It used to be a
+Mac desktop capture with the window found by scanning for the light
+rectangle inside the wallpaper — which needs a Mac whose screen is awake and
+unlocked at the moment of the capture, and that is exactly what could not be
+arranged for the 2.18 set. A landscape tablet shows the same facing-page
+spread the Mac does, at 16:10 rather than the window's ~16:9, so it crops to
+the same box and needs no window-finding at all. `mac_window` stays below for
+the day a Mac capture is to hand again.
 """
 import datetime
 import os
@@ -21,11 +28,13 @@ import re
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-SRC = os.path.join(ROOT, 'branding/screenshots-2.14')
+SRC = os.path.join(ROOT, 'branding/screenshots-2.18')
 SITE = os.path.join(ROOT, 'docs/assets/img')
 README = os.path.join(ROOT, 'branding/readme')
 
 PHONE = (810, 1800)
+# The site's wide figure: `docs/index.html` declares 1600x878.
+SPREAD_W = 1600
 
 
 def phone(name, out):
@@ -67,23 +76,36 @@ def mac_window(name, out, width=1600):
     return im.size
 
 
-# The site gallery: three rows of four, light and dark, phone and desktop.
+# Every phone figure the site shows, in the order the page lays them out.
+# All of them come from the same set now: the page used to carry a handful
+# of images this script did not know about — fasting, memorising, the
+# reciters, Tilawah, the Android widgets — which is how they came to be a
+# release and a half older than the ones beside them.
 GALLERY = [
     ('and-home', 'shot-home'),
     ('and-home-dark', 'shot-home-dark'),
+    ('and-home-maliki', 'shot-home-maliki'),
     ('and-mushaf', 'shot-mushaf'),
     ('and-mushaf-night', 'shot-mushaf-dark'),
     ('and-quran', 'shot-quran'),
+    ('and-tilawah', 'shot-tilawah'),
+    ('and-reciters', 'shot-reciters'),
+    ('and-memorize', 'shot-memorize'),
     ('and-qibla', 'shot-qibla'),
     ('and-month', 'shot-month'),
     ('and-month-share', 'shot-month-share'),
     ('and-duas', 'shot-duas'),
     ('and-tasbih', 'shot-tasbih'),
     ('and-log', 'shot-log'),
+    ('and-fasting', 'shot-fasting'),
     ('ios-widgets', 'shot-widgets'),
+    ('and-widgets', 'shot-widgets-android'),
 ]
 
-# The README's six, in its grid order.
+# The README's nine, in its grid order. Every one of them is also a site
+# figure built from the same source above, and `shotParity.test.ts` holds
+# the two sets byte-identical — so a row missing here is not a smaller
+# README, it is a README a release out of date beside the site.
 READMES = [
     ('and-home', '01_home'),
     ('and-mushaf', '02_quran'),
@@ -91,6 +113,9 @@ READMES = [
     ('and-tasbih', '04_tasbih'),
     ('and-qibla', '05_qibla'),
     ('and-log', '06_journal'),
+    ('and-tilawah', '07_tilawah'),
+    ('and-fasting', '08_fasting'),
+    ('and-widgets', '09_widgets'),
 ]
 
 
@@ -110,15 +135,30 @@ def stamp_site(day=None):
     images because the same command writes both.
     """
     day = day or datetime.date.today().isoformat()
-    path = os.path.join(ROOT, 'docs/index.html')
-    html = open(path, encoding='utf-8').read()
-    before = html
-    html = re.sub(r'(assets/img/(?:shot-[a-z-]+|og-hero)\.png)(\?v=[\d-]+)?',
-                  lambda m: f'{m.group(1)}?v={day}', html)
-    if html != before:
-        open(path, 'w', encoding='utf-8').write(html)
-    n = len(re.findall(r'\?v=' + re.escape(day), html))
-    print(f'   docs/index.html: {n} image URLs stamped ?v={day}')
+    # THE GENERATOR OWNS THE PAGE. `docs/` is written by
+    # `scripts/build-site.js` from `scripts/site/strings.json`, in thirteen
+    # languages, and a test runs that generator with --check — so stamping
+    # the HTML directly (which is what this did) produced a page the
+    # generator disowned on the next run, and a red suite. The stamp lives
+    # in the generator's own `SHOT_V` instead, and the pages are rebuilt.
+    path = os.path.join(ROOT, 'scripts/build-site.js')
+    src = open(path, encoding='utf-8').read()
+    before = src
+    src = re.sub(r"const SHOT_V = '\?v=[^']*';",
+                 f"const SHOT_V = '?v={day}';", src, count=1)
+    if src != before:
+        open(path, 'w', encoding='utf-8').write(src)
+    print(f'   scripts/build-site.js: SHOT_V = ?v={day}')
+    print('   run `node scripts/build-site.js` to rewrite the pages')
+
+
+def wide(name, out, width=SPREAD_W):
+    """A landscape tablet capture, scaled to the site's wide figure."""
+    im = Image.open(os.path.join(SRC, name + '.png')).convert('RGB')
+    h = round(im.height * width / im.width)
+    im = im.resize((width, h), Image.LANCZOS)
+    im.save(out, optimize=True)
+    print('  ', os.path.relpath(out, ROOT), im.size)
 
 
 def main():
@@ -126,7 +166,7 @@ def main():
     for src, dst in GALLERY:
         phone(src, os.path.join(SITE, dst + '.png'))
     print('the spread:')
-    mac_window('mac-spread', os.path.join(SITE, 'shot-spread.png'))
+    wide('tab-spread', os.path.join(SITE, 'shot-spread.png'))
     print('readme:')
     for src, dst in READMES:
         phone(src, os.path.join(README, dst + '.png'))

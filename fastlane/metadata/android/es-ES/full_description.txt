@@ -2,6 +2,8 @@ Mihrab mantiene las cinco oraciones diarias a mano: una pantalla de inicio seren
 
 Funciones principales:
 - Horarios de oración para hoy, la semana siguiente y un mes entero — se pueden compartir como imagen o PDF
+- Un cielo dibujado detrás de la cuenta atrás que sigue el día — noche con la luna en su fase, alba, mediodía, atardecer — y el mismo cielo como widget
+- Registra una oración con un toque desde Hoy — hoy o cualquier día de la última semana — y el diario guarda el registro, la racha y el gráfico
 - Notificaciones opcionales para las cinco oraciones, con diecisiete grabaciones de adhan o la tuya propia, aviso previo y posponer
 - Cuenta atrás fijada (Live Activity) en la pantalla de bloqueo y en el panel de notificaciones, en tres diseños
 - Widgets de pantalla de inicio: horarios en tres tamaños, el registro del día, la fecha hiyrí, la racha, el tasbih y la lectura

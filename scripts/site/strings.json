@@ -6,15 +6,15 @@
     "shots": {
       "items": {
         "home": {
-          "alt": "Home screen: the next prayer with a live countdown above the day’s times.",
-          "cap": "Home — next prayer and countdown"
+          "alt": "Home screen: a drawn sky behind the next prayer and a live countdown, the day above the times, and a check beside each prayer.",
+          "cap": "Home — the day’s sky and the countdown"
         },
         "home-maliki": {
           "alt": "The same day with the Maliki second times switched on: under each prayer, when its preferred (ikhtiyari) window closes.",
           "cap": "Maliki second times"
         },
         "home-dark": {
-          "alt": "The same home screen in the dark theme.",
+          "alt": "The same home screen in the dark theme — the sky stays true to the hour, so a morning sky sits above a dark page.",
           "cap": "Home, dark"
         },
         "tilawah": {
@@ -38,7 +38,7 @@
           "cap": "Repeat, pause, hide — for memorising"
         },
         "quran": {
-          "alt": "The Quran tab: continue reading, the khatmah plan, the verse of the day, and the Tilāwah button in the title bar.",
+          "alt": "The Quran tab: continue reading, the khatmah plan, the Tilāwah row, the verse of the day, and every surah named in the muṣḥaf’s own calligraphy.",
           "cap": "Khatmah and where you left off"
         },
         "qibla": {
@@ -74,13 +74,13 @@
           "cap": "Widgets and the Live Activity"
         },
         "widgets-android": {
-          "alt": "An Android home screen with the prayer-times widget — the day's times, the countdown, the streak and the practice graph — above the Log today widget.",
-          "cap": "Android home-screen widgets"
+          "alt": "An Android home screen carrying the Sky widget — the day’s sky with the next prayer and a live countdown — and the Continue Reading widget above it.",
+          "cap": "Android widgets — the sky, and where you left off"
         }
       },
       "spread": {
-        "alt": "Mihrab on a Mac: two facing mushaf pages side by side with the surah sidebar, as in the printed copy.",
-        "cap": "On iPad and Mac the mushaf opens as a facing-page spread — the pair of pages is what turns, exactly as it does in print."
+        "alt": "Mihrab on a tablet: two facing mushaf pages side by side with the surah sidebar, as in the printed copy.",
+        "cap": "On a tablet, an iPad or a Mac the mushaf opens as a facing-page spread — the pair of pages is what turns, exactly as it does in print."
       }
     }
   },
@@ -91,16 +91,16 @@
     "shots": {
       "items": {
         "home": {
-          "alt": "Hemskärmen: nästa bön med en levande nedräkning ovanför dagens tider.",
-          "cap": "Hem — nästa bön och nedräkning"
+          "alt": "Startskärmen: en tecknad himmel bakom nästa bön och en levande nedräkning, dagen ovanför tiderna och en bock vid varje bön.",
+          "cap": "Start — dygnets himmel och nedräkningen"
         },
         "home-maliki": {
           "alt": "Samma dag med malikitiska andratider på: under varje bön står när dess föredragna tid (ikhtiyari) tar slut.",
           "cap": "Malikitiska andratider"
         },
         "home-dark": {
-          "alt": "Samma hemskärm i mörkt tema.",
-          "cap": "Hem, mörkt"
+          "alt": "Samma startskärm i det mörka temat — himlen följer timmen, så en morgonhimmel ligger över en mörk sida.",
+          "cap": "Start, mörkt"
         },
         "tilawah": {
           "alt": "Tilāwah: en recitation av Al-Baqarah med recitatör, uppspelningskontroller, hastighet och sovtimer, och surahlistan nedanför för att börja var som helst.",
@@ -123,7 +123,7 @@
           "cap": "Upprepa, pausa, dölj — för memorering"
         },
         "quran": {
-          "alt": "Koran-fliken: fortsätt läsa, khatmah-planen, dagens vers och Tilawah-knappen i titelraden.",
+          "alt": "Koran-fliken: fortsätt läsa, khatmah-planen, Tilāwah-raden, dagens vers och varje sura med sitt namn i muṣḥafens egen kalligrafi.",
           "cap": "Khatmah och där du slutade"
         },
         "qibla": {
@@ -159,13 +159,13 @@
           "cap": "Widgetar och den levande nedräkningen"
         },
         "widgets-android": {
-          "alt": "En Android-hemskärm med bönetidswidgeten — dagens tider, nedräkningen, sviten och praktikgrafen — ovanför widgeten Logga idag.",
-          "cap": "Widgetar på Android-hemskärmen"
+          "alt": "En Android-hemskärm med himmelswidgeten — dygnets himmel med nästa bön och en levande nedräkning — och widgeten Fortsätt läsa ovanför.",
+          "cap": "Android-widgetar — himlen och där du slutade"
         }
       },
       "spread": {
-        "alt": "Mihrab på en Mac: två uppslagna mushaf-sidor sida vid sida med surelistan, som i den tryckta boken.",
-        "cap": "På iPad och Mac öppnas mushafen som ett uppslag — det är sidparet som vänds, precis som i tryck."
+        "alt": "Mihrab på en surfplatta: två uppslagna muṣḥaf-sidor sida vid sida med surelistan, som i den tryckta utgåvan.",
+        "cap": "På en surfplatta, en iPad eller en Mac öppnas muṣḥafen som ett uppslag — det är sidparet som vänds, precis som i tryck."
       }
     }
   },
@@ -281,16 +281,16 @@
       "lede": "فاتح وداكن، على الهاتف واللوحي. المصحف هو صفحة المدينة المطبوعة نفسها لا صورة عنها. اللقطات بالإنجليزية، والتطبيق يتحدث العربية كذلك.",
       "items": {
         "home": {
-          "alt": "الشاشة الرئيسية: الصلاة القادمة مع عدّ تنازلي حيّ فوق مواقيت اليوم.",
-          "cap": "الرئيسية — الصلاة القادمة والعدّ التنازلي"
+          "alt": "شاشة اليوم: سماء مرسومة خلف الصلاة القادمة وعدّ تنازلي حيّ، والتاريخ فوق الأوقات، وعلامة إلى جانب كل صلاة.",
+          "cap": "اليوم — سماء اليوم والعدّ التنازلي"
         },
         "home-maliki": {
           "alt": "اليوم نفسه مع تفعيل الأوقات الثانية المالكية: تحت كل صلاة موعد انتهاء وقتها الاختياري.",
           "cap": "الأوقات الثانية المالكية"
         },
         "home-dark": {
-          "alt": "الشاشة الرئيسية نفسها بالمظهر الداكن.",
-          "cap": "الرئيسية، داكنة"
+          "alt": "الشاشة نفسها في السمة الداكنة — السماء تتبع الساعة، فسماء الصباح فوق صفحة داكنة.",
+          "cap": "اليوم، داكن"
         },
         "tilawah": {
           "alt": "تِلاوة: تلاوة سورة البقرة مع القارئ وأزرار التشغيل والسرعة ومؤقّت النوم، وقائمة السور أسفلها للبدء من أي موضع.",
@@ -313,8 +313,8 @@
           "cap": "تكرار ووقفة وإخفاء — للحفظ"
         },
         "quran": {
-          "alt": "تبويب القرآن: متابعة القراءة، وخطة الختمة، وآية اليوم، وزرّ التلاوة في الشريط العلوي.",
-          "cap": "الختمة وأين توقفت"
+          "alt": "تبويب القرآن: تابع القراءة، وخطة الختمة، وصفّ التلاوة، وآية اليوم، وكل سورة باسمها بخط المصحف.",
+          "cap": "الختمة وموضع توقفك"
         },
         "qibla": {
           "alt": "بوصلة القبلة: قرص يبيّن الاتجاه وقوة الإشارة ومراجعة بالشمس.",
@@ -349,13 +349,13 @@
           "cap": "الأدوات والنشاط الحيّ"
         },
         "widgets-android": {
-          "alt": "شاشة رئيسية على أندرويد فيها أداة مواقيت الصلاة — مواقيت اليوم والعد التنازلي والمواظبة ورسم المتابعة — فوق أداة سجل اليوم.",
-          "cap": "أدوات الشاشة الرئيسية على أندرويد"
+          "alt": "شاشة أندرويد الرئيسية تحمل أداة «السماء» — سماء اليوم مع الصلاة القادمة وعدّ تنازلي حيّ — وأداة «تابع القراءة» فوقها.",
+          "cap": "أدوات أندرويد — السماء، وموضع توقفك"
         }
       },
       "spread": {
-        "alt": "محراب على الماك: صفحتان متقابلتان من المصحف مع قائمة السور، كما في المصحف المطبوع.",
-        "cap": "على الآيباد والماك يفتح المصحف صفحتين متقابلتين — الصفحتان معًا هما ما ينقلب، تمامًا كالمطبوع."
+        "alt": "مِحراب على لوح: صفحتان متقابلتان من المصحف جنبًا إلى جنب مع قائمة السور، كما في النسخة المطبوعة.",
+        "cap": "على لوح أو آيباد أو ماك يُفتح المصحف صفحتين متقابلتين — والزوج هو ما يُقلَب، تمامًا كما في المطبوع."
       }
     }
   },
@@ -471,16 +471,16 @@
       "lede": "Açık ve koyu, telefon ve tablet. Mushaf, basılı Medine sayfasının kendisi; onun bir fotoğrafı değil. Görsellerdeki uygulama İngilizce; uygulama Türkçe de konuşuyor.",
       "items": {
         "home": {
-          "alt": "Ana ekran: günün vakitlerinin üstünde bir sonraki namaz ve canlı geri sayım.",
-          "cap": "Ana ekran — sonraki namaz ve geri sayım"
+          "alt": "Bugün ekranı: sıradaki namazın arkasında çizilmiş bir gökyüzü ve canlı geri sayım, vakitlerin üstünde gün ve her namazın yanında bir işaret.",
+          "cap": "Bugün — günün gökyüzü ve geri sayım"
         },
         "home-maliki": {
           "alt": "Aynı gün, Maliki ikinci vakitleri açıkken: her namazın altında ihtiyari vaktinin ne zaman bittiği.",
           "cap": "Maliki ikinci vakitleri"
         },
         "home-dark": {
-          "alt": "Aynı ana ekran, koyu temada.",
-          "cap": "Ana ekran, koyu"
+          "alt": "Aynı ekran koyu temada — gökyüzü saati izler, böylece sabah gökyüzü koyu bir sayfanın üstünde durur.",
+          "cap": "Bugün, koyu"
         },
         "tilawah": {
           "alt": "Tilâvet: Bakara sûresinin tilaveti; kâri, oynatma denetimleri, hız ve uyku zamanlayıcısı, altında istediğiniz yerden başlamak için sûre listesi.",
@@ -503,7 +503,7 @@
           "cap": "Tekrar, duraklama, gizleme — ezber için"
         },
         "quran": {
-          "alt": "Kuran sekmesi: kaldığın yer, hatim planı, günün ayeti ve başlık çubuğundaki Tilavet düğmesi.",
+          "alt": "Kur’an sekmesi: okumaya devam, hatim planı, Tilâvet satırı, günün ayeti ve her sure adı mushafın kendi hattıyla.",
           "cap": "Hatim ve kaldığın yer"
         },
         "qibla": {
@@ -539,13 +539,13 @@
           "cap": "Widget’lar ve canlı etkinlik"
         },
         "widgets-android": {
-          "alt": "Namaz vakitleri widget'ı bulunan bir Android ana ekranı — günün vakitleri, geri sayım, seri ve takip grafiği — Bugünü kaydet widget'ının üstünde.",
-          "cap": "Android ana ekran widget'ları"
+          "alt": "Gökyüzü widget’ını taşıyan bir Android ana ekranı — günün gökyüzü, sıradaki namaz ve canlı geri sayım — üstünde Okumaya Devam widget’ı.",
+          "cap": "Android widget’ları — gökyüzü ve kaldığın yer"
         }
       },
       "spread": {
-        "alt": "Mac’te Mihrab: sure kenar çubuğuyla yan yana iki mushaf sayfası, basılı nüshadaki gibi.",
-        "cap": "iPad ve Mac’te mushaf iki sayfa yan yana açılır — çevrilen şey sayfa çiftidir, tıpkı basılı nüshadaki gibi."
+        "alt": "Bir tablette Mihrab: sure kenar çubuğuyla yan yana iki mushaf sayfası, basılı nüshadaki gibi.",
+        "cap": "Tablette, iPad’de veya Mac’te mushaf karşılıklı iki sayfa olarak açılır — çevrilen şey sayfa çiftidir, tam da baskıda olduğu gibi."
       }
     }
   },
@@ -661,16 +661,16 @@
       "lede": "روشن اور تاریک، فون اور ٹیبلٹ۔ مصحف مدینہ کا چھپا ہوا صفحہ ہی ہے، اُس کی تصویر نہیں۔ تصاویر میں ایپ انگریزی میں ہے؛ یہ اردو بھی بولتی ہے۔",
       "items": {
         "home": {
-          "alt": "ہوم اسکرین: دن کے اوقات کے اوپر اگلی نماز اور چلتی ہوئی گنتی۔",
-          "cap": "ہوم — اگلی نماز اور گنتی"
+          "alt": "آج کی اسکرین: اگلی نماز کے پیچھے بنایا ہوا آسمان اور چلتی ہوئی گنتی، اوقات کے اوپر دن، اور ہر نماز کے ساتھ ایک نشان۔",
+          "cap": "آج — دن کا آسمان اور گنتی"
         },
         "home-maliki": {
           "alt": "وہی دن مالکی ثانوی اوقات کے ساتھ: ہر نماز کے نیچے یہ کہ اس کا اختیاری وقت کب ختم ہوتا ہے۔",
           "cap": "مالکی ثانوی اوقات"
         },
         "home-dark": {
-          "alt": "وہی ہوم اسکرین، تاریک تھیم میں۔",
-          "cap": "ہوم، تاریک"
+          "alt": "وہی اسکرین گہرے تھیم میں — آسمان وقت کے ساتھ چلتا ہے، سو صبح کا آسمان گہرے صفحے کے اوپر۔",
+          "cap": "آج، گہرا"
         },
         "tilawah": {
           "alt": "تلاوت: سورۃ البقرہ کی تلاوت، قاری، پلے بیک کنٹرول، رفتار اور سلیپ ٹائمر کے ساتھ، اور نیچے سورتوں کی فہرست تاکہ کہیں سے بھی شروع کیا جا سکے۔",
@@ -693,8 +693,8 @@
           "cap": "تکرار، وقفہ، اخفا — حفظ کے لیے"
         },
         "quran": {
-          "alt": "قرآن ٹیب: پڑھائی جاری رکھیں، ختم قرآن کا منصوبہ، آیتِ روز، اور عنوان کی پٹی میں تلاوت کا بٹن۔",
-          "cap": "ختم قرآن اور آپ کہاں رکے تھے"
+          "alt": "قرآن ٹیب: پڑھنا جاری رکھیں، ختمہ منصوبہ، تلاوت کی سطر، دن کی آیت، اور ہر سورہ کا نام مصحف کے اپنے خط میں۔",
+          "cap": "ختمہ اور جہاں آپ نے چھوڑا"
         },
         "qibla": {
           "alt": "قبلہ کمپاس: سمت، سگنل کی قوت، اور سورج سے جانچ۔",
@@ -729,13 +729,13 @@
           "cap": "ویجٹ اور لائیو ایکٹیویٹی"
         },
         "widgets-android": {
-          "alt": "اینڈرائیڈ ہوم اسکرین جس پر نماز اوقات کا وجٹ ہے — دن کے اوقات، الٹی گنتی، تسلسل اور پریکٹس گراف — ’آج کا اندراج‘ وجٹ کے اوپر۔",
-          "cap": "اینڈرائیڈ ہوم اسکرین وجٹ"
+          "alt": "اینڈرائیڈ ہوم اسکرین پر آسمان ویجٹ — دن کا آسمان، اگلی نماز اور چلتی گنتی — اور اوپر پڑھائی جاری رکھنے کا ویجٹ۔",
+          "cap": "اینڈرائیڈ ویجٹ — آسمان، اور جہاں آپ نے چھوڑا"
         }
       },
       "spread": {
-        "alt": "میک پر محراب: سورتوں کی فہرست کے ساتھ مصحف کے دو آمنے سامنے صفحات، جیسے چھپی ہوئی جلد میں۔",
-        "cap": "آئی پیڈ اور میک پر مصحف دو آمنے سامنے صفحات کے طور پر کھلتا ہے — پلٹنے والی چیز صفحوں کا جوڑا ہے، بالکل چھپی ہوئی جلد کی طرح۔"
+        "alt": "ٹیبلٹ پر مِحراب: سورہ فہرست کے ساتھ مصحف کے دو متقابل صفحے، جیسے مطبوعہ نسخے میں۔",
+        "cap": "ٹیبلٹ، آئی پیڈ یا میک پر مصحف دو متقابل صفحوں کے طور پر کھلتا ہے — صفحوں کا جوڑا ہی پلٹتا ہے، بالکل چھپے نسخے کی طرح۔"
       }
     }
   },
@@ -851,16 +851,16 @@
       "lede": "Terang dan gelap, ponsel dan tablet. Mushafnya adalah halaman Madinah cetakan itu sendiri, bukan fotonya. Aplikasi pada gambar berbahasa Inggris; aplikasinya berbahasa Indonesia juga.",
       "items": {
         "home": {
-          "alt": "Layar utama: salat berikutnya dengan hitung mundur langsung di atas jadwal hari ini.",
-          "cap": "Beranda — salat berikutnya dan hitung mundur"
+          "alt": "Layar Hari Ini: langit yang digambar di belakang salat berikutnya dan hitungan waktu yang hidup, tanggal di atas jadwal, dan tanda centang di samping setiap salat.",
+          "cap": "Hari Ini — langit hari itu dan hitungannya"
         },
         "home-maliki": {
           "alt": "Hari yang sama dengan waktu kedua Maliki aktif: di bawah setiap salat, kapan waktu pilihannya (ikhtiyari) berakhir.",
           "cap": "Waktu kedua Maliki"
         },
         "home-dark": {
-          "alt": "Layar utama yang sama dalam tema gelap.",
-          "cap": "Beranda, gelap"
+          "alt": "Layar yang sama dalam tema gelap — langit mengikuti jam, jadi langit pagi berada di atas halaman gelap.",
+          "cap": "Hari Ini, gelap"
         },
         "tilawah": {
           "alt": "Tilāwah: bacaan Al-Baqarah dengan qari, kendali pemutaran, pengatur kecepatan dan pengatur waktu tidur, serta daftar surah di bawahnya untuk memulai dari mana saja.",
@@ -883,8 +883,8 @@
           "cap": "Ulang, jeda, sembunyikan — untuk menghafal"
         },
         "quran": {
-          "alt": "Tab Al-Qur’an: lanjutkan membaca, rencana khatam, ayat hari ini, dan tombol Tilawah di bilah judul.",
-          "cap": "Khatam dan tempat terakhir Anda"
+          "alt": "Tab Quran: lanjutkan membaca, rencana khatam, baris Tilawah, ayat hari ini, dan setiap surah dengan namanya dalam kaligrafi mushaf.",
+          "cap": "Khatam dan tempat Anda berhenti"
         },
         "qibla": {
           "alt": "Kompas kiblat: arah, kekuatan sinyal, dan pemeriksaan silang dengan matahari.",
@@ -919,13 +919,13 @@
           "cap": "Widget dan Live Activity"
         },
         "widgets-android": {
-          "alt": "Layar utama Android dengan widget waktu salat — waktu hari ini, hitung mundur, rentetan, dan grafik amalan — di atas widget Catat hari ini.",
-          "cap": "Widget layar utama Android"
+          "alt": "Layar utama Android dengan widget Langit — langit hari itu, salat berikutnya, dan hitungan waktu — serta widget Lanjutkan Membaca di atasnya.",
+          "cap": "Widget Android — langit, dan tempat Anda berhenti"
         }
       },
       "spread": {
-        "alt": "Mihrab di Mac: dua halaman mushaf berdampingan dengan bilah sisi surah, seperti pada cetakan.",
-        "cap": "Di iPad dan Mac mushaf terbuka sebagai dua halaman berdampingan — sepasang halaman itulah yang dibalik, persis seperti cetakannya."
+        "alt": "Mihrab di tablet: dua halaman mushaf berhadapan berdampingan dengan daftar surah, seperti pada cetakan.",
+        "cap": "Di tablet, iPad, atau Mac mushaf terbuka sebagai dua halaman berhadapan — sepasang halaman itulah yang dibalik, persis seperti pada cetakan."
       }
     }
   },
@@ -1041,15 +1041,15 @@
       "lede": "Hell und dunkel, Telefon und Tablet. Der Mushaf ist die gedruckte Medina-Seite selbst, kein Bild davon. Die App auf den Aufnahmen ist englisch; sie spricht auch Deutsch.",
       "items": {
         "home": {
-          "alt": "Startbildschirm: das nächste Gebet mit laufendem Countdown über den Zeiten des Tages.",
-          "cap": "Start — nächstes Gebet und Countdown"
+          "alt": "Startseite: ein gezeichneter Himmel hinter dem nächsten Gebet und ein lebendiger Countdown, das Datum über den Zeiten und ein Häkchen neben jedem Gebet.",
+          "cap": "Start — der Himmel des Tages und der Countdown"
         },
         "home-maliki": {
           "alt": "Derselbe Tag mit eingeschalteten malikitischen Zweitzeiten: unter jedem Gebet, wann sein bevorzugtes Fenster (ikhtiyari) endet.",
           "cap": "Malikitische Zweitzeiten"
         },
         "home-dark": {
-          "alt": "Derselbe Startbildschirm im dunklen Design.",
+          "alt": "Dieselbe Startseite im dunklen Thema — der Himmel folgt der Stunde, ein Morgenhimmel steht also über einer dunklen Seite.",
           "cap": "Start, dunkel"
         },
         "tilawah": {
@@ -1073,8 +1073,8 @@
           "cap": "Wiederholen, pausieren, ausblenden — zum Auswendiglernen"
         },
         "quran": {
-          "alt": "Der Koran-Tab: Weiterlesen, der Khatma-Plan, der Vers des Tages und die Tilawa-Schaltfläche in der Titelleiste.",
-          "cap": "Khatma und wo Sie stehen geblieben sind"
+          "alt": "Der Quran-Tab: weiterlesen, der Khatmah-Plan, die Tilāwah-Zeile, der Vers des Tages und jede Sure mit ihrem Namen in der Kalligrafie des Muṣḥaf.",
+          "cap": "Khatmah und wo du warst"
         },
         "qibla": {
           "alt": "Qibla-Kompass: Richtung, Signalstärke und ein Abgleich mit dem Sonnenstand.",
@@ -1109,13 +1109,13 @@
           "cap": "Widgets und die Live-Aktivität"
         },
         "widgets-android": {
-          "alt": "Ein Android-Startbildschirm mit dem Gebetszeiten-Widget — die Zeiten des Tages, der Countdown, die Serie und das Praxisdiagramm — über dem Widget „Heute eintragen“.",
-          "cap": "Widgets auf dem Android-Startbildschirm"
+          "alt": "Ein Android-Startbildschirm mit dem Himmel-Widget — der Himmel des Tages, das nächste Gebet und ein lebendiger Countdown — darüber das Weiterlesen-Widget.",
+          "cap": "Android-Widgets — der Himmel und wo du warst"
         }
       },
       "spread": {
-        "alt": "Mihrab auf dem Mac: zwei gegenüberliegende Mushaf-Seiten mit Suren-Seitenleiste, wie im gedruckten Exemplar.",
-        "cap": "Auf iPad und Mac öffnet sich der Mushaf als Doppelseite — geblättert wird das Seitenpaar, genau wie im Druck."
+        "alt": "Mihrab auf einem Tablet: zwei gegenüberliegende Muṣḥaf-Seiten neben der Suren-Liste, wie im gedruckten Exemplar.",
+        "cap": "Auf einem Tablet, einem iPad oder einem Mac öffnet sich der Muṣḥaf als Doppelseite — umgeblättert wird das Seitenpaar, genau wie im Druck."
       }
     }
   },
@@ -1231,15 +1231,15 @@
       "lede": "Clair et sombre, téléphone et tablette. Le mushaf est la page de Médine imprimée elle-même, pas une image de celle-ci. L’application des captures est en anglais ; elle parle aussi français.",
       "items": {
         "home": {
-          "alt": "Écran d’accueil : la prochaine prière et son compte à rebours au-dessus des horaires du jour.",
-          "cap": "Accueil — prochaine prière et compte à rebours"
+          "alt": "Écran d’accueil : un ciel dessiné derrière la prochaine prière et un compte à rebours vivant, la date au-dessus des horaires, et une case à cocher près de chaque prière.",
+          "cap": "Accueil — le ciel du jour et le compte à rebours"
         },
         "home-maliki": {
           "alt": "La même journée avec les seconds temps malikites activés : sous chaque prière, l’heure où sa plage préférée (ikhtiyari) se termine.",
           "cap": "Les seconds temps malikites"
         },
         "home-dark": {
-          "alt": "Le même écran d’accueil en thème sombre.",
+          "alt": "Le même écran dans le thème sombre — le ciel suit l’heure, un ciel du matin se pose donc sur une page sombre.",
           "cap": "Accueil, sombre"
         },
         "tilawah": {
@@ -1263,8 +1263,8 @@
           "cap": "Répéter, marquer une pause, masquer — pour mémoriser"
         },
         "quran": {
-          "alt": "L’onglet Coran : reprendre la lecture, le plan de khatma, le verset du jour et le bouton Tilawa dans la barre de titre.",
-          "cap": "La khatma et où vous en êtes"
+          "alt": "L’onglet Coran : reprendre la lecture, le plan de khatma, la ligne Tilāwah, le verset du jour, et chaque sourate nommée dans la calligraphie du muṣḥaf.",
+          "cap": "Khatma et où vous en étiez"
         },
         "qibla": {
           "alt": "Boussole qibla : le cap, la force du signal et une vérification par le soleil.",
@@ -1299,13 +1299,13 @@
           "cap": "Widgets et activité en direct"
         },
         "widgets-android": {
-          "alt": "Un écran d’accueil Android avec le widget des horaires — les heures du jour, le compte à rebours, la série et le graphique de pratique — au-dessus du widget « Journal du jour ».",
-          "cap": "Widgets sur l’écran d’accueil Android"
+          "alt": "Un écran d’accueil Android portant le widget Ciel — le ciel du jour, la prochaine prière et un compte à rebours — et le widget Reprendre la lecture au-dessus.",
+          "cap": "Widgets Android — le ciel, et où vous en étiez"
         }
       },
       "spread": {
-        "alt": "Mihrab sur Mac : deux pages de mushaf en vis-à-vis avec la barre latérale des sourates, comme dans l’exemplaire imprimé.",
-        "cap": "Sur iPad et Mac, le mushaf s’ouvre en double page — c’est la paire qui tourne, exactement comme sur le papier."
+        "alt": "Mihrab sur une tablette : deux pages du muṣḥaf en regard, côte à côte, avec la liste des sourates, comme dans l’exemplaire imprimé.",
+        "cap": "Sur une tablette, un iPad ou un Mac le muṣḥaf s’ouvre en double page — c’est la paire de pages qui tourne, exactement comme à l’impression."
       }
     }
   },
@@ -1421,15 +1421,15 @@
       "lede": "Claro y oscuro, teléfono y tableta. El mushaf es la página de Medina impresa, no una foto de ella. La app de las capturas está en inglés; también habla español.",
       "items": {
         "home": {
-          "alt": "Pantalla de inicio: la próxima oración con su cuenta atrás sobre los horarios del día.",
-          "cap": "Inicio — próxima oración y cuenta atrás"
+          "alt": "Pantalla de inicio: un cielo dibujado detrás de la próxima oración y una cuenta atrás viva, la fecha sobre los horarios y una casilla junto a cada oración.",
+          "cap": "Inicio — el cielo del día y la cuenta atrás"
         },
         "home-maliki": {
           "alt": "El mismo día con los segundos tiempos malikíes activados: bajo cada oración, cuándo termina su tiempo preferido (ijtiyari).",
           "cap": "Segundos tiempos malikíes"
         },
         "home-dark": {
-          "alt": "La misma pantalla de inicio en tema oscuro.",
+          "alt": "La misma pantalla en el tema oscuro — el cielo sigue la hora, así que un cielo de mañana queda sobre una página oscura.",
           "cap": "Inicio, oscuro"
         },
         "tilawah": {
@@ -1453,8 +1453,8 @@
           "cap": "Repetir, pausar, ocultar — para memorizar"
         },
         "quran": {
-          "alt": "La pestaña del Corán: seguir leyendo, el plan de jatma, la aleya del día y el botón de Tilawah en la barra de título.",
-          "cap": "La jatma y dónde lo dejaste"
+          "alt": "La pestaña Corán: seguir leyendo, el plan de jatma, la fila de Tilāwah, el versículo del día y cada sura con su nombre en la caligrafía del muṣḥaf.",
+          "cap": "Jatma y dónde lo dejaste"
         },
         "qibla": {
           "alt": "Brújula de la alquibla: el rumbo, la fuerza de la señal y una comprobación con el sol.",
@@ -1489,13 +1489,13 @@
           "cap": "Widgets y actividad en directo"
         },
         "widgets-android": {
-          "alt": "Una pantalla de inicio de Android con el widget de horarios — las horas del día, la cuenta atrás, la racha y el gráfico de práctica — sobre el widget «Registrar hoy».",
-          "cap": "Widgets en la pantalla de inicio de Android"
+          "alt": "Una pantalla de inicio de Android con el widget Cielo — el cielo del día, la próxima oración y una cuenta atrás — y encima el widget Seguir leyendo.",
+          "cap": "Widgets de Android — el cielo y dónde lo dejaste"
         }
       },
       "spread": {
-        "alt": "Mihrab en un Mac: dos páginas enfrentadas del mushaf con la barra lateral de suras, como en el ejemplar impreso.",
-        "cap": "En iPad y Mac el mushaf se abre a doble página — lo que pasa es el par de páginas, igual que en el papel."
+        "alt": "Mihrab en una tableta: dos páginas del muṣḥaf enfrentadas, una al lado de la otra, con la lista de suras, como en el ejemplar impreso.",
+        "cap": "En una tableta, un iPad o un Mac el muṣḥaf se abre a doble página — lo que se voltea es el par de páginas, igual que en el impreso."
       }
     }
   },
@@ -1611,16 +1611,16 @@
       "lede": "Светлая и тёмная тема, телефон и планшет. Мусхаф — это сама печатная мединская страница, а не её снимок. На скриншотах приложение по-английски; по-русски оно говорит так же.",
       "items": {
         "home": {
-          "alt": "Главный экран: следующая молитва с живым обратным отсчётом над временами дня.",
-          "cap": "Главная — следующая молитва и отсчёт"
+          "alt": "Главный экран: нарисованное небо за следующей молитвой и живой обратный отсчёт, дата над временами и отметка рядом с каждой молитвой.",
+          "cap": "Сегодня — небо дня и обратный отсчёт"
         },
         "home-maliki": {
           "alt": "Тот же день с включёнными маликитскими вторыми временами: под каждой молитвой — когда заканчивается её предпочтительное время (ихтияри).",
           "cap": "Маликитские вторые времена"
         },
         "home-dark": {
-          "alt": "Тот же главный экран в тёмной теме.",
-          "cap": "Главная, тёмная"
+          "alt": "Тот же экран в тёмной теме — небо следует за часом, поэтому утреннее небо стоит над тёмной страницей.",
+          "cap": "Сегодня, тёмная тема"
         },
         "tilawah": {
           "alt": "Тиляуа: чтение суры «Аль-Бакара» с чтецом, кнопками воспроизведения, скоростью и таймером сна, а ниже — список сур, чтобы начать с любого места.",
@@ -1643,8 +1643,8 @@
           "cap": "Повтор, пауза, скрытие — для заучивания"
         },
         "quran": {
-          "alt": "Вкладка Корана: продолжить чтение, план хатма, аят дня и кнопка «Тилават» в заголовке.",
-          "cap": "Хатм и место, где вы остановились"
+          "alt": "Вкладка «Коран»: продолжить чтение, план хатмы, строка тиляуа, аят дня и каждая сура, названная каллиграфией мусхафа.",
+          "cap": "Хатма и место, где вы остановились"
         },
         "qibla": {
           "alt": "Компас киблы: направление, сила сигнала и сверка по солнцу.",
@@ -1679,13 +1679,13 @@
           "cap": "Виджеты и живой отсчёт"
         },
         "widgets-android": {
-          "alt": "Домашний экран Android с виджетом времён молитв — времена дня, обратный отсчёт, серия и график практики — над виджетом «Отметить намазы».",
-          "cap": "Виджеты на домашнем экране Android"
+          "alt": "Главный экран Android с виджетом «Небо» — небо дня, следующая молитва и живой отсчёт — и виджетом «Продолжить чтение» над ним.",
+          "cap": "Виджеты Android — небо и место, где вы остановились"
         }
       },
       "spread": {
-        "alt": "Mihrab на Mac: два разворотных листа мусхафа рядом и боковой список сур, как в печатном экземпляре.",
-        "cap": "На iPad и Mac мусхаф открывается разворотом — переворачивается пара страниц, ровно как в печати."
+        "alt": "Mihrab на планшете: две соседние страницы мусхафа рядом со списком сур, как в печатном издании.",
+        "cap": "На планшете, iPad или Mac мусхаф открывается разворотом — переворачивается пара страниц, точно как в печати."
       }
     }
   },
@@ -1801,16 +1801,16 @@
       "lede": "আলো আর অন্ধকার, ফোন আর ট্যাবলেট। মুসহাফ হলো ছাপা মদিনা পৃষ্ঠাটিই, তার ছবি নয়। ছবিতে অ্যাপটি ইংরেজিতে; বাংলাও সে বলে।",
       "items": {
         "home": {
-          "alt": "হোম স্ক্রিন: দিনের সময়সূচির উপরে পরের নামাজ ও চলমান কাউন্টডাউন।",
-          "cap": "হোম — পরের নামাজ ও কাউন্টডাউন"
+          "alt": "হোম স্ক্রিন: পরের নামাজের পিছনে আঁকা আকাশ ও চলমান কাউন্টডাউন, সময়ের উপরে দিন, আর প্রতিটি নামাজের পাশে একটি টিক।",
+          "cap": "হোম — দিনের আকাশ ও কাউন্টডাউন"
         },
         "home-maliki": {
           "alt": "একই দিন, মালিকি দ্বিতীয় সময় চালু থাকা অবস্থায়: প্রতিটি নামাজের নিচে তার পছন্দনীয় (ইখতিয়ারি) সময় কখন শেষ হয়।",
           "cap": "মালিকি দ্বিতীয় সময়"
         },
         "home-dark": {
-          "alt": "একই হোম স্ক্রিন, অন্ধকার থিমে।",
-          "cap": "হোম, অন্ধকার"
+          "alt": "একই হোম স্ক্রিন গাঢ় থিমে — আকাশ ঘণ্টার সঙ্গে চলে, তাই সকালের আকাশ গাঢ় পৃষ্ঠার উপরে।",
+          "cap": "হোম, গাঢ়"
         },
         "tilawah": {
           "alt": "তিলাওয়াত: সূরা আল-বাকারার তিলাওয়াত — ক্বারী, প্লেব্যাক নিয়ন্ত্রণ, গতি ও স্লিপ টাইমার, আর নিচে যেকোনো জায়গা থেকে শুরু করার জন্য সূরার তালিকা।",
@@ -1833,8 +1833,8 @@
           "cap": "পুনরাবৃত্তি, বিরতি, আড়াল — মুখস্থের জন্য"
         },
         "quran": {
-          "alt": "কুরআন ট্যাব: পড়া চালিয়ে যান, খতম পরিকল্পনা, দিনের আয়াত, আর শিরোনাম বারে তিলাওয়াত বোতাম।",
-          "cap": "খতম আর আপনি কোথায় ছিলেন"
+          "alt": "কুরআন ট্যাব: পড়া চালিয়ে যান, খতম পরিকল্পনা, তিলাওয়াতের সারি, দিনের আয়াত, আর প্রতিটি সূরার নাম মুসহাফের নিজস্ব ক্যালিগ্রাফিতে।",
+          "cap": "খতম আর যেখানে থেমেছিলেন"
         },
         "qibla": {
           "alt": "কিবলা কম্পাস: দিক, সিগন্যালের জোর, আর সূর্যের সঙ্গে মিলিয়ে দেখা।",
@@ -1869,13 +1869,13 @@
           "cap": "উইজেট আর লাইভ অ্যাক্টিভিটি"
         },
         "widgets-android": {
-          "alt": "অ্যান্ড্রয়েড হোম স্ক্রিনে নামাজের সময়ের উইজেট — দিনের সময়, কাউন্টডাউন, ধারাবাহিকতা ও অনুশীলন গ্রাফ — ‘আজকের লগ’ উইজেটের ওপরে।",
-          "cap": "অ্যান্ড্রয়েড হোম স্ক্রিনের উইজেট"
+          "alt": "অ্যান্ড্রয়েড হোম স্ক্রিনে স্কাই উইজেট — দিনের আকাশ, পরের নামাজ ও চলমান কাউন্টডাউন — এবং তার উপরে পড়া চালিয়ে যাওয়ার উইজেট।",
+          "cap": "অ্যান্ড্রয়েড উইজেট — আকাশ, আর যেখানে থেমেছিলেন"
         }
       },
       "spread": {
-        "alt": "ম্যাকে মিহরাব: পাশাপাশি মুসহাফের দুই পাতা ও সূরার সাইডবার, ছাপা কপির মতোই।",
-        "cap": "আইপ্যাড আর ম্যাকে মুসহাফ খোলে পাশাপাশি দুই পাতায় — পাতা-জোড়াটাই ওল্টায়, ঠিক ছাপা কপির মতো।"
+        "alt": "ট্যাবলেটে মিহরাব: সূরা তালিকার পাশে মুসহাফের দুটি মুখোমুখি পৃষ্ঠা, ছাপা কপির মতোই।",
+        "cap": "ট্যাবলেট, আইপ্যাড বা ম্যাকে মুসহাফ দুই পৃষ্ঠার খোলা রূপে আসে — পৃষ্ঠার জোড়াই ঘোরে, ছাপা কপির মতোই।"
       }
     }
   },
@@ -1991,15 +1991,15 @@
       "lede": "उजाला और अँधेरा, फ़ोन और टैबलेट। मुसहफ़ छपा हुआ मदीना पृष्ठ ही है, उसकी तस्वीर नहीं। तस्वीरों में ऐप अंग्रेज़ी में है; हिंदी भी वह बोलता है।",
       "items": {
         "home": {
-          "alt": "होम स्क्रीन: दिन के समयों के ऊपर अगली नमाज़ और चलती उलटी गिनती।",
-          "cap": "होम — अगली नमाज़ और उलटी गिनती"
+          "alt": "होम स्क्रीन: अगली नमाज़ के पीछे चित्रित आकाश और चलती गिनती, समयों के ऊपर दिन, और हर नमाज़ के पास एक निशान।",
+          "cap": "होम — दिन का आकाश और गिनती"
         },
         "home-maliki": {
           "alt": "वही दिन, मालिकी दूसरे समय चालू होने पर: हर नमाज़ के नीचे यह कि उसका पसंदीदा (इख़्तियारी) समय कब ख़त्म होता है।",
           "cap": "मालिकी दूसरे समय"
         },
         "home-dark": {
-          "alt": "वही होम स्क्रीन, गहरे रंग में।",
+          "alt": "वही होम स्क्रीन गहरे थीम में — आकाश घंटे के साथ चलता है, इसलिए सुबह का आकाश गहरे पृष्ठ के ऊपर।",
           "cap": "होम, गहरा"
         },
         "tilawah": {
@@ -2023,8 +2023,8 @@
           "cap": "दोहराव, ठहराव, छिपाव — याद करने के लिए"
         },
         "quran": {
-          "alt": "क़ुरआन टैब: पढ़ना जारी रखें, ख़त्म योजना, दिन की आयत, और शीर्षक पट्टी में तिलावत बटन।",
-          "cap": "ख़त्म और आप कहाँ रुके थे"
+          "alt": "क़ुरआन टैब: पढ़ना जारी रखें, ख़त्म योजना, तिलावत की पंक्ति, दिन की आयत, और हर सूरह का नाम मुसहफ़ की अपनी सुलेख में।",
+          "cap": "ख़त्म और जहाँ आपने छोड़ा"
         },
         "qibla": {
           "alt": "क़िबला कम्पास: दिशा, सिग्नल की मज़बूती, और सूरज से जाँच।",
@@ -2059,13 +2059,13 @@
           "cap": "विजेट और लाइव गतिविधि"
         },
         "widgets-android": {
-          "alt": "एंड्रॉइड होम स्क्रीन पर नमाज़ के समय का विजेट — दिन के समय, उलटी गिनती, सिलसिला और अभ्यास ग्राफ़ — ‘आज दर्ज करें’ विजेट के ऊपर।",
-          "cap": "एंड्रॉइड होम स्क्रीन विजेट"
+          "alt": "एंड्रॉइड होम स्क्रीन पर आकाश विजेट — दिन का आकाश, अगली नमाज़ और चलती गिनती — और उसके ऊपर पढ़ना जारी रखने का विजेट।",
+          "cap": "एंड्रॉइड विजेट — आकाश, और जहाँ आपने छोड़ा"
         }
       },
       "spread": {
-        "alt": "मैक पर मिहराब: सूरह साइडबार के साथ मुसहफ़ के आमने-सामने दो पृष्ठ, छपी प्रति की तरह।",
-        "cap": "आईपैड और मैक पर मुसहफ़ आमने-सामने दो पृष्ठों में खुलता है — पलटने वाली चीज़ पृष्ठों की जोड़ी है, बिलकुल छपी प्रति की तरह।"
+        "alt": "टैबलेट पर मिहराब: सूरह सूची के साथ मुसहफ़ के दो आमने-सामने पृष्ठ, छपी प्रति की तरह।",
+        "cap": "टैबलेट, आईपैड या मैक पर मुसहफ़ दो आमने-सामने पृष्ठों में खुलता है — पृष्ठों की जोड़ी ही पलटती है, ठीक छपाई की तरह।"
       }
     }
   },
@@ -2181,15 +2181,15 @@
       "lede": "浅色与深色，手机与平板。穆斯哈夫就是印刷的麦地那版页面本身，而不是它的图片。截图里的应用是英文的；它同样说中文。",
       "items": {
         "home": {
-          "alt": "主屏幕：当日各拜功时间上方是下一次礼拜与实时倒计时。",
-          "cap": "主页 — 下一次礼拜与倒计时"
+          "alt": "主屏幕：下一次礼拜背后是一片绘制的天空与实时倒计时，时刻表上方是日期，每次礼拜旁有一个勾选。",
+          "cap": "主页 —— 当日的天空与倒计时"
         },
         "home-maliki": {
           "alt": "同一天开启马立克派次要时段后的样子：每番拜功下方标出其首选（ikhtiyari）时段何时结束。",
           "cap": "马立克派次要时段"
         },
         "home-dark": {
-          "alt": "同一个主屏幕的深色主题。",
+          "alt": "同一主屏幕的深色主题——天空随时辰变化，所以清晨的天空落在深色页面之上。",
           "cap": "主页，深色"
         },
         "tilawah": {
@@ -2213,8 +2213,8 @@
           "cap": "重复、停顿、隐藏——为了背诵"
         },
         "quran": {
-          "alt": "《古兰经》标签页：继续阅读、通读计划、每日经文，以及标题栏中的诵读按钮。",
-          "cap": "通读计划与上次读到的地方"
+          "alt": "古兰经标签页：继续阅读、封印计划、诵读一行、当日经文，以及每章以穆斯哈甫自身书法写出的名称。",
+          "cap": "封印计划与上次读到的地方"
         },
         "qibla": {
           "alt": "朝向罗盘：方位、信号强度，以及与太阳的交叉校验。",
@@ -2249,13 +2249,13 @@
           "cap": "小组件与实时活动"
         },
         "widgets-android": {
-          "alt": "安卓主屏幕上的礼拜时间小组件——当天时刻、倒计时、连续天数与练习图——位于“记录今日”小组件之上。",
-          "cap": "安卓主屏幕小组件"
+          "alt": "安卓主屏上的天空小组件——当日的天空、下一次礼拜与实时倒计时——上方是继续阅读小组件。",
+          "cap": "安卓小组件 —— 天空与上次读到的地方"
         }
       },
       "spread": {
-        "alt": "Mac 上的 Mihrab：并排的两页穆斯哈夫和章目侧栏，与印刷本一样。",
-        "cap": "在 iPad 和 Mac 上，穆斯哈夫以对开页打开——翻动的是这一对页面，正如印刷本。"
+        "alt": "平板上的 Mihrab：并排的两页穆斯哈甫与章目侧栏，一如印本。",
+        "cap": "在平板、iPad 或 Mac 上，穆斯哈甫以对开双页打开——翻动的是这一对页，正如印本。"
       }
     }
   }

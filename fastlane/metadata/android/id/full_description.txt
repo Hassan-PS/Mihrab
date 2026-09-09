@@ -2,6 +2,8 @@ Mihrab menjaga lima waktu sholat tetap dekat: layar utama yang tenang dengan sho
 
 Fitur utama:
 - Jadwal sholat untuk hari ini, sepekan ke depan, dan satu bulan penuh — dapat dibagikan sebagai gambar atau PDF
+- Langit yang digambar di belakang hitungan waktu dan mengikuti hari — malam dengan bulan pada fasenya, fajar, tengah hari, senja — dan langit yang sama sebagai widget
+- Catat salat dengan satu ketukan dari Hari Ini — untuk hari ini atau hari mana pun dalam sepekan terakhir — jurnal menyimpan rekamnya, rentetan, dan grafik
 - Notifikasi opsional untuk lima waktu, dengan tujuh belas rekaman adzan atau rekaman Anda sendiri, pengingat sebelum waktu, dan tunda
 - Hitung mundur sholat yang disematkan (Live Activity) di layar kunci dan di panel notifikasi, dalam tiga desain
 - Widget layar utama: jadwal sholat dalam tiga ukuran, catatan hari ini, tanggal Hijriah, rentetan, tasbih, dan bacaan

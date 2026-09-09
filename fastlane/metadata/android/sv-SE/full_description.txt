@@ -2,6 +2,8 @@ Mihrab håller de fem dagliga bönerna nära till hands: en lugn startskärm med
 
 Viktigaste funktionerna:
 - Bönetider för idag, veckan framåt och en hel månad — kan delas som bild eller PDF
+- En tecknad himmel bakom nedräkningen som följer dygnet — natt med månen i sin fas, gryning, middag, solnedgång — och samma himmel som widget på hemskärmen
+- Logga en bön med ett tryck från startskärmen — i dag eller någon dag den senaste veckan — och loggboken håller reda på raden, sviten och grafen
 - Valfria aviseringar för de fem dagliga bönerna, med sjutton adhan-inspelningar eller en egen, påminnelse före bönen och snooze
 - Fastnålad nedräkning till bönen (Live Activity) på låsskärmen och i aviseringspanelen, i tre utföranden
 - Widgetar på hemskärmen: bönetider i tre storlekar, dagens logg, hijridatum, svit, tasbih och läsning

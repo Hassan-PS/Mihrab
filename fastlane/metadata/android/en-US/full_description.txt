@@ -2,6 +2,8 @@ Mihrab keeps the five daily prayers close at hand: a calm home screen with the n
 
 Key features:
 - Prayer times for today, the week ahead, and a full-month overview — shareable as an image or a PDF
+- A drawn sky behind the countdown that follows the day — night with the moon in its phase, dawn, noon, sunset — and the same sky as a home-screen widget
+- Log a prayer with one tap from Today — for today or any day of the past week — and the journal keeps the record, the streak and the graph
 - Optional notifications for the five daily prayers, with seventeen adhan recordings or one of your own, pre-prayer reminders, and snooze
 - Pinned prayer countdown (Live Activity) on the lock screen and in the notification shade, in three designs
 - Home-screen widgets: prayer times in three sizes, today's log, Hijri date, streak, tasbih and reading

@@ -2,6 +2,8 @@ Mihrab hält die fünf täglichen Gebete griffbereit: ein ruhiger Startbildschir
 
 Wichtigste Funktionen:
 - Gebetszeiten für heute, die kommende Woche und einen ganzen Monat — als Bild oder PDF teilbar
+- Ein gezeichneter Himmel hinter dem Countdown, der dem Tag folgt — Nacht mit dem Mond in seiner Phase, Morgendämmerung, Mittag, Sonnenuntergang — und derselbe Himmel als Widget
+- Ein Gebet mit einem Tippen auf „Heute“ eintragen — für heute oder jeden Tag der vergangenen Woche — das Tagebuch führt Aufzeichnung, Serie und Diagramm
 - Optionale Benachrichtigungen für die fünf Gebete, mit siebzehn Adhan-Aufnahmen oder einer eigenen, Vorab-Erinnerung und Schlummerfunktion
 - Angehefteter Gebets-Countdown (Live Activity) auf dem Sperrbildschirm und in der Benachrichtigungsleiste, in drei Ausführungen
 - Homescreen-Widgets: Gebetszeiten in drei Größen, das Tagesprotokoll, Hidschri-Datum, Serie, Tasbih und Lesefortschritt

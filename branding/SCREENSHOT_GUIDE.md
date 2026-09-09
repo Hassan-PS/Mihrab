@@ -105,10 +105,134 @@ By default `~/Desktop/Simulator Screenshot - <device> - <date>.png`. If your des
 
 ---
 
-## The 2.14 set (2026-09-03)
+## The 2.18 set (2026-09-09) — READ THIS ONE FIRST
 
-`branding/screenshots-2.14/` holds the raw captures the current README and
-website imagery is built from, and `branding/tools/build_shots.py` is what
+The current set. `branding/screenshots-2.18/` holds the raw captures every
+piece of imagery is built from, and three commands turn them into
+everything:
+
+```sh
+python3 branding/tools/build_store.py    # the four store sets + Play's two assets
+python3 branding/tools/build_shots.py    # the site gallery, the README grid, the cache stamp
+node scripts/build-site.js               # rewrite the thirteen language pages
+python3 branding/tools/verify_store.py   # must print ALL STORE ASSETS PASS
+```
+
+Then the hero and the Play feature graphic, which come from `compose_wide`:
+
+```sh
+python3 -c "import sys; sys.path.insert(0,'branding/tools'); from compose_wide import hero, feature_graphic; S='branding/screenshots-2.18/'; hero('branding/github-hero.png', S+'ios-home.png', S+'ios-mushaf.png', S+'ios-duas.png'); feature_graphic('branding/play-feature-graphic.png', S+'ios-home.png')"
+cp branding/github-hero.png docs/assets/img/og-hero.png
+```
+
+### What the app has to be set up as
+
+Casablanca on automatic (so the chip reads a city and not a pair of
+coordinates — the manual search stores the result's full label, which
+truncates to "Casablanca, Pachalik…", while automatic reverse-geocodes to
+"Casablanca Auto"), the 24-hour clock, notifications granted so the rows
+carry bells rather than crossed-out ones, three prayers logged, the
+practice graph filled from the Log's own "Fill the past three months",
+a fast marked, the tasbih part-way through a set, and the muṣḥaf
+downloaded. The Mālikī rows are OFF for the home shots and ON for the
+one figure that is about them (`and-home-maliki`).
+
+### What each capture is for
+
+Everything comes from ONE Android phone set plus one capture each from the
+tablet, the iPhone and the iPad. The site's phone figures, the README grid
+and the Play/F-Droid phone set are all the same seventeen Android files —
+which is the point: the page used to carry a handful of images no script
+knew about (fasting, memorising, the reciters, Tilāwah, the Android
+widgets) and they went a release and a half stale beside the ones next to
+them. `shotParity.test.ts` now holds the README and the site
+byte-identical, and `build_shots.py`'s two lists are the whole of it.
+
+### Capturing on Android, headless
+
+The phone emulator (`Mihrab_API_37`) is rootable, which is what makes the
+clock settable — and the clock is what the sky is drawn from, so it is not
+a detail. The tablet AVD is a Play image and is NOT rootable, so its clock
+cannot be set at all: capture the tablet set by resizing the PHONE
+emulator instead, which also spares you a second setup and a second
+180 MB muṣḥaf download.
+
+```sh
+export ANDROID_SERIAL=emulator-5554
+adb root; adb shell settings put global auto_time 0
+adb shell date 0909094126                      # 09:41, to match the demo clock
+adb shell wm size 1080x2400; adb shell wm density 420    # the phone set
+adb shell wm size 2560x1600; adb shell wm density 320    # the tablet set
+adb shell settings put system time_12_24 24
+adb shell cmd appops set com.prayer_times SCHEDULE_EXACT_ALARM allow
+adb emu geo fix -7.6200 33.5945                # longitude first
+adb shell cmd uimode night yes|no              # the dark figures
+```
+
+Demo mode drifts if you broadcast it twice — a second `network … wifi
+show` adds a second wifi glyph to the status bar. Send `exit` first, then
+`enter` and the five commands once each, before every capture.
+
+### Capturing on iOS, headless
+
+`idb ui tap` does nothing at all until a companion is connected for that
+UDID, and it fails silently rather than erroring:
+
+```sh
+idb_companion --udid <iphone-udid> &                  # default port 10882
+idb_companion --udid <ipad-udid> --grpc-port 10884 &
+idb connect localhost 10882; idb connect localhost 10884
+idb ui describe-all --udid <udid>   # frames are POINTS, and are CONTENT
+                                    # coordinates in a scroll view — a row
+                                    # at y=1039 on a 1376pt screen is off
+                                    # the bottom and cannot be tapped
+xcrun simctl privacy <udid> grant location-always com.hassan.prayerapp
+xcrun simctl location <udid> set 33.5945,-7.6200
+xcrun simctl status_bar <udid> override --time '9:41' --batteryLevel 100 \
+  --batteryState charged --cellularBars 4 --wifiBars 3
+```
+
+Three things a simulator cannot do, and what was done instead:
+
+- **The clock is the host's.** There is no way to set a simulator's time,
+  so the iOS and iPad sets were shot in the evening and show the night
+  sky with the moon. That is honest and rather good, but it does mean the
+  Apple sets and the Android sets are different times of day.
+- **No magnetometer**, so the Qibla dial reads "Live compass unavailable".
+  The iPhone set therefore has SIX panels and no qibla; the Android sets
+  keep theirs, because the emulator's sensors answer.
+- **WidgetKit timelines do not populate.** A widget added to a simulator
+  home screen stays on "Open Mihrab" however often the app is opened, so
+  `ios-widgets.png` is still the real-device capture from the 2.14 pass —
+  the one image in the set that is not from this build. The Android
+  widgets figure IS current, and it is the one that matters: the Sky
+  widget is Android-only.
+
+Adding a widget on the simulator, for when that changes: long-press the
+home screen (`idb ui tap --duration 2.0`), **Edit → Add Widget**, tap the
+search field before typing, then the app, then "Add Widget".
+
+### The Mac spread, and why the wide figure comes from a tablet
+
+`branding/tools/build_shots.py` used to crop the app window out of a
+full-desktop capture. That needs the Mac's screen awake AND unlocked at
+the moment of the capture, and a machine that locks itself on a timer will
+hand you a black frame or a lock screen instead — which is exactly what
+happened here. A landscape tablet shows the same facing-page spread at
+16:10, so `wide()` scales that instead and `mac_window()` waits for the
+day a Mac capture is to hand. If you take one, check
+`ioreg -n Root -d1 -r | grep IOConsoleLocked` first.
+
+---
+
+## The 2.14 set (2026-09-03) — superseded, kept for the reasoning
+
+> The folder this section names is gone: the 2.18 set replaced it, and
+> `build_shots.py` reads `branding/screenshots-2.18/` now. The commands
+> below are here for the argument they make about caching, not to run.
+
+`branding/screenshots-2.14/` held the raw captures the README and website
+imagery were built from, and `branding/tools/build_shots.py` is what
 builds it:
 
 ```sh
@@ -131,8 +255,9 @@ python3 -c "import sys; sys.path.insert(0,'branding/tools'); from compose_wide i
 cp branding/github-hero.png docs/assets/img/og-hero.png
 ```
 
-The script also stamps `?v=<today>` onto every screenshot URL in
-`docs/index.html`. The filenames stay the same from one set to the next, so
+The script also carries a cache stamp — it writes `?v=<today>` into the
+site generator's own `SHOT_V` (it used to rewrite `docs/index.html`
+directly, which the generator then disowned on its next run). The filenames stay the same from one set to the next, so
 without it a returning visitor is served the OLD images out of their browser
 cache with nothing to tell them — which is exactly what happened when the
 2.14 set went live: correct bytes on the server, August's screenshots on the

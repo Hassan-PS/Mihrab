@@ -2,6 +2,8 @@ Mihrab garde les cinq prières quotidiennes à portée de main : un écran d'acc
 
 Fonctions principales :
 - Heures de prière pour aujourd'hui, la semaine à venir et un mois entier — partageables en image ou en PDF
+- Un ciel dessiné derrière le compte à rebours qui suit la journée — la nuit avec la lune dans sa phase, l'aube, midi, le coucher du soleil — et le même ciel en widget
+- Consignez une prière d'un seul geste depuis Aujourd'hui — aujourd'hui ou n'importe quel jour de la semaine passée — le journal garde la série et le graphique
 - Notifications facultatives pour les cinq prières, avec dix-sept enregistrements d'adhan ou le vôtre, un rappel avant l'heure et la répétition
 - Compte à rebours épinglé (Live Activity) sur l'écran de verrouillage et dans le volet des notifications, en trois présentations
 - Widgets d'écran d'accueil : heures de prière en trois tailles, le journal du jour, la date hégirienne, la série, le tasbih et la lecture

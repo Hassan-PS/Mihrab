@@ -99,7 +99,7 @@ const BADGES = [
  * bytes moved under an unchanged URL, and the widget shots have now been
  * retaken twice on 2026-09-06.
  */
-const SHOT_V = '?v=2026-09-06.2';
+const SHOT_V = '?v=2026-09-09';
 const SHOTS = [
   'home',
   'home-maliki',

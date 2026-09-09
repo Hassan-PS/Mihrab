@@ -2,6 +2,8 @@ Mihrab beş vakit namazı elinizin altında tutar: sıradaki namazı ve canlı g
 
 Öne çıkan özellikler:
 - Bugünün, önümüzdeki haftanın ve tam bir ayın namaz vakitleri — görsel ya da PDF olarak paylaşılabilir
+- Geri sayımın arkasında günü izleyen çizilmiş bir gökyüzü — evresiyle ay, tan, öğle, gün batımı — ve aynı gökyüzü ana ekran widget'ı olarak
+- Namazı Bugün ekranından tek dokunuşla kaydedin — bugün ya da son bir haftadaki herhangi bir gün — günlük kaydı, seriyi ve grafiği tutar
 - Beş vakit için isteğe bağlı bildirimler; on yedi ezan kaydı ya da kendi kaydınız, vakit öncesi hatırlatma ve erteleme
 - Kilit ekranında ve bildirim panelinde sabitlenen namaz geri sayımı (Live Activity), üç tasarımda
 - Ana ekran widget'ları: üç boyutta namaz vakitleri, günün kaydı, hicri tarih, seri, tesbih ve okuma
