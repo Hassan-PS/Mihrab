@@ -130,7 +130,20 @@ function keyed(keys: Key[], t: number): { top: string; bottom: string } {
 
 // ── Where in the day ────────────────────────────────────────────────────
 
-export type SkyMoment = { passage: SkyPassage; t: number };
+export type SkyMoment = {
+  passage: SkyPassage;
+  /** How far through the passage, 0–1. The colours and the fades ride on this. */
+  t: number;
+  /**
+   * How far through the DAY, sunrise 0 to Maghrib 1 — the sun's whole
+   * journey, in one number that does not restart at a passage boundary.
+   *
+   * Negative before sunrise and greater than 1 after Maghrib, deliberately:
+   * the dawn holds the sun at the point it will rise from, and nothing
+   * draws it once it has set. Null when the day's timings cannot say.
+   */
+  daylight: number | null;
+};
 
 /**
  * Which passage the clock is in and how far through it, from the day's
@@ -154,7 +167,7 @@ export function skyMoment(timings: TimingsMap, now: Date, tomorrowFajr?: string)
   const frac = (a: number, b: number) => (b > a ? Math.max(0, Math.min(1, (n - a) / (b - a))) : 0);
 
   if (fajr == null || asr == null || maghrib == null || ishaRaw == null) {
-    return { passage: 'day', t: 0.5 };
+    return { passage: 'day', t: 0.5, daylight: 0.5 };
   }
   // At a high latitude in summer Isha falls after midnight and is stored
   // as the clock it shows ("00:47"), which as a time on the SAME day is
@@ -169,20 +182,30 @@ export function skyMoment(timings: TimingsMap, now: Date, tomorrowFajr?: string)
   // this app is used at, an hour and a half; the sky is a drawing, not a
   // timetable, and a dawn ten minutes long or short is not visible.
   const sunrise = at('Sunrise') ?? fajr + 90 * 60_000;
+  /**
+   * THE SUN'S OWN CLOCK, and the reason it no longer starts over three
+   * times a day. Sunrise to Maghrib is the whole of the arc; every
+   * passage that draws the sun reads its position from this, so the
+   * position cannot disagree with itself at a boundary. Solar noon is the
+   * midpoint of that span — which is where Dhuhr is — so a sine over it
+   * peaks where the sun is highest, without anyone having to say so.
+   */
+  const daylight =
+    maghrib > sunrise ? (n - sunrise) / (maghrib - sunrise) : null;
   if (n < fajr) {
     // Before Fajr. With a wrapped Isha, the small hours up to it are still
     // last evening's dusk — Maghrib was yesterday's clock, Isha is today's
     // — and the night that follows began at that Isha, this morning.
     if (wrapped && n < ishaRaw) {
-      return { passage: 'dusk', t: frac(maghrib - 24 * 3600_000, ishaRaw) };
+      return { passage: 'dusk', t: frac(maghrib - 24 * 3600_000, ishaRaw), daylight };
     }
     const from = wrapped ? ishaRaw : isha - 24 * 3600_000;
-    return { passage: 'night', t: frac(from, fajr) };
+    return { passage: 'night', t: frac(from, fajr), daylight };
   }
-  if (n < sunrise) return { passage: 'dawn', t: frac(fajr, sunrise) };
-  if (n < asr) return { passage: 'day', t: frac(sunrise, asr) };
-  if (n < maghrib) return { passage: 'sunset', t: frac(asr, maghrib) };
-  if (n < isha) return { passage: 'dusk', t: frac(maghrib, isha) };
+  if (n < sunrise) return { passage: 'dawn', t: frac(fajr, sunrise), daylight };
+  if (n < asr) return { passage: 'day', t: frac(sunrise, asr), daylight };
+  if (n < maghrib) return { passage: 'sunset', t: frac(asr, maghrib), daylight };
+  if (n < isha) return { passage: 'dusk', t: frac(maghrib, isha), daylight };
   let end: number;
   if (tomorrowFajr) {
     const d = combineLocalDateAndTime(now, tomorrowFajr);
@@ -191,7 +214,7 @@ export function skyMoment(timings: TimingsMap, now: Date, tomorrowFajr?: string)
   } else {
     end = fajr + 24 * 3600_000;
   }
-  return { passage: 'night', t: frac(isha, end) };
+  return { passage: 'night', t: frac(isha, end), daylight };
 }
 
 // ── The moon ────────────────────────────────────────────────────────────
@@ -240,9 +263,16 @@ export type SkyFrame = {
   body: SkyBody;
 };
 
-/** The body's x across the top strip — between the eyebrow and the Qibla chip. */
-const X0 = 0.3;
-const X1 = 0.66;
+/**
+ * Where a body rises and where it sets, across the card's width.
+ *
+ * A whole day's arc, so it is worth the width: 0.3–0.66 was the span when
+ * each passage swept its own, and three short sweeps in the middle of the
+ * card read as a body that shuffles rather than travels. The margins keep
+ * a 22dp moon clear of both edges on the narrowest phone.
+ */
+const X_RISE = 0.12;
+const X_SET = 0.88;
 /**
  * The strip's floor — a body "at the horizon" sits here. The countdown's
  * cap line is at about 0.3 of the hero, so nothing drawn goes below 0.28.
@@ -250,10 +280,41 @@ const X1 = 0.66;
 const Y_LOW = 0.26;
 const Y_HIGH = 0.08;
 
+/** Between 0 and 1. */
+const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+
+/**
+ * Where the sun is, from how far through the day it is — ONE arc, from
+ * the point it rises at to the point it sets at.
+ *
+ * It used to be derived from the progress of the current passage, so it
+ * ran left to right three times over: once through the dawn, again from
+ * sunrise to Asr, and a third time from Asr to Maghrib — jumping back to
+ * the left, and at Asr upward as well, at each boundary. What the passage
+ * is good at is the colour and the fading in and out; where the sun IS
+ * belongs to the day.
+ *
+ * The height is a sine over the same span, so it peaks at the midpoint of
+ * sunrise and Maghrib — solar noon, which is Dhuhr — and returns to the
+ * horizon exactly as Maghrib arrives. Before sunrise the arc is held at
+ * its start: the sun waits at the point it will rise from and comes up
+ * there, which is what the dawn draws.
+ */
+function sunAt(daylight: number | null): { x: number; y: number } {
+  const f = clamp01(daylight ?? 0);
+  return {
+    x: X_RISE + f * (X_SET - X_RISE),
+    y: Y_LOW - Math.sin(f * Math.PI) * (Y_LOW - Y_HIGH),
+  };
+}
+
 export function skyFrame(moment: SkyMoment, moonDate: Date): SkyFrame {
   const { passage, t } = moment;
   const { top, bottom } = keyed(KEYS[passage], t);
-  const x = X0 + t * (X1 - X0);
+  // The moon crosses the night, which is one passage, so its own progress
+  // is the whole of its journey.
+  const x = X_RISE + t * (X_SET - X_RISE);
+  const sun = sunAt(moment.daylight);
   let stars = 0;
   let body: SkyBody = { kind: 'none' };
   switch (passage) {
@@ -268,23 +329,34 @@ export function skyFrame(moment: SkyMoment, moonDate: Date): SkyFrame {
       break;
     case 'dawn': {
       // Stars fade as the sky lightens; the sun breaks the strip's floor at
-      // t ≈ 0.6 and stands at the horizon line by sunrise.
+      // t ≈ 0.6 and stands on the horizon line, at the point it rises
+      // from, by sunrise. Only the coming-up is the dawn's: the place is
+      // the arc's start, which is where the day then carries it on from.
       stars = Math.max(0, 1 - t / 0.5);
       const rise = Math.max(0, (t - 0.6) / 0.4);
       body =
         rise > 0
-          ? { kind: 'sun', x, y: Y_LOW + 0.02 - rise * 0.02, alpha: Math.min(1, rise * 1.5) }
+          ? {
+              kind: 'sun',
+              x: sun.x,
+              y: sun.y + (1 - rise) * 0.02,
+              alpha: Math.min(1, rise * 1.5),
+            }
           : { kind: 'none' };
       break;
     }
     case 'day':
-      // Up to its height about Dhuhr (the middle of Sunrise → Asr), then down.
-      body = { kind: 'sun', x, y: Y_LOW - Math.sin(t * Math.PI) * (Y_LOW - Y_HIGH), alpha: 1 };
+      body = { kind: 'sun', x: sun.x, y: sun.y, alpha: 1 };
       break;
     case 'sunset': {
-      // From the afternoon's height to the horizon, gone as Maghrib arrives.
-      const y = 0.16 + t * (Y_LOW + 0.02 - 0.16);
-      body = { kind: 'sun', x, y, alpha: t < 0.9 ? 1 : Math.max(0, Math.round((1 - (t - 0.9) / 0.1) * 1000) / 1000) };
+      // The same arc, still coming down — the passage's own progress does
+      // nothing here but take the sun out as Maghrib arrives.
+      body = {
+        kind: 'sun',
+        x: sun.x,
+        y: sun.y,
+        alpha: t < 0.9 ? 1 : Math.max(0, Math.round((1 - (t - 0.9) / 0.1) * 1000) / 1000),
+      };
       break;
     }
     case 'dusk':

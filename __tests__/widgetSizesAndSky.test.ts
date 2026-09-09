@@ -148,6 +148,28 @@ describe('the Sky widget is the hero', () => {
     }
   });
 
+  /**
+   * The widget's sun crosses the day once, exactly as the app's does.
+   * Two ports of one drawing: if only one of them learns that the sun's
+   * place comes from the day rather than the passage, the home screen and
+   * the app disagree about where the sun is at four in the afternoon.
+   */
+  it('places the sun from the whole day, at the same span, as the app does', () => {
+    for (const src of [model, painter]) {
+      expect(src).toMatch(/X_RISE = 0\.12/);
+      expect(src).toMatch(/X_SET = 0\.88/);
+    }
+    // The model solves the arc once and every passage that draws the sun
+    // reads it; the port does the same with `sunX`/`sunY`.
+    expect(model).toMatch(/const sun = sunAt\(moment\.daylight\);/);
+    expect(model).toMatch(/y: Y_LOW - Math\.sin\(f \* Math\.PI\) \* \(Y_LOW - Y_HIGH\)/);
+    expect(painter).toMatch(/val sunX = X_RISE \+ f \* \(X_SET - X_RISE\)/);
+    expect(painter).toMatch(/val sunY = Y_LOW - sin\(f \* PI\)\.toFloat\(\) \* \(Y_LOW - Y_HIGH\)/);
+    // And the day fraction is measured over the same span in both.
+    expect(model).toMatch(/maghrib > sunrise \? \(n - sunrise\) \/ \(maghrib - sunrise\) : null/);
+    expect(painter).toMatch(/if \(maghrib > sunriseAt\) \(n - sunriseAt\)\.toFloat\(\) \/ \(maghrib - sunriseAt\) else null/);
+  });
+
   it('switches its ink where the app does', () => {
     expect(model).toMatch(/INK_SWITCH_LUMINANCE = 0\.18/);
     expect(painter).toMatch(/INK_SWITCH_LUMINANCE = 0\.18/);

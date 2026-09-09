@@ -41,7 +41,13 @@ import kotlin.math.sin
 object SkyWidgetPainter {
   enum class Passage { NIGHT, DAWN, DAY, SUNSET, DUSK }
 
-  data class Moment(val passage: Passage, val t: Float)
+  /**
+   * `daylight` is how far through the DAY it is — sunrise 0, Maghrib 1 —
+   * which is where the sun is drawn from, so its place cannot restart at
+   * a passage boundary. Negative before sunrise, past 1 after Maghrib,
+   * and null when the timings cannot say. See `skyModel.ts`.
+   */
+  data class Moment(val passage: Passage, val t: Float, val daylight: Float? = null)
 
   private data class Key(val t: Float, val top: Int, val bottom: Int)
 
@@ -108,7 +114,7 @@ object SkyWidgetPainter {
     nowMinutes: Int,
   ): Moment {
     if (fajr == null || asr == null || maghrib == null || isha == null) {
-      return Moment(Passage.DAY, 0.5f)
+      return Moment(Passage.DAY, 0.5f, 0.5f)
     }
     val day = 24 * 60
     val n = nowMinutes
@@ -117,17 +123,19 @@ object SkyWidgetPainter {
     val sunriseAt = sunrise ?: (fajr + 90)
     fun frac(a: Int, b: Int): Float =
       if (b > a) ((n - a).toFloat() / (b - a)).coerceIn(0f, 1f) else 0f
+    val daylight: Float? =
+      if (maghrib > sunriseAt) (n - sunriseAt).toFloat() / (maghrib - sunriseAt) else null
     if (n < fajr) {
-      if (wrapped && n < isha) return Moment(Passage.DUSK, frac(maghrib - day, isha))
+      if (wrapped && n < isha) return Moment(Passage.DUSK, frac(maghrib - day, isha), daylight)
       val from = if (wrapped) isha else ishaAt - day
-      return Moment(Passage.NIGHT, frac(from, fajr))
+      return Moment(Passage.NIGHT, frac(from, fajr), daylight)
     }
-    if (n < sunriseAt) return Moment(Passage.DAWN, frac(fajr, sunriseAt))
-    if (n < asr) return Moment(Passage.DAY, frac(sunriseAt, asr))
-    if (n < maghrib) return Moment(Passage.SUNSET, frac(asr, maghrib))
-    if (n < ishaAt) return Moment(Passage.DUSK, frac(maghrib, ishaAt))
+    if (n < sunriseAt) return Moment(Passage.DAWN, frac(fajr, sunriseAt), daylight)
+    if (n < asr) return Moment(Passage.DAY, frac(sunriseAt, asr), daylight)
+    if (n < maghrib) return Moment(Passage.SUNSET, frac(asr, maghrib), daylight)
+    if (n < ishaAt) return Moment(Passage.DUSK, frac(maghrib, ishaAt), daylight)
     val end = if (tomorrowFajr != null) tomorrowFajr + day else fajr + day
-    return Moment(Passage.NIGHT, frac(ishaAt, end))
+    return Moment(Passage.NIGHT, frac(ishaAt, end), daylight)
   }
 
   /** "HH:mm" → minutes since midnight, or null. */
@@ -200,8 +208,8 @@ object SkyWidgetPainter {
     return Pair(last.top, last.bottom)
   }
 
-  private const val X0 = 0.3f
-  private const val X1 = 0.66f
+  private const val X_RISE = 0.12f
+  private const val X_SET = 0.88f
   private const val Y_LOW = 0.26f
   private const val Y_HIGH = 0.08f
 
@@ -219,9 +227,15 @@ object SkyWidgetPainter {
   fun frame(moment: Moment, nowMs: Long): Frame {
     val (top, bottom) = keyed(KEYS.getValue(moment.passage), moment.t)
     val t = moment.t
-    val x = X0 + t * (X1 - X0)
+    // The moon crosses the night, which is one passage; the sun crosses
+    // the day, which is three, so it is placed from `daylight` instead.
+    val x = X_RISE + t * (X_SET - X_RISE)
+    val f = (moment.daylight ?: 0f).coerceIn(0f, 1f)
+    val sunX = X_RISE + f * (X_SET - X_RISE)
+    val sunY = Y_LOW - sin(f * PI).toFloat() * (Y_LOW - Y_HIGH)
     var stars = 0f
     var body = "none"
+    var bodyX = x
     var y = 0f
     var alpha = 1f
     var phase = 0
@@ -239,24 +253,27 @@ object SkyWidgetPainter {
         val rise = max(0f, (t - 0.6f) / 0.4f)
         if (rise > 0f) {
           body = "sun"
-          y = Y_LOW + 0.02f - rise * 0.02f
+          bodyX = sunX
+          y = sunY + (1f - rise) * 0.02f
           alpha = min(1f, rise * 1.5f)
         }
       }
       Passage.DAY -> {
         body = "sun"
-        y = Y_LOW - sin(t * PI).toFloat() * (Y_LOW - Y_HIGH)
+        bodyX = sunX
+        y = sunY
       }
       Passage.SUNSET -> {
         body = "sun"
-        y = 0.16f + t * (Y_LOW + 0.02f - 0.16f)
+        bodyX = sunX
+        y = sunY
         alpha = if (t < 0.9f) 1f else max(0f, 1f - (t - 0.9f) / 0.1f)
       }
       Passage.DUSK -> {
         stars = max(0f, (t - 0.4f) / 0.6f)
       }
     }
-    return Frame(moment.passage, t, top, bottom, GLOW.getValue(moment.passage), stars, body, x, y, alpha, phase, lit)
+    return Frame(moment.passage, t, top, bottom, GLOW.getValue(moment.passage), stars, body, bodyX, y, alpha, phase, lit)
   }
 
   /** The sky's colour at a fraction of the card's height. */

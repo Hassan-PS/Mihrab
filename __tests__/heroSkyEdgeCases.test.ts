@@ -95,11 +95,17 @@ const BASE = new Date(2026, 8, 9);
 
 /** Every minute of the day, in order. */
 function sweep(t: TimingsMap, tomorrowFajr?: string) {
-  const out: { h: number; m: number; passage: SkyPassage; t: number }[] = [];
+  const out: {
+    h: number;
+    m: number;
+    passage: SkyPassage;
+    t: number;
+    daylight: number | null;
+  }[] = [];
   for (let h = 0; h < 24; h++) {
     for (let m = 0; m < 60; m++) {
       const moment = skyMoment(t, on(BASE, h, m), tomorrowFajr);
-      out.push({ h, m, passage: moment.passage, t: moment.t });
+      out.push({ h, m, passage: moment.passage, t: moment.t, daylight: moment.daylight });
     }
   }
   return out;
@@ -208,15 +214,18 @@ describe.each(DAYS)('$name', ({ t: day, tomorrowFajr }) => {
 
   it('draws a real frame at every minute', () => {
     for (const x of s) {
-      const frame = skyFrame({ passage: x.passage, t: x.t }, on(BASE, x.h, x.m));
+      const frame = skyFrame(
+        { passage: x.passage, t: x.t, daylight: x.daylight },
+        on(BASE, x.h, x.m),
+      );
       expect(frame.top).toMatch(HEX);
       expect(frame.bottom).toMatch(HEX);
       expect(frame.glow).toMatch(HEX);
       expect(frame.stars).toBeGreaterThanOrEqual(0);
       expect(frame.stars).toBeLessThanOrEqual(1);
       if (frame.body.kind !== 'none') {
-        expect(frame.body.x).toBeGreaterThanOrEqual(0.3);
-        expect(frame.body.x).toBeLessThanOrEqual(0.66);
+        expect(frame.body.x).toBeGreaterThanOrEqual(0.12);
+        expect(frame.body.x).toBeLessThanOrEqual(0.88);
         expect(frame.body.y).toBeGreaterThanOrEqual(0.08);
         expect(frame.body.y).toBeLessThanOrEqual(0.3);
       }
@@ -252,6 +261,7 @@ describe('what the model refuses', () => {
     expect(skyMoment({ Fajr: '', Asr: '', Maghrib: '', Isha: '' }, on(BASE, 12, 0))).toEqual({
       passage: 'day',
       t: 0.5,
+      daylight: 0.5,
     });
   });
 
@@ -276,7 +286,7 @@ describe('the ink clears AA wherever the text may land', () => {
     // fraction of the sky. Every hundredth, every passage, every minute.
     for (const p of ['night', 'dawn', 'day', 'sunset', 'dusk'] as SkyPassage[]) {
       for (let i = 0; i <= 100; i += 2) {
-        const frame = skyFrame({ passage: p, t: i / 100 }, on(BASE, 12, 0));
+        const frame = skyFrame({ passage: p, t: i / 100, daylight: i / 100 }, on(BASE, 12, 0));
         for (let y = 0; y <= 100; y += 5) {
           const { text } = skyInkAt(frame, y / 100);
           expect(contrast(text, skyColorAt(frame, y / 100))).toBeGreaterThanOrEqual(4.5);
@@ -447,5 +457,119 @@ describe('the hero top row sits on the page edge', () => {
     expect(read('src/screens/home/LocationChip.tsx')).toMatch(
       /headerPin: \{\s*paddingHorizontal: SPACING\.sm/,
     );
+  });
+});
+
+/**
+ * THE SUN TRAVELS ONCE, from where it rises to where it sets.
+ *
+ * It used to be placed from the progress of the passage it was in, so it
+ * crossed the card three times a day — through the dawn, again from
+ * sunrise to Asr, and a third time from Asr to Maghrib — jumping back to
+ * the left at each boundary, and at Asr up into the sky as well, to set a
+ * second time. The passages say what colour the sky is and when the sun
+ * fades in and out; where it IS comes from the day.
+ */
+describe('the sun crosses the sky once', () => {
+  const day: TimingsMap = {
+    Fajr: '03:38',
+    Sunrise: '05:55',
+    Dhuhr: '12:50',
+    Asr: '16:20',
+    Maghrib: '19:36',
+    Isha: '21:44',
+  };
+  const minutes = sweep(day, '03:40');
+  const framesOf = () =>
+    minutes.map(x => ({
+      ...x,
+      frame: skyFrame({ passage: x.passage, t: x.t, daylight: x.daylight }, on(BASE, x.h, x.m)),
+    }));
+  const suns = () =>
+    framesOf().filter(x => x.frame.body.kind === 'sun') as (ReturnType<typeof framesOf>[number] & {
+      frame: { body: { kind: 'sun'; x: number; y: number; alpha: number } };
+    })[];
+
+  it('never moves backwards, from the first minute it is drawn to the last', () => {
+    let previous = -Infinity;
+    for (const { h, m, frame } of suns()) {
+      if (frame.body.kind !== 'sun') continue;
+      if (frame.body.x < previous - 1e-9) {
+        throw new Error(
+          `the sun jumped back at ${h}:${String(m).padStart(2, '0')}: ` +
+            `${frame.body.x.toFixed(4)} after ${previous.toFixed(4)}`,
+        );
+      }
+      previous = frame.body.x;
+    }
+  });
+
+  it('moves by no more than a minute\'s worth at a time — no seams', () => {
+    const drawn = suns();
+    // A day is ~820 minutes of sun over 0.76 of the width: 0.001 a minute.
+    for (let i = 1; i < drawn.length; i++) {
+      const a = drawn[i - 1].frame.body;
+      const b = drawn[i].frame.body;
+      if (a.kind !== 'sun' || b.kind !== 'sun') continue;
+      expect(Math.abs(b.x - a.x)).toBeLessThan(0.01);
+      expect(Math.abs(b.y - a.y)).toBeLessThan(0.01);
+    }
+  });
+
+  it('rises at one edge and sets at the other, having crossed the card', () => {
+    const drawn = suns();
+    const first = drawn[0].frame.body;
+    const last = drawn[drawn.length - 1].frame.body;
+    if (first.kind !== 'sun' || last.kind !== 'sun') throw new Error('no sun');
+    expect(first.x).toBeCloseTo(0.12, 2);
+    expect(last.x).toBeGreaterThan(0.85);
+    // And both ends are at the horizon, not somewhere in the sky.
+    expect(first.y).toBeGreaterThan(0.25);
+    expect(last.y).toBeGreaterThan(0.25);
+  });
+
+  it('is highest at Dhuhr, which is the middle of sunrise and Maghrib', () => {
+    const drawn = suns();
+    let highest = drawn[0];
+    for (const x of drawn) {
+      if (x.frame.body.kind === 'sun' && highest.frame.body.kind === 'sun') {
+        if (x.frame.body.y < highest.frame.body.y) highest = x;
+      }
+    }
+    // Sunrise 05:55 and Maghrib 19:36 put solar noon at 12:45; Dhuhr is
+    // 12:50, five minutes after it, as it always is.
+    expect(highest.h).toBe(12);
+    expect(Math.abs(highest.m - 45)).toBeLessThanOrEqual(2);
+    if (highest.frame.body.kind === 'sun') {
+      expect(highest.frame.body.y).toBeCloseTo(0.08, 2);
+    }
+  });
+
+  it('crosses Asr without noticing it', () => {
+    const before = minutes.find(x => x.h === 16 && x.m === 19)!;
+    const after = minutes.find(x => x.h === 16 && x.m === 21)!;
+    expect(before.passage).toBe('day');
+    expect(after.passage).toBe('sunset');
+    const a = skyFrame({ ...before, daylight: before.daylight }, on(BASE, 16, 19)).body;
+    const b = skyFrame({ ...after, daylight: after.daylight }, on(BASE, 16, 21)).body;
+    if (a.kind !== 'sun' || b.kind !== 'sun') throw new Error('no sun at Asr');
+    // The passage changed; the sun did not.
+    expect(b.x - a.x).toBeGreaterThan(0);
+    expect(b.x - a.x).toBeLessThan(0.01);
+    expect(Math.abs(b.y - a.y)).toBeLessThan(0.01);
+  });
+
+  it('holds at the point it will rise from while the dawn brings it up', () => {
+    const dawnSuns = framesOf().filter(
+      x => x.passage === 'dawn' && x.frame.body.kind === 'sun',
+    );
+    expect(dawnSuns.length).toBeGreaterThan(10);
+    for (const { frame } of dawnSuns) {
+      if (frame.body.kind !== 'sun') continue;
+      expect(frame.body.x).toBeCloseTo(0.12, 3);
+      // Below the horizon line, coming up to it.
+      expect(frame.body.y).toBeGreaterThanOrEqual(0.26);
+      expect(frame.body.y).toBeLessThanOrEqual(0.28);
+    }
   });
 });

@@ -53,7 +53,7 @@ describe('where in the day', () => {
   });
 
   it('falls back to a plain day when the timings are missing', () => {
-    expect(skyMoment({}, at(12))).toEqual({ passage: 'day', t: 0.5 });
+    expect(skyMoment({}, at(12))).toEqual({ passage: 'day', t: 0.5, daylight: 0.5 });
   });
 
   it('stays night at one in the morning with the Sunrise row turned off', () => {
@@ -70,7 +70,7 @@ describe('where in the day', () => {
 
 describe('the colours', () => {
   it('meet at the seams: each passage ends where the next begins', () => {
-    const f = (p: SkyPassage, t: number) => skyFrame({ passage: p, t }, at(12));
+    const f = (p: SkyPassage, t: number) => skyFrame({ passage: p, t, daylight: t }, at(12));
     const same = (a: ReturnType<typeof f>, b: ReturnType<typeof f>) => {
       expect(a.top).toBe(b.top);
       expect(a.bottom).toBe(b.bottom);
@@ -82,7 +82,8 @@ describe('the colours', () => {
   });
 
   it('go dark → saturated → light through dawn, and light → saturated → dark through sunset', () => {
-    const b = (p: SkyPassage, t: number) => luminance(skyFrame({ passage: p, t }, at(12)).bottom);
+    const b = (p: SkyPassage, t: number) =>
+      luminance(skyFrame({ passage: p, t, daylight: t }, at(12)).bottom);
     expect(b('dawn', 0)).toBeLessThan(b('dawn', 0.5));
     expect(b('dawn', 0.5)).toBeLessThan(b('dawn', 1));
     expect(b('sunset', 0)).toBeGreaterThan(b('sunset', 0.85));
@@ -94,7 +95,8 @@ describe('the colours', () => {
       const v = [0, 2, 4].map(i => parseInt(c.slice(i, i + 2), 16));
       return Math.max(...v) - Math.min(...v);
     };
-    const dawnBottom = (t: number) => sat(skyFrame({ passage: 'dawn', t }, at(12)).bottom);
+    const dawnBottom = (t: number) =>
+      sat(skyFrame({ passage: 'dawn', t, daylight: t - 1 }, at(12)).bottom);
     expect(dawnBottom(0.78)).toBeGreaterThan(dawnBottom(0));
     expect(dawnBottom(0.78)).toBeGreaterThan(dawnBottom(1));
   });
@@ -112,7 +114,7 @@ describe('the ink', () => {
     // three heights the hero puts text at.
     for (const p of PASSAGES) {
       for (let i = 0; i <= 100; i++) {
-        const frame = skyFrame({ passage: p, t: i / 100 }, at(12));
+        const frame = skyFrame({ passage: p, t: i / 100, daylight: i / 100 }, at(12));
         for (const y of Object.values(HERO_Y)) {
           const { text } = skyInkAt(frame, y);
           expect(contrast(text, skyColorAt(frame, y))).toBeGreaterThanOrEqual(4.5);
@@ -157,15 +159,21 @@ describe('the moon', () => {
   });
 
   it('is drawn in the night passage only, in its phase, crossing the top strip', () => {
-    const early = skyFrame({ passage: 'night', t: 0.1 }, new Date(Date.UTC(2024, 0, 25, 17, 54)));
-    const late = skyFrame({ passage: 'night', t: 0.9 }, new Date(Date.UTC(2024, 0, 25, 17, 54)));
+    const early = skyFrame(
+      { passage: 'night', t: 0.1, daylight: null },
+      new Date(Date.UTC(2024, 0, 25, 17, 54)),
+    );
+    const late = skyFrame(
+      { passage: 'night', t: 0.9, daylight: null },
+      new Date(Date.UTC(2024, 0, 25, 17, 54)),
+    );
     expect(early.body).toMatchObject({ kind: 'moon', phase: 4 });
     expect(late.body).toMatchObject({ kind: 'moon' });
     if (early.body.kind === 'moon' && late.body.kind === 'moon') {
       expect(late.body.x).toBeGreaterThan(early.body.x);
       expect(early.body.y).toBeLessThanOrEqual(0.32);
     }
-    expect(skyFrame({ passage: 'dawn', t: 0 }, at(12)).body.kind).toBe('none');
+    expect(skyFrame({ passage: 'dawn', t: 0, daylight: -1 }, at(12)).body.kind).toBe('none');
   });
 
   it('has no shadow when full and a full shadow when new', () => {
@@ -178,7 +186,7 @@ describe('the moon', () => {
 });
 
 describe('the sun', () => {
-  const f = (p: SkyPassage, t: number) => skyFrame({ passage: p, t }, at(12));
+  const f = (p: SkyPassage, t: number) => skyFrame({ passage: p, t, daylight: t }, at(12));
   it('rises late in the dawn, climbs to its height about the middle of the day, and has set by Maghrib', () => {
     expect(f('dawn', 0.3).body.kind).toBe('none');
     expect(f('dawn', 0.95).body.kind).toBe('sun');
@@ -195,8 +203,10 @@ describe('the sun', () => {
       for (let i = 0; i <= 20; i++) {
         const b = f(p, i / 20).body;
         if (b.kind === 'none') continue;
-        expect(b.x).toBeGreaterThanOrEqual(0.3);
-        expect(b.x).toBeLessThanOrEqual(0.66);
+        // The width the arc is drawn across — a whole day's travel, so
+        // the sun and the moon use the card rather than its middle third.
+        expect(b.x).toBeGreaterThanOrEqual(0.12);
+        expect(b.x).toBeLessThanOrEqual(0.88);
         expect(b.y).toBeLessThanOrEqual(0.28);
         expect(b.y).toBeGreaterThan(0.05);
       }
