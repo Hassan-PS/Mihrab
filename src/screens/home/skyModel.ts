@@ -150,12 +150,19 @@ export function skyMoment(timings: TimingsMap, now: Date, tomorrowFajr?: string)
   const fajr = at('Fajr');
   const asr = at('Asr');
   const maghrib = at('Maghrib');
-  const isha = at('Isha');
+  const ishaRaw = at('Isha');
   const frac = (a: number, b: number) => (b > a ? Math.max(0, Math.min(1, (n - a) / (b - a))) : 0);
 
-  if (fajr == null || asr == null || maghrib == null || isha == null) {
+  if (fajr == null || asr == null || maghrib == null || ishaRaw == null) {
     return { passage: 'day', t: 0.5 };
   }
+  // At a high latitude in summer Isha falls after midnight and is stored
+  // as the clock it shows ("00:47"), which as a time on the SAME day is
+  // before Maghrib. It belongs to the night that Maghrib began, so it is
+  // read as the next day's — otherwise the dusk was skipped and the night
+  // began at Maghrib, an hour early, with the moon already at its end.
+  const wrapped = ishaRaw < maghrib;
+  const isha = wrapped ? ishaRaw + 24 * 3600_000 : ishaRaw;
   // Sunrise is an OPTIONAL row, and a map with the row turned off has no
   // key for it — which once turned the whole night into noon. Without it
   // the dawn is taken to last as long as it does at the middle latitudes
@@ -163,7 +170,13 @@ export function skyMoment(timings: TimingsMap, now: Date, tomorrowFajr?: string)
   // timetable, and a dawn ten minutes long or short is not visible.
   const sunrise = at('Sunrise') ?? fajr + 90 * 60_000;
   if (n < fajr) {
-    const from = isha - 24 * 3600_000;
+    // Before Fajr. With a wrapped Isha, the small hours up to it are still
+    // last evening's dusk — Maghrib was yesterday's clock, Isha is today's
+    // — and the night that follows began at that Isha, this morning.
+    if (wrapped && n < ishaRaw) {
+      return { passage: 'dusk', t: frac(maghrib - 24 * 3600_000, ishaRaw) };
+    }
+    const from = wrapped ? ishaRaw : isha - 24 * 3600_000;
     return { passage: 'night', t: frac(from, fajr) };
   }
   if (n < sunrise) return { passage: 'dawn', t: frac(fajr, sunrise) };

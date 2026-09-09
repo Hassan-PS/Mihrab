@@ -141,7 +141,7 @@ describe('the ink', () => {
     expect(hero).toMatch(/skyInkAt\(frame, measured \? heroY\.foot : HERO_Y\.foot\)/);
     expect(hero).not.toMatch(/palette\./);
     // The sky is the clock's, not the target's.
-    expect(hero).toMatch(/skyMoment\(today, /);
+    expect(hero).toMatch(/skyMoment\(skyToday \?\? today, /);
     expect(hero).not.toMatch(/skyPhaseFor|targetKey/);
   });
 });

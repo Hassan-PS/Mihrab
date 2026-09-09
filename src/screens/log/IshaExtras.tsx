@@ -54,16 +54,12 @@ function IshaExtrasImpl({
 
   return (
     <View style={[styles.wrap, dead && styles.wrapNotYet]}>
-      <Text style={[styles.head, { color: palette.muted }]} numberOfLines={1}>
-        {t('sunnah.afterIsha', 'After Isha')}
-      </Text>
-
-      <View
-        style={[
-          styles.row,
-          { borderTopColor: palette.border ?? palette.muted },
-        ]}
-      >
+      {/* ONE LINE, not a heading and two rows. Witr and Qiyam are the two
+          things logged after Isha and they share the line the way the
+          sunnah chip shares the prayer's: the name, then its control. A
+          heading, a subtitle and a rule each cost the day's card a line
+          it does not have on a phone. */}
+      <View style={[styles.row, { borderTopColor: palette.border ?? palette.muted }]}>
         <Text style={[styles.name, { color: palette.text }]} numberOfLines={1}>
           {t('sunnah.witr', 'Witr')}
         </Text>
@@ -74,10 +70,7 @@ function IshaExtrasImpl({
           disabled={dead}
           onPress={onToggleWitr}
           hitSlop={6}
-          style={[
-            styles.toggle,
-            { backgroundColor: witr ? gold : palette.card },
-          ]}
+          style={[styles.toggle, { backgroundColor: witr ? gold : palette.card }]}
         >
           <Text
             style={[
@@ -89,25 +82,19 @@ function IshaExtrasImpl({
             {witr ? t('sunnah.prayed', 'Prayed') : t('sunnah.logIt', 'Log')}
           </Text>
         </Pressable>
-      </View>
-
-      <View
-        style={[
-          styles.row,
-          { borderTopColor: palette.border ?? palette.muted },
-        ]}
-      >
-        <View style={styles.nameCol}>
-          <Text style={[styles.name, { color: palette.text }]} numberOfLines={1}>
-            {t('sunnah.qiyam', 'Qiyam al-Layl')}
-          </Text>
-          {/* Numberless on purpose: a sentence carrying {{count}} triggers
-              i18next pluralisation, and Arabic needs six forms for it. The
-              number lives in the figure beside it instead. */}
-          <Text style={[styles.sub, { color: palette.muted }]} numberOfLines={1}>
-            {t('sunnah.qiyamNote', 'Not counted toward the streak')}
-          </Text>
-        </View>
+        <View style={[styles.divider, { backgroundColor: palette.border ?? palette.muted }]} />
+        <Text
+          style={[styles.name, { color: palette.text }]}
+          numberOfLines={1}
+          // The note that this is not counted toward the streak is the
+          // accessibility label's; on the line the name is enough.
+          accessibilityLabel={`${t('sunnah.qiyam', 'Qiyam al-Layl')} — ${t(
+            'sunnah.qiyamNote',
+            'Not counted toward the streak',
+          )}`}
+        >
+          {t('sunnah.qiyam', 'Qiyam al-Layl')}
+        </Text>
         <View style={styles.stepper}>
           {qiyam > 0 ? (
             <Pressable
@@ -158,29 +145,20 @@ const styles = StyleSheet.create({
    * log, on the same rhythm as everything above them, so they get the same
    * hairline rule and the same left edge instead of a box of their own.
    */
-  wrap: {
-    marginTop: SPACING.sm,
-    gap: 2,
-  },
+  wrap: { marginTop: SPACING.xs },
   // The same 0.4 the status chips and the sunnah tile use, so the whole Isha
   // row dims as one piece rather than three shades of grey.
   wrapNotYet: { opacity: 0.4 },
-  head: {
-    marginTop: SPACING.xs,
-    fontSize: TYPE.label.fontSize,
-    fontWeight: '600',
-  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
-    paddingVertical: SPACING.sm,
+    paddingVertical: SPACING.xs,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
-  nameCol: { flex: 1 },
   name: { flex: 1, fontSize: TYPE.footnote.fontSize, fontWeight: '600' },
-  sub: { fontSize: TYPE.caption.fontSize, marginTop: 1 },
-  toggle: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm, borderRadius: RADIUS.md },
+  divider: { width: StyleSheet.hairlineWidth, alignSelf: 'stretch', marginHorizontal: SPACING.xs },
+  toggle: { paddingHorizontal: SPACING.md, paddingVertical: SPACING.xs, borderRadius: RADIUS.md },
   toggleLabel: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
   stepper: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   step: { width: 28, height: 28, borderRadius: RADIUS.sm, alignItems: 'center', justifyContent: 'center' },

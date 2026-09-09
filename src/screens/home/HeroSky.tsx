@@ -11,6 +11,70 @@ import Svg, {
 } from 'react-native-svg';
 import type { MoonPhase, SkyFrame } from './skyModel';
 
+/** The moon's canvas, dp. */
+export const MOON = 22;
+/** The sun's radius, dp. */
+export const SUN_R = 9;
+/**
+ * Below this much open sky, no body is drawn: a moon (22dp) in a 40dp
+ * band already touches both edges. The gradient alone says the hour.
+ */
+export const SKY_CRAMPED_BELOW = 40;
+
+/**
+ * Where a body drawn at model fraction `f` (0–0.3 of a short card — see
+ * skyModel's Y_LOW/Y_HIGH) lands inside the sky, in dp from its top.
+ *
+ * The model was drawn for a short card whose top third was the sky. Given
+ * a band of its own — everything between the status bar + top row and the
+ * countdown block — the drawing uses the band: the model's 0.08–0.3
+ * becomes the whole of the room less half a moon at each edge, so the
+ * sun at its lowest sits just above the countdown (the horizon) and the
+ * moon crosses the middle of the open sky rather than hugging the
+ * location chip, and no body ever touches either edge.
+ *
+ * Pure, so the geometry can be tested for every phone height and every
+ * table length without a layout engine.
+ */
+export function skyScene({
+  height,
+  sceneTop,
+  sceneBottom,
+}: {
+  /** The sky's measured height, dp (0 before layout). */
+  height: number;
+  sceneTop: number;
+  sceneBottom: number;
+}): {
+  banded: boolean;
+  room: number;
+  cramped: boolean;
+  /** dp from the sky's top for a model fraction. */
+  y: (fraction: number) => number;
+} {
+  const banded = sceneTop > 0 || sceneBottom > 0;
+  const room = height - sceneTop - sceneBottom;
+  // When the table has taken the room — extra times and the Mālikī
+  // boundaries all on — the band can close to a sliver. A moon drawn
+  // there would sit half behind the countdown; the gradient alone says
+  // the hour well enough until the room comes back.
+  const cramped = banded && height > 0 && room < SKY_CRAMPED_BELOW;
+  // The model's body centres run 0.08 (the sun at noon) to 0.3 (a body at
+  // the horizon). That range becomes the room, less half a moon at each
+  // edge, so the largest body drawn at either extreme still clears the
+  // top row above and the countdown below — on a 40dp band as on a
+  // tablet's 600.
+  const margin = MOON / 2;
+  const inner = Math.max(0, room - 2 * margin);
+  const spread = (fraction: number) => Math.max(0, Math.min(1, (fraction - 0.08) / 0.22));
+  return {
+    banded,
+    room,
+    cramped,
+    y: (fraction: number) => sceneTop + margin + spread(fraction) * inner,
+  };
+}
+
 /**
  * The drawn sky behind today's hero — see skyModel.ts for the passages,
  * the keyframes, and why it is painted at full strength whatever the theme.
@@ -67,17 +131,10 @@ function HeroSkyImpl({
         : { width, height: h },
     );
   }, []);
-  const banded = sceneTop > 0 || sceneBottom > 0;
-  const room = height - sceneTop - sceneBottom;
-  // The model places bodies in the top ~0.3 of a short card. Given a
-  // band of its own, the drawing uses the band: the top third of the
-  // card becomes the whole of the room, so the sun at its lowest sits
-  // just above the countdown (the horizon) and the moon crosses the
-  // middle of the open sky rather than hugging the location chip.
-  const spread = (fraction: number) =>
-    Math.max(0.08, Math.min(0.9, 0.1 + (fraction / 0.3) * 0.75));
+  const scene = skyScene({ height, sceneTop, sceneBottom });
+  const { banded, cramped } = scene;
   const sceneY = (fraction: number): number | `${number}%` =>
-    banded && room > 0 ? sceneTop + spread(fraction) * room : `${fraction * 100}%`;
+    banded && scene.room > 0 ? scene.y(fraction) : `${fraction * 100}%`;
 
   // A fixed, sparse field in the top strip: the same stars every night, so
   // the card does not twinkle from one render to the next, and none of
@@ -95,11 +152,6 @@ function HeroSkyImpl({
     [],
   );
 
-  // When the table has taken the room — extra times and the Mālikī
-  // boundaries all on — the band can close to a sliver. A moon drawn
-  // there would sit half behind the countdown; the gradient alone says
-  // the hour well enough until the room comes back.
-  const cramped = banded && height > 0 && room < 40;
   const bodyXY = body.kind === 'none' || cramped ? null : { x: body.x, y: body.y };
   const drawStars = stars > 0 && !cramped;
 
@@ -162,7 +214,7 @@ function HeroSkyImpl({
           <Circle
             cx={`${body.x * 100}%`}
             cy={sceneY(body.y)}
-            r={9}
+            r={SUN_R}
             fill={glow}
             fillOpacity={body.alpha}
           />
@@ -231,8 +283,6 @@ export function moonShadowPath(phase: MoonPhase, cx: number, cy: number, r: numb
 
 export const HeroSky = memo(HeroSkyImpl);
 
-/** The moon's canvas, dp. */
-const MOON = 22;
 
 const styles = StyleSheet.create({
   fill: { ...StyleSheet.absoluteFillObject },

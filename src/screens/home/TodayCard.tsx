@@ -28,6 +28,7 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
   type LayoutChangeEvent,
   type NativeScrollEvent,
@@ -81,6 +82,11 @@ import { QiblaChipCorner } from './QiblaChip';
 import { HOME_SCREEN_PADDING, HOME_TABLE_RADIUS } from './tokens';
 import { RADIUS, SPACING } from '../../theme/tokens';
 import { TYPE } from '../../theme/typography';
+
+/** Below this window height the rows go dense — see `renderDay`. */
+export const DENSE_BELOW_HEIGHT = 720;
+/** Past this many rows a day the rows go dense. */
+export const DENSE_ABOVE_ROWS = 6;
 
 export type TodayCardProps = {
   /** Today first, then the next six days. */
@@ -143,6 +149,7 @@ const HeroToday = memo(function HeroToday({
   chosen,
   onExpire,
   today,
+  skyToday,
   tomorrowFajr,
   expanded,
   bleed,
@@ -159,6 +166,13 @@ const HeroToday = memo(function HeroToday({
   /** Called when a chosen prayer's time arrives, to hand the hero back. */
   onExpire: () => void;
   today: TimingsMap;
+  /**
+   * The day for the SKY — unfiltered, Sunrise included — where `today`
+   * is the day as drawn. The rail reads `today`, so its "from" is always
+   * a row the reader can see; the sky reads this, because it needs the
+   * sunrise whether or not the row is on.
+   */
+  skyToday?: TimingsMap;
   /** Tomorrow's Fajr, `HH:mm`, which closes tonight's sky. */
   tomorrowFajr?: string;
   expanded: boolean;
@@ -232,8 +246,12 @@ const HeroToday = memo(function HeroToday({
    */
   const minuteKey = Math.floor(now.getTime() / 60_000);
   const frame = useMemo(
-    () => skyFrame(skyMoment(today, new Date(minuteKey * 60_000), tomorrowFajr), new Date(minuteKey * 60_000)),
-    [today, tomorrowFajr, minuteKey],
+    () =>
+      skyFrame(
+        skyMoment(skyToday ?? today, new Date(minuteKey * 60_000), tomorrowFajr),
+        new Date(minuteKey * 60_000),
+      ),
+    [today, skyToday, tomorrowFajr, minuteKey],
   );
   /**
    * The hero's ink comes from the sky, not the theme (skyModel.ts), and
@@ -291,13 +309,45 @@ const HeroToday = memo(function HeroToday({
    * fraction of, so the rail is simply not drawn.
    */
   const rail = useMemo(() => {
+    // A clock later than Maghrib's in the evening's rows (Isha, the First
+    // Third) that reads EARLIER than Maghrib has crossed midnight — a
+    // Stockholm June Isha is "00:47" — and belongs to tomorrow's date.
+    // Read as today's it had already "passed" at 23:00, and the rail ran
+    // from Isha to Isha with nothing in it.
+    const maghribAt = today.Maghrib
+      ? combineLocalDateAndTime(now, today.Maghrib).getTime()
+      : null;
+    const instant = (key: string, raw: string): Date => {
+      const at = combineLocalDateAndTime(now, raw);
+      if (
+        (key === 'Isha' || key === 'Firstthird') &&
+        maghribAt != null &&
+        at.getTime() < maghribAt
+      ) {
+        at.setDate(at.getDate() + 1);
+      }
+      return at;
+    };
+    // Today's instants AND yesterday's: before Fajr nothing of today has
+    // passed, and the rail used to vanish for the whole small-hours
+    // stretch — the one time a "how far into the night" bar is the most
+    // use. Last night's Isha is the same clock a day earlier.
     const passed = DISPLAY_ORDER.map(key => ({
       key,
       raw: today[key],
     }))
       .filter(e => e.raw)
-      .map(e => ({ key: e.key, at: combineLocalDateAndTime(now, e.raw) }))
-      .filter(e => e.at.getTime() <= now.getTime());
+      .flatMap(e => {
+        const at = instant(e.key, e.raw as string);
+        const yesterday = new Date(at);
+        yesterday.setDate(yesterday.getDate() - 1);
+        return [
+          { key: e.key, at },
+          { key: e.key, at: yesterday },
+        ];
+      })
+      .filter(e => e.at.getTime() <= now.getTime())
+      .sort((a, b) => a.at.getTime() - b.at.getTime());
     const from = passed[passed.length - 1];
     if (!from) return null;
     const span = target.at.getTime() - from.at.getTime();
@@ -736,6 +786,14 @@ function TodayCardImpl({
   );
 
   const insets = useSafeAreaInsets();
+  /**
+   * Dense rows when the page would not otherwise hold the day: a short
+   * phone (under 720dp of window), or a table past six rows — the extra
+   * times, the Mālikī boundaries. The design's whole point is the day on
+   * one screen; 4dp less air per row is the cheapest way to keep it.
+   */
+  const windowHeight = useWindowDimensions().height;
+  const shortScreen = windowHeight > 0 && windowHeight < DENSE_BELOW_HEIGHT;
   // Full-bleed: the hero's top padding clears the status bar; the sky
   // bleeds up under it. The card chrome — radius, edge, glass — is gone:
   // the hero is a panel of the page, and the rows sit on the page.
@@ -758,6 +816,10 @@ function TodayCardImpl({
     const rows = DISPLAY_ORDER.filter(key => dayTimings[key]);
     const overrideKey = overrideKeyFor(offset, dayTimings, rows);
     const timeSample = timeSampleFor(dayTimings, rows);
+    // A Mālikī boundary is a second line on the row, so a table carrying
+    // them weighs two rows more than its count says.
+    const withDaruri = rows.some(key => dayTimings[`${key}Daruri`]);
+    const dense = fullBleed && (shortScreen || rows.length + (withDaruri ? 2 : 0) > DENSE_ABOVE_ROWS);
     return rows.map((key, rowIndex) => (
       <PrayerRow
         key={key}
@@ -814,6 +876,7 @@ function TodayCardImpl({
             : undefined
         }
         hasCheckColumn={isToday}
+        dense={dense}
       />
     ));
   };
@@ -842,7 +905,8 @@ function TodayCardImpl({
             target={target}
             chosen={chosenKey !== null}
             onExpire={clearChosen}
-            today={skyTimings ?? timings}
+            today={timings}
+            skyToday={skyTimings}
             tomorrowFajr={tomorrow?.Fajr}
             expanded={expanded}
             dateLine={todayDateLine}

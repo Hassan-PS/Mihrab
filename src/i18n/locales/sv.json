@@ -1534,7 +1534,8 @@
     "resetPreserved": "Fastor, sunnaböner och dhikr rörs inte. Detta går inte att ångra.",
     "resetRangeAll": "hela loggen",
     "options": "Alternativ",
-    "setUpSync": "Ställ in synk"
+    "setUpSync": "Ställ in synk",
+    "legendTitle": "Vad grafen visar"
   },
   "endOfDay": {
     "title": "Logga dagens böner?",

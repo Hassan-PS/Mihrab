@@ -36,6 +36,8 @@ type Props = {
   /** Whether the grid is currently showing only owed days. */
   showingOwed: boolean;
   onToggleOwed: () => void;
+  /** No captions — for a short phone, where the third line costs a row of the day. */
+  compact?: boolean;
 };
 
 function PracticeStatsRowImpl({
@@ -43,6 +45,7 @@ function PracticeStatsRowImpl({
   palette,
   showingOwed,
   onToggleOwed,
+  compact = false,
 }: Props) {
   const { t } = useTranslation();
   const owed = stats.owed.length;
@@ -60,7 +63,7 @@ function PracticeStatsRowImpl({
         unit={t('stats.daysUnit', ' days')}
         label={t('stats.streakLabel', 'On-time streak')}
         caption={
-          stats.bestStreak > 0
+          !compact && stats.bestStreak > 0
             ? t('stats.best', 'best {{best}}', { best: stats.bestStreak })
             : undefined
         }
@@ -69,13 +72,13 @@ function PracticeStatsRowImpl({
         value={rate}
         unit={stats.sunnahRate === null ? undefined : '%'}
         label={t('stats.sunnahLabel', 'Sunnah kept')}
-        caption={t('stats.thisMonth', 'this month')}
+        caption={compact ? undefined : t('stats.thisMonth', 'this month')}
       />
       <Tile
         value={String(stats.fastsThisMonth)}
         unit={t('stats.daysUnit', ' days')}
         label={t('stats.fastedLabel', 'Fasted')}
-        caption={t('stats.thisMonth', 'this month')}
+        caption={compact ? undefined : t('stats.thisMonth', 'this month')}
       />
       <Pressable
         accessibilityRole="button"
@@ -101,7 +104,7 @@ function PracticeStatsRowImpl({
               : t('stats.owedLabel', 'Prayers owed')
           }
           caption={
-            owed > 0
+            owed > 0 && !compact
               ? showingOwed
                 ? t('stats.owedHide', 'showing ✕')
                 : t('stats.owedShow', 'tap to see')

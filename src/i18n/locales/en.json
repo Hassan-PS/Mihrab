@@ -1534,7 +1534,8 @@
     "resetPreserved": "Fasts, sunnah prayers and dhikr are not touched. This cannot be undone.",
     "resetRangeAll": "the whole log",
     "options": "Options",
-    "setUpSync": "Set up sync"
+    "setUpSync": "Set up sync",
+    "legendTitle": "What the graph shows"
   },
   "endOfDay": {
     "title": "Log today’s prayers?",

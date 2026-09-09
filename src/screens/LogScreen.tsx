@@ -34,6 +34,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -133,6 +134,10 @@ const PRAYERS: JournalPrayer[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 const STATUSES: JournalStatus[] = ['on-time', 'late', 'missed', 'qadha'];
 /** A prayer row's vertical padding: five of them and the day must fit a phone. */
 const LOG_ROW_PAD = 6;
+/** Under this window height the graph gives up height — see `shortScreen`. */
+const LOG_DENSE_BELOW_HEIGHT = 760;
+/** The heatmap's scale on such a phone. */
+const HEATMAP_SHORT_SCALE = 0.8;
 
 /**
  * A `YYYY-MM-DD` key back into a local Date, anchored at noon.
@@ -191,6 +196,16 @@ export function LogScreen() {
   useScrollToTop(scrollRef);
   const tabBarInset = useTabBarInset();
   const pageTop = useTabPageTop();
+  /**
+   * A SHORT PHONE. Under 760dp of window the page cannot hold the graph
+   * and the day at their full size, so the graph gives: the stat tiles
+   * drop their third line and the heatmap is drawn at four fifths,
+   * reclaiming the height it no longer paints. The day's card — the
+   * thing the page is for — keeps its size.
+   */
+  const windowHeight = useWindowDimensions().height;
+  const shortScreen = windowHeight > 0 && windowHeight < LOG_DENSE_BELOW_HEIGHT;
+  const [heatmapH, setHeatmapH] = useState(0);
   const [optionsOpen, setOptionsOpen] = useState(false);
   // The bar gets out of the way while reading — see tabBarVisibility.ts.
   const tabBarScroll = useTabBarScroll();
@@ -1139,8 +1154,30 @@ export function LogScreen() {
             palette={palette}
             showingOwed={showOwed}
             onToggleOwed={toggleOwed}
+            compact={shortScreen}
           />
+          {/* On a short phone the graph is drawn at HEATMAP_SHORT_SCALE and
+              its box is pulled in by the height that no longer paints, so
+              the day's card moves up by the same amount. A transform, not
+              a smaller square: the square's geometry — its border, the
+              sunnah ring, the marks — is fixed in the graph, and a scale
+              keeps every one of those in proportion. Touch follows the
+              transform. */}
+          <View
+            onLayout={shortScreen ? e => setHeatmapH(e.nativeEvent.layout.height) : undefined}
+            style={
+              shortScreen && heatmapH > 0
+                ? {
+                    transform: [{ scale: HEATMAP_SHORT_SCALE }],
+                    marginVertical: -(heatmapH * (1 - HEATMAP_SHORT_SCALE)) / 2,
+                  }
+                : null
+            }>
           <PracticeHeatmap
+            // The key to the squares is behind the ⋯ (LogOptionsSheet):
+            // two lines under a graph read every day, on a page that has
+            // to hold the day's card without scrolling.
+            compact
             rows={heatmapRows}
             weekdayLabels={weekdayLabels}
             selectedKey={selected}
@@ -1148,6 +1185,7 @@ export function LogScreen() {
             onSelectDay={onSelectDayFromGrid}
             onReachOldest={showMore}
           />
+          </View>
           {showOwed ? (
             <View
               style={[

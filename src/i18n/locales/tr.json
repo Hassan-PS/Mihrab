@@ -1534,7 +1534,8 @@
     "resetPreserved": "Oruç, sünnet namazları ve zikir dokunulmaz. Bu geri alınamaz.",
     "resetRangeAll": "kaydın tamamı",
     "options": "Seçenekler",
-    "setUpSync": "Eşitlemeyi ayarla"
+    "setUpSync": "Eşitlemeyi ayarla",
+    "legendTitle": "Grafik neyi gösterir"
   },
   "endOfDay": {
     "title": "Bugünün namazları kaydedilsin mi?",

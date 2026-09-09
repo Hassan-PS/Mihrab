@@ -27,6 +27,7 @@ import { runSyncNow, syncIsReady } from '../../sync/runSync';
 import { RADIUS, SPACING } from '../../theme/tokens';
 import { TYPE, typeStyle } from '../../theme/typography';
 import { useSyncDialog } from '../sync/useSyncDialog';
+import { HeatmapLegend } from '../../practice/PracticeHeatmap';
 
 export function LogOptionsSheet({
   visible,
@@ -161,6 +162,13 @@ export function LogOptionsSheet({
               />
             )}
           </Group>
+          {/* What the graph's squares mean — it lived under the graph. */}
+          <View style={styles.legend}>
+            <Text style={[typeStyle('footnote'), styles.legendTitle, { color: palette.muted }]}>
+              {t('log.legendTitle', 'What the graph shows')}
+            </Text>
+            <HeatmapLegend />
+          </View>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('common.close', 'Close')}
@@ -199,6 +207,8 @@ export function LogOptionsButton({ onPress }: { onPress: () => void }) {
 
 const styles = StyleSheet.create({
   sheet: { gap: SPACING.md },
+  legend: { gap: SPACING.sm, paddingHorizontal: SPACING.xs },
+  legendTitle: { fontWeight: '600' },
   close: {
     alignSelf: 'stretch',
     alignItems: 'center',

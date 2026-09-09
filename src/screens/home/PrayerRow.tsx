@@ -136,6 +136,13 @@ type PrayerRowProps = {
    * that was not there.
    */
   hasCheckColumn?: boolean;
+  /**
+   * Tighter vertical padding — for a short phone, or a table with the
+   * extra times and the Mālikī boundaries all on, where nine rows at the
+   * full height would push the page into a scroll the design exists to
+   * avoid. Same type, same columns; only the air between rows goes.
+   */
+  dense?: boolean;
 };
 
 function PrayerRowImpl({
@@ -157,6 +164,7 @@ function PrayerRowImpl({
   log,
   onToggleLog,
   hasCheckColumn = false,
+  dense = false,
 }: PrayerRowProps) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
@@ -184,6 +192,7 @@ function PrayerRowImpl({
       {...interactive}
       style={[
         styles.row,
+        dense && styles.rowDense,
         isNext && { backgroundColor: palette.accentBg },
       ]}>
       {isNext && (
@@ -345,6 +354,7 @@ const styles = StyleSheet.create({
     paddingStart: SPACING.xl,
     position: 'relative',
   },
+  rowDense: { paddingVertical: SPACING.sm },
   divider: {
     position: 'absolute',
     bottom: 0,

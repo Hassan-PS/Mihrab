@@ -1534,7 +1534,8 @@
     "resetPreserved": "Fasten, Sunna-Gebete und Dhikr bleiben unberührt. Das lässt sich nicht rückgängig machen.",
     "resetRangeAll": "das ganze Protokoll",
     "options": "Optionen",
-    "setUpSync": "Synchronisierung einrichten"
+    "setUpSync": "Synchronisierung einrichten",
+    "legendTitle": "Was die Grafik zeigt"
   },
   "endOfDay": {
     "title": "Heutige Gebete eintragen?",

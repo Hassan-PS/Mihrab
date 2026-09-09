@@ -491,7 +491,6 @@ function PracticeHeatmapImpl({
   const gold = sunnahMark(palette);
   const accent = palette.accentSolid;
 
-  const legend = useMemo(() => [0, 1, 3, 5], []);
 
   /**
    * What a square is filled with.
@@ -1078,8 +1077,44 @@ function PracticeHeatmapImpl({
         </ScrollView>
       </View>
 
-      {compact ? null : (
-        <>
+      {compact ? null : <HeatmapLegend />}
+
+      {caption && !compact ? (
+        <Text
+          style={[styles.caption, { color: palette.muted }]}
+          // Two, not one. The caption gained the personal best beside the
+          // streak, and four figures no longer fit one line on a 320pt phone
+          // — least of all in a language that spells its numbers out. It
+          // wraps rather than being clipped mid-word.
+          numberOfLines={2}
+          maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}
+        >
+          {caption}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+
+/**
+ * What the squares mean — the ramp of five, and the five marks.
+ *
+ * Its own component so a page can put it where it has room: the Log
+ * keeps the graph on the page and the key behind its ⋯, because two
+ * lines of legend under a graph the reader sees every day were two
+ * lines the day's card no longer had.
+ */
+export function HeatmapLegend() {
+  const { t } = useTranslation();
+  const { palette } = useAppPalette();
+  const ring = palette.textSolid;
+  const gold = sunnahMark(palette);
+  const accent = palette.accentSolid;
+  const legend = [0, 1, 3, 5];
+  return (
+    <View style={styles.legendWrap}>
+
           <View style={styles.legendRow}>
             <Text
               style={[styles.legendText, { color: palette.muted }]}
@@ -1202,23 +1237,7 @@ function PracticeHeatmapImpl({
               {t('sunnah.qiyamLegend', 'night prayer')}
             </Text>
           </View>
-        </>
-      )}
-
-      {caption && !compact ? (
-        <Text
-          style={[styles.caption, { color: palette.muted }]}
-          // Two, not one. The caption gained the personal best beside the
-          // streak, and four figures no longer fit one line on a 320pt phone
-          // — least of all in a language that spells its numbers out. It
-          // wraps rather than being clipped mid-word.
-          numberOfLines={2}
-          maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}
-        >
-          {caption}
-        </Text>
-      ) : null}
-    </View>
+            </View>
   );
 }
 
@@ -1270,6 +1289,7 @@ const styles = StyleSheet.create({
   // depend on whether the square carries a border, which a static stylesheet
   // cannot express.
   squareSelected: { transform: [{ scale: 1.4 }], zIndex: 2 },
+  legendWrap: { gap: SPACING.sm },
   legendRow: {
     flexDirection: 'row',
     alignItems: 'center',

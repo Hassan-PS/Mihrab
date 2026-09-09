@@ -1071,7 +1071,10 @@ export function HomeScreen() {
       <CenteredColumn
         maxWidth={isDashboard ? dashCap : undefined}
         style={[styles.homeColumn, !isDashboard && !isMacCatalyst && styles.fillColumn]}
-        innerStyle={styles.homeColumn}>
+        // Both wrappers: on a wide-but-not-dashboard window (a tablet held
+        // upright) the column is capped and gets an inner View, and the
+        // hero can only grow to the page's foot if that one grows too.
+        innerStyle={[styles.homeColumn, !isDashboard && !isMacCatalyst && styles.fillColumn]}>
       <PermissionBanners
         usingLocalFallback={state.usingLocalFallback ?? false}
         exactAlarmDenied={exactAlarmDenied}

@@ -1534,7 +1534,8 @@
     "resetPreserved": "Les jeûnes, les prières sunna et le dhikr ne sont pas touchés. Cette action est irréversible.",
     "resetRangeAll": "tout le journal",
     "options": "Options",
-    "setUpSync": "Configurer la synchronisation"
+    "setUpSync": "Configurer la synchronisation",
+    "legendTitle": "Ce que montre le graphique"
   },
   "endOfDay": {
     "title": "Consigner les prières du jour ?",
