@@ -293,7 +293,16 @@ export const HeroSky = memo(HeroSkyImpl);
 
 
 const styles = StyleSheet.create({
-  fill: { ...StyleSheet.absoluteFillObject },
+  fill: {
+    ...StyleSheet.absoluteFillObject,
+    // THE SKY DOES NOT MIRROR. The app lays itself out right-to-left for
+    // Arabic with a Yoga `direction` on its root, and the moon is placed
+    // with `start`, which that flips — while the sun is an SVG `cx`, which
+    // nothing flips. So in Arabic the moon crossed the night right to left
+    // and the sun crossed the day left to right. The sun rises where it
+    // rises; this subtree reads left to right whatever the app does.
+    direction: 'ltr',
+  },
   moon: {
     position: 'absolute',
     width: MOON,

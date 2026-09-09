@@ -573,3 +573,21 @@ describe('the sun crosses the sky once', () => {
     }
   });
 });
+
+/**
+ * THE SKY DOES NOT MIRROR. The app lays itself out right-to-left for
+ * Arabic with a Yoga `direction` on its root; the moon is placed with
+ * `start`, which that flips, and the sun is an SVG `cx`, which nothing
+ * flips — so in Arabic the two crossed the card in opposite directions.
+ * Checked on an emulator set to ar-SA: with the subtree pinned to
+ * left-to-right, the 09:30 sun and the 23:00 moon both sit on the left.
+ */
+describe('the sky reads left to right whatever the app does', () => {
+  it('pins its own subtree to ltr', () => {
+    const sky = read('src/screens/home/HeroSky.tsx');
+    expect(sky).toMatch(/fill: \{[^}]*direction: 'ltr'/s);
+    // The moon still uses a logical edge — and that is fine precisely
+    // because the subtree's direction is fixed.
+    expect(sky).toMatch(/start: `\$\{body\.x \* 100\}%`/);
+  });
+});
