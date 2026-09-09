@@ -818,20 +818,29 @@ export function daruriWindowEnd(
  * and the one thing a reader wants at that point, HOW LONG THE SECOND
  * WINDOW RUNS, was nowhere on the card. So:
  *
- *   'first'  — the preferred window is open; `at` is when it closes.
- *   'second' — it has closed and the prayer is unlogged; `at` is when the
- *              second window closes (the next prayer, in the book's own
- *              terms — see DARURI_END_OF), so what is left can be seen.
- *   null     — nothing to say: no boundary for this day, the second
- *              window has closed too, or the prayer is already logged.
- *              A logged prayer has answered the question the line asks.
+ *   'second' — the preferred window has closed and the prayer is
+ *              unlogged; `at` is when the second window closes (the next
+ *              prayer, in the book's own terms — see DARURI_END_OF), so
+ *              what is left can be seen.
+ *   'first'  — at every other moment: while the preferred window is open,
+ *              and again once the prayer is logged or the second window
+ *              has closed too. `at` is the first boundary, stated as a
+ *              fact of the day, as the other days' cards state it.
+ *   null     — no boundary for this day.
+ *
+ * THE LINE NEVER GOES AWAY, and this is deliberate. A first draft dropped
+ * it for a logged prayer — "it has answered the question the line asks" —
+ * and the rows shrank one by one as the day was logged, leaving a void
+ * under the table by evening (the pager holds every day at one height,
+ * and the other days keep all their lines). A row is the same height at
+ * 05:00 as at 23:00; only its words change.
  *
  * `week[0]` is the day the card shows and `baseDay` its date; Maghrib's
  * and Ishāʾ's second windows end on `week[1]`, and when that day is not
- * loaded the answer is null rather than a guess. `approx` is carried
- * for the first window only — the modelled boundaries are the isfār and
- * iṣfirār angles; the second window's end is always one of the card's
- * own rows.
+ * loaded the line falls back to the first boundary rather than to a
+ * guess. `approx` is carried for the first window only — the modelled
+ * boundaries are the isfār and iṣfirār angles; the second window's end
+ * is always one of the card's own rows.
  */
 export function daruriRowState(
   week: TimingsMap[],
@@ -843,6 +852,7 @@ export function daruriRowState(
   const firstEnd = week[0]?.[key];
   if (!firstEnd) return null;
   const approx = DARURI_CONFIDENCE[key] === 'modelled';
+  const first = { phase: 'first' as const, at: firstEnd, approx };
   let firstEndAt: Date;
   try {
     const dayStart = startOfLocalDay(baseDay);
@@ -855,17 +865,15 @@ export function daruriRowState(
       }
     }
   } catch {
-    return null;
+    return first;
   }
-  if (now.getTime() < firstEndAt.getTime()) {
-    return { phase: 'first', at: firstEnd, approx };
-  }
-  if (logged) return null;
+  if (now.getTime() < firstEndAt.getTime()) return first;
+  if (logged) return first;
   const end = daruriWindowEnd(week, baseDay, 0, key);
-  if (!end || now.getTime() >= end.getTime()) return null;
+  if (!end || now.getTime() >= end.getTime()) return first;
   const { row, tomorrow } = DARURI_END_OF[key];
   const at = week[tomorrow ? 1 : 0]?.[row];
-  return at ? { phase: 'second', at, approx: false } : null;
+  return at ? { phase: 'second', at, approx: false } : first;
 }
 
 /**

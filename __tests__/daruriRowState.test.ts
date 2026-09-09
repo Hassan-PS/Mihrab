@@ -50,12 +50,19 @@ describe('Maghrib, unlogged', () => {
     );
   });
 
-  it('says nothing once the second window has closed too', () => {
-    expect(daruriRowState(week, day, 'MaghribDaruri', nextDay(5, 40), false)).toBeNull();
+  it('goes back to stating the first boundary once the second window has closed too', () => {
+    // Never null: the row keeps its line, and its height, all day.
+    expect(daruriRowState(week, day, 'MaghribDaruri', nextDay(5, 40), false)).toEqual({
+      phase: 'first',
+      at: '21:06',
+      approx: false,
+    });
   });
 
   it('will not guess the end when tomorrow is not loaded', () => {
-    expect(daruriRowState([today], day, 'MaghribDaruri', at(21, 6), false)).toBeNull();
+    expect(daruriRowState([today], day, 'MaghribDaruri', at(21, 6), false)?.phase).toBe(
+      'first',
+    );
     // ...but still says where the first window closes.
     expect(daruriRowState([today], day, 'MaghribDaruri', at(20, 0), false)?.phase).toBe(
       'first',
@@ -64,9 +71,16 @@ describe('Maghrib, unlogged', () => {
 });
 
 describe('a logged prayer', () => {
-  it('keeps the first line — it is information — and drops the second', () => {
+  it('states the first boundary all day — never the second, never nothing', () => {
+    // The void under the table by evening came from rows that dropped
+    // their line as they were logged; the line stays, the words are the
+    // first boundary as a fact of the day.
     expect(daruriRowState(week, day, 'MaghribDaruri', at(20, 0), true)?.phase).toBe('first');
-    expect(daruriRowState(week, day, 'MaghribDaruri', at(22, 0), true)).toBeNull();
+    expect(daruriRowState(week, day, 'MaghribDaruri', at(22, 0), true)).toEqual({
+      phase: 'first',
+      at: '21:06',
+      approx: false,
+    });
   });
 });
 
@@ -82,13 +96,17 @@ describe('the other four', () => {
       at: '07:05',
       approx: false,
     });
-    expect(daruriRowState(week, day, 'FajrDaruri', at(7, 5), false)).toBeNull();
+    expect(daruriRowState(week, day, 'FajrDaruri', at(7, 5), false)).toEqual({
+      phase: 'first',
+      at: '06:20',
+      approx: true,
+    });
   });
 
   it('Ẓuhr and ʿAṣr both end at Maghrib', () => {
     expect(daruriRowState(week, day, 'DhuhrDaruri', at(17, 30), false)?.at).toBe('19:51');
     expect(daruriRowState(week, day, 'AsrDaruri', at(19, 0), false)?.at).toBe('19:51');
-    expect(daruriRowState(week, day, 'AsrDaruri', at(19, 51), false)).toBeNull();
+    expect(daruriRowState(week, day, 'AsrDaruri', at(19, 51), false)?.phase).toBe('first');
   });
 
   it('Ishāʾ: a boundary past midnight is tomorrow’s, and the window ends at tomorrow’s Fajr', () => {
@@ -101,7 +119,9 @@ describe('the other four', () => {
       approx: false,
     });
     // ...and never guessed past the loaded week.
-    expect(daruriRowState([today], day, 'IshaDaruri', nextDay(0, 50), false)).toBeNull();
+    expect(daruriRowState([today], day, 'IshaDaruri', nextDay(0, 50), false)?.phase).toBe(
+      'first',
+    );
   });
 
   it('is null where the sky produced no boundary', () => {
