@@ -206,15 +206,24 @@ describe('the readers', () => {
     expect(core).toContain('commitPageTurn(clamped, clamped)');
   });
 
-  it('land on the ayah asked for before they record anything — translation', () => {
+  it('land on the ayah asked for, and record only what the reader scrolls to — translation', () => {
     const t = src('src/screens/quran/TranslationSurahScreen.tsx');
     // The landing is driven once the rows exist, and asked for again each
-    // time the list has not measured that far (#41).
+    // time the list has not measured that far (#41)…
     expect(t).toContain('landingIndex.current = scrollToAyah - 1;');
     expect(t).toMatch(/onScrollToIndexFailed=\{info => \{[\s\S]*?highestMeasuredFrameIndex[\s\S]*?setTimeout\(tryLand/);
-    // Nothing is written until the reader has arrived.
+    // …but only the LANDING is asked again — a failed scroll to the recited
+    // ayah must never be answered by scrolling back to the landing.
+    expect(t).toMatch(/onScrollToIndexFailed=\{info => \{[\s\S]*?if \(landed\.current \|\| landingIndex\.current == null\) return;[\s\S]*?setTimeout\(tryLand/);
+    // And it is re-asserted while the rows settle under the translations.
+    expect(t).toContain('onContentSizeChange={onContentSizeChange}');
+    // Nothing is written until the READER scrolls: the mount, the landing
+    // and the settling all move rows into view, and none of them is reading.
     expect(t).toMatch(/if \(!landed\.current\) \{[\s\S]*?landed\.current = true;[\s\S]*?return;/);
-    expect(t).toContain('recordReading({');
+    expect(t).toMatch(/if \(!readerScrolled\.current\) return;[\s\S]*?recordReading\(\{/);
+    expect(t).toContain('onScrollBeginDrag={takeOver}');
+    // A wheel on a Mac begins no drag: any scroll after the settle window is the reader's.
+    expect(t).toMatch(/const onScroll = useCallback\(\(\) => \{[\s\S]*?Date\.now\(\) > landingUntil\.current\) takeOver\(\);/);
     expect(t).not.toContain('setLastRead(');
     expect(t).not.toContain('initialScrollIndex=');
   });

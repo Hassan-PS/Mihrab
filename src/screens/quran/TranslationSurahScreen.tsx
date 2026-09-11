@@ -309,15 +309,22 @@ export function TranslationSurahScreen({
   // any scroll had happened and wrote it over the place being returned to.
   //
   // So the landing is driven from here once the rows exist, asked for
-  // again each time the list says it has not measured that far, and the
-  // marker is not written until the reader has actually arrived — or the
-  // list has been asked as often as is reasonable and left where it got to.
+  // again each time the list says it has not measured that far, and
+  // re-asserted for a moment as the rows settle — and the marker is not
+  // written until the READER scrolls. Not "until the ayah is on screen":
+  // a bookmark or a search result lands here too, and a landing is a
+  // jump, which moves nothing (see `recordReading`). Reading does.
   const listRef = useRef<FlatList<AyahRow>>(null);
   const landingIndex = useRef<number | null>(null);
   const landingTries = useRef(0);
-  const landed = useRef(!scrollToAyah);
-  // The reader has taken the list: from here on the landing is theirs to
-  // move, and nothing below re-asserts it.
+  /** The ayah asked for has been seen, or the list has been asked enough. */
+  const landed = useRef(true);
+  /**
+   * The reader has taken the list. Set by a drag, or by any scroll once
+   * the landing's settle window has closed — a wheel on a Mac begins no
+   * drag. From here on nothing re-asserts the landing, and the rows the
+   * reader passes are theirs to be recorded.
+   */
   const readerScrolled = useRef(false);
   /**
    * How long the landing keeps re-asserting itself as the rows settle.
@@ -326,11 +333,12 @@ export function TranslationSurahScreen({
    * landing taller — each one, as it is measured — which pushes the ayah
    * down the screen after it has been put at the top. So for a moment
    * after the landing begins, every change in the list's content size is
-   * answered by landing again; after that, or the moment the reader
-   * scrolls, the page is theirs.
+   * answered by landing again. Without a target the window is only the
+   * first layout, so the mount itself never counts as the reader reading.
    */
   const landingUntil = useRef(0);
-  const LANDING_SETTLE_MS = 2500;
+  const LANDING_SETTLE_MS = 4000;
+  const MOUNT_SETTLE_MS = 600;
   const tryLand = useCallback(() => {
     const index = landingIndex.current;
     if (index == null || readerScrolled.current) return;
@@ -343,6 +351,7 @@ export function TranslationSurahScreen({
     if (!scrollToAyah || scrollToAyah <= 1 || scrollToAyah > rows.length) {
       landingIndex.current = null;
       landed.current = true;
+      landingUntil.current = Date.now() + MOUNT_SETTLE_MS;
       return undefined;
     }
     landed.current = false;
@@ -365,6 +374,16 @@ export function TranslationSurahScreen({
     },
     [],
   );
+  const takeOver = useCallback(() => {
+    readerScrolled.current = true;
+    // Whatever the landing had left to do, the reader has taken over.
+    landed.current = true;
+    landingIndex.current = null;
+  }, []);
+  const onScroll = useCallback(() => {
+    if (readerScrolled.current) return;
+    if (Date.now() > landingUntil.current) takeOver();
+  }, [takeOver]);
 
   // ── Last-read for translation mode (QR-10) ──────────────────────────
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 60 });
@@ -385,6 +404,9 @@ export function TranslationSurahScreen({
         }
         return;
       }
+      // Rows becoming visible without the reader's hand on the list — the
+      // mount, the landing, the rows settling — are not reading.
+      if (!readerScrolled.current) return;
       const row = first.item as AyahRow;
       if (typeof row?.ayah !== 'number') return;
       recordReading({
@@ -655,11 +677,14 @@ export function TranslationSurahScreen({
           // far as it has, let it mount the next window, and ask again —
           // each round reaches further. A dozen rounds covers Al-Baqarah;
           // after that the reader is left where the list got to, and the
-          // marker is theirs to move again.
+          // marker is theirs to move again. Only the LANDING is asked
+          // again: a failed scroll to the recited ayah, later, must not
+          // be answered by scrolling back to where the reader came in.
           const reach = Math.min(info.index, info.highestMeasuredFrameIndex);
           listRef.current?.scrollToIndex({ index: reach, animated: false });
+          if (landed.current || landingIndex.current == null) return;
           landingTries.current += 1;
-          if (landingTries.current < 14 && landingIndex.current != null) {
+          if (landingTries.current < 14) {
             setTimeout(tryLand, 50);
           } else {
             landed.current = true;
@@ -668,11 +693,9 @@ export function TranslationSurahScreen({
         viewabilityConfig={viewabilityConfig.current}
         onViewableItemsChanged={onViewableItemsChanged.current}
         onContentSizeChange={onContentSizeChange}
-        onScrollBeginDrag={() => {
-          readerScrolled.current = true;
-          // Whatever the landing had left to do, the reader has taken over.
-          landed.current = true;
-        }}
+        onScrollBeginDrag={takeOver}
+        onScroll={onScroll}
+        scrollEventThrottle={200}
       />
       <MiniPlayer />
 
