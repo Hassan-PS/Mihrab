@@ -114,8 +114,29 @@ fi
 
 ARCHIVE=ios/build/appstore/Mihrab-$VERSION.xcarchive
 EXPORT=ios/build/appstore/export-$VERSION
-rm -rf "$ARCHIVE" "$EXPORT"
 mkdir -p ios/build/appstore
+rm -rf "$EXPORT"
+[ "${SKIP_ARCHIVE:-}" = "1" ] || rm -rf "$ARCHIVE"
+
+# Xcode signs in with an Apple ID; xcodebuild on its own does not have one.
+# Without this, `-allowProvisioningUpdates` has no credentials to create
+# App Store profiles with and the export dies on
+#
+#     error: exportArchive No Accounts
+#     error: exportArchive No profiles for 'com.hassan.prayerapp' were found
+#
+# which reads as a project misconfiguration and is an authentication
+# problem. The same API key that uploads the build can also mint the
+# profiles, so hand it to both xcodebuild invocations. (Seen 2026-09-11 on
+# the first local archive this account ever made: the ARCHIVE succeeds
+# without credentials, because automatic signing falls back to the
+# development certificate already in the keychain, and only the export
+# needs distribution profiles that do not exist yet.)
+AUTH=(
+  -authenticationKeyPath "$KEY_PATH"
+  -authenticationKeyID "$KEY_ID"
+  -authenticationKeyIssuerID "$ISSUER"
+)
 
 # ── Pods, in plain iOS shape ──────────────────────────────────────────
 # build-catalyst.sh regenerates the Pods project with MIHRAB_CATALYST=1,
@@ -134,16 +155,21 @@ fi
 # distribution certificate to create them against, so this is the first
 # run that can: expect it to register profiles the first time and be
 # silent afterwards.
-say "Archiving for generic/platform=iOS (Release)…"
-xcodebuild archive \
-  -workspace "$WORKSPACE" \
-  -scheme "$SCHEME" \
-  -configuration Release \
-  -destination 'generic/platform=iOS' \
-  -archivePath "$ARCHIVE" \
-  -allowProvisioningUpdates \
-  DEVELOPMENT_TEAM="$TEAM" \
-  -quiet
+if [ "${SKIP_ARCHIVE:-}" = "1" ] && [ -d "$ARCHIVE" ]; then
+  say "SKIP_ARCHIVE=1 — reusing $ARCHIVE"
+else
+  say "Archiving for generic/platform=iOS (Release)…"
+  xcodebuild archive \
+    -workspace "$WORKSPACE" \
+    -scheme "$SCHEME" \
+    -configuration Release \
+    -destination 'generic/platform=iOS' \
+    -archivePath "$ARCHIVE" \
+    -allowProvisioningUpdates \
+    "${AUTH[@]}" \
+    DEVELOPMENT_TEAM="$TEAM" \
+    -quiet
+fi
 
 [ -d "$ARCHIVE" ] || die "No archive at $ARCHIVE — xcodebuild reported success and produced nothing."
 
@@ -163,9 +189,23 @@ xcodebuild archive \
 APP_BUNDLE=$(find "$ARCHIVE/Products/Applications" -maxdepth 1 -name '*.app' | head -1)
 [ -n "$APP_BUNDLE" ] || die "No .app inside the archive."
 
-claims() {  # claims <bundle> <entitlement key> -> prints the values, or nothing
+# claims <bundle> <entitlement key> -> prints the value as JSON, or nothing.
+#
+# NOT `plutil -extract`: it reads its argument as a KEY PATH and splits it
+# on dots, so `com.apple.security.application-groups` is looked up as
+# com → apple → security → … and comes back empty. Every entitlement key
+# Apple defines is dotted, so a gate built on -extract reports "claims
+# nothing" for everything — including a widget that is carrying its App
+# Group perfectly well. Caught on the first real run, 2026-09-11: the
+# check failed the build and the bundle was correct.
+claims() {
   codesign -d --entitlements :- "$1" 2>/dev/null |
-    plutil -extract "$2" raw -o - - 2>/dev/null || true
+    plutil -convert json -o - - 2>/dev/null |
+    python3 -c 'import json,sys
+try: d = json.load(sys.stdin)
+except Exception: sys.exit(0)
+v = d.get(sys.argv[1])
+print("" if v in (None, [], False, "") else json.dumps(v))' "$2" 2>/dev/null || true
 }
 
 fail=0
@@ -233,6 +273,7 @@ xcodebuild -exportArchive \
   -exportPath "$EXPORT" \
   -exportOptionsPlist ios/build/appstore/ExportOptions.plist \
   -allowProvisioningUpdates \
+  "${AUTH[@]}" \
   -quiet || die "Export failed.
 
   The one-line summary above is rarely the real message. The export
