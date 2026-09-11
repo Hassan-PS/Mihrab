@@ -38,10 +38,11 @@ import { DEFAULT_RIWAYAH, resolveRiwayah, type RiwayahId } from './riwayat';
 import {
   KHATMAH_COLOR,
   activeKhatmah,
+  drawnReadingPosition,
   khatmahCurrentPortion,
   khatmahMarkerAyah,
   recordKhatmahPageTurn,
-  setLastRead,
+  recordReading,
   setQuranPrefs,
   useQuranState,
   useQuranHydrated,
@@ -177,6 +178,8 @@ export function useOverlayDismissGuard(
  */
 export type AyahMarkProps = {
   bookmarks: readonly QuranBookmark[];
+  /** The reading marker, when it is one the reader pinned (#41). */
+  readingPosition: { surah: number; ayah: number } | null;
   khatmahPosition: { surah: number; ayah: number } | null;
   khatmahTarget: { surah: number; ayah: number } | null;
 };
@@ -351,13 +354,28 @@ export function useMushafReaderCore({
   // ── Last-read + khatmah on page turns (QR-10/21) ────────────────────
   const commitPageTurn = useCallback(
     (newPage: number, prevPage: number) => {
-      const first = pageStartAyah(newPage, riwayah);
-      setLastRead({
-        surah: first.surah,
-        ayah: first.ayah,
-        page: newPage,
-        mode: 'mushaf',
-      });
+      /**
+       * A TURN IS READING; A JUMP IS NOT — issue #41.
+       *
+       * The marker used to follow every arrival, so a reader who went to
+       * look something up — the rail, jump-to-page, a bookmark, a search
+       * result — lost their place to the page they had only glanced at.
+       * Now it follows the page turned TO from the page beside it (one on
+       * a phone, two on a spread), which is what reading looks like, and
+       * nothing else: land anywhere and the marker waits until the next
+       * page is turned. The khatmah's own bookkeeping has always drawn
+       * the same line — see `recordKhatmahPageTurn` — and the two agree.
+       * `recordReading` then decides whether the turn is the khatmah's or
+       * the reader's own.
+       */
+      const step = Math.abs(newPage - prevPage);
+      if (step >= 1 && step <= 2) {
+        const first = pageStartAyah(newPage, riwayah);
+        recordReading(
+          { surah: first.surah, ayah: first.ayah, page: newPage, mode: 'mushaf' },
+          riwayah,
+        );
+      }
       // Sequential forward turn = the page(s) left behind are completed —
       // but only when they are the khatmah's own pages. Reading a juz or a
       // bookmark ahead of the plan is reading, not khatmah progress; see
@@ -521,15 +539,24 @@ export function useMushafReaderCore({
   // that should have touched nothing re-drew all of them. The plan is the
   // same reference until progress is actually recorded.
   const plan = activeKhatmah(quran);
+  // Only a PINNED marker is drawn (`drawnReadingPosition`), and a pin is
+  // rare and deliberate — so this key changes when the reader pins or
+  // reads on from a pin, never on the page turns that key the concern
+  // above.
+  const reading = drawnReadingPosition(quran);
+  const readingKey = reading ? `${reading.surah}:${reading.ayah}` : '';
   const marks = useMemo<AyahMarkProps>(
     () => ({
       bookmarks: quran.bookmarks,
+      readingPosition: readingKey
+        ? { surah: Number(readingKey.split(':')[0]), ayah: Number(readingKey.split(':')[1]) }
+        : null,
       khatmahPosition: plan?.position ?? null,
       // The finish line for the portion in hand. Null with no plan, and
       // null once the book is read — there is nothing left to aim at.
       khatmahTarget: plan ? khatmahMarkerAyah(plan) : null,
     }),
-    [quran.bookmarks, plan],
+    [quran.bookmarks, plan, readingKey],
   );
 
   const finish = useMemo<KhatmahFinish | null>(() => {

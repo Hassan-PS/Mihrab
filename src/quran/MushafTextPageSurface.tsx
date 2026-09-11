@@ -35,7 +35,7 @@ import {
 import { DEFAULT_RIWAYAH, riwayahById, type RiwayahId } from './riwayat';
 import { toneIsDark, type MushafTone } from './mushafTone';
 import { useMushafPageFont } from './useMushafPageFont';
-import { ayahTint, withAlpha, type AyahRefLike } from './ayahMarks';
+import { ayahEndInk, ayahTint, withAlpha, type AyahRefLike } from './ayahMarks';
 import type { QuranBookmark } from './quranState';
 
 export type MushafPageColors = {
@@ -69,6 +69,8 @@ export type MushafTextPageSurfaceProps = {
    * already owns, which is the same reason it owns the palette at all.
    */
   bookmarks?: readonly QuranBookmark[];
+  /** The reading marker — where "Continue reading" leads (#41). */
+  readingPosition?: AyahRefLike | null;
   khatmahPosition?: AyahRefLike | null;
   /** The ayah the khatmah portion in hand ends on. */
   khatmahTarget?: AyahRefLike | null;
@@ -267,6 +269,7 @@ function GlyphPageSurface({
   selected,
   playing,
   bookmarks,
+  readingPosition,
   khatmahPosition,
   khatmahTarget,
   onUnavailable,
@@ -305,6 +308,7 @@ function GlyphPageSurface({
         selected,
         playing,
         bookmarks,
+        readingPosition,
         khatmahPosition,
         khatmahTarget,
         accentColor,
@@ -314,12 +318,17 @@ function GlyphPageSurface({
       selected,
       playing,
       bookmarks,
+      readingPosition,
       khatmahPosition,
       khatmahTarget,
       accentColor,
       nightMode,
     ],
   );
+  // The reading marker's second voice — the ayah's medallion in its ink —
+  // so it is seen even where its wash has yielded to a bookmark or the
+  // khatmah (#41).
+  const endInk = useMemo(() => ayahEndInk(readingPosition), [readingPosition]);
 
   const lineCount = layout?.lines.length ?? 15;
   const framed = isFramedPage(page);
@@ -356,6 +365,7 @@ function GlyphPageSurface({
       selected={selected}
       playing={playing}
       tint={tint}
+      endInk={endInk}
       onWordPress={handleWordPress}
       onWordLongPress={handleWordLongPress}
     />
@@ -410,6 +420,7 @@ function UnicodePageSurface({
   selected,
   playing,
   bookmarks,
+  readingPosition,
   khatmahPosition,
   khatmahTarget,
   onWordPress,
@@ -435,6 +446,7 @@ function UnicodePageSurface({
         selected,
         playing,
         bookmarks,
+        readingPosition,
         khatmahPosition,
         khatmahTarget,
         accentColor,
@@ -444,12 +456,17 @@ function UnicodePageSurface({
       selected,
       playing,
       bookmarks,
+      readingPosition,
       khatmahPosition,
       khatmahTarget,
       accentColor,
       nightMode,
     ],
   );
+  // The reading marker's second voice — the ayah's medallion in its ink —
+  // so it is seen even where its wash has yielded to a bookmark or the
+  // khatmah (#41).
+  const endInk = useMemo(() => ayahEndInk(readingPosition), [readingPosition]);
 
   const framed = isFramedPage(page);
   const inset = pageInset(page, width);
@@ -468,6 +485,7 @@ function UnicodePageSurface({
       selected={selected}
       playing={playing}
       tint={tint}
+      endInk={endInk}
       onAyahPress={handlePress}
       onAyahLongPress={handleLongPress}
     />

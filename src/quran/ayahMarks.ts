@@ -19,7 +19,12 @@
  * a band over them. Night mode gets more because a translucent colour on
  * a near-black ground is much weaker than the same colour on cream.
  */
-import { BOOKMARK_COLORS, KHATMAH_COLOR, type QuranBookmark } from './quranState';
+import {
+  BOOKMARK_COLORS,
+  KHATMAH_COLOR,
+  READING_COLOR,
+  type QuranBookmark,
+} from './quranState';
 
 export type AyahRefLike = { surah: number; ayah: number };
 
@@ -29,12 +34,35 @@ export type AyahTint = (surah: number, ayah: number) => string | null;
 export const NO_AYAH_TINT: AyahTint = () => null;
 
 /**
+ * The ink of an ayah's end-medallion, or null for the page's own — the
+ * SECOND channel a mark can use, and the reading marker's (#41).
+ *
+ * A wash is one colour per ayah, and the strongest claim wins, so a mark
+ * that must survive sharing an ayah with a bookmark or the khatmah needs
+ * a channel the wash does not use. The medallion is foreground ink over
+ * whatever the ayah is washed in, so both are seen at once: the khatmah's
+ * cyan under the words, the reading marker's terracotta on the number.
+ */
+export type AyahEndInk = (surah: number, ayah: number) => string | null;
+
+export const NO_AYAH_END_INK: AyahEndInk = () => null;
+
+/** The medallion ink for a reading marker, or none. Built once per page. */
+export function ayahEndInk(reading: AyahRefLike | null | undefined): AyahEndInk {
+  if (!reading) return NO_AYAH_END_INK;
+  const { surah, ayah } = reading;
+  return (s, a) => (s === surah && a === ayah ? READING_COLOR : null);
+}
+
+/**
  * Opacity per kind, light and night. Ordered by how loudly each should
  * speak: a bookmark is a note the reader left, the khatmah marks are the
  * plan speaking, and the selection and the reciter are happening NOW.
  */
 const ALPHA = {
   bookmark: [0.16, 0.28],
+  /** Where the reader left off — theirs, so louder than a note, quieter than the plan. */
+  reading: [0.17, 0.29],
   khatmah: [0.18, 0.3],
   /** The ayah today's portion ends on — the loudest of the standing marks. */
   target: [0.22, 0.34],
@@ -68,6 +96,8 @@ export type AyahMarkSources = {
   playing?: AyahRefLike | null;
   /** Every bookmark the reader has; only the ones on the page can match. */
   bookmarks?: readonly QuranBookmark[];
+  /** The reading marker — where "Continue reading" leads (#41). */
+  readingPosition?: AyahRefLike | null;
   /** The khatmah's pinned "I am here", when the plan has one. */
   khatmahPosition?: AyahRefLike | null;
   /** The ayah the portion in hand ends on — where today's reading stops. */
@@ -94,6 +124,7 @@ export function ayahTint({
   selected,
   playing,
   bookmarks,
+  readingPosition,
   khatmahPosition,
   khatmahTarget,
   accentColor,
@@ -110,6 +141,11 @@ export function ayahTint({
     marks.set(key(ref.surah, ref.ayah), withAlpha(color, alpha[night]));
   };
 
+  // Weakest of all as a wash, because it has a second voice: on an ayah
+  // that also carries a bookmark or a khatmah mark this colour yields to
+  // theirs — a bookmark IS its colour, and would be lost under another —
+  // and the reading marker keeps the medallion instead (`ayahEndInk`).
+  put(readingPosition, READING_COLOR, ALPHA.reading);
   for (const b of bookmarks ?? []) {
     put(b, BOOKMARK_COLORS[b.color] ?? accentColor, ALPHA.bookmark);
   }

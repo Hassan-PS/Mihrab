@@ -48,7 +48,6 @@ import {
   finishKhatmahPortion,
   hydrateQuranState,
   khatmahAyahsRead,
-  khatmahCurrentPage,
   khatmahCurrentPortion,
   khatmahDay,
   khatmahDaysLeft,
@@ -65,6 +64,8 @@ import {
   KHATMAH_TOTAL_AYAHS,
 } from '../quran/quranState';
 import { loadTafsir, resolveTafsirEdition } from '../quran/tafsir';
+import { selectQuranCardState } from '../quran/quranCardState';
+import { ResumeDoors } from '../quran/ResumeDoors';
 import {
   CompanionTextSheet,
   useCompanionChoice,
@@ -329,6 +330,8 @@ export function QuranScreen() {
   const pct = (part: number, whole: number) =>
     whole > 0 ? Math.max(0, Math.min(100, (part / whole) * 100)) : 0;
   const plan = activeKhatmah(quran);
+  // The two doors, from the selector Home's card uses (#41).
+  const doors = selectQuranCardState(quran);
   // The day's portion, how much of it is read, and anything read past it.
   const day = plan ? khatmahDay(plan) : null;
   // And the same thing in pages, of the muṣḥaf this reader is in — see
@@ -403,37 +406,28 @@ export function QuranScreen() {
     <View
       style={[styles.headerWrap, listCap]}
       onLayout={e => setHeaderH(e.nativeEvent.layout.height)}>
-      {/* Continue reading (QR-10). Alone only when there is no khatmah —
-          with one, it is a row inside the khatmah card, so the screen never
-          shows two "Continue"s with two different page numbers side by side
-          (redesign-plan B.3.2). */}
-      {quran.lastRead && !plan ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('quran.continueReading', 'Continue reading')}
-          onPress={() => {
-            const lr = quran.lastRead;
-            if (!lr) return;
-            openSurah(
-              lr.surah,
-              lr.mode === 'withTranslation' ? lr.ayah : undefined,
-              lr.mode === 'mushaf' ? lr.page : undefined,
-            );
-          }}
+      {/* The doors back into the book — the khatmah's next page and the
+          reading marker, both when the reader keeps both (#41). The same
+          rows Home draws, from the same selector, so the two screens
+          cannot disagree about where "Continue" leads. Absent when there
+          is nothing to continue: this screen IS the way in. */}
+      {doors.khatmah || doors.reading ? (
+        <View
           style={[
-            styles.resumeCard,
+            styles.doorsCard,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.resumeLabel, { color: palette.muted }]}>
-              {t('quran.continueReading', 'Continue reading')}
-            </Text>
-            <Text style={[styles.resumeTitle, { color: palette.text }]}>
-              {`${findSurah(quran.lastRead.surah)?.romanized ?? ''} · ${t('quran.pageLabel', { page: quran.lastRead.page })}`}
-            </Text>
-          </View>
-          <Text style={{ color: palette.accentSolid, fontSize: TYPE.title3.fontSize }}>→</Text>
-        </Pressable>
+          <ResumeDoors
+            state={doors}
+            // Both the page and the ayah, whichever reader recorded the
+            // place: the muṣḥaf takes the page and the translation reader
+            // the ayah, and a marker pinned in one reader still lands in
+            // the other after the mode has been switched.
+            onOpenKhatmah={target => openSurah(target.surah, target.ayah, target.page)}
+            onOpenReading={marker => openSurah(marker.surah, marker.ayah, marker.page)}
+            onOpenQuran={() => {}}
+          />
+        </View>
       ) : null}
 
       {/* Said where it lands: this card is the user's place in the mushaf,
@@ -545,35 +539,11 @@ export function QuranScreen() {
                 ]}
               />
             </View>
-            {/* One primary, one secondary, the rest behind "more"
-                (redesign-plan B.3.3). Four buttons in two rows was the
-                loudest thing on the screen, and the second row's filled
-                button was cyan — a second accent. */}
+            {/* One primary — the day's reading done — and the rest behind
+                "more". The way INTO the plan is the doors card above this
+                one (#41), so this card is the plan's own account of itself
+                and the button is what changes that account. */}
             <View style={styles.khatmahActions}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('quran.khatmahContinue', 'Continue')}
-                onPress={() => {
-                  // The reader's own muṣḥaf, like every other number on
-                  // this card: `khatmahCurrentPage` defaults to Ḥafṣ, and
-                  // taking that default sent a Warsh reader to the page
-                  // of that NUMBER in their print, which is not the page
-                  // the plan meant.
-                  const page = khatmahCurrentPage(plan, quran.prefs.riwayah);
-                  const startSurah =
-                    plan.position?.surah ??
-                    MUSHAF_PAGES.find(p => p.page === page)?.start.surah ??
-                    1;
-                  openSurah(startSurah, undefined, page);
-                }}
-                style={[
-                  styles.khatmahBtn,
-                  { backgroundColor: palette.accentSolid },
-                ]}>
-                <Text style={styles.khatmahBtnLabel}>
-                  {`${t('quran.khatmahContinue', 'Continue')} · ${t('quran.pageLabel', { page: khatmahCurrentPage(plan, quran.prefs.riwayah) })}`}
-                </Text>
-              </Pressable>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t('quran.khatmahMarkDone', {
@@ -581,14 +551,8 @@ export function QuranScreen() {
                   defaultValue: "Mark day {{day}}'s reading done",
                 })}
                 onPress={finishKhatmahPortion}
-                style={[
-                  styles.khatmahBtn,
-                  styles.khatmahBtnSecondary,
-                  { backgroundColor: palette.accentBg },
-                ]}>
-                <Text
-                  style={[styles.khatmahBtnLabel, { color: palette.accentSolid }]}
-                  numberOfLines={1}>
+                style={[styles.khatmahBtn, { backgroundColor: palette.accentSolid }]}>
+                <Text style={styles.khatmahBtnLabel} numberOfLines={1}>
                   {/* The strings carry a leading "✓" from when this was the
                       only filled button on the card; a secondary button
                       does not need to shout it, and the glyph was what
@@ -626,35 +590,6 @@ export function QuranScreen() {
                 </Text>
               </Pressable>
             </View>
-            {/* Where the reader actually left off, which is not always the
-                plan's page. Labelled, so the two numbers stop looking like
-                a disagreement. */}
-            {quran.lastRead ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('quran.continueReading', 'Continue reading')}
-                onPress={() => {
-                  const lr = quran.lastRead;
-                  if (!lr) return;
-                  openSurah(
-                    lr.surah,
-                    lr.mode === 'withTranslation' ? lr.ayah : undefined,
-                    lr.mode === 'mushaf' ? lr.page : undefined,
-                  );
-                }}
-                style={styles.lastReadRow}>
-                <Text
-                  style={[styles.khatmahMeta, { color: palette.muted, flex: 1 }]}
-                  numberOfLines={1}>
-                  {t('quran.lastReadRow', {
-                    defaultValue: 'Last read · {{surah}}, page {{page}}',
-                    surah: findSurah(quran.lastRead.surah)?.romanized ?? '',
-                    page: quran.lastRead.page,
-                  })}
-                </Text>
-                <Text style={{ color: palette.accentSolid, fontSize: TYPE.callout.fontSize }}>→</Text>
-              </Pressable>
-            ) : null}
           </>
         ) : (
           <>
@@ -1630,18 +1565,7 @@ const styles = StyleSheet.create({
   // window and left the other half empty (Mac audit, 2026-07-16).
   listWide: { maxWidth: 720, width: '100%', alignSelf: 'center' as const },
   headerWrap: { gap: SPACING.md, marginBottom: HEADER_GAP },
-  resumeCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: SPACING.lg,
-    borderRadius: RADIUS.md,
-    gap: SPACING.md,
-  },
-  resumeLabel: {
-    fontSize: TYPE.label.fontSize,
-    fontWeight: '600',
-  },
-  resumeTitle: { fontSize: TYPE.callout.fontSize, fontWeight: '700', marginTop: 2 },
+  doorsCard: { borderRadius: RADIUS.md, overflow: 'hidden' },
   khatmahCard: { padding: SPACING.lg, borderRadius: RADIUS.md, gap: SPACING.sm },
   khatmahTop: { flexDirection: 'row', justifyContent: 'space-between' },
   khatmahTitle: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
@@ -1656,7 +1580,6 @@ const styles = StyleSheet.create({
   },
   khatmahFill: { height: '100%' },
   khatmahFillExtra: { opacity: 0.45 },
-  khatmahBtnSecondary: { flex: 1.15 },
   khatmahMore: {
     width: 40,
     height: 40,
@@ -1666,12 +1589,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   khatmahMoreGlyph: { fontSize: TYPE.title3.fontSize, fontWeight: '700', lineHeight: 20 },
-  lastReadRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-    paddingTop: SPACING.xs,
-  },
   khatmahDayRow: {
     flexDirection: 'row',
     alignItems: 'center',

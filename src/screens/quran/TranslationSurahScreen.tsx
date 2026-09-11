@@ -47,11 +47,15 @@ import {
 import { findPageForAyah } from '../../quran/pages';
 import { surahName } from '../../quran/surahName';
 import {
+  activeKhatmah,
+  drawnReadingPosition,
   findBookmark,
   isStarred,
-  setLastRead,
+  recordReading,
   useQuranState,
   BOOKMARK_COLORS,
+  KHATMAH_COLOR,
+  READING_COLOR,
 } from '../../quran/quranState';
 import { usePlaybackStatus } from '../../quran/audio/playback';
 import { useActiveWordIndex } from '../../quran/audio/useWordTiming';
@@ -293,15 +297,97 @@ export function TranslationSurahScreen({
   }, []);
   useOverlayDismissGuard(sheetVisible || editionPickerVisible, closeSheets);
 
+  // ── Landing on an ayah — issue #41 ───────────────────────────────────
+  //
+  // "Continue" opened the surah and left the reader at the top, for any
+  // ayah past the first screen. Two faults, one symptom: the rows load
+  // after the list has mounted, so `initialScrollIndex` — honoured at
+  // mount only — was always undefined when it mattered; and the rows are
+  // dynamic in height, so the one retry the failure handler made scrolled
+  // as far as the list had measured (eight rows) and stopped there. And a
+  // third, quieter one: the viewability handler fired for ayah 1 before
+  // any scroll had happened and wrote it over the place being returned to.
+  //
+  // So the landing is driven from here once the rows exist, asked for
+  // again each time the list says it has not measured that far, and the
+  // marker is not written until the reader has actually arrived — or the
+  // list has been asked as often as is reasonable and left where it got to.
+  const listRef = useRef<FlatList<AyahRow>>(null);
+  const landingIndex = useRef<number | null>(null);
+  const landingTries = useRef(0);
+  const landed = useRef(!scrollToAyah);
+  // The reader has taken the list: from here on the landing is theirs to
+  // move, and nothing below re-asserts it.
+  const readerScrolled = useRef(false);
+  /**
+   * How long the landing keeps re-asserting itself as the rows settle.
+   *
+   * The translations arrive after the Arabic and make every row above the
+   * landing taller — each one, as it is measured — which pushes the ayah
+   * down the screen after it has been put at the top. So for a moment
+   * after the landing begins, every change in the list's content size is
+   * answered by landing again; after that, or the moment the reader
+   * scrolls, the page is theirs.
+   */
+  const landingUntil = useRef(0);
+  const LANDING_SETTLE_MS = 2500;
+  const tryLand = useCallback(() => {
+    const index = landingIndex.current;
+    if (index == null || readerScrolled.current) return;
+    listRef.current?.scrollToIndex({ index, animated: false, viewPosition: 0.06 });
+  }, []);
+  useEffect(() => {
+    landingTries.current = 0;
+    readerScrolled.current = false;
+    if (!rows) return undefined;
+    if (!scrollToAyah || scrollToAyah <= 1 || scrollToAyah > rows.length) {
+      landingIndex.current = null;
+      landed.current = true;
+      return undefined;
+    }
+    landed.current = false;
+    landingIndex.current = scrollToAyah - 1;
+    landingUntil.current = Date.now() + LANDING_SETTLE_MS;
+    // After the first batch has mounted, never in the same frame.
+    const id = setTimeout(tryLand, 0);
+    return () => clearTimeout(id);
+  }, [rows, scrollToAyah, tryLand]);
+  const settleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onContentSizeChange = useCallback(() => {
+    if (landingIndex.current == null || readerScrolled.current) return;
+    if (Date.now() > landingUntil.current) return;
+    if (settleTimer.current) clearTimeout(settleTimer.current);
+    settleTimer.current = setTimeout(tryLand, 40);
+  }, [tryLand]);
+  useEffect(
+    () => () => {
+      if (settleTimer.current) clearTimeout(settleTimer.current);
+    },
+    [],
+  );
+
   // ── Last-read for translation mode (QR-10) ──────────────────────────
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 60 });
   const onViewableItemsChanged = useRef(
     (info: { viewableItems: Array<{ item: unknown; isViewable: boolean }> }) => {
-      const first = info.viewableItems.find(v => v.isViewable);
+      const visible = info.viewableItems.filter(v => v.isViewable);
+      const first = visible[0];
       if (!first) return;
+      if (!landed.current) {
+        // Still on the way to the ayah asked for: this is the list passing
+        // rows on the way there, not the reader reading them.
+        const target = landingIndex.current;
+        if (
+          target != null &&
+          visible.some(v => (v.item as AyahRow)?.ayah === target + 1)
+        ) {
+          landed.current = true;
+        }
+        return;
+      }
       const row = first.item as AyahRow;
       if (typeof row?.ayah !== 'number') return;
-      setLastRead({
+      recordReading({
         surah: surahNumberRef.current,
         ayah: row.ayah,
         page: findPageForAyah(surahNumberRef.current, row.ayah),
@@ -313,7 +399,6 @@ export function TranslationSurahScreen({
   surahNumberRef.current = surahNumber;
 
   // ── Auto-scroll to the playing ayah ─────────────────────────────────
-  const listRef = useRef<FlatList<AyahRow>>(null);
   const lastAutoScrolled = useRef<number>(0);
   useEffect(() => {
     if (!playback.active || !playback.playing) return;
@@ -337,10 +422,21 @@ export function TranslationSurahScreen({
     settings.language,
   );
 
+  // The two trails' markers, drawn beside the ayah number the way a
+  // bookmark's bar is (#41): the reading marker when the reader pinned it,
+  // the khatmah's when the plan is pinned here. Both, when both — they are
+  // different promises and can share an ayah.
+  const readingMark = drawnReadingPosition(quran);
+  const khatmahMark = activeKhatmah(quran)?.position ?? null;
+
   const renderAyah = ({ item }: { item: AyahRow }) => {
     const { ayah, arabic } = item;
     const starred = isStarred(quran, surahNumber, ayah);
     const bookmark = findBookmark(quran, surahNumber, ayah);
+    const readingHere =
+      readingMark?.surah === surahNumber && readingMark.ayah === ayah;
+    const khatmahHere =
+      khatmahMark?.surah === surahNumber && khatmahMark.ayah === ayah;
     const isPlayingThis =
       playback.active?.surah === surahNumber &&
       playback.active?.ayah === ayah &&
@@ -396,6 +492,22 @@ export function TranslationSurahScreen({
                 { backgroundColor: BOOKMARK_COLORS[bookmark.color] },
               ]}
             />
+          ) : null}
+          {khatmahHere ? (
+            <View style={[styles.markerPill, { borderColor: KHATMAH_COLOR }]}>
+              <View style={[styles.markerDot, { backgroundColor: KHATMAH_COLOR }]} />
+              <Text style={[styles.markerLabel, { color: KHATMAH_COLOR }]}>
+                {t('quran.khatmahMarkerLabel', 'Khatmah')}
+              </Text>
+            </View>
+          ) : null}
+          {readingHere ? (
+            <View style={[styles.markerPill, { borderColor: READING_COLOR }]}>
+              <View style={[styles.markerDot, { backgroundColor: READING_COLOR }]} />
+              <Text style={[styles.markerLabel, { color: READING_COLOR }]}>
+                {t('quran.readingMarkerLabel', 'Reading')}
+              </Text>
+            </View>
           ) : null}
           {starred ? (
             <Text style={{ color: palette.accentSolid, fontSize: TYPE.footnote.fontSize }}>★</Text>
@@ -538,22 +650,29 @@ export function TranslationSurahScreen({
         initialNumToRender={8}
         maxToRenderPerBatch={10}
         windowSize={9}
-        initialScrollIndex={
-          scrollToAyah && rows && scrollToAyah <= rows.length
-            ? scrollToAyah - 1
-            : undefined
-        }
         onScrollToIndexFailed={info => {
-          // Dynamic row heights: retry after the list settles.
-          setTimeout(() => {
-            listRef.current?.scrollToIndex({
-              index: Math.min(info.index, info.highestMeasuredFrameIndex),
-              animated: false,
-            });
-          }, 120);
+          // Dynamic row heights: the list has not measured that far. Go as
+          // far as it has, let it mount the next window, and ask again —
+          // each round reaches further. A dozen rounds covers Al-Baqarah;
+          // after that the reader is left where the list got to, and the
+          // marker is theirs to move again.
+          const reach = Math.min(info.index, info.highestMeasuredFrameIndex);
+          listRef.current?.scrollToIndex({ index: reach, animated: false });
+          landingTries.current += 1;
+          if (landingTries.current < 14 && landingIndex.current != null) {
+            setTimeout(tryLand, 50);
+          } else {
+            landed.current = true;
+          }
         }}
         viewabilityConfig={viewabilityConfig.current}
         onViewableItemsChanged={onViewableItemsChanged.current}
+        onContentSizeChange={onContentSizeChange}
+        onScrollBeginDrag={() => {
+          readerScrolled.current = true;
+          // Whatever the landing had left to do, the reader has taken over.
+          landed.current = true;
+        }}
       />
       <MiniPlayer />
 
@@ -703,6 +822,17 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   bookmarkBar: { width: 18, height: 5, borderRadius: RADIUS.xs },
+  markerPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: RADIUS.full,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  markerDot: { width: 6, height: 6, borderRadius: RADIUS.full },
+  markerLabel: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
   ayahNumber: { fontSize: TYPE.footnote.fontSize, fontWeight: '700', fontVariant: ['tabular-nums'] },
   ayahArabic: {
     fontSize: TYPE.title2.fontSize,

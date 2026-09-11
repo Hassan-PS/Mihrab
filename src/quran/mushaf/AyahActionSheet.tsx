@@ -35,11 +35,13 @@ import {
   isStarred,
   removeBookmark,
   setKhatmahPosition,
+  setReadingPosition,
   toggleStar,
   useQuranState,
   setQuranPrefs,
   BOOKMARK_COLORS,
   KHATMAH_COLOR,
+  READING_COLOR,
   type BookmarkColor,
 } from '../quranState';
 import {
@@ -233,6 +235,10 @@ export function AyahActionSheet({
   const plan = activeKhatmah(state);
   const isKhatmahHere =
     plan?.position?.surah === surah && plan?.position?.ayah === ayah;
+  // The other trail's marker (#41): pinned here, or recorded here by
+  // reading — either way "Continue reading" already leads to this ayah.
+  const isReadingHere =
+    state.lastRead?.surah === surah && state.lastRead?.ayah === ayah;
   const reference = `${meta?.romanized ?? ''} ${surah}:${ayah}`;
 
   /**
@@ -606,6 +612,48 @@ export function AyahActionSheet({
               );
             })}
           </View>
+
+          {/* The reading marker (#41): "Continue reading" starts here. A
+              pin rather than a bookmark — there is one of it, it moves on
+              as the reader reads on, and it is drawn in the reader until
+              it does. Beside the khatmah's own pin, in the other colour,
+              because the two are different trails through one book and
+              an ayah can carry both. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ selected: isReadingHere }}
+            accessibilityLabel={
+              isReadingHere
+                ? t('quran.readingPinned', 'Continue reading starts here')
+                : t('quran.readingPin', 'Continue reading from here')
+            }
+            onPress={() => {
+              // A marker that is here because reading brought it is not
+              // drawn on the page (`LastRead.pinned`); asking for it from
+              // the panel pins it, and then it is. Already pinned here:
+              // nothing left to do.
+              if (isReadingHere && state.lastRead?.pinned) return;
+              setReadingPosition(
+                surah,
+                ayah,
+                page,
+                settings.quranReadingMode === 'mushaf' ? 'mushaf' : 'withTranslation',
+              );
+            }}
+            style={[
+              styles.khatmahPin,
+              {
+                borderColor: READING_COLOR,
+                backgroundColor: isReadingHere ? `${READING_COLOR}26` : 'transparent',
+              },
+            ]}>
+            <View style={[styles.khatmahDot, { backgroundColor: READING_COLOR }]} />
+            <Text style={[styles.khatmahPinLabel, { color: palette.text }]}>
+              {isReadingHere
+                ? t('quran.readingPinned', 'Continue reading starts here')
+                : t('quran.readingPin', 'Continue reading from here')}
+            </Text>
+          </Pressable>
 
           {/* Khatmah pin (v2.7.28) — only while a plan is active. */}
           {plan ? (

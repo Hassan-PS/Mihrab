@@ -63,7 +63,7 @@ import {
   type MushafLine,
   type MushafWord,
 } from './mushafLayout';
-import type { AyahTint } from './ayahMarks';
+import type { AyahEndInk, AyahTint } from './ayahMarks';
 import { useActiveWordOn, wordCode } from './audio/activeWordStore';
 import { BasmalahRow, SurahBandRow } from './mushafOrnaments';
 import { FONTS } from '../theme/typography';
@@ -131,6 +131,12 @@ export type MushafTextPageProps = {
    * renderer could show before there was a tint to hand it.
    */
   tint?: AyahTint;
+  /**
+   * The reading marker's ink on an ayah's end-medallion (`ayahMarks.ts`,
+   * #41) — the one mark drawn as foreground, so it shows through
+   * whatever the ayah is washed in.
+   */
+  endInk?: AyahEndInk;
   onWordPress?: (ref: AyahRef, word: MushafWord) => void;
   onWordLongPress?: (ref: AyahRef, word: MushafWord) => void;
   style?: StyleProp<ViewStyle>;
@@ -156,6 +162,7 @@ function MushafTextPage({
   selected,
   playing,
   tint,
+  endInk,
   onWordPress,
   onWordLongPress,
   style,
@@ -209,6 +216,10 @@ function MushafTextPage({
     if (tint) return tint(w.surah, w.ayah);
     return sameAyah(selected ?? playing ?? null, w) ? colors.selection : null;
   };
+  // Only the medallion carries ink; every other word answers null, so a
+  // line with no marker on it keeps an empty marks string.
+  const inkOf = (w: MushafWord): string | null =>
+    endInk && w.isEnd ? endInk(w.surah, w.ayah) : null;
 
   // The plates are set by their own rules — see `lineSpaceEm`.
   const framed = isFramedPage(page);
@@ -225,7 +236,7 @@ function MushafTextPage({
           lineHeight={lineHeight}
           fontFamily={fontFamily}
           colors={colors}
-          marks={lineMarks(line, tintOf)}
+          marks={lineMarks(line, tintOf, inkOf)}
           framed={framed}
           onPress={handlePress}
           onLongPress={handleLongPress}
@@ -252,15 +263,28 @@ function MushafTextPage({
 export function lineMarks(
   line: MushafLine,
   tintOf: (w: MushafWord) => string | null,
+  inkOf: (w: MushafWord) => string | null = () => null,
 ): string {
   if (line.kind !== 'ayah') return '';
   let any = false;
   const parts = line.words.map(w => {
     const c = tintOf(w);
-    if (c) any = true;
-    return c ?? '';
+    const ink = inkOf(w);
+    if (c || ink) any = true;
+    // `wash~ink` for a word that carries both channels; a bare wash for the
+    // common case, so nothing about the string changes for a page with no
+    // reading marker on it. Neither colour can contain '~'.
+    return ink ? `${c ?? ''}~${ink}` : (c ?? '');
   });
   return any ? parts.join('|') : '';
+}
+
+/** One word's entry in a marks string, split back into its two channels. */
+function splitMark(entry: string | undefined): [string | null, string | null] {
+  if (!entry) return [null, null];
+  const at = entry.indexOf('~');
+  if (at < 0) return [entry, null];
+  return [entry.slice(0, at) || null, entry.slice(at + 1) || null];
 }
 
 export default React.memo(MushafTextPage);
@@ -375,7 +399,9 @@ const LineView = React.memo(function LineView({
   // The marks arrive resolved, one colour per word — see `lineMarks`.
   const wordTints = marks ? marks.split('|') : null;
   const tintAt = (index: number): string | null =>
-    wordTints ? wordTints[index] || null : null;
+    wordTints ? splitMark(wordTints[index])[0] : null;
+  const inkAt = (index: number): string | null =>
+    wordTints ? splitMark(wordTints[index])[1] : null;
 
   // Marking a single ayah inside one paragraph needs the paragraph split at
   // the ayah boundary — nested <Text> keeps the text one shaped stream, so
@@ -407,9 +433,17 @@ const LineView = React.memo(function LineView({
       !w.isEnd &&
       activeWord === wordCode(w.surah, w.ayah, w.position);
     const colour = lit ? colors.word : tintAt(piece.index);
+    // The reading marker's medallion — ink over the wash, never instead
+    // of it, so an ayah that is also bookmarked or the khatmah's shows both.
+    const ink = w.isEnd ? inkAt(piece.index) : null;
     nodes.push(
-      colour != null ? (
-        <Text key={i} style={{ backgroundColor: colour }}>
+      colour != null || ink != null ? (
+        <Text
+          key={i}
+          style={{
+            ...(colour != null ? { backgroundColor: colour } : null),
+            ...(ink != null ? { color: ink } : null),
+          }}>
           {piece.text}
         </Text>
       ) : (

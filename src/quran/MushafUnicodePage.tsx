@@ -63,7 +63,12 @@ import {
 } from './pages';
 import { loadRiwayahText } from './riwayahData';
 import { printedPageFor, type AllocatedLine } from './mushafPrintedLines';
-import { NO_AYAH_TINT, type AyahTint } from './ayahMarks';
+import {
+  NO_AYAH_END_INK,
+  NO_AYAH_TINT,
+  type AyahEndInk,
+  type AyahTint,
+} from './ayahMarks';
 import { riwayahById, riwayahFontFamily, type RiwayahId } from './riwayat';
 import { BasmalahRow, SurahBandRow } from './mushafOrnaments';
 import type { AyahRef } from './MushafTextPage';
@@ -560,6 +565,8 @@ export type MushafUnicodePageProps = {
    * neutral selection wash, which is all this renderer showed before.
    */
   tint?: AyahTint;
+  /** The reading marker's ink on an ayah's medallion (`ayahMarks.ts`, #41). */
+  endInk?: AyahEndInk;
   onAyahPress?: (ref: AyahRef) => void;
   onAyahLongPress?: (ref: AyahRef) => void;
 };
@@ -584,6 +591,7 @@ function MushafUnicodePage({
   selected,
   playing,
   tint,
+  endInk = NO_AYAH_END_INK,
   onAyahPress,
   onAyahLongPress,
 }: MushafUnicodePageProps) {
@@ -698,6 +706,7 @@ function MushafUnicodePage({
         fontFamily={fontFamily}
         colors={colors}
         tint={tintOf}
+        endInk={endInk}
         onAyahPress={onAyahPress}
         onAyahLongPress={onAyahLongPress}
       />
@@ -793,7 +802,7 @@ function MushafUnicodePage({
                     ayah and the next. */}
                 <Text
                   style={{
-                    color: colors.accent,
+                    color: endInk(ayah.surah, ayah.ayah) ?? colors.accent,
                     fontFamily: FONTS.arabicQuran,
                   }}
                 >
@@ -843,6 +852,7 @@ function PrintedPageBody({
   fontFamily,
   colors,
   tint,
+  endInk = NO_AYAH_END_INK,
   onAyahPress,
   onAyahLongPress,
 }: {
@@ -854,6 +864,7 @@ function PrintedPageBody({
   fontFamily: string;
   colors: MushafUnicodePageProps['colors'];
   tint: AyahTint;
+  endInk?: AyahEndInk;
   onAyahPress?: (ref: AyahRef) => void;
   onAyahLongPress?: (ref: AyahRef) => void;
 }) {
@@ -1026,16 +1037,20 @@ function PrintedPageBody({
           mark: number | null;
           /** The background this ayah is marked with, or null. */
           lit: string | null;
+          /** The medallion's ink when a reading marker sits here, or null. */
+          ink: string | null;
         }> = [];
         for (const part of row.ayahs) {
           const words = part.text.split(/\s+/).filter(Boolean);
           const lit = tint(part.surah, part.ayah);
+          const ink = part.ends ? endInk(part.surah, part.ayah) : null;
           words.forEach((word, wi) => {
             tokens.push({
               text: word,
               ref: { surah: part.surah, ayah: part.ayah },
               mark: part.ends && wi === words.length - 1 ? part.ayah : null,
               lit,
+              ink,
             });
           });
         }
@@ -1131,7 +1146,10 @@ function PrintedPageBody({
                   {token.text}
                   {token.mark != null ? (
                     <Text
-                      style={{ color: colors.accent, fontFamily: FONTS.arabicQuran }}
+                      style={{
+                        color: token.ink ?? colors.accent,
+                        fontFamily: FONTS.arabicQuran,
+                      }}
                     >
                       {ayahMarkText(token.mark)}
                     </Text>

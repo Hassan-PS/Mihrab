@@ -38,20 +38,24 @@ describe('Today', () => {
 describe('the Quran tab', () => {
   const src = read('src/screens/QuranScreen.tsx');
 
-  it('never shows two "Continue" cards at once', () => {
-    // The standalone resume card is for a reader with no khatmah; with one,
-    // last-read is a labelled row inside the khatmah card.
-    expect(src).toContain('{quran.lastRead && !plan ? (');
-    expect(src).toContain("t('quran.lastReadRow'");
+  it('shows the doors once, at the top — and nowhere else (#41)', () => {
+    // The khatmah's next page and the reading marker are one card of rows
+    // shared with Home; the khatmah card below it carries no Continue of
+    // its own and no "last read" line, which were two more ways to say
+    // the same thing with different numbers.
+    expect(src.match(/<ResumeDoors/g)).toHaveLength(1);
+    expect(src).toContain('{doors.khatmah || doors.reading ? (');
+    expect(src).not.toContain("t('quran.lastReadRow'");
+    expect(src).not.toContain("t('quran.khatmahContinue'");
   });
 
-  it('has one primary, one secondary and a "more" on the khatmah card', () => {
-    const start = src.indexOf('{/* One primary, one secondary');
-    const end = src.indexOf('{/* Where the reader actually left off');
+  it('has one primary and a "more" on the khatmah card', () => {
+    const start = src.indexOf('{/* One primary — the day');
     expect(start).toBeGreaterThan(0);
+    const end = src.indexOf("t('quran.startKhatmah', 'Start a khatmah')", start);
     const actions = src.slice(start, end);
     expect(actions.match(/backgroundColor: palette\.accentSolid/g)).toHaveLength(1);
-    expect(actions.match(/backgroundColor: palette\.accentBg/g)).toHaveLength(1);
+    expect(actions).not.toMatch(/backgroundColor: palette\.accentBg/);
     expect(actions).toContain("t('quran.khatmahMore'");
     // Two rows of four buttons is what this replaced.
     expect(actions).not.toContain('khatmahPrevDay');

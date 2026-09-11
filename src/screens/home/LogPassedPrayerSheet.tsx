@@ -7,18 +7,27 @@
  * two, the first time or after it, because the prayer can still be
  * prayed in its own time; once the window has gone entirely there are
  * four, the Log's own set, missed among them. The caller passes the set
- * and the sheet asks the question that fits it. Drawn as the reset
- * picker is: a titled card on the overlay, one row per answer, cancel at
- * the foot.
+ * and the sheet asks the question that fits it.
+ *
+ * ── ONE CARD, ONE LEVEL DEEP ──────────────────────────────────────────
+ *
+ * Drawn the way every group in the app is drawn since the redesign: the
+ * card holds rows, the rows are divided by an inset hairline, and nothing
+ * on it is a box inside a box. The first draft gave each answer a bordered
+ * button of its own, which was four outlines stacked on a card that
+ * already had one. The day sits above the prayer's name as a label; the
+ * question is the one line of prose; the answers are rows; cancel is the
+ * quiet last row rather than a button floating at the corner.
  */
 import { memo } from 'react';
-import { Modal, Pressable, StyleSheet, Text } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
+import { RowDivider } from '../../components/ui/Group';
 import { cardEdgeStyle } from '../../theme/chrome';
 import type { PassedPrayerAnswer } from '../../journal/quickLog';
-import { RADIUS, SPACING } from '../../theme/tokens';
-import { TYPE } from '../../theme/typography';
+import { LAYOUT, RADIUS, SPACING } from '../../theme/tokens';
+import { TYPE, typeStyle } from '../../theme/typography';
 
 type Props = {
   /**
@@ -57,47 +66,59 @@ function LogPassedPrayerSheetImpl({ question, onAnswer, onCancel }: Props) {
         onPress={onCancel}>
         <Pressable
           accessible={false}
+          accessibilityLabel={t('journal.passedTitle', {
+            defaultValue: 'Log {{prayer}} · {{day}}',
+            prayer: question?.prayer ?? '',
+            day: question?.day ?? '',
+          })}
           style={[styles.sheet, { backgroundColor: palette.card, ...cardEdgeStyle(palette) }]}
           onPress={() => {}}>
-          <Text style={[styles.title, { color: palette.text }]}>
-            {t('journal.passedTitle', {
-              defaultValue: 'Log {{prayer}} · {{day}}',
-              prayer: question?.prayer ?? '',
-              day: question?.day ?? '',
-            })}
-          </Text>
-          <Text style={[styles.message, { color: palette.muted }]}>
-            {question?.secondOpen
-              ? t('journal.passedFirstBody', {
-                  defaultValue:
-                    'Its first time has passed and the second is open. Was it prayed in the first time, or after it?',
-                })
-              : t('journal.passedBody', {
-                  defaultValue: 'Its time has passed. How was it prayed?',
-                })}
-          </Text>
+          <View style={styles.head}>
+            <Text style={[typeStyle('label'), { color: palette.muted }]} numberOfLines={1}>
+              {question?.day ?? ''}
+            </Text>
+            <Text style={[styles.title, { color: palette.text }]} numberOfLines={1}>
+              {question?.prayer ?? ''}
+            </Text>
+            <Text style={[typeStyle('footnote'), styles.message, { color: palette.muted }]}>
+              {question?.secondOpen
+                ? t('journal.passedFirstBody', {
+                    defaultValue:
+                      'Its first time has passed and the second is open. Was it prayed in the first time, or after it?',
+                  })
+                : t('journal.passedBody', {
+                    defaultValue: 'Its time has passed. How was it prayed?',
+                  })}
+            </Text>
+          </View>
           {(question?.answers ?? []).map(status => (
-            <Pressable
-              key={status}
-              accessibilityRole="button"
-              accessibilityLabel={t(`journal.status.${status}`)}
-              onPress={() => onAnswer(status)}
-              style={({ pressed }) => [
-                styles.row,
-                { borderColor: palette.border ?? palette.muted },
-                pressed && { backgroundColor: palette.controlBg },
-              ]}>
-              <Text style={[styles.rowLabel, { color: palette.text }]}>
-                {t(`journal.status.${status}`)}
-              </Text>
-            </Pressable>
+            <View key={status}>
+              <RowDivider inset={LAYOUT.gutter} />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t(`journal.status.${status}`)}
+                onPress={() => onAnswer(status)}
+                style={({ pressed }) => [
+                  styles.row,
+                  pressed && { backgroundColor: palette.controlBg },
+                ]}>
+                <Text style={[typeStyle('headline'), { color: palette.text }]}>
+                  {t(`journal.status.${status}`)}
+                </Text>
+              </Pressable>
+            </View>
           ))}
+          <RowDivider inset={0} />
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('common.cancel', 'Cancel')}
             onPress={onCancel}
-            style={({ pressed }) => [styles.cancel, pressed && { opacity: 0.6 }]}>
-            <Text style={[styles.cancelLabel, { color: palette.muted }]}>
+            style={({ pressed }) => [
+              styles.row,
+              styles.cancel,
+              pressed && { backgroundColor: palette.controlBg },
+            ]}>
+            <Text style={[typeStyle('headline'), { color: palette.muted }]}>
               {t('common.cancel', 'Cancel')}
             </Text>
           </Pressable>
@@ -113,24 +134,22 @@ const styles = StyleSheet.create({
   scrim: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: SPACING.xxl },
   sheet: {
     width: '100%',
-    maxWidth: 380,
+    maxWidth: 360,
     borderRadius: RADIUS.xl,
-    paddingHorizontal: SPACING.xl,
-    paddingTop: SPACING.xl,
-    paddingBottom: SPACING.lg,
+    overflow: 'hidden',
   },
-  title: { fontSize: TYPE.title3.fontSize, fontWeight: '700', marginBottom: SPACING.sm },
-  message: { fontSize: TYPE.callout.fontSize, lineHeight: 21, marginBottom: SPACING.lg },
+  head: {
+    paddingHorizontal: LAYOUT.gutter,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.md,
+    gap: 2,
+  },
+  title: { fontSize: TYPE.title3.fontSize, fontWeight: '700' },
+  message: { marginTop: SPACING.xs },
   row: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: RADIUS.md,
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    marginBottom: SPACING.sm,
-    minHeight: 48,
+    paddingHorizontal: LAYOUT.gutter,
+    minHeight: SPACING.xxxl,
     justifyContent: 'center',
   },
-  rowLabel: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
-  cancel: { alignSelf: 'flex-end', paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md },
-  cancelLabel: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
+  cancel: { alignItems: 'center' },
 });

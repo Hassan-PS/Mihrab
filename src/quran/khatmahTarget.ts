@@ -15,8 +15,9 @@
  * that has nothing to do with the khatmah; the offer is about the plan, so
  * it is the plan's own page that answers.
  */
-import { MUSHAF_PAGES } from './pages';
+import { firstAyahOfPage } from './pages';
 import { khatmahCurrentPage, type KhatmahPlan } from './quranState';
+import { DEFAULT_RIWAYAH, type RiwayahId } from './riwayat';
 
 export type KhatmahTarget = {
   /** The muṣḥaf page the plan continues from. */
@@ -26,12 +27,16 @@ export type KhatmahTarget = {
   ayah: number;
 };
 
-export function khatmahContinueTarget(plan: KhatmahPlan): KhatmahTarget {
-  const page = khatmahCurrentPage(plan);
-  const meta = MUSHAF_PAGES.find(p => p.page === page);
-  return {
-    page,
-    surah: meta?.start.surah ?? 1,
-    ayah: meta?.start.ayah ?? 1,
-  };
+/**
+ * `riwayah` is the reader's own muṣḥaf: the plan's place is an ayah count,
+ * and which PAGE that is depends on the print. Absent means Ḥafṣ, which is
+ * what the widget and the reminder were already answering.
+ */
+export function khatmahContinueTarget(
+  plan: KhatmahPlan,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): KhatmahTarget {
+  const page = khatmahCurrentPage(plan, riwayah);
+  const start = firstAyahOfPage(page, riwayah);
+  return { page, surah: start.surah, ayah: start.ayah };
 }

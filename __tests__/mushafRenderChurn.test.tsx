@@ -313,7 +313,10 @@ describe('the readers hand the page a handler, not an arrow around one', () => {
     // the state as the key the marks — and the tint every line memoises on
     // — were rebuilt on the turn that should have touched nothing.
     const core = read('src/quran/mushafReaderCore.tsx');
-    expect(core).toMatch(/\[quran\.bookmarks, plan\],?\s*\n\s*\);/);
+    // `readingKey` is the PINNED marker as a string — a pin is rare and
+    // deliberate, so the key does not move on a page turn either (#41).
+    expect(core).toMatch(/\[quran\.bookmarks, plan, readingKey\],?\s*\n\s*\);/);
     expect(core).not.toMatch(/\}, \[quran\]\);/);
+    expect(core).not.toMatch(/\[quran\.bookmarks, plan, quran\.lastRead\]/);
   });
 });

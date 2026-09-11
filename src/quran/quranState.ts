@@ -55,6 +55,17 @@ export type LastRead = {
   page: number;
   mode: 'mushaf' | 'withTranslation';
   updatedAt: number;
+  /**
+   * Set by hand from an ayah's own panel (#41), as opposed to recorded
+   * from a page turn or a scroll. A pinned marker is DRAWN in the reader
+   * — the wash and the medallion — because the reader put it there on
+   * purpose and wants to find it again; a recorded one is not, because it
+   * is wherever the reading is, and a mark that rides at the top of every
+   * page as it is turned tells the reader nothing. The next stretch of
+   * reading moves the marker on and clears this, as reading moves any
+   * place along. Additive: absent on every marker written before it.
+   */
+  pinned?: boolean;
 };
 
 export type KhatmahPlan = {
@@ -126,6 +137,18 @@ export const KHATMAH_COLOR = '#0891b2';
  * there is nothing for it to be confused with.
  */
 export const KHATMAH_EXTRA_COLOR = '#c9a227';
+
+/**
+ * The reading marker's colour — issue #41 — reserved like the khatmah's.
+ *
+ * Terracotta: warm where the khatmah is cool, and unlike every bookmark
+ * colour (the amber is golden, the rose is a magenta), so the two
+ * trails can be told apart at a glance on a page that carries both. It
+ * is drawn as a wash under the ayah AND as the ink of the ayah's own
+ * end-medallion, which is what lets it share an ayah with a khatmah mark
+ * or a bookmark: the wash yields to theirs, the medallion stays.
+ */
+export const READING_COLOR = '#c8552b';
 
 export type RepeatSettings = {
   /** Repeat each ayah N times (1 = play once). */
@@ -375,6 +398,7 @@ function coerceLastRead(v: unknown): LastRead | null {
       typeof r.updatedAt === 'number' && Number.isFinite(r.updatedAt)
         ? r.updatedAt
         : 0,
+    ...(r.pinned === true ? { pinned: true } : {}),
   };
 }
 
@@ -579,6 +603,140 @@ export function setLastRead(pos: Omit<LastRead, 'updatedAt'>): void {
     ...prev,
     lastRead: { ...pos, updatedAt: Date.now() },
   }));
+}
+
+/**
+ * How near a page has to be to the khatmah's own page to be its reading.
+ *
+ * Two, not one: a spread turns two pages at a time, and a turn that lands
+ * two ahead of the plan's page is the plan being read on an iPad, not a
+ * reader who went somewhere else.
+ */
+const KHATMAH_PAGE_REACH = 2;
+
+/**
+ * Is this page where the khatmah is being read — the plan's own next
+ * page, or the one beside it?
+ *
+ * Narrower than `khatmahTracksPage`, and on purpose: that answers "does
+ * reading here count towards the plan", and it says yes to every page
+ * behind the frontier because re-reading is still the khatmah's ground.
+ * This answers "is the reader on the khatmah's page RIGHT NOW", which is
+ * what decides whether the reading marker (below) should follow them.
+ * A page well behind the frontier is not the khatmah's reading; it is
+ * someone reading Al-Baqarah on a Tuesday while their plan sits in juz
+ * twenty, and that is exactly the reading the marker is for.
+ */
+export function isKhatmahPage(
+  page: number,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+  s: QuranState = getQuranState(),
+): boolean {
+  const plan = activeKhatmah(s);
+  if (!plan) return false;
+  return Math.abs(page - khatmahCurrentPage(plan, riwayah)) <= KHATMAH_PAGE_REACH;
+}
+
+/**
+ * Record where the reader is — issue #41.
+ *
+ * ── TWO TRAILS THROUGH ONE BOOK ───────────────────────────────────────
+ *
+ * `lastRead` is the reading marker: the place "Continue reading" hands
+ * back. A khatmah is a second trail with its own marker (the plan's next
+ * page, `khatmahContinueTarget`), and a reader can walk both — the plan
+ * in the morning, Al-Kahf on a Friday — which is a thing this store used
+ * to make impossible: every page turn wrote `lastRead`, so an evening in
+ * the khatmah erased the afternoon's place in Al-Kahf, and the marker
+ * was never more than "the last page looked at".
+ *
+ * So the khatmah's own reading — a muṣḥaf page within reach of the
+ * plan's page — leaves the marker where it is, UNLESS the marker was
+ * already riding with the plan, in which case it comes along. That
+ * second clause is what keeps a reader with one trail exactly where
+ * they were: every marker written before this existed sits on the
+ * plan's page, and a marker that stopped following would have looked
+ * like a lost place. The moment such a reader reads somewhere else, the
+ * marker detaches and becomes theirs; the moment it is theirs, the
+ * khatmah cannot take it back.
+ *
+ * Translation mode always writes. Khatmah progress is credited from
+ * muṣḥaf page turns and nowhere else, so a plan read in translation
+ * never advances on its own — and a marker that refused to follow that
+ * reading would be a place lost with nothing to point at it instead.
+ */
+export function recordReading(
+  pos: Omit<LastRead, 'updatedAt' | 'pinned'>,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): void {
+  const prev = getQuranState();
+  const marker = prev.lastRead;
+  if (
+    pos.mode === 'mushaf' &&
+    marker &&
+    isKhatmahPage(pos.page, riwayah, prev) &&
+    !isKhatmahPage(marker.page, riwayah, prev)
+  ) {
+    return;
+  }
+  // Reading moves the place along, pinned or not; a pin is a correction
+  // of where the marker stands, never a bookmark (those exist).
+  setLastRead(pos);
+}
+
+/**
+ * Pin the reading marker to an ayah by hand — the counterpart of
+ * `setKhatmahPosition` for the other trail. From an ayah's own panel,
+ * so a reader can say "I am here" about a place the page turns did not
+ * record: a translation row scrolled past, or a muṣḥaf page whose first
+ * ayah is not where they stopped.
+ */
+export function setReadingPosition(
+  surah: number,
+  ayah: number,
+  page: number,
+  mode: LastRead['mode'],
+): void {
+  setLastRead({ surah, ayah, page, mode, pinned: true });
+}
+
+/**
+ * The marker as something to DRAW, or null.
+ *
+ * Only a pinned marker is drawn — see `LastRead.pinned`. The readers
+ * ask this rather than reading `lastRead` themselves so that the rule
+ * lives in one place and a mark never appears for a reader who did
+ * nothing but turn the page.
+ */
+export function drawnReadingPosition(
+  s: QuranState,
+): { surah: number; ayah: number } | null {
+  const m = s.lastRead;
+  return m?.pinned ? { surah: m.surah, ayah: m.ayah } : null;
+}
+
+/** Whether the reading marker sits on this ayah, pinned or recorded. */
+export function isReadingHere(s: QuranState, surah: number, ayah: number): boolean {
+  return s.lastRead?.surah === surah && s.lastRead?.ayah === ayah;
+}
+
+/**
+ * Where "Continue reading" leads, or null when there is no such place —
+ * because nothing has been read, or because the marker is riding with
+ * the khatmah and the khatmah's own offer already leads there. Two rows
+ * to one page is one row too many; the plan's is the stronger claim.
+ */
+export function readingContinueTarget(
+  s: QuranState,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): LastRead | null {
+  const marker = s.lastRead;
+  if (!marker) return null;
+  // The same reach `recordReading` uses, so the two agree about what
+  // "riding with the plan" means; a marker the khatmah would carry along
+  // is a marker the khatmah's own row already speaks for.
+  if (isKhatmahPage(marker.page, riwayah, s)) return null;
+  return marker;
 }
 
 export function ayahKey(surah: number, ayah: number): string {

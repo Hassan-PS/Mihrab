@@ -1,56 +1,67 @@
 /**
- * What Home's Quran card should say (design review 2b).
+ * What the Quran doors say — on Home's card and at the top of the Qur'an
+ * tab, which draw the same thing (design review 2b; issue #41).
  *
  * The card used to be one wide button reading "Open the Quran" — an
  * unfalsifiable label on the widest element of the screen, while the app
  * already knew the last page, the khatmah plan and today's portion and
- * surfaced none of it. Four states, and the card picks the most useful TRUE
- * thing it can say:
+ * surfaced none of it. It became four states, and the four had one flaw:
+ * they were EITHER a khatmah OR a place to continue reading, and a reader
+ * who keeps a khatmah and reads Al-Kahf on Fridays has two places to go
+ * back to, not one. With a plan running the card said "Continue" and
+ * opened the last page looked at, which was sometimes the plan and
+ * sometimes not, and never said which.
  *
- *   khatmah  — a plan is running and pages remain for today
- *   done     — the plan is running and today's portion is finished
- *   continue — a bookmark exists but no plan
- *   start    — nothing started: the door into the muṣḥaf, and the offer
- *              of a khatmah. It used to show the verse of the day here;
- *              that is a reading, and Today is not where one is read —
- *              the card's job is the way in, in every state.
+ * So: two doors, each present when it is true, each leading exactly where
+ * it says.
  *
- * The review's own note is the reason this is a selector and not four
- * branches inside the view: four states in one card is four code paths, and
- * they belong somewhere testable. The view stays dumb.
+ *   khatmah — a plan is running: its day, what is left today or that it
+ *             is done, and the plan's OWN next page (`khatmahContinueTarget`
+ *             — never the last page looked at).
+ *   reading — the reading marker (`quranState.lastRead`), unless it is
+ *             riding with the plan, in which case the khatmah door already
+ *             leads there and a second door to the same page is noise
+ *             (`readingContinueTarget`).
+ *
+ * Neither is the "start" state: the way into the muṣḥaf and the offer of a
+ * khatmah. It used to show the verse of the day there; that is a reading,
+ * and Today is not where one is read — the card's job is the way in.
+ *
+ * A selector and not branches inside the view, as the review's own note
+ * asks: the states belong somewhere testable, and two screens draw them.
  */
+import { khatmahContinueTarget, type KhatmahTarget } from './khatmahTarget';
 import {
   KHATMAH_TOTAL_AYAHS,
   khatmahAyahsRead,
   khatmahDay,
   khatmahDaysLeft,
   khatmahPages,
+  readingContinueTarget,
   type KhatmahPlan,
   type LastRead,
   type QuranState,
 } from './quranState';
 
-export type QuranCardState =
-  | { kind: 'start' }
-  | { kind: 'continue'; lastRead: LastRead }
-  | {
-      kind: 'khatmah';
-      lastRead: LastRead | null;
-      /** 1-based day within the plan. */
-      dayNumber: number;
-      targetDays: number;
-      /** Pages still to read today (≥ 1 in this state). */
-      pagesLeftToday: number;
-      /** 0…1 of the whole mushaf. */
-      progress: number;
-    }
-  | {
-      kind: 'done';
-      dayNumber: number;
-      targetDays: number;
-      daysToGo: number;
-      progress: number;
-    };
+export type QuranCardKhatmah = {
+  /** 1-based day within the plan. */
+  dayNumber: number;
+  targetDays: number;
+  /** Today's portion is finished; the door still opens, on the next one. */
+  done: boolean;
+  /** Pages still to read today; 0 once done. */
+  pagesLeftToday: number;
+  daysToGo: number;
+  /** 0…1 of the whole muṣḥaf. */
+  progress: number;
+  /** Where "Continue khatmah" leads. */
+  target: KhatmahTarget;
+};
+
+export type QuranCardState = {
+  khatmah: QuranCardKhatmah | null;
+  reading: LastRead | null;
+};
 
 function localYmd(now: number): string {
   const d = new Date(now);
@@ -77,7 +88,7 @@ export function selectQuranCardState(
   now: number = Date.now(),
 ): QuranCardState {
   const plan = activeKhatmah(state);
-  const lastRead = state.lastRead;
+  let khatmah: QuranCardKhatmah | null = null;
 
   if (plan) {
     /**
@@ -96,30 +107,22 @@ export function selectQuranCardState(
      */
     const day = khatmahDay(plan, now);
     const pages = khatmahPages(plan, state.prefs.riwayah, now);
-    const dayNumber = day.portion.day;
-    const progress = Math.max(
-      0,
-      Math.min(1, khatmahAyahsRead(plan) / KHATMAH_TOTAL_AYAHS),
-    );
-    if (day.done) {
-      return {
-        kind: 'done',
-        dayNumber,
-        targetDays: plan.targetDays,
-        daysToGo: khatmahDaysLeft(plan, now),
-        progress,
-      };
-    }
-    return {
-      kind: 'khatmah',
-      lastRead,
-      dayNumber,
+    khatmah = {
+      dayNumber: day.portion.day,
       targetDays: plan.targetDays,
-      pagesLeftToday: Math.max(1, pages.leftToday),
-      progress,
+      done: day.done,
+      pagesLeftToday: day.done ? 0 : Math.max(1, pages.leftToday),
+      daysToGo: khatmahDaysLeft(plan, now),
+      progress: Math.max(
+        0,
+        Math.min(1, khatmahAyahsRead(plan) / KHATMAH_TOTAL_AYAHS),
+      ),
+      target: khatmahContinueTarget(plan, state.prefs.riwayah),
     };
   }
 
-  if (lastRead) return { kind: 'continue', lastRead };
-  return { kind: 'start' };
+  return {
+    khatmah,
+    reading: readingContinueTarget(state, state.prefs.riwayah),
+  };
 }
