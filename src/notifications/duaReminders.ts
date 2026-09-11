@@ -42,6 +42,7 @@
 import notifee, { AndroidImportance, TriggerType } from '@notifee/react-native';
 import { Platform } from 'react-native';
 import i18n from '../i18n';
+import { ROUTE_DUA_CATEGORY } from './notificationRoute';
 import type { TimingsMap } from '../types/prayer';
 
 /** Stable prefix so a resync cancels only these. */
@@ -189,7 +190,11 @@ export async function rescheduleDuaReminders(params: {
                     'duaReminders.eveningBody',
                     'The evening duas — their time runs until sunset.',
                   ),
-            data: { duaCategory: kind },
+            // `route` says what this is; `duaCategory` says which one —
+            // the pair `notificationRoute` turns into a destination
+            // (#39). The category is the tap's whole answer, so it is
+            // written here rather than resolved at press time.
+            data: { route: ROUTE_DUA_CATEGORY, duaCategory: kind },
             android: {
               channelId,
               smallIcon: 'ic_stat_prayer',

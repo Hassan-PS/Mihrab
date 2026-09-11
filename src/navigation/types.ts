@@ -1,3 +1,5 @@
+import type { DuaCategory } from '../duas/duas';
+
 /**
  * The six tabs (design review 2e). They are the app; the stack below is
  * everything pushed on top of them.
@@ -6,7 +8,12 @@ export type MainTabParamList = {
   TodayTab: undefined;
   QuranTab: undefined;
   TasbihTab: undefined;
-  DuasTab: undefined;
+  /**
+   * `category` opens that category rather than the index — the morning
+   * and evening adhkār reminders, #39. Optional, and the tab opens on
+   * the index without it, which is every other way in.
+   */
+  DuasTab: { category?: DuaCategory } | undefined;
   LogTab: undefined;
   SettingsTab: undefined;
 };

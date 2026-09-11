@@ -21,10 +21,7 @@ import { create, type ReactTestInstance } from 'react-test-renderer';
 let mockIntercept: (() => boolean) | undefined;
 
 jest.mock('../src/navigation/useAndroidSubScreenBack', () => ({
-  useAndroidSubScreenBack: (
-    _defer: unknown,
-    intercept?: () => boolean,
-  ) => {
+  useAndroidSubScreenBack: (_defer: unknown, intercept?: () => boolean) => {
     mockIntercept = intercept;
   },
 }));
@@ -33,7 +30,9 @@ jest.mock('react-i18next', () => ({
   ...jest.requireActual('react-i18next'),
   useTranslation: () => ({
     t: (k: string, d?: unknown) =>
-      typeof d === 'string' ? d : ((d as { defaultValue?: string })?.defaultValue ?? k),
+      typeof d === 'string'
+        ? d
+        : (d as { defaultValue?: string })?.defaultValue ?? k,
     i18n: { language: 'en' },
   }),
 }));
@@ -63,14 +62,22 @@ jest.mock('@react-navigation/native', () => ({
 jest.mock('../src/navigation/tabBarInset', () => ({ useTabBarInset: () => 0 }));
 // No title bar on a tab: the page clears the status bar itself, and the
 // number it clears it by comes from a hook with no provider in this tree.
-jest.mock('../src/navigation/useTabPageTop', () => ({ useTabPageTop: () => 12 }));
+jest.mock('../src/navigation/useTabPageTop', () => ({
+  useTabPageTop: () => 12,
+}));
 jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
+/** What the screen asked of the tab bar, in order. */
+const mockBar: string[] = [];
 jest.mock('../src/navigation/tabBarVisibility', () => ({
   useTabBarScroll: () => ({}),
-  hideTabBar: () => {},
-  showTabBar: () => {},
+  hideTabBar: () => {
+    mockBar.push('hide');
+  },
+  showTabBar: () => {
+    mockBar.push('show');
+  },
 }));
 
 import { DuasScreen } from '../src/screens/DuasScreen';
@@ -101,6 +108,7 @@ function render() {
 
 beforeEach(() => {
   mockIntercept = undefined;
+  mockBar.length = 0;
 });
 
 describe('the screen opens on every category', () => {
@@ -156,7 +164,9 @@ describe('a category opens, and back closes it', () => {
     // thumb already says "Duas".
     const tree = render();
     expect(
-      texts(tree.root).some(s => s === 'All duas' || s === 'duas.allCategories'),
+      texts(tree.root).some(
+        s => s === 'All duas' || s === 'duas.allCategories',
+      ),
     ).toBe(false);
     openMorning(tree);
     const back = tree.root
@@ -188,6 +198,77 @@ describe('a category opens, and back closes it', () => {
     });
     expect(handled).toBe(true);
     expect(texts(tree.root)).toContain('duas.cat.travel');
+  });
+});
+
+describe('a reminder opens its own category — issue #39', () => {
+  const renderLinked = (category?: string) => {
+    const setParams = jest.fn();
+    const focus: (() => void)[] = [];
+    let tree!: ReturnType<typeof create>;
+    act(() => {
+      tree = create(
+        <DuasScreen
+          route={{ params: { category } }}
+          navigation={{
+            setParams,
+            addListener: (_event, cb) => {
+              focus.push(cb);
+              return () => {};
+            },
+          }}
+        />,
+      );
+    });
+    return { tree, setParams, focus };
+  };
+
+  it('opens the evening adhkār when the link names them', () => {
+    // The morning and evening reminders name a window of the day. Landing
+    // on the index — or on whatever screen was last open — leaves the
+    // reader to go and find what they were just reminded of.
+    const { tree } = renderLinked('evening');
+    const shown = texts(tree.root);
+    expect(shown).toContain(duasByCategory('evening')[0].arabic);
+    expect(shown).not.toContain('duas.cat.travel');
+  });
+
+  it('hands the param back once it has been used', () => {
+    // Otherwise tomorrow's reminder arrives with the same value on the
+    // route, nothing changes, and the tap does nothing at all.
+    const { setParams } = renderLinked('morning');
+    expect(setParams).toHaveBeenCalledWith({ category: undefined });
+  });
+
+  it('opens the index for a name that is not a category', () => {
+    const { tree } = renderLinked('sunrise');
+    expect(texts(tree.root)).toContain('duas.cat.travel');
+  });
+
+  it('opens the index when there is no link at all', () => {
+    const { tree } = renderLinked(undefined);
+    expect(texts(tree.root)).toContain('duas.cat.travel');
+  });
+
+  it('keeps the tab bar off the page the link opened', () => {
+    // The navigator shows the bar as the tab takes focus, and on a cold
+    // start that focus lands after this screen has mounted with the
+    // category already open — so the page arrived with a bar over it
+    // that no tap from the index has ever put there.
+    const { focus } = renderLinked('evening');
+    expect(focus).toHaveLength(1);
+    mockBar.length = 0;
+    act(() => {
+      focus[0]();
+    });
+    expect(mockBar).toContain('hide');
+  });
+
+  it('leaves the bar alone on the index', () => {
+    // Nothing to re-assert there: the index is where the bar belongs.
+    const { focus } = renderLinked(undefined);
+    expect(focus).toHaveLength(0);
+    expect(mockBar).toContain('show');
   });
 });
 

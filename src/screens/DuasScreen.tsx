@@ -21,6 +21,7 @@ import { TabBackButton } from '../navigation/TabBackButton';
 import {
   DUA_SECTIONS,
   duasByCategory,
+  isDuaCategory,
   type Dua,
   type DuaCategory,
 } from '../duas/duas';
@@ -57,7 +58,17 @@ import { RADIUS, SPACING } from '../theme/tokens';
  * would have found — with the difference that a test can hand over a
  * fake one and assert what the header was told.
  */
-export function DuasScreen() {
+type DuasScreenProps = {
+  /** `mihrab://duas/evening` arrives here — #39. */
+  route?: { params?: { category?: string } };
+  navigation?: {
+    setParams?: (params: { category?: string }) => void;
+    /** Returns its own unsubscribe, which is what the effect cleans up. */
+    addListener?: (event: 'focus', cb: () => void) => (() => void) | undefined;
+  };
+};
+
+export function DuasScreen({ route, navigation }: DuasScreenProps = {}) {
   // Subscribe to width changes so future master-detail layouts pick up
   // the new breakpoint without a forced remount. iPad/Mac (#33) baseline.
   useBreakpoint();
@@ -96,18 +107,55 @@ export function DuasScreen() {
    * So `null` is the index — every category, one per row, scrolling the
    * way everything else does — and a category name opens that category.
    */
-  const [selected, setSelected] = useState<DuaCategory | null>(null);
+  const linked = route?.params?.category;
+  const [selected, setSelected] = useState<DuaCategory | null>(
+    isDuaCategory(linked) ? linked : null,
+  );
+  /**
+   * A REMINDER OPENS ITS OWN CATEGORY — issue #39.
+   *
+   * The morning and evening adhkār reminders name a window of the day
+   * and the duas that belong in it, and a tap used to land on whatever
+   * screen was last open — the index at best, the Qur'an at worst. The
+   * link carries the category now (`mihrab://duas/evening`), and this is
+   * where it becomes the open page. The initial state above answers the
+   * cold start, where the screen mounts with the param already on it;
+   * this answers the app that was already running.
+   *
+   * The param is given back as soon as it is used. Without that, a
+   * reader who taps tomorrow's reminder after walking back to the index
+   * would get nothing: the value on the route would not have changed, so
+   * nothing here would fire. Consuming it makes each tap a change.
+   */
+  useEffect(() => {
+    if (!isDuaCategory(linked)) return;
+    setSelected(linked);
+    navigation?.setParams?.({ category: undefined });
+  }, [linked, navigation]);
   /**
    * A CATEGORY IS A PAGE OF ITS OWN. Inside one the tab bar goes away —
    * the reader went INTO something, and a row of tabs under a list of
    * duas said "you could be anywhere" about a place they had chosen —
-   * and the list gets the bar's height. Back on the index it returns.
-   * Leaving the tab shows it regardless (MainTabs' focus listener).
+   * and the list gets the bar's height. Back on the index it returns,
+   * and leaving the tab shows it regardless (MainTabs' focus listener).
    */
   useEffect(() => {
-    if (selected !== null) hideTabBar();
-    else showTabBar();
-  }, [selected]);
+    if (selected === null) {
+      showTabBar();
+      return;
+    }
+    hideTabBar();
+    /**
+     * The navigator shows the bar as a tab takes focus, and that focus
+     * arrives AFTER this screen has mounted when a reminder opened a
+     * category directly (#39) — so the page came up with the bar over
+     * it, which no tap from the index has ever done. The same applies
+     * every time the reader leaves for another tab and comes back to a
+     * category still open. Re-assert it where the focus lands rather
+     * than trying to win the race at mount.
+     */
+    return navigation?.addListener?.('focus', hideTabBar);
+  }, [selected, navigation]);
   const insets = useSafeAreaInsets();
   // The long lists here: a category is up to a dozen duas, each three
   // renderings tall once opened. Same arrow as Tilāwah's surah list.

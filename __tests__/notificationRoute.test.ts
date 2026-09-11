@@ -32,11 +32,14 @@ jest.mock('../src/quran/khatmahTarget', () => ({
   khatmahContinueTarget: jest.fn(() => mockTarget),
 }));
 
+import { getStateFromPath } from '@react-navigation/native';
 import {
   notificationRoute,
   ROUTE_AYAH_OF_DAY,
+  ROUTE_DUA_CATEGORY,
   ROUTE_KHATMAH,
 } from '../src/notifications/notificationRoute';
+import { linking as linkingOptions } from '../src/navigation/linking';
 
 const src = (p: string) => readFileSync(path.join(__dirname, '..', p), 'utf8');
 
@@ -84,8 +87,9 @@ describe('the khatmah reminder opens where the plan is NOW', () => {
     } as never);
     expect(url).toBe('mihrab://read/3?scrollToAyah=7');
     mockTarget = { page: 100, surah: 5, ayah: 1 };
-    expect(await notificationRoute({ data: { route: ROUTE_KHATMAH } } as never))
-      .toBe('mihrab://read/5?scrollToAyah=1');
+    expect(
+      await notificationRoute({ data: { route: ROUTE_KHATMAH } } as never),
+    ).toBe('mihrab://read/5?scrollToAyah=1');
   });
 
   it('sends a muṣḥaf reader to the page instead', async () => {
@@ -116,6 +120,67 @@ describe('the khatmah reminder opens where the plan is NOW', () => {
     expect(
       await notificationRoute({ data: { route: ROUTE_KHATMAH } } as never),
     ).toBe('mihrab://quran');
+  });
+});
+
+describe('the adhkār reminder opens its own category — issue #39', () => {
+  it('lands on the duas it names, not wherever the reader was', async () => {
+    expect(
+      await notificationRoute({
+        data: { route: ROUTE_DUA_CATEGORY, duaCategory: 'evening' },
+      } as never),
+    ).toBe('mihrab://duas/evening');
+  });
+
+  it('still routes the week already on the system’s queue', async () => {
+    // Seven days of these are scheduled ahead of this shipping, carrying
+    // the category and no route — the same migration the ayah of the day
+    // needed, for the same reason.
+    expect(
+      await notificationRoute({ data: { duaCategory: 'morning' } } as never),
+    ).toBe('mihrab://duas/morning');
+  });
+
+  it('opens the index for a name that is not a category', async () => {
+    // A reminder is about duas whatever else is wrong with it, so the
+    // index is the honest answer — not the screen they happened to be on.
+    expect(
+      await notificationRoute({
+        data: { route: ROUTE_DUA_CATEGORY, duaCategory: 'sunrise' },
+      } as never),
+    ).toBe('mihrab://duas');
+  });
+});
+
+describe('mihrab://duas/<category> is a route the navigator knows', () => {
+  const duasRoute = (url: string) => {
+    const state = getStateFromPath(url, linkingOptions.config) as never;
+    return JSON.parse(JSON.stringify(state)) as {
+      routes: {
+        name: string;
+        state?: { routes: { name: string; params?: unknown }[] };
+      }[];
+    };
+  };
+
+  it('carries the category into the tab', () => {
+    const tab = duasRoute('duas/evening').routes[0].state?.routes[0];
+    expect(tab?.name).toBe('DuasTab');
+    expect(tab?.params).toEqual({ category: 'evening' });
+  });
+
+  it('and the bare tab still opens the index', () => {
+    // The optional segment has to stay optional: `mihrab://duas` is what
+    // every other sender uses, and a path that stopped matching it would
+    // break them silently.
+    const tab = duasRoute('duas').routes[0].state?.routes[0];
+    expect(tab?.name).toBe('DuasTab');
+    // React Navigation hands an optional segment through as an empty
+    // params object rather than none; what matters is that it names no
+    // category, which is what the screen reads as "the index".
+    expect(
+      (tab?.params as { category?: string } | undefined)?.category,
+    ).toBeUndefined();
   });
 });
 
@@ -161,6 +226,12 @@ describe('the senders say what they are', () => {
     const a = src('src/notifications/ayahOfDay.ts');
     expect(a).toContain('route: ROUTE_AYAH_OF_DAY');
     expect(a).toContain('surah: String(ref.surah)');
+  });
+
+  it('the adhkār reminders carry the category they are for', () => {
+    const d = src('src/notifications/duaReminders.ts');
+    expect(d).toContain('route: ROUTE_DUA_CATEGORY');
+    expect(d).toContain('duaCategory: kind');
   });
 
   it('the Log widget opens the Log', () => {

@@ -79,7 +79,16 @@ export const linking: LinkingOptions<RootStackParamList> = {
           TodayTab: 'today',
           QuranTab: 'quran',
           TasbihTab: 'tasbih',
-          DuasTab: 'duas',
+          /**
+           * mihrab://duas — the index; mihrab://duas/evening — that
+           * category, opened (#39).
+           *
+           * The name is checked by the screen rather than here: a
+           * `parse` that cannot say "not a category" has to invent a
+           * value, and the honest answer to an unknown name is the
+           * index, which is what the screen does with one.
+           */
+          DuasTab: 'duas/:category?',
           LogTab: 'log',
           SettingsTab: 'settings',
         },

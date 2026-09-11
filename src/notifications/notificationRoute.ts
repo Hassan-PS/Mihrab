@@ -40,6 +40,7 @@ import { MIHRAB_SCHEME } from '../navigation/linking';
 import { findPageForAyah } from '../quran/pages';
 import { khatmahContinueTarget } from '../quran/khatmahTarget';
 import { findDhikr } from '../dhikr/dhikr';
+import { isDuaCategory } from '../duas/duas';
 import { hydrateTasbihState, setActiveTasbih } from '../tasbih/tasbihStore';
 import {
   activeKhatmah,
@@ -54,6 +55,8 @@ export const ROUTE_AYAH_OF_DAY = 'ayahOfDay';
 export const ROUTE_SURAH = 'surah';
 /** One of the user's own dhikr reminders — #29. */
 export const ROUTE_DHIKR = 'dhikr';
+/** The morning or evening adhkār reminder — #39. */
+export const ROUTE_DUA_CATEGORY = 'duaCategory';
 
 function positiveInt(value: unknown): number | null {
   const n = Number(value);
@@ -123,6 +126,24 @@ export async function notificationRoute(
       }
     }
     return `${MIHRAB_SCHEME}tasbih`;
+  }
+
+  // The morning and evening adhkār — issue #39. The reminder names a
+  // window of the day and the duas that belong in it, and then landed
+  // the reader wherever they happened to be: the data was on the
+  // notification from the day it was written (`duaCategory`) and, as in
+  // #27, nothing read it.
+  //
+  // Baked in rather than resolved here, like the ayah of the day and
+  // unlike the khatmah: an evening reminder means the evening adhkār
+  // however late it is opened, and the window it names has not moved.
+  // The category is validated on the way out because `duas/:category`
+  // is a public-looking path in a private scheme, and an unknown name
+  // should open the index rather than a page of nothing.
+  if (data.route === ROUTE_DUA_CATEGORY || (!data.route && data.duaCategory)) {
+    return isDuaCategory(data.duaCategory)
+      ? `${MIHRAB_SCHEME}duas/${data.duaCategory}`
+      : `${MIHRAB_SCHEME}duas`;
   }
 
   if (data.route === ROUTE_KHATMAH) {

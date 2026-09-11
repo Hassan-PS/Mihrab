@@ -1643,6 +1643,20 @@ export function sectionedCategories(): DuaCategory[] {
   return DUA_SECTIONS.flatMap(s => s.categories);
 }
 
+/**
+ * Whether a value that came from outside the app names a category.
+ *
+ * Deep links and notification payloads are strings until something
+ * checks them — issue #39 sends `mihrab://duas/evening` from a reminder,
+ * and a link is the one thing here whose contents nothing else
+ * guarantees. An unknown name opens the index rather than a blank page.
+ */
+export function isDuaCategory(value: unknown): value is DuaCategory {
+  return (
+    typeof value === 'string' && (DUA_CATEGORIES as string[]).includes(value)
+  );
+}
+
 export function duasByCategory(category: DuaCategory): Dua[] {
   return DUAS.filter(d => d.category === category);
 }
