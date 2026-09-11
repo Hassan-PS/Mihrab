@@ -37,7 +37,16 @@ describe('the check on Today', () => {
   const src = read('src/screens/home/TodayCard.tsx');
 
   it('is drawn as not-yet until the journal has been read', () => {
-    expect(src).toMatch(/quickLog\.hydrated\s*\?\s*quickLogPhase\([^)]*\)\s*:\s*'not-yet'/);
+    // `ready` carries it now: the ring is drawn at a whisper exactly as
+    // for a prayer whose time has not come, and it is the ONE state that
+    // takes no press — there is nothing to answer the tap with (#41 follow-up).
+    expect(src).toContain('ready: quickLog.hydrated,');
+    const check = readFileSync(
+      join(__dirname, '..', 'src/screens/home/LogCheck.tsx'),
+      'utf8',
+    );
+    expect(check).toContain("const notYet = phase === 'not-yet' || !ready;");
+    expect(check).toContain('disabled={!ready}');
   });
 });
 

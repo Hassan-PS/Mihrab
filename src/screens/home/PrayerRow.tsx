@@ -134,7 +134,12 @@ type PrayerRowProps = {
    * Absent on secondary rows and on other days, where the slot is still
    * held so every name on the card starts on the same line.
    */
-  log?: { status: LoggedStatus | null; phase: QuickLogPhase };
+  log?: {
+    status: LoggedStatus | null;
+    phase: QuickLogPhase;
+    /** The journal has been read — until then nothing can be recorded. */
+    ready?: boolean;
+  };
   onToggleLog?: () => void;
   /**
    * Whether this card has a check column at all. Today's does, so its
@@ -225,6 +230,7 @@ function PrayerRowImpl({
         <LogCheck
           status={log.status}
           phase={log.phase}
+          ready={log.ready}
           palette={palette}
           prayerLabel={t(`prayer.${prayerKey}`)}
           onPress={onToggleLog}

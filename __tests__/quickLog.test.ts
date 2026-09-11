@@ -205,10 +205,17 @@ describe('the row and the card', () => {
     expect(quick).toMatch(/PassedPrayerAnswer = LoggedStatus/);
   });
 
-  it('is a checkbox that cannot be pressed before its time', () => {
+  it('is a checkbox that says so before its time, rather than doing nothing', () => {
+    // It is announced as disabled and drawn at a whisper, but it TAKES the
+    // press and the card answers it — a ring that looks live and does
+    // nothing was reported as a broken button. The unread journal is the
+    // one state that takes no press: there is nothing to answer with.
     expect(check).toMatch(/accessibilityRole="checkbox"/);
-    expect(check).toMatch(/disabled=\{notYet\}/);
     expect(check).toMatch(/accessibilityState=\{\{ checked: logged, disabled: notYet \}\}/);
+    expect(check).toMatch(/disabled=\{!ready\}/);
+    expect(card).toMatch(/if \(outcome === 'nothing'\) \{[\s\S]*?'not-yet'[\s\S]*?say\(t\('journal\.notYet'/);
+    // One line, one height: the answer takes the day's own second line.
+    expect(card).toMatch(/\{hint \?\? \(getHijriDate \? getHijriDate\(selected\) : ''\)\}/);
   });
 
   it('writes through the Log’s own path', () => {

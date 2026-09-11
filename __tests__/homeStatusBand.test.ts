@@ -131,7 +131,10 @@ describe('the band is wired to the page', () => {
   const band = read('src/screens/home/HomeStatusBand.tsx');
 
   it('only the phone renders it — the dashboard has no strip to cover', () => {
-    expect(home).toMatch(/!isDashboard && !isMacCatalyst \? \(\s*<HomeStatusBand/);
+    // …and not while a permission banner is what sits under the clock.
+    expect(home).toMatch(
+      /!isDashboard && !isMacCatalyst && !hasBanner \? \(\s*<HomeStatusBand/,
+    );
     expect(home).toMatch(/insetTop=\{insets\.top\}/);
   });
 

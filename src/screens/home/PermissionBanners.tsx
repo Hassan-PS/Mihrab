@@ -21,6 +21,15 @@ type PermissionBannersProps = {
   exactAlarmDenied: boolean;
   notifPermDenied: boolean;
   onRetryFetch: () => void;
+  /**
+   * The status bar's height, when these are the first thing on a page
+   * that runs to the top edge of the screen — the phone's Today.
+   *
+   * A banner there was drawn through the clock and behind the camera
+   * cutout. It is padding rather than a margin so the tint fills the
+   * strip behind the bar rather than leaving a band of page above it.
+   */
+  topInset?: number;
 };
 
 function PermissionBannersImpl({
@@ -28,6 +37,7 @@ function PermissionBannersImpl({
   exactAlarmDenied,
   notifPermDenied,
   onRetryFetch,
+  topInset = 0,
 }: PermissionBannersProps) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
@@ -36,10 +46,29 @@ function PermissionBannersImpl({
     return null;
   }
 
+  // Only the FIRST banner clears the bar; any others stack under it.
+  // The strip runs behind the bar rather than starting under it: the tint
+  // fills the top of the screen, so the clock sits on the notice instead
+  // of on a band of page above it. Its top corners square off for that.
+  const lead =
+    topInset > 0
+      ? {
+          paddingTop: topInset + SPACING.sm,
+          borderTopStartRadius: 0,
+          borderTopEndRadius: 0,
+        }
+      : null;
+  let first = true;
+  const leadStyle = () => {
+    if (!first) return null;
+    first = false;
+    return lead;
+  };
+
   return (
     <>
       {usingLocalFallback && (
-        <View style={[styles.banner, { backgroundColor: palette.accentBg }]}>
+        <View style={[styles.banner, { backgroundColor: palette.accentBg }, leadStyle()]}>
           <Text style={[styles.text, { color: palette.text }]}>
             {t('home.localFallbackNotice')}
           </Text>
@@ -56,7 +85,7 @@ function PermissionBannersImpl({
       )}
 
       {exactAlarmDenied && (
-        <View style={[styles.banner, { backgroundColor: palette.accentBg }]}>
+        <View style={[styles.banner, { backgroundColor: palette.accentBg }, leadStyle()]}>
           <Text
             style={[styles.text, { color: palette.text }]}
             numberOfLines={2}>
@@ -75,7 +104,7 @@ function PermissionBannersImpl({
       )}
 
       {notifPermDenied && (
-        <View style={[styles.banner, { backgroundColor: palette.accentBg }]}>
+        <View style={[styles.banner, { backgroundColor: palette.accentBg }, leadStyle()]}>
           <Text
             style={[styles.text, { color: palette.text }]}
             numberOfLines={2}>

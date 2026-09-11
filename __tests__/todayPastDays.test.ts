@@ -170,8 +170,12 @@ describe('the day bar', () => {
     expect(home).toMatch(/roomy=\{isRoomy\}/);
     expect(card).toMatch(/roomy\s*\?\s*styles\.cardRoomy\s*:\s*styles\.cardBleed/);
     expect(card).toMatch(/const roomyHeroHeight = roomy/);
-    // The status bar is the page's on a roomy page, not the sky's.
-    expect(card).toMatch(/ownsStatusBar=\{fullBleed && !roomy\}/);
+    // The status bar is the page's on a roomy page, not the sky's — and
+    // not the sky's either when a banner is above the hero (#41 follow-up).
+    expect(card).toMatch(
+      /const underStatusBar = fullBleed && !roomy && !bannerAbove;/,
+    );
+    expect(card).toMatch(/ownsStatusBar=\{underStatusBar\}/);
   });
 });
 

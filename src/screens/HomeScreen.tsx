@@ -242,6 +242,18 @@ export function HomeScreen() {
   }, []);
   const [exactAlarmDenied, setExactAlarmDenied] = useState(false);
   const [notifPermDenied, setNotifPermDenied] = useState(false);
+  /**
+   * Whether anything is drawn above the hero — the three banner
+   * conditions `PermissionBanners` knows (a provider that fell back,
+   * exact alarms revoked, notifications denied).
+   *
+   * It decides who is under the status bar: the sky, or a notice. Both
+   * cannot be, and the notice wins because it is on top.
+   */
+  const hasBanner =
+    (state.phase === 'ready' && state.usingLocalFallback === true) ||
+    exactAlarmDenied ||
+    notifPermDenied;
   const [nextInfo, setNextInfo] = useState<{ name: string; at: Date } | null>(
     null,
   );
@@ -1119,11 +1131,20 @@ export function HomeScreen() {
           styles.homeColumn,
           !isDashboard && !isMacCatalyst && !isRoomy && styles.fillColumn,
         ]}>
+      {/* A banner is the FIRST thing on the page, and on a phone the page
+          runs to the top edge — so without this the notice was drawn
+          through the clock and behind the camera. It takes the status
+          bar's height as padding and the bar's glyphs go back to the
+          page's own ink, because with a banner up there the sky is no
+          longer what the clock sits on (see `bannerAbove` below). */}
       <PermissionBanners
         usingLocalFallback={state.usingLocalFallback ?? false}
         exactAlarmDenied={exactAlarmDenied}
         notifPermDenied={notifPermDenied}
         onRetryFetch={retry}
+        topInset={
+          !isDashboard && !isMacCatalyst && !isRoomy && hasBanner ? insets.top : 0
+        }
       />
 
 
@@ -1154,6 +1175,10 @@ export function HomeScreen() {
             expanded={isDashboard}
             fullBleed={fullBleed}
             roomy={isRoomy}
+            // The hero is under the status bar only when nothing is above
+            // it. A permission banner takes that place, and takes the
+            // inset and the bar's ink with it.
+            bannerAbove={hasBanner}
             renderLocation={
               fullBleed
                 ? ink => (
@@ -1258,7 +1283,7 @@ export function HomeScreen() {
     </ScrollView>
     {/* Over the page, and only on the phone's full-bleed hero: the
         dashboard's card does not run under the status bar. */}
-    {!isDashboard && !isMacCatalyst ? (
+    {!isDashboard && !isMacCatalyst && !hasBanner ? (
       <HomeStatusBand
         scrollY={scrollY}
         insetTop={insets.top}

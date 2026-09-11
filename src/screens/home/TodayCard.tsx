@@ -105,6 +105,9 @@ import { TYPE } from '../../theme/typography';
  * it and a generous hit slop instead.
  */
 const CHEVRON_SIZE = 20;
+
+/** How long the day line carries an answer to a tap it could not record. */
+const HINT_MS = 2600;
 function Chevron({ back, color }: { back: boolean; color: string }) {
   return (
     <Svg width={CHEVRON_SIZE} height={CHEVRON_SIZE} viewBox="0 0 20 20">
@@ -170,6 +173,12 @@ export type TodayCardProps = {
    * the rows sit on the page beneath it, not in a card.
    */
   fullBleed?: boolean;
+  /**
+   * Something is drawn above the hero — a permission banner (HomeScreen).
+   * The hero is then not under the status bar: it neither pads for it nor
+   * paints its glyphs, and the notice above does both.
+   */
+  bannerAbove?: boolean;
   /**
    * A tablet held upright (see `HOME_ROOMY_MIN_HEIGHT`): full-bleed, but
    * the hero does NOT grow into the page's slack.
@@ -551,6 +560,7 @@ function TodayCardImpl({
   onOpenQibla,
   expanded = false,
   fullBleed = false,
+  bannerAbove = false,
   roomy = false,
   renderLocation,
   skyTimings,
@@ -842,11 +852,45 @@ function TodayCardImpl({
     answers: readonly PassedPrayerAnswer[];
     secondOpen: boolean;
   } | null>(null);
+  /**
+   * The answer to a tap that could not be recorded — shown under the day,
+   * in the line the Hijri date sits on, for a moment.
+   *
+   * A check whose prayer has not come cannot record anything; it used to
+   * take no press at all, which is a control that looks live and does
+   * nothing, and it was reported as exactly that. It takes the press now
+   * and says why — and at one in the morning, when none of today's
+   * prayers has come, the way to yesterday is the chevron beside it.
+   */
+  const [hint, setHint] = useState<string | null>(null);
+  const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const say = useCallback((message: string) => {
+    setHint(message);
+    if (hintTimer.current) clearTimeout(hintTimer.current);
+    hintTimer.current = setTimeout(() => setHint(null), HINT_MS);
+  }, []);
+  useEffect(
+    () => () => {
+      if (hintTimer.current) clearTimeout(hintTimer.current);
+    },
+    [],
+  );
   const toggleLog = useCallback(
     async (prayer: JournalPrayer, dayTimings: TimingsMap, offset: number) => {
       const day = addDays(startOfLocalDay(new Date()), offset);
       const options = { day, tomorrow: dayAt(offset + 1) };
       const outcome = await quickLog.toggle(prayer, dayTimings, options);
+      if (outcome === 'nothing') {
+        // The one reason a tap is refused that the reader can act on: the
+        // prayer has not come. (An unread journal takes no press at all.)
+        if (
+          quickLogPhase(prayer, dayTimings, new Date(), options.tomorrow, day) ===
+          'not-yet'
+        ) {
+          say(t('journal.notYet', 'Not yet — its time has not come'));
+        }
+        return;
+      }
       if (outcome !== 'ask') return;
       const { phase, answers } = quickLog.askedAt(prayer, dayTimings, options);
       // A set that came back empty would be a sheet with nothing on it:
@@ -860,7 +904,7 @@ function TodayCardImpl({
         secondOpen: phase === 'after-first',
       });
     },
-    [quickLog, dayAt],
+    [quickLog, dayAt, say, t],
   );
   const answerPassed = useCallback(
     (status: PassedPrayerAnswer) => {
@@ -931,7 +975,10 @@ function TodayCardImpl({
   // the hero is a panel of the page, and the rows sit on the page.
   // Roomy: the hero is a panel inside the page, so it takes the page's
   // own top padding rather than clearing the status bar.
-  const heroTop = fullBleed && !roomy ? insets.top + SPACING.md : SPACING.lg;
+  // Under the status bar only when the hero is the top of the page: a
+  // full-bleed phone layout with nothing above it.
+  const underStatusBar = fullBleed && !roomy && !bannerAbove;
+  const heroTop = underStatusBar ? insets.top + SPACING.md : SPACING.lg;
   /**
    * The hero's height on a roomy page: about a third of the window, never
    * under 300 and never over 460. A third keeps the sky the backdrop it
@@ -1040,12 +1087,13 @@ function TodayCardImpl({
           loggable && isSalah(key)
             ? {
                 status: quickLog.statusOf(key, day),
+                phase: quickLogPhase(key, dayTimings, logNow, nextDay, day),
                 // Until the journal has been read there is nothing to
                 // show and nothing safe to record: the ring at a whisper,
-                // exactly as for a prayer whose time has not come.
-                phase: quickLog.hydrated
-                  ? quickLogPhase(key, dayTimings, logNow, nextDay, day)
-                  : 'not-yet',
+                // exactly as for a prayer whose time has not come — and
+                // nothing to answer a tap with either, so that one state
+                // alone takes no press.
+                ready: quickLog.hydrated,
               }
             : undefined
         }
@@ -1092,12 +1140,12 @@ function TodayCardImpl({
             tomorrowFajr={tomorrow?.Fajr}
             expanded={expanded}
             bleed={{ horizontal: SPACING.xl, top: heroTop, bottom: SPACING.lg }}
-            statusBarInset={fullBleed && !roomy ? insets.top : 0}
+            statusBarInset={underStatusBar ? insets.top : 0}
             fill={fullBleed}
             topRow={fullBleed ? { renderLocation, qibla: qiblaChip } : undefined}
             // Not on a roomy page: the hero is not under the status bar
             // there, so the bar takes the page's ink like every other tab.
-            ownsStatusBar={fullBleed && !roomy}
+            ownsStatusBar={underStatusBar}
           />
         ) : null}
         {/* Parked in the corner rather than in the hero's own markup, and
@@ -1181,12 +1229,19 @@ function TodayCardImpl({
                 </Text>
               </Text>
             </View>
+            {/* One line, two things it may say: the day's Hijri date, or
+                — for a moment after a tap that could not be recorded —
+                why. Never both, and never a line of different height:
+                the table below must not move under the thumb. */}
             <Text
-              style={[styles.dayHijri, { color: palette.muted }]}
+              style={[
+                styles.dayHijri,
+                { color: hint ? palette.accent : palette.muted },
+              ]}
               numberOfLines={1}
               maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
-              {getHijriDate ? getHijriDate(selected) : ''}
-              {onToday ? null : (
+              {hint ?? (getHijriDate ? getHijriDate(selected) : '')}
+              {onToday || hint ? null : (
                 <Text style={[styles.dayBack, { color: palette.accent }]}>
                   {'   '}
                   {t('home.backToToday', 'Back to today')}

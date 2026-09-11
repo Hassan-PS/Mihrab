@@ -24,8 +24,13 @@ export const LOG_CHECK_SIZE = 24;
  *   ◐✓  late or made up — the accent's tint with the tick in accent: it
  *       was prayed, and it was not on time; both facts are visible.
  *   ○–  missed — the ring with a dash; recorded, and recorded as missed.
- *   ◌   not yet — the ring at a whisper, not pressable: there is nothing
- *       to record before the prayer's time.
+ *   ◌   not yet — the ring at a whisper. There is nothing to record
+ *       before the prayer's time, but the tap is taken and ANSWERED
+ *       (TodayCard says so under the day): a control that does nothing
+ *       and says nothing reads as broken, which is how it was reported.
+ *       The one state that truly cannot be pressed is a journal that has
+ *       not been read yet — there is nothing to answer with, and it
+ *       lasts a moment rather than half a day.
  *
  * Drawn with SVG for the tick so it is the same stroke as the rest of the
  * app's marks and not whichever ✓ glyph the system font ships.
@@ -33,18 +38,21 @@ export const LOG_CHECK_SIZE = 24;
 function LogCheckImpl({
   status,
   phase,
+  ready = true,
   palette,
   prayerLabel,
   onPress,
 }: {
   status: LoggedStatus | null;
   phase: QuickLogPhase;
+  /** The journal has been read: false while it is being, or after it failed. */
+  ready?: boolean;
   palette: AppPalette;
   prayerLabel: string;
   onPress: () => void;
 }) {
   const { t } = useTranslation();
-  const notYet = phase === 'not-yet';
+  const notYet = phase === 'not-yet' || !ready;
   const logged = status != null;
   const onTime = status === 'on-time';
   const missed = status === 'missed';
@@ -71,7 +79,7 @@ function LogCheckImpl({
       accessibilityRole="checkbox"
       accessibilityState={{ checked: logged, disabled: notYet }}
       accessibilityLabel={label}
-      disabled={notYet}
+      disabled={!ready}
       onPress={onPress}
       hitSlop={10}
       style={styles.hit}>
