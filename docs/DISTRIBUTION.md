@@ -295,7 +295,30 @@ on the listing beside the current seven.)
 
 ## 4. App Store / TestFlight (iOS)
 
-Fully automated via **Xcode Cloud**. We don't build the iOS binary locally for distribution — Xcode Cloud handles signing, archiving, upload, and submission.
+Normally via **Xcode Cloud**, which handles signing, archiving and upload.
+
+**There is a local path too, and it is not a fallback of last resort:**
+`./scripts/build-ios-appstore.sh` archives, exports a signed `.ipa`,
+validates it and uploads through `altool` with the API key in
+`~/.config/mihrab/asc.json`. `--no-upload` stops after validation.
+
+It exists because Xcode Cloud is one service on one company's weather —
+on 2026-09-11 `POST /v1/ciBuildRuns` answered HTTP 500 for an hour, with
+nothing to fix and no way to ship — and because until that same day this
+account had **no distribution certificate at all**: every App Store build
+Mihrab had ever shipped was signed by a cloud-managed certificate held on
+Apple's side. Building locally needs your own `Apple Distribution`
+certificate in the login keychain (Xcode → Settings → Accounts → Manage
+Certificates → + → Apple Distribution), and its private key is the
+irreplaceable half — a `.cer` from the developer portal is only the
+public one.
+
+Know what it does not prove: a local export signs against provisioning
+profiles already on the machine, which is exactly how builds 520-522
+archived green here and failed in the cloud. The script's entitlement
+gate reads what each embedded appex actually claims in the built archive
+and refuses to export on the specific mismatch that cost those three
+builds, but a green local run is still not a green cloud run.
 
 ### Workflows
 
