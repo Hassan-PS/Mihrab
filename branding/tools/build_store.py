@@ -95,8 +95,8 @@ SETS = [
     {
         # Play caps a screenshot's long side at twice its short side, so the
         # phone's own 1080x2400 (2.22) cannot be uploaded as-is and the panel
-        # is composed at 1080x2160 (exactly 2.00). The raw shots go to F-Droid
-        # instead, which shows real screenshots rather than marketing panels.
+        # is composed at 1080x2160 (exactly 2.00). F-Droid gets the same
+        # panels, under plain 1-based names — see the note in build().
         "name": "Android phone",
         "src": "branding/store/play",
         "raw_size": (1080, 2400),
@@ -197,11 +197,21 @@ def build(spec):
             jpg = os.path.join(upload, key + ".jpg")
             Image.open(out).convert("RGB").save(jpg, quality=92, subsampling=0)
         if fdroid:
-            # F-Droid orders by file name and shows the shot itself, so the
-            # raw capture goes across under a plain 1-based name.
+            # F-Droid gets the same captioned panel as Play, under a plain
+            # 1-based name because F-Droid orders by file name. It used to
+            # get the raw capture, on the theory that F-Droid shows "real"
+            # screenshots — which put a page of bare captures next to the
+            # panels the listing had inherited, and read as two apps.
+            #
+            # KEEP THESE NAMES STABLE. F-Droid's server copies every file in
+            # this folder into its own repo directory at build time and
+            # never deletes one (fdroidserver update.py, insert_localized_
+            # app_metadata: copy only, no cleanup). A renamed screenshot is a
+            # second screenshot on the listing, forever, until an F-Droid
+            # admin removes the old file by hand. Overwrite; do not rename.
             n = key.split("_", 1)
             plain = "%d_%s.png" % (int(n[0]), n[1]) if n[0].isdigit() else shot
-            Image.open(raw).convert("RGB").save(os.path.join(fdroid, plain))
+            Image.open(out).convert("RGB").save(os.path.join(fdroid, plain))
     went = [d for d in (spec["previews"], spec.get("upload"), spec.get("fdroid")) if d]
     print("%s: %d panels -> %s" % (spec["name"], len(shots), ", ".join(went)))
 

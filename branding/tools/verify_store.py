@@ -104,9 +104,13 @@ for rel, size, mode in (
     if im.mode != mode:
         problems.append("%s is %s, wanted %s" % (rel, im.mode, mode))
 
-# ---- F-Droid: real screenshots, no size rule, but still no alpha ----
-folder("fastlane/metadata/android/en-US/images/phoneScreenshots", (1080, 2400), count=(2, 8), exts=(".png",))
-folder("fastlane/metadata/android/en-US/images/tenInchScreenshots", (2560, 1600), count=(2, 8), exts=(".png",))
+# ---- F-Droid: the same captioned panels as Play, no alpha ----
+# The panel sizes, not the raw capture sizes: build_store.py sends the
+# composed panel to F-Droid (its listing had a page of bare captures next to
+# the panels it had inherited, and read as two apps). Names in these folders
+# must stay stable — see the note in build_store.py.
+folder("fastlane/metadata/android/en-US/images/phoneScreenshots", (1080, 2160), count=(2, 8), exts=(".png",))
+folder("fastlane/metadata/android/en-US/images/tenInchScreenshots", (2560, 1440), count=(2, 8), exts=(".png",))
 
 if problems:
     print("%d problem(s) across %d files:\n" % (len(problems), checked))

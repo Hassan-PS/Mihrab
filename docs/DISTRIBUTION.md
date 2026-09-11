@@ -272,7 +272,18 @@ fastlane/metadata/android/en-US/
     └── phoneScreenshots/
 ```
 
-The Play Console reads from these. F-Droid optionally reuses them but our `com.prayer_times.yml` carries its own copy too.
+The Play Console reads from these, and F-Droid copies the screenshot folders
+into its own repo at build time — so what is on the F-Droid listing is
+whatever these folders held at the tagged commit. They hold the same
+captioned panels as Play (`branding/tools/build_store.py` writes both).
+
+**F-Droid never deletes a screenshot it has copied.** fdroidserver copies
+every file in `phoneScreenshots/` into `repo/com.prayer_times/en-US/` and
+has no cleanup step, so a file renamed here becomes a *second* screenshot on
+the listing, under the old name, until an F-Droid admin removes it by hand.
+Overwrite in place; never rename. (Seen 2026-09-11: four July captures
+under old names — `2_quran`, `3_duas`, `4_tasbih`, `5_fasting` — were still
+on the listing beside the current seven.)
 
 ### Flavor specifics
 
