@@ -1239,7 +1239,8 @@
     "quickLogLogged": "{{prayer}} registrada: {{status}}. Toca para deshacer",
     "quickLogNotYet": "{{prayer}} aún no ha llegado",
     "passedTitle": "Registrar {{prayer}} · {{day}}",
-    "passedBody": "Su tiempo ya pasó. ¿Se rezó a tiempo o se recuperó?"
+    "passedBody": "Su tiempo ya pasó. ¿Cómo se rezó?",
+    "passedFirstBody": "Su primer tiempo ya pasó y el segundo sigue abierto. ¿Se rezó en el primer tiempo o después?"
   },
   "events": {
     "islamicNewYear": "Año Nuevo islámico",

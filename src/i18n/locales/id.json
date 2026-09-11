@@ -1239,7 +1239,8 @@
     "quickLogLogged": "{{prayer}} dicatat: {{status}}. Ketuk untuk membatalkan",
     "quickLogNotYet": "Waktu {{prayer}} belum masuk",
     "passedTitle": "Catat {{prayer}} · {{day}}",
-    "passedBody": "Waktunya telah lewat. Apakah dikerjakan tepat waktu, atau diqadha?"
+    "passedBody": "Waktunya telah lewat. Bagaimana dikerjakannya?",
+    "passedFirstBody": "Waktu pertamanya telah lewat dan waktu kedua masih berjalan. Dikerjakan pada waktu pertama, atau setelahnya?"
   },
   "events": {
     "islamicNewYear": "Tahun Baru Hijriyah",

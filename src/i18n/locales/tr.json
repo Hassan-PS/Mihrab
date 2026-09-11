@@ -1239,7 +1239,8 @@
     "quickLogLogged": "{{prayer}} kaydedildi: {{status}}. Geri almak için dokunun",
     "quickLogNotYet": "{{prayer}} vakti henüz girmedi",
     "passedTitle": "{{prayer}} kaydet · {{day}}",
-    "passedBody": "Vakti geçti. Vaktinde mi kılındı, yoksa kaza mı edildi?"
+    "passedBody": "Vakti geçti. Nasıl kılındı?",
+    "passedFirstBody": "İlk vakti geçti, ikinci vakti sürüyor. İlk vakitte mi kılındı, sonrasında mı?"
   },
   "events": {
     "islamicNewYear": "Hicri yılbaşı",

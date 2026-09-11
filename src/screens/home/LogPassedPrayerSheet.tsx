@@ -1,12 +1,15 @@
 /**
- * "Its time has passed — when was it prayed?"
+ * "Its time has passed — how was it prayed?"
  *
  * The question the check on Today asks once a prayer's window has closed
- * (see quickLog.ts). Two answers and a way out: on time, or made up. Not
- * four — the Log's full set is a screen away for anyone who wants "late"
- * or "missed", and a sheet that opens on a tap should be answerable with
- * the next one. The same sheet the reset picker is drawn as: a titled
- * card on the overlay, one row per answer, cancel at the foot.
+ * (see quickLog.ts). WHICH answers it offers is the moment's to decide,
+ * not this file's — issue #40: inside a Mālikī second window there are
+ * two, the first time or after it, because the prayer can still be
+ * prayed in its own time; once the window has gone entirely there are
+ * four, the Log's own set, missed among them. The caller passes the set
+ * and the sheet asks the question that fits it. Drawn as the reset
+ * picker is: a titled card on the overlay, one row per answer, cancel at
+ * the foot.
  */
 import { memo } from 'react';
 import { Modal, Pressable, StyleSheet, Text } from 'react-native';
@@ -17,11 +20,19 @@ import type { PassedPrayerAnswer } from '../../journal/quickLog';
 import { RADIUS, SPACING } from '../../theme/tokens';
 import { TYPE } from '../../theme/typography';
 
-const ANSWERS: readonly PassedPrayerAnswer[] = ['on-time', 'qadha'];
-
 type Props = {
-  /** The prayer's name in the app language, and the day's label. */
-  question: { prayer: string; day: string } | null;
+  /**
+   * The prayer's name in the app language, the day's label, and what may
+   * be answered — `answers` comes from `passedPrayerAnswers`, so the
+   * sheet never offers a status the clock has already ruled out.
+   */
+  question: {
+    prayer: string;
+    day: string;
+    answers: readonly PassedPrayerAnswer[];
+    /** True while the second window is still open: fewer answers, and its own question. */
+    secondOpen: boolean;
+  } | null;
   onAnswer: (status: PassedPrayerAnswer) => void;
   onCancel: () => void;
 };
@@ -56,11 +67,16 @@ function LogPassedPrayerSheetImpl({ question, onAnswer, onCancel }: Props) {
             })}
           </Text>
           <Text style={[styles.message, { color: palette.muted }]}>
-            {t('journal.passedBody', {
-              defaultValue: 'Its time has passed. Was it prayed on time, or made up?',
-            })}
+            {question?.secondOpen
+              ? t('journal.passedFirstBody', {
+                  defaultValue:
+                    'Its first time has passed and the second is open. Was it prayed in the first time, or after it?',
+                })
+              : t('journal.passedBody', {
+                  defaultValue: 'Its time has passed. How was it prayed?',
+                })}
           </Text>
-          {ANSWERS.map(status => (
+          {(question?.answers ?? []).map(status => (
             <Pressable
               key={status}
               accessibilityRole="button"

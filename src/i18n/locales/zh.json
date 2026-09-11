@@ -1239,7 +1239,8 @@
     "quickLogLogged": "{{prayer}}已记录：{{status}}。点按可撤销",
     "quickLogNotYet": "{{prayer}}时间尚未到",
     "passedTitle": "记录{{prayer}} · {{day}}",
-    "passedBody": "时间已过。是按时礼的，还是补礼的？"
+    "passedBody": "时间已过。这次礼拜是怎么完成的？",
+    "passedFirstBody": "首选时段已过，必要时段仍在。这次礼拜是在首选时段内，还是之后？"
   },
   "events": {
     "islamicNewYear": "伊斯兰新年",

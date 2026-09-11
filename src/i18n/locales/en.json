@@ -1239,7 +1239,8 @@
     "quickLogLogged": "{{prayer}} logged: {{status}}. Tap to undo",
     "quickLogNotYet": "{{prayer}} has not come yet",
     "passedTitle": "Log {{prayer}} · {{day}}",
-    "passedBody": "Its time has passed. Was it prayed on time, or made up?"
+    "passedBody": "Its time has passed. How was it prayed?",
+    "passedFirstBody": "Its first time has passed and the second is open. Was it prayed in the first time, or after it?"
   },
   "events": {
     "islamicNewYear": "Islamic New Year",

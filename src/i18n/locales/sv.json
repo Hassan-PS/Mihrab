@@ -1239,7 +1239,8 @@
     "quickLogLogged": "{{prayer}} loggad: {{status}}. Tryck för att ångra",
     "quickLogNotYet": "{{prayer}} har inte infallit ännu",
     "passedTitle": "Logga {{prayer}} · {{day}}",
-    "passedBody": "Dess tid har passerat. Bads den i tid, eller togs den igen?"
+    "passedBody": "Dess tid har passerat. Hur bads den?",
+    "passedFirstBody": "Första tiden har passerat och den andra är öppen. Bads den i första tiden, eller efter den?"
   },
   "events": {
     "islamicNewYear": "Islamiskt nyår",

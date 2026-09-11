@@ -10,10 +10,19 @@
  * used to write `late` there on its own, which was the clock's answer
  * and not the reader's: someone marking yesterday's Fajr at breakfast
  * usually prayed it at Fajr, and a check that silently recorded
- * otherwise had to be corrected on the Log. So the row asks, once, with
- * two answers (`LogPassedPrayerSheet`), and writes what it is told.
- * A second tap un-logs it either way (a tombstone, like the Log's own
- * deselect) — nothing to ask about undoing.
+ * otherwise had to be corrected on the Log. So the row asks, once
+ * (`LogPassedPrayerSheet`), and writes what it is told. A second tap
+ * un-logs it either way (a tombstone, like the Log's own deselect) —
+ * nothing to ask about undoing.
+ *
+ * WHAT IT ASKS DEPENDS ON THE MOMENT — issue #40. With the Mālikī second
+ * times on, a window has two halves, and the half it is in is an answer
+ * nobody should have to give twice: inside the second window the only
+ * question is the first time or after it, because the prayer can still
+ * be prayed in its own time and nothing is qaḍāʾ yet. Once the whole
+ * window has gone — for everybody, with those times or without — all
+ * four of the Log's statuses are on the table, missed among them, and
+ * `late` is no longer the app's guess at which.
  *
  * ── THE WINDOW ────────────────────────────────────────────────────────
  *
@@ -37,6 +46,7 @@ import {
   clearEntry,
   getEntryStatus,
   isLogged,
+  LOGGABLE_STATUSES,
   upsertEntry,
   type JournalEntry,
   type JournalPrayer,
@@ -68,7 +78,47 @@ const WINDOW_END: Record<JournalPrayer, string | null> = {
   Isha: null, // tomorrow's Fajr, or the end of the day
 };
 
-export type QuickLogPhase = 'not-yet' | 'in-window' | 'after-window';
+export type QuickLogPhase =
+  | 'not-yet'
+  | 'in-window'
+  /**
+   * Mālikī only: the preferred (ikhtiyārī) time has passed and the second
+   * (ḍarūrī) one is still open — issue #40. Without the second times
+   * turned on there is no such moment, and the window runs to its end.
+   */
+  | 'after-first'
+  | 'after-window';
+
+/**
+ * When the PREFERRED window closes, for a reader who has the Mālikī
+ * second times on — or null for everyone else.
+ *
+ * The boundaries ride in the day's timings under `<Prayer>Daruri`, put
+ * there by HomeScreen when `malikiSecondTimesEnabled` is set, so their
+ * presence is the whole question: a table that carries them is a table
+ * whose windows have two halves, and one that does not is unchanged.
+ */
+function firstWindowEnd(
+  prayer: JournalPrayer,
+  timings: TimingsMap,
+  base: Date,
+): number | null {
+  const clock = timings[`${prayer}Daruri` as keyof TimingsMap];
+  if (!clock) return null;
+  try {
+    let at = combineLocalDateAndTime(base, clock);
+    // Ishāʾ's boundary can fall after midnight, and then belongs to the
+    // next date — the same rule `daruriRowState` and the alerts apply.
+    if (prayer === 'Isha' && timings.Maghrib) {
+      if (at < combineLocalDateAndTime(base, timings.Maghrib)) {
+        at = addDays(at, 1);
+      }
+    }
+    return at.getTime();
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Where `now` falls for this prayer on `day` — the calendar day the
@@ -102,7 +152,42 @@ export function quickLogPhase(
   // broken feed) is treated as open: the prayer has come, and "late" is
   // a claim the data cannot support.
   if (end <= start) return 'in-window';
-  return now.getTime() < end ? 'in-window' : 'after-window';
+  if (now.getTime() >= end) return 'after-window';
+  // Mālikī: the same window, split. A boundary outside the window it is
+  // meant to divide is no boundary — a modelled angle at a high latitude
+  // can land past sunrise — and the window stays whole rather than
+  // asking a question built on it.
+  const first = firstWindowEnd(prayer, timings, base);
+  if (first != null && first > start && first < end && now.getTime() >= first) {
+    return 'after-first';
+  }
+  return 'in-window';
+}
+
+/** In the second window, a prayer was either prayed in the first or after it. */
+const FIRST_PASSED_ANSWERS: readonly LoggedStatus[] = ['on-time', 'late'];
+
+/**
+ * What the check may offer once a prayer's time has passed — issue #40.
+ *
+ * The clock knows more at some moments than at others, and the sheet
+ * should not ask a question the moment has already answered:
+ *
+ *   • the second window is still open — it was prayed in the first time
+ *     or after it, and nothing here is missed or made up yet, because
+ *     the prayer can still be prayed in its own time;
+ *   • the whole window has closed — all four are on the table: prayed on
+ *     time and recorded late, prayed late, missed outright, or made up
+ *     since. Only the reader knows which.
+ *
+ * Without the Mālikī times there is no first boundary to pass, so a
+ * passed prayer is always the second case.
+ */
+export function passedPrayerAnswers(
+  phase: QuickLogPhase,
+): readonly LoggedStatus[] {
+  if (phase === 'after-first') return FIRST_PASSED_ANSWERS;
+  return phase === 'after-window' ? LOGGABLE_STATUSES : [];
 }
 
 /**
@@ -123,8 +208,16 @@ export function quickLogStatus(
   return phase === 'in-window' ? 'on-time' : 'ask';
 }
 
-/** The two answers to "its time has passed — when was it prayed?" */
-export type PassedPrayerAnswer = Extract<LoggedStatus, 'on-time' | 'qadha'>;
+/**
+ * An answer to "its time has passed — how was it prayed?"
+ *
+ * Any of the four the Log itself offers (#40). It was two — on time or
+ * made up — which fitted the one moment the sheet was written for and
+ * no other: inside the Mālikī second window nothing is qaḍāʾ yet, and
+ * once the whole window has gone a prayer can also simply have been
+ * missed. Which of the four are OFFERED is `passedPrayerAnswers`.
+ */
+export type PassedPrayerAnswer = LoggedStatus;
 
 export type QuickLog = {
   hydrated: boolean;
@@ -141,6 +234,15 @@ export type QuickLog = {
     timings: TimingsMap,
     options?: { day?: Date; tomorrow?: TimingsMap },
   ) => Promise<'ask' | 'written' | 'nothing'>;
+  /**
+   * Which answers that question should offer, and the phase it is asked
+   * in — the same reading of the clock `toggle` just made (#40).
+   */
+  askedAt: (
+    prayer: JournalPrayer,
+    timings: TimingsMap,
+    options?: { day?: Date; tomorrow?: TimingsMap },
+  ) => { phase: QuickLogPhase; answers: readonly PassedPrayerAnswer[] };
   /** Record `prayer` on `day` with the answer the user gave. */
   record: (
     prayer: JournalPrayer,
@@ -208,6 +310,25 @@ export function useQuickLog(): QuickLog {
     [persist],
   );
 
+  const askedAt = useCallback(
+    (
+      prayer: JournalPrayer,
+      timings: TimingsMap,
+      options: { day?: Date; tomorrow?: TimingsMap } = {},
+    ) => {
+      const now = new Date();
+      const phase = quickLogPhase(
+        prayer,
+        timings,
+        now,
+        options.tomorrow,
+        options.day ?? now,
+      );
+      return { phase, answers: passedPrayerAnswers(phase) };
+    },
+    [],
+  );
+
   const record = useCallback(
     async (prayer: JournalPrayer, day: Date, status: PassedPrayerAnswer) => {
       if (!hydratedRef.current) return;
@@ -218,7 +339,7 @@ export function useQuickLog(): QuickLog {
   );
 
   return useMemo(
-    () => ({ hydrated: store.hydrated, statusOf, toggle, record }),
-    [store.hydrated, statusOf, toggle, record],
+    () => ({ hydrated: store.hydrated, statusOf, toggle, askedAt, record }),
+    [store.hydrated, statusOf, toggle, askedAt, record],
   );
 }

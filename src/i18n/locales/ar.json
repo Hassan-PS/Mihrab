@@ -1239,7 +1239,8 @@
     "quickLogLogged": "سُجّلت {{prayer}}: {{status}}. اضغط للتراجع",
     "quickLogNotYet": "لم يدخل وقت {{prayer}} بعد",
     "passedTitle": "تسجيل {{prayer}} · {{day}}",
-    "passedBody": "مضى وقتها. هل صُلّيت في وقتها أم قُضيت؟"
+    "passedBody": "مضى وقتها. كيف صُلّيت؟",
+    "passedFirstBody": "مضى وقتها الاختياري ووقتها الضروري ما زال قائمًا. هل صُلّيت في الوقت الأول أم بعده؟"
   },
   "events": {
     "islamicNewYear": "رأس السنة الهجرية",

@@ -6,7 +6,14 @@
  */
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { quickLogPhase, quickLogStatus, isSalah, SALAH } from '../src/journal/quickLog';
+import {
+  isSalah,
+  passedPrayerAnswers,
+  quickLogPhase,
+  quickLogStatus,
+  SALAH,
+} from '../src/journal/quickLog';
+import { LOGGABLE_STATUSES } from '../src/journal/journal';
 
 const read = (p: string) => readFileSync(join(__dirname, '..', p), 'utf8');
 
@@ -84,6 +91,79 @@ describe('the window', () => {
     expect(quickLogStatus('Dhuhr', day, at('12:00'), day, yesterday)).toBe('ask');
   });
 
+  /**
+   * The Mālikī second times split the same window in two — issue #40.
+   *
+   * The boundaries ride in the day's timings under `<Prayer>Daruri`,
+   * which is how a table that has them differs from one that does not:
+   * there is no setting to read here, only a day that carries them.
+   */
+  describe('with the second times on', () => {
+    const maliki = {
+      ...day,
+      FajrDaruri: '05:30', // isfār, before sunrise
+      DhuhrDaruri: '15:10',
+      AsrDaruri: '18:30',
+      MaghribDaruri: '20:20',
+      IshaDaruri: '00:40', // past midnight, and still Ishāʾ's
+    };
+
+    it('is on time in the first half, and asks in the second', () => {
+      expect(quickLogPhase('Dhuhr', maliki, at('13:00'))).toBe('in-window');
+      expect(quickLogPhase('Dhuhr', maliki, at('15:10'))).toBe('after-first');
+      expect(quickLogPhase('Dhuhr', maliki, at('16:19'))).toBe('after-first');
+      expect(quickLogPhase('Dhuhr', maliki, at('16:20'))).toBe('after-window');
+      // One tap still records without asking while the first time runs.
+      expect(quickLogStatus('Dhuhr', maliki, at('13:00'))).toBe('on-time');
+      expect(quickLogStatus('Dhuhr', maliki, at('15:30'))).toBe('ask');
+    });
+
+    it('offers the first time or after it, and nothing that has not happened', () => {
+      // Inside the second window the prayer can still be prayed in its
+      // own time: nothing is missed and nothing is qaḍāʾ yet.
+      expect(passedPrayerAnswers('after-first')).toEqual(['on-time', 'late']);
+    });
+
+    it('offers all four once the whole window has gone', () => {
+      expect(passedPrayerAnswers('after-window')).toEqual([
+        'on-time',
+        'late',
+        'missed',
+        'qadha',
+      ]);
+      expect(passedPrayerAnswers('after-window')).toEqual(LOGGABLE_STATUSES);
+    });
+
+    it('asks nothing where there is nothing to ask', () => {
+      expect(passedPrayerAnswers('in-window')).toEqual([]);
+      expect(passedPrayerAnswers('not-yet')).toEqual([]);
+    });
+
+    it("carries Ishāʾ's boundary over midnight, as the row and the alerts do", () => {
+      // 23:00 is before 00:40, which belongs to the next date — not
+      // "already past" because 00:40 reads as earlier in the day.
+      expect(quickLogPhase('Isha', maliki, at('23:00'), day)).toBe('in-window');
+      const pastMidnight = new Date(2026, 8, 9, 1, 0);
+      expect(
+        quickLogPhase('Isha', maliki, pastMidnight, day, new Date(2026, 8, 8)),
+      ).toBe('after-first');
+    });
+
+    it('ignores a boundary that falls outside the window it would divide', () => {
+      // A modelled angle at a high latitude can land past sunrise. A
+      // window is not split by a line drawn outside it.
+      const odd = { ...maliki, FajrDaruri: '07:00' }; // after sunrise
+      expect(quickLogPhase('Fajr', odd, at('06:30'))).toBe('after-window');
+      expect(quickLogPhase('Fajr', odd, at('05:00'))).toBe('in-window');
+    });
+
+    it('leaves a table without the boundaries exactly as it was', () => {
+      // Everyone else: one window, and all four answers once it closes.
+      expect(quickLogPhase('Dhuhr', day, at('15:10'))).toBe('in-window');
+      expect(quickLogPhase('Dhuhr', day, at('16:20'))).toBe('after-window');
+    });
+  });
+
   it('knows the five', () => {
     expect(SALAH).toEqual(['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']);
     expect(isSalah('Sunrise')).toBe(false);
@@ -111,14 +191,18 @@ describe('the row and the card', () => {
     // The tap goes through the card's handler, which opens the question
     // when the model says 'ask'.
     expect(card).toMatch(/toggleLog\(key, dayTimings, offset\)/);
-    expect(card).toMatch(/if \(outcome === 'ask'\) setQuestion\(\{ prayer, offset \}\)/);
+    expect(card).toMatch(/if \(outcome !== 'ask'\) return;/);
+    expect(card).toMatch(/setQuestion\(\{\s*prayer,\s*offset,/);
   });
 
-  it('asks with two answers, on time or made up, and a way out', () => {
+  it('asks with the answers the moment allows, and a way out', () => {
+    // Which ones is `passedPrayerAnswers`' to say (#40) — the sheet draws
+    // what it is handed rather than a set of its own.
     const sheet = read('src/screens/home/LogPassedPrayerSheet.tsx');
-    expect(sheet).toMatch(/ANSWERS: readonly PassedPrayerAnswer\[\] = \['on-time', 'qadha'\]/);
+    expect(sheet).toMatch(/\(question\?\.answers \?\? \[\]\)\.map\(status =>/);
+    expect(sheet).not.toMatch(/const ANSWERS/);
     expect(sheet).toMatch(/common\.cancel/);
-    expect(quick).toMatch(/PassedPrayerAnswer = Extract<LoggedStatus, 'on-time' \| 'qadha'>/);
+    expect(quick).toMatch(/PassedPrayerAnswer = LoggedStatus/);
   });
 
   it('is a checkbox that cannot be pressed before its time', () => {

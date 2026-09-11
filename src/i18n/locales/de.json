@@ -1239,7 +1239,8 @@
     "quickLogLogged": "{{prayer}} eingetragen: {{status}}. Tippen zum Rückgängigmachen",
     "quickLogNotYet": "{{prayer}} ist noch nicht eingetreten",
     "passedTitle": "{{prayer}} eintragen · {{day}}",
-    "passedBody": "Ihre Zeit ist vorbei. Wurde sie rechtzeitig verrichtet oder nachgeholt?"
+    "passedBody": "Ihre Zeit ist vorbei. Wie wurde sie verrichtet?",
+    "passedFirstBody": "Die erste Zeit ist vorbei, die zweite läuft noch. Wurde sie in der ersten Zeit verrichtet oder danach?"
   },
   "events": {
     "islamicNewYear": "Islamisches Neujahr",

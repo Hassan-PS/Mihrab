@@ -1239,7 +1239,8 @@
     "quickLogLogged": "{{prayer}} enregistrée : {{status}}. Touchez pour annuler",
     "quickLogNotYet": "{{prayer}} n’est pas encore arrivée",
     "passedTitle": "Consigner {{prayer}} · {{day}}",
-    "passedBody": "Son heure est passée. A-t-elle été priée à l’heure, ou rattrapée ?"
+    "passedBody": "Son heure est passée. Comment a-t-elle été priée ?",
+    "passedFirstBody": "Son premier temps est passé et le second court encore. A-t-elle été priée dans le premier temps, ou après ?"
   },
   "events": {
     "islamicNewYear": "Nouvel an hijri",

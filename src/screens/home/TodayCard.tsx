@@ -838,15 +838,27 @@ function TodayCardImpl({
   const [question, setQuestion] = useState<{
     prayer: JournalPrayer;
     offset: number;
+    /** What may be answered at this moment, and which question fits — #40. */
+    answers: readonly PassedPrayerAnswer[];
+    secondOpen: boolean;
   } | null>(null);
   const toggleLog = useCallback(
     async (prayer: JournalPrayer, dayTimings: TimingsMap, offset: number) => {
       const day = addDays(startOfLocalDay(new Date()), offset);
-      const outcome = await quickLog.toggle(prayer, dayTimings, {
-        day,
-        tomorrow: dayAt(offset + 1),
+      const options = { day, tomorrow: dayAt(offset + 1) };
+      const outcome = await quickLog.toggle(prayer, dayTimings, options);
+      if (outcome !== 'ask') return;
+      const { phase, answers } = quickLog.askedAt(prayer, dayTimings, options);
+      // A set that came back empty would be a sheet with nothing on it:
+      // the phase changed under the tap (the boundary fell between the
+      // two reads), and doing nothing is better than an empty card.
+      if (!answers.length) return;
+      setQuestion({
+        prayer,
+        offset,
+        answers,
+        secondOpen: phase === 'after-first',
       });
-      if (outcome === 'ask') setQuestion({ prayer, offset });
     },
     [quickLog, dayAt],
   );
@@ -1233,6 +1245,8 @@ function TodayCardImpl({
               ? {
                   prayer: t(`prayer.${question.prayer}`),
                   day: `${getDayLabel(question.offset)} · ${getDayDate(question.offset)}`,
+                  answers: question.answers,
+                  secondOpen: question.secondOpen,
                 }
               : null
           }
