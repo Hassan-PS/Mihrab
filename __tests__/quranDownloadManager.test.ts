@@ -48,6 +48,16 @@ jest.mock('../src/quran/audio/audioStore', () => ({
     reciterId: string,
     onProgress?: (p: { done: number; total: number; failed: number }) => void,
   ) => mockMakeHandle(`audio:${reciterId}`, onProgress),
+  downloadAyahs: (
+    reciterId: string,
+    refs: ReadonlyArray<{ surah: number; ayah: number }>,
+    onProgress?: (p: { done: number; total: number; failed: number }) => void,
+  ) => mockMakeHandle(`ayahs:${reciterId}:${refs.length}`, onProgress),
+  downloadSurahAudio: (
+    reciterId: string,
+    surah: number,
+    onProgress?: (p: { done: number; total: number; failed: number }) => void,
+  ) => mockMakeHandle(`surah:${reciterId}:${surah}`, onProgress),
   totalAyahCount: () => 6236,
 }));
 
@@ -224,6 +234,102 @@ describe('the bar knows what it is counting', () => {
     mockHandles[0].onProgress({ done: 1, total: 6236, failed: 0 });
     const call = mockPublish.mock.calls.at(-1)?.[0] as { label: string };
     expect(call.label).toMatch(/Husary/i);
+  });
+});
+
+/**
+ * One surah in one voice — the tilāwah download in the ayah sheet.
+ *
+ * It was the last download still owned by a screen: the handle lived in
+ * `RecitationControls`, so closing the sheet cancelled it, and the shade
+ * was never told it was happening at all.
+ */
+describe('one surah of tilawah', () => {
+  // Al-Fatihah, with three of its seven already on disk.
+  const REFS = [
+    { surah: 1, ayah: 5 },
+    { surah: 1, ayah: 6 },
+    { surah: 1, ayah: 7 },
+  ];
+  const FATIHAH = { kind: 'surah', reciterId: 'husary', surah: 1 } as const;
+
+  it('queues the missing ayahs, not the whole surah', () => {
+    expect(startQuranDownload({ ...FATIHAH, refs: REFS })).toBe(true);
+    // A bar counting to seven when three are missing tells somebody to
+    // expect more than twice the wait.
+    expect(mockHandles[0].what).toBe('ayahs:husary:3');
+    expect(quranDownloadState().progress.total).toBe(3);
+  });
+
+  it('falls back to the whole surah when nobody read the disk', () => {
+    startQuranDownload(FATIHAH);
+    expect(mockHandles[0].what).toBe('surah:husary:1');
+    // Seven ayahs, from the catalogue rather than from the caller.
+    expect(quranDownloadState().progress.total).toBe(7);
+  });
+
+  it('survives the sheet that started it', () => {
+    const unsubscribe = subscribeQuranDownload(() => {});
+    startQuranDownload({ ...FATIHAH, refs: REFS });
+    unsubscribe();
+    expect(mockHandles[0].cancel).not.toHaveBeenCalled();
+    expect(quranDownloadState().running).not.toBeNull();
+  });
+
+  it('is identified by voice and surah, not by the ayahs it queued', () => {
+    startQuranDownload({ ...FATIHAH, refs: REFS });
+    // The row asking is drawing a bar; it has no idea which ayahs were
+    // missing when somebody else pressed the button.
+    expect(isJobRunning(FATIHAH)).toBe(true);
+    expect(isJobRunning({ kind: 'surah', reciterId: 'husary', surah: 2 })).toBe(
+      false,
+    );
+    expect(
+      isJobRunning({ kind: 'surah', reciterId: 'alafasy', surah: 1 }),
+    ).toBe(false);
+    expect(isJobRunning(HUSARY)).toBe(false);
+  });
+
+  it('shares the one pipe with the mushaf and the reciters', () => {
+    expect(startQuranDownload({ ...FATIHAH, refs: REFS })).toBe(true);
+    expect(startQuranDownload(FONTS)).toBe(false);
+    expect(startQuranDownload(HUSARY)).toBe(false);
+    expect(mockHandles).toHaveLength(1);
+  });
+
+  it('names the surah and the voice in the shade, counting ayahs', () => {
+    startQuranDownload({ ...FATIHAH, refs: REFS });
+    mockHandles[0].onProgress({ done: 1, total: 3, failed: 0 });
+    const call = mockPublish.mock.calls.at(-1)?.[0] as {
+      label: string;
+      body: string;
+    };
+    expect(call.label).toMatch(/Husary/i);
+    expect(call.label).toMatch(/Fatihah/i);
+    expect(call.body).not.toMatch(/page/i);
+  });
+
+  it('puts the bar up on the tap, not on the first file that lands', () => {
+    // Seven ayahs on a slow connection left several seconds between the
+    // button and anything in the shade, which reads as a dead button.
+    startQuranDownload({ ...FATIHAH, refs: REFS });
+    expect(mockPublish).toHaveBeenCalledWith(
+      expect.objectContaining({ done: 0, total: 3 }),
+    );
+  });
+
+  it('says so in the shade when it finishes', async () => {
+    startQuranDownload({ ...FATIHAH, refs: REFS });
+    mockHandles[0].onProgress({ done: 3, total: 3, failed: 0 });
+    mockHandles[0].resolve(true);
+    await Promise.resolve();
+    await Promise.resolve();
+    const call = mockFinish.mock.calls.at(-1)?.[0] as {
+      complete: boolean;
+      doneTitle: string;
+    };
+    expect(call.complete).toBe(true);
+    expect(call.doneTitle).toMatch(/Fatihah/i);
   });
 });
 

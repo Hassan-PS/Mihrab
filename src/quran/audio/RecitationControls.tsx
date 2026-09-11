@@ -15,11 +15,17 @@ import { findReciter } from './reciters';
 import { ReciterPickerSheet } from './ReciterPickerSheet';
 import {
   deleteSurahAudio,
-  downloadAyahs,
   surahAudioStatus,
-  type AudioDownloadHandle,
   type SurahAudioStatus,
 } from './audioStore';
+import {
+  cancelQuranDownload,
+  isJobRunning,
+  quranDownloadState,
+  startQuranDownload,
+  subscribeQuranDownload,
+  type QuranDownloadState,
+} from '../quranDownloadManager';
 import { playRange, setPlaybackRate } from './playback';
 import { setQuranPrefs, useQuranState } from '../quranState';
 import { Chip, RowAction, SectionHead, Stepper } from '../../components/controls';
@@ -53,9 +59,33 @@ export function RecitationControls({ surahNumber, onStartPlayback }: Props) {
    * read, which is not the same as none.
    */
   const [status, setStatus] = useState<SurahAudioStatus | null>(null);
-  const [downloading, setDownloading] = useState(false);
-  const [dlProgress, setDlProgress] = useState({ done: 0, total: 0 });
-  const dlHandle = useRef<AudioDownloadHandle | null>(null);
+  /**
+   * The download belongs to the app, not to this sheet.
+   *
+   * It used to live here: the handle was a ref and the cleanup cancelled
+   * it, so closing the ayah sheet — or turning the phone, or tapping an
+   * ayah — threw away however much of the surah had arrived, silently.
+   * Nothing was in the shade either, so a download you could not see was
+   * also a download you could not get back to.
+   *
+   * The manager runs it now (same place as the mushaf and the whole-
+   * reciter download), which is what gives it the notification with the
+   * progress bar and the strip across the top of the reader. This screen
+   * only asks what is happening.
+   */
+  const [download, setDownload] = useState<QuranDownloadState>(
+    quranDownloadState,
+  );
+  useEffect(() => subscribeQuranDownload(setDownload), []);
+  const job = {
+    kind: 'surah' as const,
+    reciterId: prefs.reciterId,
+    surah: surahNumber,
+  };
+  const downloading = isJobRunning(job);
+  /** Something else has the pipe — one at a time, so neither is halved. */
+  const busyElsewhere = download.running != null && !downloading;
+  const dlProgress = download.progress;
 
   /**
    * Rough download size for this surah, stated before the tap.
@@ -89,9 +119,22 @@ export function RecitationControls({ surahNumber, onStartPlayback }: Props) {
     read();
     return () => {
       cancelled = true;
-      dlHandle.current?.cancel();
+      // Nothing is cancelled here any more. Leaving the sheet used to end
+      // the download; the manager keeps it running, and this screen is
+      // only one of the places it can be watched from.
     };
   }, [prefs.reciterId, surahNumber]);
+
+  /**
+   * Re-read the folder when a run ends, whichever screen it ended on.
+   *
+   * `download.running` going null is the moment the counts on this row
+   * are wrong: a run that failed four ayahs should leave the row saying
+   * four are missing, not claiming success.
+   */
+  useEffect(() => {
+    if (download.running == null) refreshStatus.current();
+  }, [download.running]);
 
   useEffect(() => {
     setToText(String(meta?.ayahCount ?? 1));
@@ -109,18 +152,13 @@ export function RecitationControls({ surahNumber, onStartPlayback }: Props) {
    * four are missing, not claiming success or claiming nothing happened.
    */
   const startDownload = () => {
-    if (downloading || !status || status.missing.length === 0) return;
-    setDownloading(true);
+    if (downloading || busyElsewhere) return;
+    if (!status || status.missing.length === 0) return;
     const refs = status.missing.map(ayah => ({ surah: surahNumber, ayah }));
-    const handle = downloadAyahs(prefs.reciterId, refs, p =>
-      setDlProgress({ done: p.done, total: p.total }),
-    );
-    dlHandle.current = handle;
-    void handle.promise.then(() => {
-      dlHandle.current = null;
-      setDownloading(false);
-      refreshStatus.current();
-    });
+    // The manager owns it from here: it posts the progress notification,
+    // carries the strip at the top of the reader, and keeps going when
+    // this sheet closes.
+    startQuranDownload({ ...job, refs });
   };
 
   const removeDownload = () => {
@@ -208,28 +246,46 @@ export function RecitationControls({ surahNumber, onStartPlayback }: Props) {
                   done: dlProgress.done,
                   total: dlProgress.total,
                 })
-              : complete
-                ? t('quran.surahAudioDownloaded', 'Audio downloaded for offline use')
-                : partial
-                  ? // The state this row could not say. #30.
-                    t('quran.surahAudioPartial', {
-                      defaultValue:
-                        '{{have}} of {{total}} ayahs · tap to download the rest',
-                      have: status?.have ?? 0,
-                      total: status?.total ?? 0,
-                    })
-                  : t('quran.downloadSurahAudioSized', {
-                      defaultValue: 'Download this surah · {{size}}',
-                      size: estimatedSize,
-                    })
+              : busyElsewhere
+                ? // One pipe, one disk, one foreground service — see
+                  // quranDownloadManager. Said rather than silently
+                  // ignored, because a dead button is the worse answer.
+                  t(
+                    'quran.listenDownloadBusy',
+                    'Something else is downloading. One at a time, so neither is halved.',
+                  )
+                : complete
+                  ? t('quran.surahAudioDownloaded', 'Audio downloaded for offline use')
+                  : partial
+                    ? // The state this row could not say. #30.
+                      t('quran.surahAudioPartial', {
+                        defaultValue:
+                          '{{have}} of {{total}} ayahs · tap to download the rest',
+                        have: status?.have ?? 0,
+                        total: status?.total ?? 0,
+                      })
+                    : t('quran.downloadSurahAudioSized', {
+                        defaultValue: 'Download this surah · {{size}}',
+                        size: estimatedSize,
+                      })
           }
           onPress={startDownload}
-          disabled={complete || downloading || status == null}
+          disabled={complete || downloading || busyElsewhere || status == null}
           accessibilityLabel={t('quran.downloadSurahAudio', {
             defaultValue: 'Download audio for {{surah}}',
             surah: surahLabel,
           })}
         />
+        {/* Stopping it is a thing a person does, and until the manager
+            owned this download there was nowhere to do it: closing the
+            sheet was the cancel, and it was not announced as one. */}
+        {downloading ? (
+          <RowAction
+            label={t('common.cancel', 'Cancel')}
+            onPress={() => cancelQuranDownload()}
+            accessibilityLabel={t('common.cancel', 'Cancel')}
+          />
+        ) : null}
         {/* Clearable per surah, not only per reciter — #30 asked for it,
             and a reader who has finished with al-Baqarah should not have
             to delete a whole reciter to get 40 MB back. */}

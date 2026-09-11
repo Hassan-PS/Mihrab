@@ -77,15 +77,41 @@ function supported(): boolean {
   return Platform.OS === 'android';
 }
 
-async function ensureChannel(): Promise<void> {
-  await notifee.createChannel({
-    id: CHANNEL_ID,
-    name: i18n.t('quran.downloadChannelName'),
-    description: i18n.t('quran.downloadChannelDesc'),
-    // LOW: it is a progress bar, not news. It must appear in the shade and
-    // never make a sound — this thing updates a hundred times.
-    importance: AndroidImportance.LOW,
-  });
+/**
+ * The channel, created once per download rather than once per update.
+ *
+ * `createChannel` is idempotent, so calling it before every
+ * `displayNotification` looked free. It is not: it is a round trip to
+ * native, awaited, in front of every single progress post — so the bar in
+ * the shade ran a step or two behind the count in the app, and the gap
+ * grew with the queue depth. Reported as the shade "lagging behind".
+ *
+ * Held as the promise rather than a boolean so that two publishes racing
+ * at the start of a download await the same creation instead of starting
+ * two. Cleared on teardown, which is also what picks up a language change:
+ * the channel's name is translated, and the next download re-creates it.
+ */
+let channelReady: Promise<void> | null = null;
+
+function ensureChannel(): Promise<void> {
+  channelReady ??= notifee
+    .createChannel({
+      id: CHANNEL_ID,
+      name: i18n.t('quran.downloadChannelName'),
+      description: i18n.t('quran.downloadChannelDesc'),
+      // LOW: it is a progress bar, not news. It must appear in the shade
+      // and never make a sound — this thing updates a hundred times.
+      importance: AndroidImportance.LOW,
+    })
+    .then(() => undefined)
+    .catch(error => {
+      // A failed creation must not be remembered as a success, or every
+      // notification for the rest of the session goes to a channel that
+      // does not exist.
+      channelReady = null;
+      throw error;
+    });
+  return channelReady;
 }
 
 /**
@@ -124,6 +150,71 @@ export async function publishDownloadProgress(input: {
   const percent = Math.floor((done / total) * 100);
   if (percent === lastPercent && done !== total) return;
   lastPercent = percent;
+  const next: PendingPost = { ...input, total, done };
+  // Something is already talking to native. Leave the newest state behind
+  // for it and return — see `pending`.
+  if (posting) {
+    pending = next;
+    return;
+  }
+  posting = true;
+  const era = generation;
+  const run = (async () => {
+    try {
+      let post: PendingPost | null = next;
+      while (post && era === generation) {
+        await displayProgress(post);
+        post = pending;
+        pending = null;
+      }
+    } finally {
+      posting = false;
+      pending = null;
+    }
+  })();
+  // Held so teardown can wait for it: a post still in flight when the bar
+  // is cancelled would land after the cancel and put it straight back.
+  inFlight = run;
+  void run.finally(() => {
+    if (inFlight === run) inFlight = null;
+  });
+  await run;
+}
+
+type PendingPost = { done: number; total: number; label: string; body: string };
+
+/**
+ * Whether a post is in flight, and the newest one waiting behind it.
+ *
+ * Every progress update used to fire its own `displayNotification` without
+ * waiting for the last, so a download that reports faster than native can
+ * draw built a queue: the shade was showing a percentage from several
+ * seconds ago and kept climbing after the download had finished. Awaiting
+ * each one in turn would be worse — a hundred posts strictly in order is
+ * a hundred round trips.
+ *
+ * So there is one in flight and exactly one waiting, and a newer update
+ * REPLACES the waiting one. Intermediate percentages are worth nothing;
+ * the current one is worth everything, and it is always the one that goes
+ * out next. The bar can then only be one post behind, and the last post of
+ * a run is always the true final count.
+ */
+let posting = false;
+let pending: PendingPost | null = null;
+/** The drain loop, while one is running; see where it is awaited. */
+let inFlight: Promise<void> | null = null;
+/**
+ * Bumped by teardown so a post that was waiting behind it is dropped.
+ *
+ * Without this, cancelling a download could take the bar down and then
+ * have the drain loop post the queued update straight back up — an
+ * ongoing notification for a download that is no longer running, which is
+ * the one kind the user cannot swipe away.
+ */
+let generation = 0;
+
+async function displayProgress(input: PendingPost): Promise<void> {
+  const { total, done } = input;
   try {
     await ensureChannel();
     await notifee.displayNotification({
@@ -179,6 +270,16 @@ export async function publishDownloadProgress(input: {
  */
 async function tearDownProgress(): Promise<void> {
   lastPercent = -1;
+  // Stop the drain loop, drop whatever it was about to post, and let the
+  // one post that is already with native finish — all three before a
+  // single cancel is asked for, or the bar comes back up behind us.
+  generation += 1;
+  pending = null;
+  await inFlight?.catch(() => undefined);
+  inFlight = null;
+  // The next download re-creates it, which is also how a language change
+  // reaches the channel's name.
+  channelReady = null;
   releaseService?.();
   releaseService = null;
   await notifee.stopForegroundService().catch(() => undefined);

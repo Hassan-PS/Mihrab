@@ -211,8 +211,18 @@ describe('the row that reports it', () => {
   it('re-reads the folder when a run ends, however it ended', () => {
     // A run that failed four ayahs should leave the row saying four are
     // missing — not claiming success, and not claiming nothing happened.
-    const after = src.slice(src.indexOf('void handle.promise.then'));
-    expect(after.slice(0, 200)).toMatch(/refreshStatus\.current\(\)/);
+    // The download is the manager's now, so the end of a run is its state
+    // going idle rather than a promise this component is holding.
+    const after = src.slice(src.indexOf('if (download.running == null)'));
+    expect(after.slice(0, 120)).toMatch(/refreshStatus\.current\(\)/);
+  });
+
+  it('hands the download to the manager rather than holding it', () => {
+    // It used to live in a ref whose cleanup cancelled it, so closing the
+    // ayah sheet threw the download away — silently, with nothing in the
+    // shade to get back to.
+    expect(src).toMatch(/startQuranDownload\(\{ \.\.\.job, refs \}\)/);
+    expect(src).not.toMatch(/dlHandle/);
   });
 
   it('offers to delete this surah once anything is on disk', () => {

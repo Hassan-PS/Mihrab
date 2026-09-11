@@ -1193,7 +1193,12 @@
     "khatmahPrevDayHelp": "Die heutige Markierung zurücknehmen und zum Abschnitt des Vortags zurückgehen.",
     "lastReadRow": "Zuletzt gelesen · {{surah}}, Seite {{page}}",
     "autoShort": "Auto",
-    "switchToAuto": "Dem App-Design folgen"
+    "switchToAuto": "Dem App-Design folgen",
+    "downloadingSurah": "{{surah}} wird geladen · {{name}}",
+    "surahDownloadDoneTitle": "{{surah}} ist bereit",
+    "surahDownloadDoneBody": "Die Rezitation von {{surah}} durch {{name}} liegt auf diesem Gerät und spielt jetzt ohne Verbindung.",
+    "reciterDownloadStrip": "{{name}} wird geladen · {{pct}} %",
+    "surahDownloadStrip": "{{surah}} wird geladen · {{pct}} %"
   },
   "mosques": {
     "searching": "Suche nach Moscheen in der Nähe…",

@@ -44,8 +44,15 @@ import type {
   MushafDownloadProgress,
 } from './mushafDownload';
 import { downloadAllPageFonts } from './mushafFontStore';
-import { downloadReciterAudio, totalAyahCount } from './audio/audioStore';
+import {
+  downloadAyahs,
+  downloadSurahAudio,
+  totalAyahCount,
+  downloadReciterAudio,
+} from './audio/audioStore';
 import { findReciter } from './audio/reciters';
+import { findSurah } from './quran';
+import { surahName } from './surahName';
 import {
   finishDownloadNotification,
   publishDownloadProgress,
@@ -58,10 +65,28 @@ import i18n from '../i18n';
  * `fonts` is the mushaf's own per-page faces — the book's text. `audio`
  * carries the reciter, because "a download is running" is not enough for a
  * screen that lists forty-two voices and has to say which one.
+ *
+ * `surah` is one surah in one voice — the tilāwah download in the ayah
+ * sheet. It is the small one, and it was the last to move in here: its
+ * handle lived in `RecitationControls`, so closing the sheet threw it
+ * away, and the shade never heard about it at all.
+ *
+ * `refs` are the ayahs to fetch — the MISSING ones, so the count on
+ * screen is the work left rather than a walk to 286 that skips 282 of
+ * them instantly. It is optional because a caller that only wants to ask
+ * `isJobRunning` should not have to read the disk first; when it is
+ * absent the whole surah is queued and the already-valid files are
+ * skipped.
  */
 export type QuranDownloadJob =
   | { kind: 'fonts' }
-  | { kind: 'audio'; reciterId: string };
+  | { kind: 'audio'; reciterId: string }
+  | {
+      kind: 'surah';
+      reciterId: string;
+      surah: number;
+      refs?: ReadonlyArray<{ surah: number; ayah: number }>;
+    };
 
 export type QuranDownloadState = {
   /** What is running, or null when nothing is. */
@@ -123,12 +148,34 @@ export function isJobRunning(job: QuranDownloadJob): boolean {
   if (running.kind === 'audio' && job.kind === 'audio') {
     return running.reciterId === job.reciterId;
   }
+  if (running.kind === 'surah' && job.kind === 'surah') {
+    // Identity is the voice and the surah. NOT the refs: the caller
+    // asking is a row that wants to know whether the bar it is drawing is
+    // its own, and it has no business knowing which ayahs were missing
+    // when somebody else pressed the button.
+    return running.reciterId === job.reciterId && running.surah === job.surah;
+  }
   return true;
 }
 
 /** The reciter's name as the shade should say it. */
 function reciterLabel(reciterId: string): string {
   return findReciter(reciterId).name;
+}
+
+/** One surah's name in the app's language, for the shade and the strip. */
+export function jobSurahName(surah: number): string {
+  const meta = findSurah(surah);
+  return meta ? surahName(meta, i18n.language) : String(surah);
+}
+
+/** How many ayahs a surah job will fetch, known before the first one lands. */
+function surahJobTotal(job: {
+  surah: number;
+  refs?: ReadonlyArray<unknown>;
+}): number {
+  if (job.refs) return job.refs.length;
+  return findSurah(job.surah)?.ayahCount ?? 0;
 }
 
 /**
@@ -139,6 +186,20 @@ function reciterLabel(reciterId: string): string {
  * know about the other.
  */
 function notificationText(job: QuranDownloadJob) {
+  if (job.kind === 'surah') {
+    const name = reciterLabel(job.reciterId);
+    const surah = jobSurahName(job.surah);
+    return {
+      label: i18n.t('quran.downloadingSurah', { surah, name }),
+      body: (done: number, total: number) =>
+        i18n.t('quran.downloadProgressAyahs', { done, total }),
+      doneTitle: i18n.t('quran.surahDownloadDoneTitle', { surah }),
+      doneBody: i18n.t('quran.surahDownloadDoneBody', { surah, name }),
+      incompleteTitle: i18n.t('quran.audioDownloadIncompleteTitle'),
+      incompleteBody: (failed: number) =>
+        i18n.t('quran.audioDownloadIncompleteBody', { count: failed }),
+    };
+  }
   if (job.kind === 'audio') {
     const name = reciterLabel(job.reciterId);
     return {
@@ -205,6 +266,15 @@ function begin(job: QuranDownloadJob): MushafDownloadHandle {
       body: text.body(progress.done, progress.total),
     });
   };
+  if (job.kind === 'surah') {
+    // The refs are the gap. Without them — a caller that could not read
+    // the disk — the whole surah is queued and the valid files skipped,
+    // which fetches the right bytes and counts the wrong ones. Only the
+    // fallback.
+    return job.refs
+      ? downloadAyahs(job.reciterId, job.refs, onProgress)
+      : downloadSurahAudio(job.reciterId, job.surah, onProgress);
+  }
   if (job.kind === 'audio') {
     return downloadReciterAudio(job.reciterId, onProgress);
   }
@@ -225,9 +295,28 @@ export function startQuranDownload(job: QuranDownloadJob): boolean {
     progress:
       job.kind === 'audio'
         ? { done: 0, total: totalAyahCount(), failed: 0 }
-        : EMPTY_PROGRESS,
+        : job.kind === 'surah'
+          ? { done: 0, total: surahJobTotal(job), failed: 0 }
+          : EMPTY_PROGRESS,
     last: null,
   });
+
+  // The bar goes up on the tap, not on the first file that lands. A surah
+  // of seven ayahs on a slow connection used to leave several seconds
+  // between "Download" and anything appearing in the shade, which reads as
+  // a button that did nothing.
+  // Only when the total is already known: `fonts` learns its own from the
+  // first callback, and a bar that says "0 of 0 pages" is worse than a bar
+  // that is a second late.
+  if (state.progress.total > 0) {
+    const opening = notificationText(job);
+    void publishDownloadProgress({
+      done: 0,
+      total: state.progress.total,
+      label: opening.label,
+      body: opening.body(0, state.progress.total),
+    });
+  }
 
   handle = begin(job);
 

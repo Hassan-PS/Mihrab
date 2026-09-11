@@ -31,7 +31,10 @@ describe('the gate', () => {
     // tied to the download state alone.
     expect(gate).toMatch(/downloadStatus === 'checking' && !reading/);
     expect(gate).toMatch(/downloadStatus === 'needs_download' && !reading/);
-    expect(gate).toMatch(/downloadStatus === 'downloading' \? \(/);
+    // The strip is tied to the manager's state alone — ANY download, not
+    // only this screen's fonts, since the ayah sheet's per-surah tilāwah
+    // download is started from inside this reader and then dismissed.
+    expect(gate).toMatch(/run\.running != null \? \(/);
   });
 
   it('says what will happen before it is asked to', () => {

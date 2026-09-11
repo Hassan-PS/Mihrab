@@ -1193,7 +1193,12 @@
     "khatmahPrevDayHelp": "Bugünün işaretini geri al ve önceki günün bölümüne dön.",
     "lastReadRow": "Son okunan · {{surah}}, sayfa {{page}}",
     "autoShort": "Otomatik",
-    "switchToAuto": "Uygulama temasını izle"
+    "switchToAuto": "Uygulama temasını izle",
+    "downloadingSurah": "{{surah}} indiriliyor · {{name}}",
+    "surahDownloadDoneTitle": "{{surah}} hazır",
+    "surahDownloadDoneBody": "{{name}} okuyuşuyla {{surah}} bu cihazda. Artık bağlantı olmadan çalıyor.",
+    "reciterDownloadStrip": "{{name}} indiriliyor · %{{pct}}",
+    "surahDownloadStrip": "{{surah}} indiriliyor · %{{pct}}"
   },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",

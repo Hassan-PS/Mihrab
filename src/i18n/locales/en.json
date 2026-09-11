@@ -1193,7 +1193,12 @@
     "khatmahPrevDayHelp": "Undo today’s mark and step back to the previous day’s portion.",
     "lastReadRow": "Last read · {{surah}}, page {{page}}",
     "autoShort": "Auto",
-    "switchToAuto": "Follow the app theme"
+    "switchToAuto": "Follow the app theme",
+    "downloadingSurah": "Downloading {{surah}} · {{name}}",
+    "surahDownloadDoneTitle": "{{surah}} is ready",
+    "surahDownloadDoneBody": "{{name}}’s recitation of {{surah}} is on this device. It plays without a connection now.",
+    "reciterDownloadStrip": "Downloading {{name}} · {{pct}}%",
+    "surahDownloadStrip": "Downloading {{surah}} · {{pct}}%"
   },
   "mosques": {
     "searching": "Looking for nearby mosques…",

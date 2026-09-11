@@ -86,6 +86,10 @@ import {
 } from '../quran/surahHeaderGlyph';
 import { useTabBarInset } from '../navigation/tabBarInset';
 import { useTabPageTop } from '../navigation/useTabPageTop';
+import {
+  QuranDownloadStripView,
+  useQuranDownloadRun,
+} from '../quran/QuranDownloadStrip';
 import { SyncHeaderButton } from './sync/SyncHeaderButton';
 import { TilawahRow } from './quran/TilawahRow';
 import { useTabBarScroll } from '../navigation/tabBarVisibility';
@@ -184,6 +188,18 @@ export function QuranScreen() {
   // Go-to-page (v2.8.5) — a page number typed here opens the mushaf there.
   const tabBarInset = useTabBarInset();
   const pageTop = useTabPageTop();
+  /**
+   * The download strip, when anything is downloading.
+   *
+   * This tab draws no header (see `useTabPageTop`), so the strip is the
+   * top of the page while it is up and has to clear the status bar
+   * itself — `pageTop` minus its own breathing room is exactly that
+   * inset. The lists then start below the strip rather than below the
+   * status bar, or the page would open with a band of nothing in it.
+   */
+  const download = useQuranDownloadRun();
+  const stripOn = download.running != null;
+  const listTop = stripOn ? SPACING.md : pageTop;
   // The bar gets out of the way while reading — see tabBarVisibility.ts.
   const tabBarScroll = useTabBarScroll();
   const [pageJumpVisible, setPageJumpVisible] = useState(false);
@@ -1265,6 +1281,12 @@ export function QuranScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: palette.bg }]}>
+      {stripOn ? (
+        <QuranDownloadStripView
+          run={download}
+          top={Math.max(0, pageTop - SPACING.md)}
+        />
+      ) : null}
       {tab === 'surah' ? (
         <FlatList<SurahIndex>
           ref={listRef}
@@ -1273,7 +1295,7 @@ export function QuranScreen() {
           keyExtractor={s => String(s.number)}
           contentContainerStyle={[
             styles.list,
-            { paddingTop: pageTop, paddingBottom: tabBarInset },
+            { paddingTop: listTop, paddingBottom: tabBarInset },
           ]}
           contentInsetAdjustmentBehavior="never"
           ListHeaderComponent={header}
@@ -1290,7 +1312,7 @@ export function QuranScreen() {
           keyExtractor={j => String(j.juz)}
           contentContainerStyle={[
             styles.list,
-            { paddingTop: pageTop, paddingBottom: tabBarInset },
+            { paddingTop: listTop, paddingBottom: tabBarInset },
           ]}
           contentInsetAdjustmentBehavior="never"
           ListHeaderComponent={header}
@@ -1305,7 +1327,7 @@ export function QuranScreen() {
           keyExtractor={() => 'bookmarks'}
           contentContainerStyle={[
             styles.list,
-            { paddingTop: pageTop, paddingBottom: tabBarInset },
+            { paddingTop: listTop, paddingBottom: tabBarInset },
           ]}
           contentInsetAdjustmentBehavior="never"
           ListHeaderComponent={header}

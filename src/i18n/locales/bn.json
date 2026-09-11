@@ -1193,7 +1193,12 @@
     "khatmahPrevDayHelp": "আজকের চিহ্ন বাতিল করে আগের দিনের অংশে ফিরে যান।",
     "lastReadRow": "শেষ পড়া · {{surah}}, পৃষ্ঠা {{page}}",
     "autoShort": "স্বয়ংক্রিয়",
-    "switchToAuto": "অ্যাপের থিম অনুসরণ করুন"
+    "switchToAuto": "অ্যাপের থিম অনুসরণ করুন",
+    "downloadingSurah": "{{surah}} ডাউনলোড হচ্ছে · {{name}}",
+    "surahDownloadDoneTitle": "{{surah}} প্রস্তুত",
+    "surahDownloadDoneBody": "{{surah}}-এর {{name}}-এর তিলাওয়াত এই ডিভাইসে আছে। এখন সংযোগ ছাড়াই বাজবে।",
+    "reciterDownloadStrip": "{{name}} ডাউনলোড হচ্ছে · {{pct}}%",
+    "surahDownloadStrip": "{{surah}} ডাউনলোড হচ্ছে · {{pct}}%"
   },
   "mosques": {
     "searching": "কাছাকাছি মসজিদ খোঁজা হচ্ছে…",

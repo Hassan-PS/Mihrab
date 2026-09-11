@@ -1193,7 +1193,12 @@
     "khatmahPrevDayHelp": "Отменить сегодняшнюю отметку и вернуться к порции предыдущего дня.",
     "lastReadRow": "Последнее чтение · {{surah}}, стр. {{page}}",
     "autoShort": "Авто",
-    "switchToAuto": "Следовать теме приложения"
+    "switchToAuto": "Следовать теме приложения",
+    "downloadingSurah": "Загрузка {{surah}} · {{name}}",
+    "surahDownloadDoneTitle": "{{surah}} готова",
+    "surahDownloadDoneBody": "Чтение суры {{surah}} в исполнении {{name}} сохранено на устройстве и теперь звучит без связи.",
+    "reciterDownloadStrip": "Загрузка {{name}} · {{pct}} %",
+    "surahDownloadStrip": "Загрузка {{surah}} · {{pct}} %"
   },
   "mosques": {
     "searching": "Ищем ближайшие мечети…",

@@ -43,15 +43,17 @@ import { MUSHAF_TOTAL_PAGES } from './mushafImages';
 import {
   deleteLegacyImageStore,
   legacyImageStoreBytes,
-  type MushafDownloadProgress,
 } from './mushafDownload';
 import { fontStoreKnownComplete, fontStoreStats } from './mushafFontStore';
 import {
-  cancelQuranDownload,
   quranDownloadState,
   startQuranDownload,
   subscribeQuranDownload,
 } from './quranDownloadManager';
+import {
+  QuranDownloadStripView,
+  useQuranDownloadRun,
+} from './QuranDownloadStrip';
 import { DEVICE_CLASS } from '../responsive/deviceClass';
 import { MushafPhoneReader } from './MushafPhoneReader';
 import { MushafSpreadReader } from './MushafSpreadReader';
@@ -66,13 +68,19 @@ type Props = Omit<MushafReaderProps, 'keyTurn'>;
 /** The complete Ḥafṣ font set, as the download button says it. */
 const FONT_SET_MB = 180;
 
-/** The strip's own breathing room above its row, dp. */
-const STRIP_PADDING_TOP = 6;
-
 export function MushafReader(props: Props) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
   const quran = useQuranState();
+  /**
+   * Whatever the app is downloading, if anything.
+   *
+   * The reader draws the strip for ALL of them, not only its own fonts —
+   * a per-surah tilāwah download is started from the ayah sheet, which is
+   * hosted here and then dismissed, so this is where it has to be visible.
+   * The gate below still cares only about `fonts`.
+   */
+  const run = useQuranDownloadRun();
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   /**
@@ -108,11 +116,6 @@ export function MushafReader(props: Props) {
   const [downloadStatus, setDownloadStatus] = useState<
     'checking' | 'needs_download' | 'downloading' | 'ready'
   >(() => (bundledRiwayah || fontStoreKnownComplete() ? 'ready' : 'checking'));
-  const [progress, setProgress] = useState<MushafDownloadProgress>({
-    done: 0,
-    total: MUSHAF_TOTAL_PAGES,
-    failed: 0,
-  });
   const [lastRunFailed, setLastRunFailed] = useState(0);
   /** Bytes the retired page-image store is still occupying, if any. */
   const [staleImageBytes, setStaleImageBytes] = useState(0);
@@ -156,20 +159,6 @@ export function MushafReader(props: Props) {
   }, [bundledRiwayah]);
 
   /**
-   * Re-render the progress bar when the whole percent changes, not on every
-   * one of 604 files. The extra ~500 renders land on the same JS thread the
-   * downloads are being driven from, and the bar cannot show them anyway: it
-   * is 300 dp wide, so a file is a third of a pixel.
-   */
-  const lastPctRef = useRef(-1);
-  const publishProgress = useCallback((p: MushafDownloadProgress) => {
-    const pct = p.total > 0 ? Math.floor((p.done / p.total) * 100) : 0;
-    if (pct === lastPctRef.current && p.done !== p.total) return;
-    lastPctRef.current = pct;
-    setProgress(p);
-  }, []);
-
-  /**
    * Follow the download wherever it was started from.
    *
    * The download outlives this screen — see quranDownloadManager — so what
@@ -192,7 +181,6 @@ export function MushafReader(props: Props) {
       if (s.running) {
         if (s.running.kind !== 'fonts') return;
         setDownloadStatus('downloading');
-        if (s.progress.total > 0) publishProgress(s.progress);
         return;
       }
       if (!s.last || s.last.job.kind !== 'fonts') return;
@@ -201,14 +189,12 @@ export function MushafReader(props: Props) {
     };
     apply(quranDownloadState());
     return subscribeQuranDownload(apply);
-  }, [bundledRiwayah, publishProgress]);
+  }, [bundledRiwayah]);
 
   const startDownload = () => {
     if (downloadStatus === 'downloading') return;
     setDownloadStatus('downloading');
     setReading(true);
-    lastPctRef.current = -1;
-    setProgress({ done: 0, total: MUSHAF_TOTAL_PAGES, failed: 0 });
     // Out with the old first. An updated app may still be carrying the page
     // images the font reader replaced — nothing will ever read them again,
     // and they are larger than what we are about to fetch. Before the
@@ -288,58 +274,23 @@ export function MushafReader(props: Props) {
     );
   }
   // ── The strip ───────────────────────────────────────────────────────
-  // While the bulk download runs, the reader carries a line saying how far
-  // it has got, with the one control that matters. It leaves when the
-  // download does, however the download ends.
-  const pct =
-    progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0;
+  // While a download runs — the mushaf's fonts, a reciter, or one surah's
+  // tilāwah started from the ayah sheet — the reader carries a line saying
+  // how far it has got, with the one control that matters. It leaves when
+  // the download does, however the download ends.
+  //
+  // ANY download, not only this screen's own: the ayah sheet's per-surah
+  // download is started from inside this reader and then the sheet closes,
+  // so without the strip there was nowhere left for it to be seen.
+  //
+  // `stripTop` is what it has to clear: iOS floats a translucent
+  // navigation header OVER the content, so a strip at y = 0 was drawn
+  // UNDER it, with the percentage behind the blur and Cancel behind the
+  // header's chips. In fullscreen there is no header and the status bar is
+  // hidden, so it clears the cutout instead.
   const strip =
-    downloadStatus === 'downloading' ? (
-      <View
-        style={[
-          styles.strip,
-          {
-            backgroundColor: palette.card,
-            borderBottomColor: palette.border,
-            // iOS floats a translucent navigation header OVER the content,
-            // so a strip at the top of the screen was drawn UNDER it: the
-            // percentage sat behind the blur and the Cancel button behind
-            // the header's own chips. The reader below does the same thing
-            // with `navPad` — this is the one piece of chrome that is
-            // ABOVE the reader and so has to do it for itself. In
-            // fullscreen there is no header and the status bar is hidden,
-            // so the strip only clears the cutout.
-            paddingTop: stripTop + STRIP_PADDING_TOP,
-          },
-        ]}>
-        <View style={styles.stripRow}>
-          <Text
-            style={[styles.stripLabel, { color: palette.muted }]}
-            numberOfLines={1}>
-            {t('quran.mushafDownloadStrip', {
-              defaultValue: 'Downloading the mushaf · {{pct}}%',
-              pct,
-            })}
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('common.cancel', 'Cancel')}
-            hitSlop={10}
-            onPress={() => cancelQuranDownload()}>
-            <Text style={[styles.stripCancel, { color: palette.accentSolid }]}>
-              {t('common.cancel', 'Cancel')}
-            </Text>
-          </Pressable>
-        </View>
-        <View style={[styles.stripTrack, { backgroundColor: palette.accentBg }]}>
-          <View
-            style={[
-              styles.stripFill,
-              { width: `${pct}%`, backgroundColor: palette.accentSolid },
-            ]}
-          />
-        </View>
-      </View>
+    run.running != null ? (
+      <QuranDownloadStripView run={run} top={stripTop} />
     ) : null;
 
   // ── The route ───────────────────────────────────────────────────────
@@ -386,19 +337,4 @@ const styles = StyleSheet.create({
   },
   ctaLabel: { color: '#ffffff', fontSize: TYPE.body.fontSize, fontWeight: '700' },
   withStrip: { flex: 1 },
-  strip: {
-    paddingHorizontal: SPACING.lg,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  stripRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: SPACING.md,
-    paddingBottom: SPACING.xs,
-  },
-  stripLabel: { fontSize: TYPE.label.fontSize, fontVariant: ['tabular-nums'], flexShrink: 1 },
-  stripCancel: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
-  stripTrack: { height: 3, overflow: 'hidden' },
-  stripFill: { height: '100%' },
 });

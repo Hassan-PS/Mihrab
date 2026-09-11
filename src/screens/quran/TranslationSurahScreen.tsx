@@ -28,7 +28,12 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useHeaderHeight } from '@react-navigation/elements';
 import { TilawahIcon } from '../../quran/audio/PlaybackIcons';
+import {
+  QuranDownloadStripView,
+  useQuranDownloadRun,
+} from '../../quran/QuranDownloadStrip';
 import { desktopSize } from '../../responsive/desktop';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppPalette } from '../../hooks/useAppPalette';
@@ -92,6 +97,9 @@ export function TranslationSurahScreen({
   const isArabic = i18n.language === 'ar';
   const { palette } = useAppPalette();
   const insets = useSafeAreaInsets();
+  const headerHeight = useHeaderHeight();
+  /** Whatever the app is downloading — drawn as the strip, see below. */
+  const download = useQuranDownloadRun();
   const { settings } = usePrayerSettings();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -647,6 +655,16 @@ export function TranslationSurahScreen({
 
   return (
     <View style={{ flex: 1, backgroundColor: palette.bg }}>
+      {/* The download strip — the ayah sheet below starts the per-surah
+          tilāwah download and then closes, so this is where it can be
+          watched from. iOS floats its header over the content, so the
+          strip clears it; Android's is opaque and in flow. */}
+      {download.running ? (
+        <QuranDownloadStripView
+          run={download}
+          top={Platform.OS === 'ios' ? headerHeight : 0}
+        />
+      ) : null}
       <FlatList
         ref={listRef}
         data={rows ?? []}

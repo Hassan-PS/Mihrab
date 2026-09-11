@@ -1193,7 +1193,12 @@
     "khatmahPrevDayHelp": "Ångra dagens markering och gå tillbaka till föregående dags del.",
     "lastReadRow": "Senast läst · {{surah}}, sida {{page}}",
     "autoShort": "Auto",
-    "switchToAuto": "Följ appens tema"
+    "switchToAuto": "Följ appens tema",
+    "downloadingSurah": "Laddar ner {{surah}} · {{name}}",
+    "surahDownloadDoneTitle": "{{surah}} är klar",
+    "surahDownloadDoneBody": "{{name}}s recitation av {{surah}} finns på den här enheten. Den spelas nu utan anslutning.",
+    "reciterDownloadStrip": "Laddar ner {{name}} · {{pct}} %",
+    "surahDownloadStrip": "Laddar ner {{surah}} · {{pct}} %"
   },
   "mosques": {
     "searching": "Söker närliggande moskéer…",

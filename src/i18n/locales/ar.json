@@ -1193,7 +1193,12 @@
     "khatmahPrevDayHelp": "إلغاء علامة اليوم والعودة إلى حصة اليوم السابق.",
     "lastReadRow": "آخر قراءة · {{surah}}، صفحة {{page}}",
     "autoShort": "تلقائي",
-    "switchToAuto": "اتباع سمة التطبيق"
+    "switchToAuto": "اتباع سمة التطبيق",
+    "downloadingSurah": "جارٍ تنزيل {{surah}} · {{name}}",
+    "surahDownloadDoneTitle": "{{surah}} جاهزة",
+    "surahDownloadDoneBody": "تلاوة {{name}} لسورة {{surah}} محفوظة على هذا الجهاز، وتُشغَّل الآن دون اتصال.",
+    "reciterDownloadStrip": "جارٍ تنزيل {{name}} · {{pct}}٪",
+    "surahDownloadStrip": "جارٍ تنزيل {{surah}} · {{pct}}٪"
   },
   "mosques": {
     "searching": "البحث عن مساجد قريبة…",

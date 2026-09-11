@@ -1193,7 +1193,12 @@
     "khatmahPrevDayHelp": "आज का निशान हटाएँ और पिछले दिन के हिस्से पर वापस जाएँ।",
     "lastReadRow": "अंतिम पठन · {{surah}}, पृष्ठ {{page}}",
     "autoShort": "स्वतः",
-    "switchToAuto": "ऐप की थीम का अनुसरण करें"
+    "switchToAuto": "ऐप की थीम का अनुसरण करें",
+    "downloadingSurah": "{{surah}} डाउनलोड हो रही है · {{name}}",
+    "surahDownloadDoneTitle": "{{surah}} तैयार है",
+    "surahDownloadDoneBody": "{{name}} द्वारा {{surah}} की तिलावत इस डिवाइस पर है। अब यह बिना कनेक्शन के चलती है।",
+    "reciterDownloadStrip": "{{name}} डाउनलोड हो रहा है · {{pct}}%",
+    "surahDownloadStrip": "{{surah}} डाउनलोड हो रही है · {{pct}}%"
   },
   "mosques": {
     "searching": "पास की मस्जिदें ढूँढी जा रही हैं…",

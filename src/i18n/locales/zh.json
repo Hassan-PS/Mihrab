@@ -1193,7 +1193,12 @@
     "khatmahPrevDayHelp": "撤销今天的标记，回到前一天的进度。",
     "lastReadRow": "上次读到 · {{surah}}，第 {{page}} 页",
     "autoShort": "自动",
-    "switchToAuto": "跟随应用主题"
+    "switchToAuto": "跟随应用主题",
+    "downloadingSurah": "正在下载 {{surah}} · {{name}}",
+    "surahDownloadDoneTitle": "{{surah}} 已就绪",
+    "surahDownloadDoneBody": "{{name}} 诵读的 {{surah}} 已保存在本设备，现在无需联网即可播放。",
+    "reciterDownloadStrip": "正在下载 {{name}} · {{pct}}%",
+    "surahDownloadStrip": "正在下载 {{surah}} · {{pct}}%"
   },
   "mosques": {
     "searching": "正在查找附近的清真寺…",

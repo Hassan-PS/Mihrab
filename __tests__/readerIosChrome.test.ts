@@ -26,7 +26,13 @@ describe('the download strip clears the floating header', () => {
     // the status bar hidden, so the cutout's own inset is consulted too).
     expect(source).toMatch(/props\.isFullscreen\s*\?\s*insets\.top\s*:\s*headerHeight/);
     expect(source).toMatch(/Math\.max\(cutout\.top, insets\.top\)/);
-    expect(source).toContain('paddingTop: stripTop + STRIP_PADDING_TOP');
+    // The reader works the number out; the shared strip is what applies
+    // it. The strip moved out of this file when the tilāwah and reciter
+    // downloads needed one too, so the contract now spans both.
+    expect(source).toContain('top={stripTop}');
+    expect(read('src/quran/QuranDownloadStrip.tsx')).toContain(
+      'paddingTop: top + STRIP_PADDING_TOP',
+    );
   });
 
   // And the reader below must not clear the SAME header a second time, or

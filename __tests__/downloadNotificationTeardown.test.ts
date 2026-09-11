@@ -164,6 +164,77 @@ describe('finishing', () => {
   });
 });
 
+/**
+ * Reported: the bar in the shade ran behind the count in the app, and kept
+ * climbing after the download had already finished.
+ *
+ * Two causes, both here. Every update awaited `createChannel` — a round
+ * trip to native in front of every single post — and every update fired
+ * its own `displayNotification` without waiting for the last, so a
+ * download reporting faster than the platform can draw built a queue of
+ * stale percentages.
+ */
+describe('keeping up with the download', () => {
+  beforeEach(async () => {
+    // Resets the percent guard and the drain loop between cases.
+    await clearStaleDownloadNotification();
+    mockNotifee.displayNotification.mockClear();
+    mockNotifee.cancelNotification.mockClear();
+    mockNotifee.stopForegroundService.mockClear();
+    mockNotifee.createChannel.mockClear();
+  });
+
+  const post = (done: number) =>
+    publishDownloadProgress({
+      done,
+      total: 604,
+      label: 'Downloading',
+      body: `${done} of 604 pages`,
+    });
+
+  it('creates the channel once for a run, not once per update', async () => {
+    await post(10);
+    await post(100);
+    await post(200);
+    expect(mockNotifee.createChannel).toHaveBeenCalledTimes(1);
+  });
+
+  it('collapses a burst onto the newest state', async () => {
+    // Five updates arrive before native has drawn the first. Four of the
+    // five are already historical by the time it could; only the newest
+    // is worth posting.
+    const burst = [post(100), post(200), post(300), post(400), post(500)];
+    await Promise.all(burst);
+    const notes = displayed() as unknown as Array<{ body: string }>;
+    expect(notes.length).toBeLessThan(burst.length);
+    expect(notes.at(-1)?.body).toBe('500 of 604 pages');
+  });
+
+  it('always ends on the true final count', async () => {
+    // "604 of 604" is the one number that has to be exact, whatever
+    // percent the update before it landed on.
+    await Promise.all([post(600), post(604)]);
+    const notes = displayed() as unknown as Array<{ body: string }>;
+    expect(notes.at(-1)?.body).toBe('604 of 604 pages');
+  });
+
+  it('does not put the bar back up after it has been taken down', async () => {
+    // The queued update must not outlive the cancel — an ongoing
+    // notification with no download behind it is one the user cannot
+    // swipe away.
+    const first = post(100);
+    void post(200);
+    await finishDownloadNotification({
+      complete: false,
+      cancelled: true,
+      failed: 0,
+    });
+    await first;
+    const bars = displayed().filter(n => n.id === PROGRESS_ID);
+    expect(bars).toHaveLength(1);
+  });
+});
+
 describe('a bar left behind by a process that is gone', () => {
   it('is cleared at startup, and posts nothing in its place', async () => {
     // A crash, a Force stop, or an install over the top of a running

@@ -1193,7 +1193,12 @@
     "khatmahPrevDayHelp": "Batalkan tanda hari ini dan kembali ke bagian hari sebelumnya.",
     "lastReadRow": "Terakhir dibaca · {{surah}}, halaman {{page}}",
     "autoShort": "Otomatis",
-    "switchToAuto": "Ikuti tema aplikasi"
+    "switchToAuto": "Ikuti tema aplikasi",
+    "downloadingSurah": "Mengunduh {{surah}} · {{name}}",
+    "surahDownloadDoneTitle": "{{surah}} siap",
+    "surahDownloadDoneBody": "Tilawah {{surah}} oleh {{name}} ada di perangkat ini. Kini diputar tanpa koneksi.",
+    "reciterDownloadStrip": "Mengunduh {{name}} · {{pct}}%",
+    "surahDownloadStrip": "Mengunduh {{surah}} · {{pct}}%"
   },
   "mosques": {
     "searching": "Mencari masjid terdekat…",
