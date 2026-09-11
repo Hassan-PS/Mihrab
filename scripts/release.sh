@@ -232,7 +232,7 @@ die() {
 # NOT fastlane/ — those are the release NOTES, which change every time by
 # definition. Flagging them would mark every release as cycle-changing,
 # and a signal that is always on is not a signal.
-CYCLE_PATHS="scripts/release.sh scripts/verify-release.sh scripts/build-catalyst.sh scripts/sync-version.js scripts/xcode-cloud.py .github/workflows docs/DISTRIBUTION.md"
+CYCLE_PATHS="scripts/release.sh scripts/verify-release.sh scripts/build-catalyst.sh scripts/build-ios-appstore.sh scripts/sync-version.js scripts/xcode-cloud.py .github/workflows docs/DISTRIBUTION.md"
 JOURNAL="$ROOT/docs/release-log.md"
 
 # Everything phase 2 writes into the tree, so a run that stops partway can
@@ -748,9 +748,52 @@ step "App Store build"
 # is queued, and no public commit status is posted — and the closing
 # summary says so and prints the one command that starts it when the hold
 # lifts. Everything else about the release is unchanged.
+# ── AND SOMETIMES XCODE CLOUD IS SIMPLY DOWN ──────────────────────────
+#
+# On 2026-09-11 `POST /v1/ciBuildRuns` answered HTTP 500 for an hour —
+# three attempts, including one with an explicit branch reference. That
+# is not a rate limit that clears in a minute and it is not something
+# this repo can fix, and until there was a second route it meant the iOS
+# channel of a release simply did not happen.
+#
+# scripts/build-ios-appstore.sh is that second route: it archives on this
+# Mac, checks the entitlements, exports with the Apple Distribution
+# certificate in the login keychain, and uploads through altool with the
+# same API key. It produced 2.18.5 (269), which reached App Store Connect
+# VALID while Xcode Cloud was still refusing to start anything.
+#
+# It runs when Xcode Cloud will not, and it can be asked for outright
+# with IOS_LOCAL=1. NO_IOS_LOCAL=1 turns the fallback off for a run that
+# must not spend twenty minutes building here.
+#
+# WHAT IT COSTS, because this is not free: fifteen to twenty-five minutes
+# on this machine, and — the first time a newly created signing
+# certificate is used — a macOS keychain prompt that blocks with no
+# output until somebody clicks Always Allow. The ACL is established after
+# that, so it asks once per certificate rather than once per release.
+#
+# WHAT IT IS NOT: proof that Xcode Cloud would be green. A local export
+# signs against profiles already on this Mac; a clean-checkout cloud
+# build does not, which is how builds 520-522 passed here and failed
+# there. Green here means the build shipped, not that the cloud is well.
+ios_local_build() {
+  step "App Store build — locally, on this Mac"
+  if "$ROOT/scripts/build-ios-appstore.sh"; then
+    ok "iOS uploaded from this Mac — App Store Connect has the build"
+    XC_STARTED=local
+    return 0
+  fi
+  warn "the local iOS build failed too — iOS has not shipped"
+  XC_STARTED=0
+  return 1
+}
+
 if [ "${SKIP_APP_STORE:-0}" = "1" ]; then
   ok "skipped: SKIP_APP_STORE=1 — Xcode Cloud stays paused, nothing sent"
   XC_STARTED=skipped
+elif [ "${IOS_LOCAL:-0}" = "1" ]; then
+  ok "IOS_LOCAL=1 — building iOS here, Xcode Cloud stays paused"
+  ios_local_build || true
 else
 $XC resume >/dev/null 2>&1 || warn "could not un-pause Xcode Cloud"
 XC_ARMED=1
@@ -758,15 +801,25 @@ XC_START="$($XC start 2>&1)"
 if [ $? -eq 0 ]; then
   ok "$XC_START"
   XC_STARTED=1
+  xc_pause
 else
   # HTTP 500 UNEXPECTED_ERROR from `POST /v1/ciBuildRuns` is how App Store
   # Connect says "rate limited" — it is not a fault in this repo, and it
   # clears on its own.
   printf "%s\n" "$XC_START" | sed 's/^/      /' >&2
-  warn "Xcode Cloud would not start a run — iOS has not built"
+  warn "Xcode Cloud would not start a run"
   XC_STARTED=0
+  # Pause BEFORE the local build: it takes twenty minutes, and leaving
+  # the workflow armed that long is exactly the window a stray push to
+  # main uses to start a run on the wrong commit.
+  xc_pause
+  if [ "${NO_IOS_LOCAL:-0}" = "1" ]; then
+    warn "NO_IOS_LOCAL=1 — not falling back to the local build"
+  else
+    warn "falling back to the local route (NO_IOS_LOCAL=1 disables this)"
+    ios_local_build || true
+  fi
 fi
-xc_pause
 fi
 
 # ══════════════════════════════════════════════════════════════════════
@@ -927,10 +980,19 @@ if [ "${XC_STARTED:-0}" = "skipped" ]; then
 elif [ "${XC_STARTED:-0}" = "1" ]; then
   XC_APP_STORE_NOTE="building now — submit it in App Store Connect when it
               lands.  ./scripts/xcode-cloud.py runs 3"
+elif [ "${XC_STARTED:-0}" = "local" ]; then
+  XC_APP_STORE_NOTE="UPLOADED FROM THIS MAC, not Xcode Cloud. The build is
+              already in App Store Connect — submit it there when
+              processing finishes. Nothing is pending in the cloud and
+              the workflow is still paused. Note that a local export
+              signs against profiles already on this Mac, so this says
+              the build shipped, not that a clean cloud build is green."
 else
-  XC_APP_STORE_NOTE="NOT BUILDING. Apple refused to start the run (see
-              above). Retry when it clears — it pauses itself again:
-                ./scripts/xcode-cloud.py resume && ./scripts/xcode-cloud.py start; ./scripts/xcode-cloud.py pause"
+  XC_APP_STORE_NOTE="NOT BUILDING. Apple refused to start the run and the
+              local fallback did not ship it either (see above). Retry
+              either route — the cloud one pauses itself again:
+                ./scripts/xcode-cloud.py resume && ./scripts/xcode-cloud.py start; ./scripts/xcode-cloud.py pause
+                ./scripts/build-ios-appstore.sh"
 fi
 cat <<EOF
 
