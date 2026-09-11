@@ -241,12 +241,70 @@ def start(force: str | None = None) -> None:
     print(f"started run {a.get('number')} ({a.get('executionProgress')}) id={out['data']['id']}")
 
 
+def ensure(commit: str, wait: str = "6") -> None:
+    """Make sure a run exists for `commit` — waiting for the push to do it.
+
+    THE WORKFLOW IS ENABLED NOW, so the release's own push to `main` starts
+    the run. That is the whole point of leaving it enabled: nothing arms
+    and disarms around a release, and nothing builds in between because
+    nothing is pushed in between.
+
+    But the push trigger has silently not fired before (2026-08-07: nothing
+    after thirty minutes; a run started by hand picked up the same commit
+    and succeeded), so "pushed, therefore building" is not a thing that can
+    be assumed. And starting one blindly is worse than not starting one: two
+    concurrent runs do not race, they BOTH die with "An update has been
+    initiated by another request", which is how 2026-08-26 came out of a
+    release with two failed runs.
+
+    So: wait for the trigger, and only start a run if it never came.
+    Prints what it found and exits 0 when a run exists for the commit,
+    exits 2 when there is none and one could not be started.
+    """
+    minutes = float(wait)
+    deadline = time.time() + minutes * 60
+    short = commit[:8]
+    while True:
+        data = call(f"/v1/ciProducts/{product()}/buildRuns?limit=10&sort=-number")
+        for run in data["data"]:
+            a = run["attributes"]
+            sha = (a.get("sourceCommit") or {}).get("commitSha") or ""
+            if sha and sha[:8] == short:
+                print(f"run {a.get('number')} is building {short} "
+                      f"({a.get('executionProgress')})")
+                return
+        if time.time() >= deadline:
+            break
+        time.sleep(20)
+
+    print(f"no run for {short} after {minutes:g} min — "
+          f"the push trigger did not fire. Starting one by hand.")
+    live = in_flight()
+    if live:
+        a = live[0]["attributes"]
+        other = (a.get("sourceCommit") or {}).get("commitSha") or "?"
+        print(f"  refusing: run {a.get('number')} is already live on "
+              f"{other[:8]}. Starting a second would kill both.")
+        raise SystemExit(2)
+    try:
+        start()
+    except SystemExit:
+        raise SystemExit(2)
+
+
 def workflow_enabled(wf: str) -> bool:
     return bool(call(f"/v1/ciWorkflows/{wf}")["data"]["attributes"].get("isEnabled"))
 
 
 def pause(_: str | None = None) -> None:
     """Stop Xcode Cloud starting a run on every push to `main`.
+
+    NOT THE NORMAL STATE ANY MORE. The workflow is left ENABLED (2026-09-11)
+    because nothing is pushed to `main` except a release, so "every push
+    builds iOS" and "only a release builds iOS" are now the same sentence.
+    This is here for the day that stops being true — a spell of pushing
+    work-in-progress to `main`, or a cron that starts writing outside the
+    directories the start condition skips.
 
     WHY YOU WOULD. Every run this workflow starts posts a commit status to
     GitHub — context `PrayerApp | Default` — and on a public repository
@@ -260,7 +318,7 @@ def pause(_: str | None = None) -> None:
     it simply does not fire, and `resume` puts it back exactly as it was.
 
     THE COST, and it is real: nothing builds iOS until you say so. A release
-    that would have been picked up by the push to `main` now needs
+    that would have been picked up by the push to `main` then needs
     `./scripts/xcode-cloud.py start` after the tag, and `shipped` will
     report the version as never having reached App Store Connect until it
     does. `start` refuses while paused rather than failing obscurely.
@@ -416,6 +474,8 @@ if __name__ == "__main__":
         shipped(sys.argv[2], *sys.argv[3:4])
     elif cmd == "pause":
         pause()
+    elif cmd == "ensure":
+        ensure(sys.argv[2], *sys.argv[3:4])
     elif cmd == "resume":
         resume()
     else:

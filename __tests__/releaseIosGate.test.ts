@@ -104,21 +104,25 @@ describe('the summary line only claims what is true', () => {
 /**
  * iOS BUILDS ONCE PER RELEASE, AND ONLY FROM THE RELEASE.
  *
- * The Xcode Cloud workflow is paused between releases — `isEnabled` false,
- * so a push to `main` starts nothing at all. That is not a build-minutes
- * decision: every run posts its result to GitHub as a commit status named
+ * Every run posts its result to GitHub as a commit status named
  * `PrayerApp | Default`, and on a public repository every status is
  * public. Runs #724 to #728 were all COMPLETE/CANCELED — cancelled by the
  * next push, including the prayer-times data cron's — so `main` wore a red
  * X next to five green GitHub Actions checks, describing nothing about the
  * code.
  *
- * So release.sh arms the trigger for the few seconds it takes to start a
- * run on the commit it just tagged, and disarms it again. What these pin
- * is the disarming: the window has to close on EVERY path out of the
- * script, not just the happy one, or an interrupted release leaves the
- * trigger armed and the next unrelated push builds, posts and is
- * cancelled — exactly the state this replaced.
+ * The workflow used to be PAUSED between releases to prevent that, with
+ * release.sh arming it for a few seconds and a `trap` disarming it on
+ * every path out. Since 2026-09-11 the defence is upstream instead:
+ * nothing is pushed to `main` except a release, so the workflow can stay
+ * enabled and still only ever see release commits.
+ *
+ * What these pin is what makes THAT safe, because it has two sharp edges.
+ * The crons push on their own schedule and are skipped by the start
+ * condition rather than by anything in this repo — and that rule has to
+ * cover `src/providers/data`, not just `data`, because every bot commit
+ * writes a seed file there too. And a run must not be started blindly
+ * next to the push's own: two concurrent runs do not race, they both die.
  */
 describe('the release is the only thing that builds iOS', () => {
   const releaseSh = readFileSync(
@@ -130,28 +134,34 @@ describe('the release is the only thing that builds iOS', () => {
     'utf8',
   );
 
-  it('arms the trigger, starts a run, and disarms it', () => {
+  it('waits for the push trigger instead of starting a run blindly', () => {
     const step = releaseSh.slice(releaseSh.indexOf('step "App Store build"'));
-    expect(step).toContain('$XC resume');
-    expect(step).toContain('XC_ARMED=1');
-    expect(step).toContain('$XC start');
-    // Disarmed in the same step, not left to the end of the script.
-    const armed = step.indexOf('XC_ARMED=1');
-    const disarmed = step.indexOf('xc_pause');
-    expect(disarmed).toBeGreaterThan(armed);
-    expect(disarmed - armed).toBeLessThan(1200);
+    expect(step).toContain('$XC ensure "$RELEASE_SHA"');
+    // The arming is gone with the reason for it. A release that armed the
+    // trigger and fell over before disarming was the failure mode this
+    // whole arrangement replaced; there is now nothing to leave armed.
+    expect(step).not.toContain('$XC resume');
+    expect(step).not.toContain('XC_ARMED=1');
+    expect(releaseSh).not.toMatch(/trap xc_pause/);
   });
 
-  it('closes the window on every path out, including a die', () => {
-    // `die` exits without running cleanup_workbench — it always has — so
-    // the pause cannot live at the end of the script.
-    expect(releaseSh).toMatch(/trap xc_pause EXIT INT TERM/);
-    const fn = releaseSh.slice(releaseSh.indexOf('xc_pause() {'));
-    // Idempotent: the trap fires again on a normal exit, after the step
-    // already paused, and must not un-pause or report twice.
-    expect(fn).toContain('[ "$XC_ARMED" = "1" ] || return 0');
-    // A pause that fails is the one thing here that must be loud.
-    expect(fn).toContain('STILL ARMED');
+  it('starts a run by hand only when the trigger did not fire', () => {
+    const fn = xc.slice(xc.indexOf('def ensure('));
+    // The 2026-08-07 incident: pushed, and nothing after thirty minutes.
+    // A run started by hand picked up the same commit and succeeded.
+    expect(fn).toContain('the push trigger did not fire');
+    // And the 2026-08-26 one, which is why it is not started blindly.
+    expect(fn).toContain('in_flight()');
+    expect(fn).toMatch(/Starting a second would kill both/);
+  });
+
+  it('skips the dataset crons by path, seed files included', () => {
+    // The crons push to main roughly daily and nobody drives them. The
+    // workflow's own start condition is what stops them building, and the
+    // `data` matcher alone skipped NOTHING: every bot commit writes
+    // src/providers/data/{ifis,habous}Seed.json as well as data/.
+    expect(releaseSh).toContain('src/providers/data');
+    expect(releaseSh).toContain('DO_NOT_START_IF_ALL_FILES_MATCH');
   });
 
   it('never dies between arming and disarming', () => {

@@ -68,21 +68,25 @@ describe('the skip', () => {
 });
 
 describe('the ordinary path is untouched', () => {
-  it('still starts a run when the flag is not set', () => {
-    expect(step).toContain('$XC resume');
-    expect(step).toContain('XC_START="$($XC start 2>&1)"');
+  it('still gets a run for the release commit when the flag is not set', () => {
+    // The workflow is enabled now, so the release's own push starts the
+    // run and `ensure` confirms it — starting one blindly next to it
+    // kills both. See releaseIosGate.test.ts for that contract.
+    expect(step).toContain('$XC ensure "$RELEASE_SHA"');
   });
 
-  it('still pauses the workflow afterwards', () => {
-    // Every run posts a PUBLIC commit status, so the workflow is paused
-    // between releases. The pause has to happen on the path that armed
-    // it, and only there.
-    expect(step).toContain('xc_pause');
+  it('falls back to building on this Mac when the cloud has no run', () => {
+    // Added after 2026-09-11, when POST /v1/ciBuildRuns answered HTTP 500
+    // for an hour: before this, "Apple is down" meant the iOS channel of
+    // a release simply did not happen.
+    expect(step).toContain('ios_local_build');
+    expect(step).toContain('NO_IOS_LOCAL');
+    expect(script).toContain('scripts/build-ios-appstore.sh');
   });
 
   it('is still a warning rather than a failure', () => {
     // Everything above this step is already public by the time it runs.
-    expect(step).toContain('warn "Xcode Cloud would not start a run');
+    expect(step).toContain('warn "Xcode Cloud has no run for this release"');
     expect(step).not.toContain('die "Xcode Cloud');
   });
 });

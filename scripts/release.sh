@@ -159,39 +159,46 @@ keep_installed_widget_registered() {
   return 0
 }
 
-# ── XCODE CLOUD IS ARMED FOR SECONDS, AND ONLY HERE ───────────────────
+# ── XCODE CLOUD IS ENABLED, AND A RELEASE IS THE ONLY THING PUSHED ────
 #
-# The Default workflow is PAUSED between releases (`isEnabled` false on
-# `ciWorkflows/{id}` — see scripts/xcode-cloud.py). That is deliberate and
-# it is not about build minutes: every run posts its result to GitHub as a
-# commit status called `PrayerApp | Default`, and on a public repository
-# every status is public. A run cancelled by the next push — or by the data
-# refresh cron, which pushes to `main` on its own schedule — leaves a red X
-# on a commit that earned none, beside five green GitHub Actions checks.
-# Runs #724 to #728 were all COMPLETE/CANCELED for exactly that reason.
+# Every run posts its result to GitHub as a commit status called
+# `PrayerApp | Default`, and on a public repository every status is
+# public. A run cancelled by the next push leaves a red X on a commit that
+# earned none, beside five green GitHub Actions checks — runs #724 to #728
+# were all COMPLETE/CANCELED for exactly that reason. That is what the
+# pause was defending against, and for a long time it was the only defence
+# available.
 #
-# So a push never builds iOS. The RELEASE builds iOS, here, on the commit
-# it just tagged: resume, start, pause. The window in which a stray push
-# could trigger anything is the few seconds between those calls.
+# The defence now is upstream: NOTHING IS PUSHED TO `main` EXCEPT A
+# RELEASE. Work accumulates locally and goes up when a release goes up, so
+# the workflow can stay enabled and still only ever see release commits.
 #
-# AND IT CLOSES ON EVERY PATH OUT. `die` does not run `cleanup_workbench`
-# — nothing did until this — so the pause is a trap rather than a line at
-# the end. A release that fell over between the resume and the pause would
-# otherwise leave the trigger armed, and the next unrelated push to `main`
-# would build, and post, and be cancelled by the one after it: precisely
-# the state this was written to end. Verified by killing a run mid-step.
+# ONE EXCEPTION, AND IT IS AUTOMATED: the dataset crons push on their own
+# schedule, roughly daily. The workflow's own start condition skips them —
+# `DO_NOT_START_IF_ALL_FILES_MATCH` over `data` AND `src/providers/data`.
+# The second directory was added on 2026-09-11 and is the whole reason
+# enabling this is safe: every bot commit writes `data/...` *and*
+# `src/providers/data/{ifis,habous}Seed.json`, so the single `data` matcher
+# it had before skipped nothing at all. Check that rule before adding a
+# path the crons write to.
 XC="python3 $ROOT/scripts/xcode-cloud.py"
-XC_ARMED=0
-xc_pause() {
-  [ "$XC_ARMED" = "1" ] || return 0
-  XC_ARMED=0
-  if $XC pause >/dev/null 2>&1; then
-    ok "Xcode Cloud paused again — no push builds iOS until the next release"
-  else
-    warn "Xcode Cloud is STILL ARMED — run ./scripts/xcode-cloud.py pause"
-  fi
-}
-trap xc_pause EXIT INT TERM
+
+# THE ARM/DISARM TRAP IS GONE, AND SO IS THE REASON FOR IT.
+#
+# The workflow was kept paused because a push to `main` would otherwise
+# build iOS and post a public commit status; a release armed it for a few
+# seconds and a `trap` disarmed it however the run ended. The trap was the
+# careful part: a release that fell over between the resume and the pause
+# would have left the trigger live.
+#
+# What changed is upstream of all of it — nothing is pushed to `main` now
+# except a release. Work accumulates locally and goes up when a release
+# goes up, so "every push to main builds iOS" and "only a release builds
+# iOS" became the same sentence. The workflow stays enabled, the release's
+# own push starts the run, and there is no window to protect.
+#
+# `pause` and `resume` still exist in xcode-cloud.py for the day that
+# stops being true.
 
 cleanup_workbench() {
   step "Cleanup"
@@ -789,37 +796,40 @@ ios_local_build() {
 }
 
 if [ "${SKIP_APP_STORE:-0}" = "1" ]; then
-  ok "skipped: SKIP_APP_STORE=1 — Xcode Cloud stays paused, nothing sent"
+  ok "skipped: SKIP_APP_STORE=1 — nothing sent to App Store Connect"
   XC_STARTED=skipped
 elif [ "${IOS_LOCAL:-0}" = "1" ]; then
-  ok "IOS_LOCAL=1 — building iOS here, Xcode Cloud stays paused"
+  ok "IOS_LOCAL=1 — building iOS here rather than in the cloud"
   ios_local_build || true
 else
-$XC resume >/dev/null 2>&1 || warn "could not un-pause Xcode Cloud"
-XC_ARMED=1
-XC_START="$($XC start 2>&1)"
-if [ $? -eq 0 ]; then
-  ok "$XC_START"
-  XC_STARTED=1
-  xc_pause
-else
-  # HTTP 500 UNEXPECTED_ERROR from `POST /v1/ciBuildRuns` is how App Store
-  # Connect says "rate limited" — it is not a fault in this repo, and it
-  # clears on its own.
-  printf "%s\n" "$XC_START" | sed 's/^/      /' >&2
-  warn "Xcode Cloud would not start a run"
-  XC_STARTED=0
-  # Pause BEFORE the local build: it takes twenty minutes, and leaving
-  # the workflow armed that long is exactly the window a stray push to
-  # main uses to start a run on the wrong commit.
-  xc_pause
-  if [ "${NO_IOS_LOCAL:-0}" = "1" ]; then
-    warn "NO_IOS_LOCAL=1 — not falling back to the local build"
+  # THE WORKFLOW IS ENABLED, AND THE PUSH ABOVE IS WHAT STARTS THE RUN.
+  #
+  # It used to be paused, and a release armed it for the seconds it took
+  # to start a run and disarmed it after. That existed because a push to
+  # main would otherwise build — and the answer now is that nothing is
+  # pushed to main except a release. The arming was protecting against
+  # traffic that no longer exists, and it cost a window: a release that
+  # fell over between the resume and the pause left the trigger live.
+  #
+  # So this does not start anything it does not have to. It waits for the
+  # push's own run, and starts one only if the trigger silently did not
+  # fire — which it has done before (2026-08-07). Starting a second run
+  # next to a live one kills both; `ensure` refuses rather than doing it.
+  XC_ENSURE="$($XC ensure "$RELEASE_SHA" 2>&1)"
+  if [ $? -eq 0 ]; then
+    ok "$XC_ENSURE"
+    XC_STARTED=1
   else
-    warn "falling back to the local route (NO_IOS_LOCAL=1 disables this)"
-    ios_local_build || true
+    printf "%s\n" "$XC_ENSURE" | sed 's/^/      /' >&2
+    warn "Xcode Cloud has no run for this release"
+    XC_STARTED=0
+    if [ "${NO_IOS_LOCAL:-0}" = "1" ]; then
+      warn "NO_IOS_LOCAL=1 — not falling back to the local build"
+    else
+      warn "falling back to the local route (NO_IOS_LOCAL=1 disables this)"
+      ios_local_build || true
+    fi
   fi
-fi
 fi
 
 # ══════════════════════════════════════════════════════════════════════

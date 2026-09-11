@@ -327,8 +327,25 @@ named **Default**, configured to start on branch changes to `main` — a tag
 push has never started anything, whatever an older version of this page
 said.
 
-**It is paused, and a release is the only thing that un-pauses it.**
-`isEnabled` is false on the workflow, so no push builds anything —
+**It is ENABLED, and a release is the only thing pushed to `main`.**
+Changed 2026-09-11. Work accumulates locally and goes up when a release
+goes up, so "every push builds iOS" and "only a release builds iOS" are
+the same sentence, and no arming or disarming happens around a release.
+
+Two things make that safe, and both are worth checking before you rely
+on it. The dataset crons push on their own schedule — the workflow's
+start condition skips them with `DO_NOT_START_IF_ALL_FILES_MATCH` over
+**`data` and `src/providers/data`**; the second directory was added the
+same day, and without it the rule skipped nothing, because every bot
+commit writes a seed file under `src/providers/data` as well as the
+dataset under `data`. And `release.sh` no longer starts a run blindly:
+`xcode-cloud.py ensure <sha>` waits for the push's own run and starts
+one only if the trigger silently did not fire, because two concurrent
+runs do not race — they both die.
+
+`pause` and `resume` still exist for the day either of those stops
+being true. The paragraph below describes that older arrangement:
+`isEnabled` false on the workflow, so no push builds anything —
 `scripts/release.sh` arms it for the few seconds it takes to start a run on
 the commit it just tagged, then disarms it. The pause is a `trap`, so it
 happens on every path out of the script, including an abort: an armed
