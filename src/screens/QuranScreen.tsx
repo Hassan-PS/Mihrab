@@ -79,7 +79,11 @@ import { useVerseOfTheDay } from '../quran/useVerseOfTheDay';
 import { SyncHint } from './sync/SyncHint';
 import { cardEdgeStyle } from '../theme/chrome';
 import { TYPE, arabicTextStyle } from '../theme/typography';
-import { surahHeaderGlyph, surahHeaderStyle } from '../quran/surahHeaderGlyph';
+import {
+  surahHeaderGlyph,
+  surahHeaderStyle,
+  surahNameSize,
+} from '../quran/surahHeaderGlyph';
 import { useTabBarInset } from '../navigation/tabBarInset';
 import { useTabPageTop } from '../navigation/useTabPageTop';
 import { SyncHeaderButton } from './sync/SyncHeaderButton';
@@ -1093,7 +1097,12 @@ export function QuranScreen() {
           // the surah for screen readers.
           accessible={false}
           importantForAccessibility="no"
-          style={[styles.arabic, { color: palette.text }]}>
+          // Each name at its own size — see `SURAH_NAME_SIZES`. The line
+          // height is the base's, so the row is the same height either way.
+          style={[
+            styles.arabic,
+            { color: palette.text, fontSize: surahNameSize(item.number) },
+          ]}>
           {surahHeaderGlyph(item.number)}
         </Text>
       </Pressable>
@@ -1135,7 +1144,11 @@ export function QuranScreen() {
         allowFontScaling={false}
         accessible={false}
         importantForAccessibility="no"
-        style={[styles.arabic, { color: palette.text }]}>
+        style={[
+          styles.arabic,
+          { color: palette.text },
+          item.startSurah ? { fontSize: surahNameSize(item.startSurah.number) } : null,
+        ]}>
         {item.startSurah ? surahHeaderGlyph(item.startSurah.number) : ''}
       </Text>
     </Pressable>

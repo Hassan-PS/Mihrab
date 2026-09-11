@@ -60,10 +60,60 @@ export function surahHeaderGlyph(surahNumber: number): string {
  */
 export const SURAH_NAME_SIZE = 34;
 
-export function surahHeaderStyle(): TextStyle {
+/**
+ * ── ONE WEIGHT, NOT ONE SIZE — the names are 114 separate drawings ────
+ *
+ * The Complex's calligraphers drew each name on its own, to fill the
+ * header of a printed page, so the drawings differ in the weight of the
+ * pen as well as in length: measured off the outlines, the main stroke
+ * of ٱلْبَقَرَة is 1.94 px at 34 pt where ٱلنِّسَاء is 1.42 — a difference of
+ * three eighths, and the two sit four rows apart in the list. It read as
+ * some names being bold and others light, which was reported as exactly
+ * that.
+ *
+ * A drawing cannot be un-bolded without redrawing it, and these are not
+ * ours to redraw. What a printer would do instead is set the heavier
+ * ones a little smaller, and that is what this table is: a size per
+ * name, chosen so the stroke lands near the LIGHTEST the font offers
+ * (the reported end to aim for), with a limit on how far any name may
+ * shrink — the pull towards one weight is traded against the pull
+ * towards one size, since the two are unrelated in these drawings
+ * (correlation 0.06) and no single size can satisfy both.
+ *
+ * Measured with a distance transform over each rasterised glyph — the
+ * 85th percentile of twice the distance-to-edge, which is the main
+ * strokes rather than the hair-thin vowel marks. The spread of weights
+ * across the 114 goes from ×1.37 to ×1.20; nothing grows, so no name can
+ * outgrow the room the row measured for it, and nothing falls below 28.
+ * The line height does NOT follow the size (`surahHeaderStyle`): the
+ * rows of the list are the same height whichever name they carry.
+ */
+const SURAH_NAME_SIZES: readonly number[] = [
+  29, 28, 30, 34, 34, 32, 32, 33, 34, 34,  // 1–10
+  30, 34, 31, 33, 29, 30, 34, 31, 32, 34,  // 11–20
+  30, 32, 30, 32, 32, 34, 34, 34, 34, 34,  // 21–30
+  34, 33, 31, 33, 33, 34, 34, 32, 32, 32,  // 31–40
+  33, 32, 31, 33, 32, 29, 30, 31, 29, 34,  // 41–50
+  34, 32, 31, 29, 29, 29, 30, 31, 31, 30,  // 51–60
+  32, 30, 33, 34, 34, 31, 32, 33, 31, 30,  // 61–70
+  30, 31, 34, 33, 31, 33, 32, 32, 34, 34,  // 71–80
+  29, 32, 30, 31, 31, 34, 31, 34, 29, 32,  // 81–90
+  32, 34, 30, 31, 33, 31, 33, 34, 34, 33,  // 91–100
+  33, 31, 31, 30, 33, 29, 31, 29, 30, 32,  // 101–110
+  32, 31, 32, 34,  // 111–114
+];
+
+/** The size this name is set at — see the table above. */
+export function surahNameSize(surahNumber: number): number {
+  return SURAH_NAME_SIZES[surahNumber - 1] ?? SURAH_NAME_SIZE;
+}
+
+export function surahHeaderStyle(surahNumber?: number): TextStyle {
   return {
     fontFamily: SURAH_HEADER_FONT,
-    fontSize: SURAH_NAME_SIZE,
+    fontSize: surahNumber ? surahNameSize(surahNumber) : SURAH_NAME_SIZE,
+    // The BASE size's line height, always: a name set smaller than the
+    // base must not make its row shorter than its neighbours'.
     lineHeight: Math.round(SURAH_NAME_SIZE * 1.35),
     includeFontPadding: false,
   };

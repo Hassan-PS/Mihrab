@@ -88,7 +88,11 @@ import { setQuranPrefs, useQuranState } from '../../quran/quranState';
 import { useBreakpoint } from '../../responsive/breakpoints';
 import { RADIUS, SPACING } from '../../theme/tokens';
 import { TYPE } from '../../theme/typography';
-import { surahHeaderGlyph, surahHeaderStyle } from '../../quran/surahHeaderGlyph';
+import {
+  surahHeaderGlyph,
+  surahHeaderStyle,
+  surahNameSize,
+} from '../../quran/surahHeaderGlyph';
 import { InfoButton } from '../../components/ui/InfoSheet';
 
 /** Playback speeds, matching the reader's own chips. */
@@ -923,7 +927,10 @@ export function TilawahScreen() {
             </Text>
           </View>
           <Text
-            style={[styles.surahArabic, { color: palette.text }]}
+            style={[
+              styles.surahArabic,
+              { color: palette.text, fontSize: surahNameSize(item.number) },
+            ]}
             accessible={false}
             importantForAccessibility="no">
             {surahHeaderGlyph(item.number)}
@@ -978,7 +985,10 @@ export function TilawahScreen() {
             {shownSurah.romanized}
           </Text>
           <Text
-            style={[styles.nowArabic, { color: palette.text }]}
+            style={[
+              styles.nowArabic,
+              { color: palette.text, fontSize: surahNameSize(shownSurah.number) },
+            ]}
             numberOfLines={1}
             accessible={false}
             importantForAccessibility="no">
