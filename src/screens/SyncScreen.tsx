@@ -39,6 +39,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { CenteredColumn } from '../responsive/CenteredColumn';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { useKeyboardAwareScroll } from '../hooks/useKeyboardAwareScroll';
 import { cardEdgeStyle } from '../theme/chrome';
 import { RADIUS, SPACING } from '../theme/tokens';
 import { TYPE, typeStyle } from '../theme/typography';
@@ -163,6 +164,9 @@ function PeerRow({
 }
 
 export function SyncScreen() {
+  // One ref for both returns: the not-ready page and the real one are
+  // never mounted together.
+  const kb = useKeyboardAwareScroll<ScrollView>();
   const { t } = useTranslation();
   const { palette } = useAppPalette();
 
@@ -474,7 +478,11 @@ export function SyncScreen() {
 
   if (ready === false) {
     return (
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+      <ScrollView
+        ref={kb.ref}
+        automaticallyAdjustKeyboardInsets
+        style={styles.scroll}
+        contentContainerStyle={[styles.content, kb.contentPadding]}>
         <CenteredColumn innerStyle={styles.stack} style={styles.stack}>
           <View style={[styles.card, card]}>
             <Text style={[typeStyle('body'), { color: palette.text }]}>
@@ -487,7 +495,11 @@ export function SyncScreen() {
   }
 
   return (
-    <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+    <ScrollView
+      ref={kb.ref}
+      automaticallyAdjustKeyboardInsets
+      style={styles.scroll}
+      contentContainerStyle={[styles.content, kb.contentPadding]}>
       <CenteredColumn innerStyle={styles.stack} style={styles.stack}>
         {/* One explanation, two lines, the rest a tap away. The intro and
             the folder card each carried a paragraph saying the same thing

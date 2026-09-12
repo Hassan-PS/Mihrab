@@ -36,6 +36,7 @@ import {
 import { CenteredColumn } from '../responsive/CenteredColumn';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { useKeyboardAwareScroll } from '../hooks/useKeyboardAwareScroll';
 import { useBreakpoint } from '../responsive/breakpoints';
 import { cardEdgeStyle } from '../theme/chrome';
 import { RADIUS, SPACING } from '../theme/tokens';
@@ -104,6 +105,7 @@ function CategoryRow({
 }
 
 export function BackupScreen() {
+  const kb = useKeyboardAwareScroll<ScrollView>();
   const { t } = useTranslation();
   const { palette } = useAppPalette();
   useBreakpoint();
@@ -217,8 +219,10 @@ export function BackupScreen() {
 
   return (
     <ScrollView
+      ref={kb.ref}
+      automaticallyAdjustKeyboardInsets
       style={[styles.scroll, { backgroundColor: palette.bg }]}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, kb.contentPadding]}
       contentInsetAdjustmentBehavior="automatic"
     >
       {/* The gap belongs to the stack, not to `contentContainerStyle`.

@@ -17,6 +17,7 @@ import { useAppPalette } from '../../hooks/useAppPalette';
 import { CenteredColumn } from '../../responsive/CenteredColumn';
 import { useTabBarInset } from '../../navigation/tabBarInset';
 import { useAndroidSubScreenBack } from '../../navigation/useAndroidSubScreenBack';
+import { useKeyboardAwareScroll } from '../../hooks/useKeyboardAwareScroll';
 import { SPACING } from '../../theme/tokens';
 
 type Props = {
@@ -33,13 +34,19 @@ export function SettingsPage({ children, deferBackRef }: Props) {
   const tabBarInset = useTabBarInset();
   // Optional by design: a page with no modals has nothing to defer.
   useAndroidSubScreenBack(deferBackRef);
+  // Every settings subpage with a field in it — location search, the
+  // coordinate boxes, a saved place's name — rides on this one scroller.
+  const kb = useKeyboardAwareScroll<ScrollView>();
 
   return (
     <ScrollView
+      ref={kb.ref}
+      automaticallyAdjustKeyboardInsets
       style={[styles.scroll, { backgroundColor: palette.bg }]}
       contentContainerStyle={[
         styles.content,
         { paddingBottom: SPACING.xl + tabBarInset },
+        kb.contentPadding,
       ]}
       contentInsetAdjustmentBehavior="automatic"
       keyboardShouldPersistTaps="handled">

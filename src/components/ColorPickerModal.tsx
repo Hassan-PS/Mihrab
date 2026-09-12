@@ -56,6 +56,7 @@ import Svg, {
 import { useTranslation } from 'react-i18next';
 import type { AppPalette } from '../theme/appPalette';
 import { cardEdgeStyle } from '../theme/chrome';
+import { useKeyboardInset } from '../hooks/useKeyboardInset';
 import { useSystemNavigationReserve } from '../navigation/tabBarInset';
 import { modalStyles } from '../screens/settings/modalStyles';
 import { RADIUS, SPACING } from '../theme/tokens';
@@ -106,6 +107,15 @@ export function ColorPickerModal({
 }: Props) {
   const { t } = useTranslation();
   const navigationReserve = useSystemNavigationReserve();
+  /**
+   * A React Native Modal on Android is a Dialog with its own window, and
+   * that window does not inherit the activity's `adjustResize`. So the
+   * keyboard opened straight over the hex field — which is how this bug
+   * was found. Padding the flex-end ROOT lifts the whole sheet above the
+   * keyboard; padding the sheet would grow it into its own `maxHeight`
+   * instead and leave the field exactly where it was.
+   */
+  const keyboardInset = useKeyboardInset();
 
   const [hsv, setHsv] = useState<Hsv>(() => hexToHsv(initial));
   const [draft, setDraft] = useState(initial);
@@ -236,7 +246,7 @@ export function ColorPickerModal({
       animationType="slide"
       transparent
       onRequestClose={onClose}>
-      <View style={modalStyles.root}>
+      <View style={[modalStyles.root, { paddingBottom: keyboardInset }]}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('common.close', 'Close')}

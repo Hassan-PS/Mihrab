@@ -25,6 +25,7 @@ import {
 import { useNavigation, usePreventRemove } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useKeepAwake } from './keepAwakeLock';
+import { useKeyboardInset } from '../hooks/useKeyboardInset';
 import { useAppPalette } from '../hooks/useAppPalette';
 import {
   easternNumerals,
@@ -910,6 +911,7 @@ export function MushafJumpModal({
 }) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const keyboardInset = useKeyboardInset();
   const [text, setText] = useState('');
   useEffect(() => {
     if (!visible) setText('');
@@ -920,7 +922,14 @@ export function MushafJumpModal({
     if (Number.isFinite(n) && n >= 1) onJump(n);
   };
   return (
-    <View style={[styles.jumpBackdrop, { backgroundColor: palette.overlay }]}>
+    <View
+      style={[
+        styles.jumpBackdrop,
+        { backgroundColor: palette.overlay },
+        // The field in this card is the whole point of it, and a Modal on
+        // Android does not resize for the keyboard. See useKeyboardInset.
+        keyboardInset > 0 ? { paddingBottom: keyboardInset } : null,
+      ]}>
       <View style={[styles.jumpCard, { backgroundColor: palette.card }]}>
         <Text style={[styles.jumpTitle, { color: palette.text }]}>
           {t('quran.jumpToPage', 'Go to page')}

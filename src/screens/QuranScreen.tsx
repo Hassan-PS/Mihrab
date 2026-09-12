@@ -24,6 +24,8 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useKeyboardInset } from '../hooks/useKeyboardInset';
+import { useKeyboardAwareScroll } from '../hooks/useKeyboardAwareScroll';
 import { useAppPalette } from '../hooks/useAppPalette';
 import type { AppPalette } from '../theme/appPalette';
 import { SegmentedControl } from '../components/ui';
@@ -126,6 +128,8 @@ export function QuranScreen() {
   const listCap = quranWide ? styles.listWide : null;
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
+  // Two dialogs on this screen open with an autoFocus field in them.
+  const keyboardInset = useKeyboardInset();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   useAndroidSubScreenBack();
@@ -142,6 +146,9 @@ export function QuranScreen() {
    */
   const listRef = useRef<FlatList>(null);
   useScrollToTop(listRef);
+  // The search box lives in the list header, so it travels with the
+  // list: tap it after scrolling and it is the list that has to move.
+  const kb = useKeyboardAwareScroll<FlatList>(listRef);
   const isArabic = i18n.language === 'ar';
   const quran = useQuranState();
   // What is playing is no longer this screen's business: the bar under
@@ -1289,6 +1296,7 @@ export function QuranScreen() {
       ) : null}
       {tab === 'surah' ? (
         <FlatList<SurahIndex>
+          automaticallyAdjustKeyboardInsets
           ref={listRef}
           {...tabBarScroll}
           data={[...filteredSurahs]}
@@ -1296,6 +1304,7 @@ export function QuranScreen() {
           contentContainerStyle={[
             styles.list,
             { paddingTop: listTop, paddingBottom: tabBarInset },
+            kb.contentPadding,
           ]}
           contentInsetAdjustmentBehavior="never"
           ListHeaderComponent={header}
@@ -1306,6 +1315,7 @@ export function QuranScreen() {
         />
       ) : tab === 'juz' ? (
         <FlatList<JuzRow>
+          automaticallyAdjustKeyboardInsets
           ref={listRef}
           {...tabBarScroll}
           data={juzRows}
@@ -1313,6 +1323,7 @@ export function QuranScreen() {
           contentContainerStyle={[
             styles.list,
             { paddingTop: listTop, paddingBottom: tabBarInset },
+            kb.contentPadding,
           ]}
           contentInsetAdjustmentBehavior="never"
           ListHeaderComponent={header}
@@ -1321,6 +1332,7 @@ export function QuranScreen() {
         />
       ) : (
         <FlatList
+          automaticallyAdjustKeyboardInsets
           ref={listRef}
           {...tabBarScroll}
           data={[0]}
@@ -1328,6 +1340,7 @@ export function QuranScreen() {
           contentContainerStyle={[
             styles.list,
             { paddingTop: listTop, paddingBottom: tabBarInset },
+            kb.contentPadding,
           ]}
           contentInsetAdjustmentBehavior="never"
           ListHeaderComponent={header}
@@ -1435,7 +1448,18 @@ export function QuranScreen() {
           accessibilityLabel={t('common.close', 'Close')}
           onPress={() => setCustomDaysVisible(false)}
         />
-        <View style={[styles.menuCard, { backgroundColor: palette.card }]}>
+        <View
+          style={[
+            styles.menuCard,
+            { backgroundColor: palette.card },
+            // Top-anchored, so padding cannot lift it. Re-anchoring to
+            // `bottom` puts the card just above the keyboard rather than
+            // leaving an autoFocus field underneath it — a Modal on
+            // Android does not resize. See useKeyboardInset.
+            keyboardInset > 0
+              ? { bottom: keyboardInset + SPACING.xl }
+              : styles.menuCardResting,
+          ]}>
           <Text style={[styles.menuTitle, { color: palette.text }]}>
             {t('quran.khatmahSetUpTitle', 'Start a khatmah')}
           </Text>
@@ -1520,7 +1544,18 @@ export function QuranScreen() {
           accessibilityLabel={t('common.close', 'Close')}
           onPress={() => setPageJumpVisible(false)}
         />
-        <View style={[styles.menuCard, { backgroundColor: palette.card }]}>
+        <View
+          style={[
+            styles.menuCard,
+            { backgroundColor: palette.card },
+            // Top-anchored, so padding cannot lift it. Re-anchoring to
+            // `bottom` puts the card just above the keyboard rather than
+            // leaving an autoFocus field underneath it — a Modal on
+            // Android does not resize. See useKeyboardInset.
+            keyboardInset > 0
+              ? { bottom: keyboardInset + SPACING.xl }
+              : styles.menuCardResting,
+          ]}>
           <Text style={[styles.menuTitle, { color: palette.text }]}>
             {t('quran.jumpToPage', 'Go to page')}
           </Text>
@@ -1829,13 +1864,20 @@ const styles = StyleSheet.create({
   menuBackdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   menuCard: {
     position: 'absolute',
+    // rtl-safe: a dialog pinned to both edges — symmetric, direction-agnostic
     left: 24,
     right: 24,
-    top: '25%',
     borderRadius: RADIUS.lg,
     padding: SPACING.lg,
     gap: SPACING.md,
   },
+  // The vertical anchor is a style of its own, and the card takes exactly
+  // one of the two. It cannot live in `menuCard` and be cancelled with
+  // `{top: undefined}` when the keyboard lifts the card: an undefined
+  // value is dropped rather than applied, so `top` survived, the card
+  // was pinned at both edges, and it stretched into a tall pale box with
+  // its buttons floating in the middle of it.
+  menuCardResting: { top: '25%' },
   menuTitle: { fontSize: TYPE.title3.fontSize, fontWeight: '700', marginBottom: SPACING.xs },
   menuRow: {
     borderWidth: StyleSheet.hairlineWidth,

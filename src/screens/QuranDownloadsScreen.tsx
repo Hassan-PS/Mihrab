@@ -36,6 +36,7 @@ import { CenteredColumn } from '../responsive/CenteredColumn';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { useKeyboardAwareScroll } from '../hooks/useKeyboardAwareScroll';
 import { cardEdgeStyle } from '../theme/chrome';
 import {
   deleteLegacyImageStore,
@@ -75,6 +76,7 @@ function formatBytes(bytes: number): string {
 }
 
 export function QuranDownloadsScreen() {
+  const kb = useKeyboardAwareScroll<ScrollView>();
   const { t } = useTranslation();
   const { palette } = useAppPalette();
 
@@ -218,8 +220,10 @@ export function QuranDownloadsScreen() {
 
   return (
     <ScrollView
+      ref={kb.ref}
+      automaticallyAdjustKeyboardInsets
       style={{ flex: 1, backgroundColor: palette.bg }}
-      contentContainerStyle={styles.list}
+      contentContainerStyle={[styles.list, kb.contentPadding]}
       contentInsetAdjustmentBehavior="automatic">
       {/* The gap belongs to the stack, not to `contentContainerStyle`.
           That gap separates the ScrollView's DIRECT children, and since

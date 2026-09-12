@@ -42,6 +42,7 @@ import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import notifee, { EventType } from '@notifee/react-native';
 import { JOURNAL_LOG_ACTION_ID } from '../notifications/prayerNotifications';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { useKeyboardAwareScroll } from '../hooks/useKeyboardAwareScroll';
 import { useIsActive } from '../hooks/useIsActive';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { LogOptionsButton, LogOptionsSheet } from './log/LogOptionsSheet';
@@ -194,6 +195,7 @@ export function LogScreen() {
    */
   const scrollRef = useRef<ScrollView>(null);
   useScrollToTop(scrollRef);
+  const kb = useKeyboardAwareScroll<ScrollView>(scrollRef);
   const tabBarInset = useTabBarInset();
   const pageTop = useTabPageTop();
   /**
@@ -1155,12 +1157,14 @@ export function LogScreen() {
 
   return (
     <ScrollView
+      automaticallyAdjustKeyboardInsets
       ref={scrollRef}
       {...tabBarScroll}
       style={{ backgroundColor: palette.bg }}
       contentContainerStyle={[
         styles.scroll,
         { paddingTop: pageTop, paddingBottom: tabBarInset },
+        kb.contentPadding,
       ]}
       contentInsetAdjustmentBehavior="never"
     >

@@ -21,6 +21,7 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { useKeyboardAwareScroll } from '../hooks/useKeyboardAwareScroll';
 import { TYPE, arabicTextStyle } from '../theme/typography';
 import { TABULAR_MAX_FONT_SCALE } from '../theme/textScale';
 import { SURAHS } from './quran';
@@ -75,6 +76,10 @@ function MushafIndexSidebarImpl({
   const quran = useQuranState();
   const [tab, setTab] = useState<Tab>('surah');
   const [query, setQuery] = useState('');
+  // The search box sits above the lists rather than inside one, so all
+  // this needs from the hook is room at the foot: without it the last
+  // matches sit under the keyboard with nowhere to scroll to.
+  const kb = useKeyboardAwareScroll<FlatList>();
 
   // Both tables are facts about the PRINT on screen, not about the Qur'an:
   // a Warsh muṣḥaf opens al-Baqarah and juz 2 on pages of its own.
@@ -257,6 +262,8 @@ function MushafIndexSidebarImpl({
 
       {tab === 'surah' ? (
         <FlatList
+          automaticallyAdjustKeyboardInsets
+          contentContainerStyle={kb.contentPadding}
           data={surahRows}
           keyExtractor={s => String(s.number)}
           renderItem={renderSurah}
@@ -266,6 +273,8 @@ function MushafIndexSidebarImpl({
         />
       ) : tab === 'juz' ? (
         <FlatList
+          automaticallyAdjustKeyboardInsets
+          contentContainerStyle={kb.contentPadding}
           data={juzRows}
           keyExtractor={j => String(j.juz)}
           renderItem={renderJuz}
@@ -274,6 +283,8 @@ function MushafIndexSidebarImpl({
         />
       ) : (
         <FlatList
+          automaticallyAdjustKeyboardInsets
+          contentContainerStyle={kb.contentPadding}
           data={quran.bookmarks}
           keyExtractor={b => b.id}
           renderItem={renderMark}

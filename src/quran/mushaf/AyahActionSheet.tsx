@@ -22,6 +22,7 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useKeyboardInset } from '../../hooks/useKeyboardInset';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { TYPE, arabicTextStyle } from '../../theme/typography';
 import { findSurah, loadSurah } from '../quran';
@@ -91,6 +92,7 @@ export function AyahActionSheet({
 }: Props) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const keyboardInset = useKeyboardInset();
   const insets = useSafeAreaInsets();
   // The larger of the two, on both — see the sheet's note.
   const sideInset = Math.max(insets.left, insets.right);
@@ -352,6 +354,10 @@ export function AyahActionSheet({
       <View
         style={[
           styles.sheet,
+          // A Modal on Android does not resize for the keyboard, and the
+          // recitation controls inside this sheet carry a field. See
+          // useKeyboardInset.
+          keyboardInset > 0 ? { bottom: keyboardInset } : null,
           {
             backgroundColor: palette.card,
             /**
@@ -397,6 +403,11 @@ export function AyahActionSheet({
           </Pressable>
         </View>
 
+        {/* No `automaticallyAdjustKeyboardInsets` here: the sheet itself
+            lifts by the keyboard's height, on both platforms, so this
+            scroller never intersects the keyboard to begin with. The prop
+            would be an iOS-only no-op sitting where a reader would take
+            it for the fix. */}
         <ScrollView ref={scrollRef} style={styles.body} bounces={false}>
           {arabic ? (
             <Text style={[styles.arabic, { color: palette.text }]}>

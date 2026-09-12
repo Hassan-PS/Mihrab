@@ -15,6 +15,7 @@ import {
 import { requestAndroidLocationPermission } from '../utils/locationPermission';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { GeocodedPlace } from '../geocoding/nominatim';
+import { useKeyboardAwareScroll } from '../hooks/useKeyboardAwareScroll';
 import { inputChromeStyle } from '../theme/chrome';
 import { MapPinIcon, SearchIcon } from '../theme/icons';
 import { RADIUS, SPACING } from '../theme/tokens';
@@ -54,6 +55,8 @@ export function LocationSetup({ palette, hideIntro }: Props) {
   const { t } = useTranslation();
   const { updateSettings } = usePrayerSettings();
   const [step, setStep] = useState<'choose' | 'manual'>('choose');
+  // One ref for both steps: only ever one of them is mounted.
+  const kb = useKeyboardAwareScroll<ScrollView>();
   const [gpsBusy, setGpsBusy] = useState(false);
   const [gpsError, setGpsError] = useState<string | null>(null);
   const [draftLat, setDraftLat] = useState('');
@@ -162,8 +165,10 @@ export function LocationSetup({ palette, hideIntro }: Props) {
   if (step === 'choose') {
     return (
       <ScrollView
+        ref={kb.ref}
+        automaticallyAdjustKeyboardInsets
         style={[styles.fill, { backgroundColor: palette.bg }]}
-        contentContainerStyle={styles.chooseContent}
+        contentContainerStyle={[styles.chooseContent, kb.contentPadding]}
         keyboardShouldPersistTaps="handled">
         {hideIntro ? null : (
           <>
@@ -227,8 +232,10 @@ export function LocationSetup({ palette, hideIntro }: Props) {
 
   return (
     <ScrollView
+      ref={kb.ref}
+      automaticallyAdjustKeyboardInsets
       style={[styles.fill, { backgroundColor: palette.bg }]}
-      contentContainerStyle={styles.manualContent}
+      contentContainerStyle={[styles.manualContent, kb.contentPadding]}
       keyboardShouldPersistTaps="handled">
       <Pressable
         accessibilityRole="button"

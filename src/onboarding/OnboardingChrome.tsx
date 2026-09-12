@@ -22,6 +22,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { useKeyboardAwareScroll } from '../hooks/useKeyboardAwareScroll';
 import { CenteredColumn } from '../responsive/CenteredColumn';
 import { isReduceMotion } from '../theme/motion';
 import { RADIUS, SPACING } from '../theme/tokens';
@@ -142,6 +143,7 @@ export function OnboardingFrame({
 }) {
   const { palette } = useAppPalette();
   const insets = useSafeAreaInsets();
+  const kb = useKeyboardAwareScroll<ScrollView>();
   return (
     <View style={[styles.root, { backgroundColor: palette.bg }]}>
       <View style={{ height: insets.top }} />
@@ -153,6 +155,8 @@ export function OnboardingFrame({
         <View style={styles.ruleTrack} />
       )}
       <ScrollView
+        ref={kb.ref}
+        automaticallyAdjustKeyboardInsets
         style={styles.scroll}
         contentContainerStyle={[
           styles.content,
@@ -161,6 +165,7 @@ export function OnboardingFrame({
           // sizes, the shelf on a small phone — and only centres in the
           // slack when there is slack.
           center ? styles.contentCentered : null,
+          kb.contentPadding,
         ]}
         keyboardShouldPersistTaps="handled">
         {topRow ? (

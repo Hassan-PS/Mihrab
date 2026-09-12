@@ -18,6 +18,7 @@ import { cardEdgeStyle, inputChromeStyle, rowDividerStyle } from '../../theme/ch
 import { useSystemNavigationReserve } from '../../navigation/tabBarInset';
 import { DHIKR, dhikrArabic } from '../../dhikr/dhikr';
 import type { DhikrReminder } from '../../dhikr/dhikrReminders';
+import { useKeyboardInset } from '../../hooks/useKeyboardInset';
 import { modalStyles } from './modalStyles';
 import { sharedSettingsStyles as s } from './sharedStyles';
 import { TimeOfDayPicker } from './TimePickerSheet';
@@ -87,6 +88,9 @@ export function DhikrReminderEditor({
 }) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  // The title and body fields sit at the foot of this sheet, and a Modal
+  // on Android does not resize for the keyboard. See useKeyboardInset.
+  const keyboardInset = useKeyboardInset();
   const navigationReserve = useSystemNavigationReserve();
   const [draft, setDraft] = useState<DhikrDraft>(NEW_DRAFT);
 
@@ -110,7 +114,7 @@ export function DhikrReminderEditor({
       animationType="slide"
       transparent
       onRequestClose={onClose}>
-      <View style={modalStyles.root}>
+      <View style={[modalStyles.root, { paddingBottom: keyboardInset }]}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('common.close', 'Close')}

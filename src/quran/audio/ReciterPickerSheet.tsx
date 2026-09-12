@@ -37,6 +37,7 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useKeyboardInset } from '../../hooks/useKeyboardInset';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { setQuranPrefs, useQuranState } from '../quranState';
 import { searchReciters, type Reciter } from './reciters';
@@ -94,6 +95,10 @@ type Props = {
 export function ReciterPickerSheet({ visible, onClose }: Props) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  // The filter field is in this sheet, and a Modal on Android does
+  // not resize for the keyboard. `bottom` rather than padding: this
+  // sheet is absolutely positioned, so lifting it IS moving `bottom`.
+  const keyboardInset = useKeyboardInset();
   const { prefs } = useQuranState();
   const [query, setQuery] = useState('');
   const [onDisk, setOnDisk] = useState<Record<string, ReciterAudioStats>>({});
@@ -285,7 +290,11 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
         accessibilityLabel={t('common.close', 'Close')}
         onPress={onClose}
       />
-      <View style={[styles.sheet, { backgroundColor: palette.card }]}>
+      <View
+        style={[
+          styles.sheet,
+          { backgroundColor: palette.card, bottom: keyboardInset },
+        ]}>
         <Text style={[styles.title, { color: palette.text }]}>
           {t('quran.chooseReciter', 'Choose reciter')}
         </Text>
