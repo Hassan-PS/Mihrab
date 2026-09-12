@@ -119,12 +119,26 @@ export function OnboardingFrame({
   topRow,
   children,
   footer,
+  center,
 }: {
   progress: { now: number; total: number } | null;
   /** The language chip, the Skip control — whatever sits above the title. */
   topRow?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
+  /**
+   * Centre the body in whatever height is left over, instead of stacking
+   * it under the top row.
+   *
+   * For the sparse screens — the greeting, and the alerts screen before
+   * it has been answered. Those have a few lines of content and a button
+   * at the foot, and top-aligning them left two thirds of a phone empty
+   * between the two, which reads as a layout that broke rather than as
+   * calm. A screen with rows or a widget in it keeps the top alignment,
+   * where the gap is filled and centring would only push the first row
+   * away from the title it belongs to.
+   */
+  center?: boolean;
 }) {
   const { palette } = useAppPalette();
   const insets = useSafeAreaInsets();
@@ -140,10 +154,26 @@ export function OnboardingFrame({
       )}
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.content,
+          // `flexGrow`, not `flex`: the body still scrolls when it is
+          // taller than the screen — a long translation at large text
+          // sizes, the shelf on a small phone — and only centres in the
+          // slack when there is slack.
+          center ? styles.contentCentered : null,
+        ]}
         keyboardShouldPersistTaps="handled">
-        <CenteredColumn maxWidth={ONBOARDING_COLUMN}>
-          {topRow ? <View style={styles.topRow}>{topRow}</View> : null}
+        {topRow ? (
+          // Outside the centred column: the language chip and the Skip
+          // control belong to the top edge of the screen whatever the
+          // body does with the space below them.
+          <CenteredColumn maxWidth={ONBOARDING_COLUMN}>
+            <View style={styles.topRow}>{topRow}</View>
+          </CenteredColumn>
+        ) : null}
+        <CenteredColumn
+          maxWidth={ONBOARDING_COLUMN}
+          style={center ? styles.bodyCentered : undefined}>
           {children}
         </CenteredColumn>
       </ScrollView>
@@ -271,6 +301,10 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xl,
     gap: SPACING.md,
   },
+  contentCentered: { flexGrow: 1 },
+  // The body takes the leftover height and sits in the middle of it; the
+  // top row above it keeps its own place at the top.
+  bodyCentered: { flex: 1, justifyContent: 'center' },
   topRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',

@@ -191,6 +191,11 @@ export function AlertsScreen({
   return (
     <OnboardingFrame
       progress={progress}
+      // Before the question is answered this screen is a title, two lines
+      // and two buttons — the same sparse shape as the greeting, and it
+      // needs the same centring. Once granted it fills with the adhan
+      // list and the rows, and top alignment is right again.
+      center={face !== 'granted'}
       footer={
         face === 'unasked' ? (
           <>

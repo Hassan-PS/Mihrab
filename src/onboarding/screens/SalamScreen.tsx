@@ -20,105 +20,46 @@
  * out in place. No `I18nManager.forceRTL`, no restart. Worth knowing
  * before anyone "fixes" this with a reload.
  */
-import { useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  Easing,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { useState } from 'react';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { usePrayerSettings } from '../../context/PrayerSettingsContext';
 import { APP_LANGUAGES } from '../../i18n/languages';
 import { LanguageModal } from '../../screens/settings/LanguageModal';
-import { isReduceMotion } from '../../theme/motion';
 import { RADIUS, SPACING } from '../../theme/tokens';
 import { TYPE, typeStyle } from '../../theme/typography';
 import type { AppLanguage } from '../../settings/types';
-import {
-  OnboardingFrame,
-  OnboardingHeading,
-  PrimaryAction,
-} from '../OnboardingChrome';
+import { MihrabLogoIcon, TranslationIcon } from '../../theme/icons';
+import { OnboardingFrame, PrimaryAction } from '../OnboardingChrome';
 
 /**
- * Animated Arabic salām hero — task #89.
+ * The Arabic salām — task #89, and no longer animated.
  *
- * The greeting "السلام عليكم ورحمة الله تعالى وبركاته" in Amiri, fading
- * in with a gentle scale and slide, the translation appearing under it.
+ * It used to fade in over 1.1 seconds while scaling from 0.92 and sliding
+ * twenty points sideways, and then bring the translation up behind it.
+ * Three effects at once on the first thing anybody sees, and it looked
+ * like a splash screen: the scale read as a stock app-launch zoom, and
+ * the slide was a hardcoded `translateX` that pushed right-to-left text
+ * in whichever direction the number said rather than the language did.
  *
- * Reduce Motion is asked, not assumed — the docblock used to claim this
- * behaviour and the file did not have it until 2026-09-12. Not
- * `useReduceMotion()`: that hook starts false and corrects itself a frame
- * later, which for a once-per-install animation means starting and then
- * being cut short, visibly worse than either answer. Awaiting the cached
- * read costs one frame of an empty hero and gets it right the first time.
+ * The greeting does not need an entrance. The flow's own cross-fade and
+ * the modal presentation already bring the screen in; anything here was
+ * a second animation layered on the first. Typography and space carry it
+ * now — which is principle 4, and which is also why there is no
+ * Reduce Motion branch left in this file: there is no motion to reduce.
  */
-export function SalamHero({
+function SalamHero({
   accentColor,
   mutedColor,
 }: {
   accentColor: string;
   mutedColor: string;
 }) {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(0.92)).current;
-  const slide = useRef(new Animated.Value(20)).current;
-  const translationOpacity = useRef(new Animated.Value(0)).current;
   const { t } = useTranslation();
-
-  useEffect(() => {
-    let alive = true;
-    void isReduceMotion().then(reduce => {
-      if (!alive) return;
-      if (reduce) {
-        opacity.setValue(1);
-        scale.setValue(1);
-        slide.setValue(0);
-        translationOpacity.setValue(1);
-        return;
-      }
-      Animated.sequence([
-        Animated.parallel([
-          Animated.timing(opacity, {
-            toValue: 1,
-            duration: 1100,
-            easing: Easing.out(Easing.cubic),
-            useNativeDriver: true,
-          }),
-          Animated.timing(scale, {
-            toValue: 1,
-            duration: 1100,
-            easing: Easing.out(Easing.cubic),
-            useNativeDriver: true,
-          }),
-          Animated.timing(slide, {
-            toValue: 0,
-            duration: 1100,
-            easing: Easing.out(Easing.cubic),
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.timing(translationOpacity, {
-          toValue: 1,
-          duration: 600,
-          easing: Easing.out(Easing.quad),
-          useNativeDriver: true,
-        }),
-      ]).start();
-    });
-    return () => {
-      alive = false;
-    };
-  }, [opacity, scale, slide, translationOpacity]);
-
   return (
     <View style={salamStyles.wrap}>
-      <Animated.Text
+      <Text
         accessibilityLabel={t('onboarding.salamA11y', {
           defaultValue:
             'As-salāmu ʿalaykum wa raḥmatu llāhi taʿālā wa barakātuh',
@@ -127,8 +68,6 @@ export function SalamHero({
           salamStyles.salam,
           {
             color: accentColor,
-            opacity,
-            transform: [{ scale }, { translateX: slide }],
             // The bundled Amiri font ships via task #69 — a calligraphic
             // Naskh that's elegant at large sizes. Falls back to the
             // system default if the .ttf hasn't been registered yet.
@@ -140,17 +79,13 @@ export function SalamHero({
           },
         ]}>
         السلام عليكم ورحمة الله تعالى وبركاته
-      </Animated.Text>
-      <Animated.Text
-        style={[
-          salamStyles.translation,
-          { color: mutedColor, opacity: translationOpacity },
-        ]}>
+      </Text>
+      <Text style={[salamStyles.translation, { color: mutedColor }]}>
         {t(
           'onboarding.welcome.salam',
           'Peace be upon you, and the mercy of Allah and His blessings.',
         )}
-      </Animated.Text>
+      </Text>
     </View>
   );
 }
@@ -158,12 +93,14 @@ export function SalamHero({
 const salamStyles = StyleSheet.create({
   wrap: {
     alignItems: 'center',
-    paddingVertical: SPACING.md,
-    gap: SPACING.md,
+    gap: SPACING.sm,
   },
   salam: {
-    fontSize: 30, // tokens-ok-line: display or Arabic scale, sized by hand
-    lineHeight: 50,
+    // The hero of the screen, and sized like one. Arabic naskh needs the
+    // line height more than the point size — the descenders on ك and ه
+    // and the kashida strokes collide at anything tighter.
+    fontSize: 33, // tokens-ok-line: display or Arabic scale, sized by hand
+    lineHeight: 58,
     textAlign: 'center',
     writingDirection: 'rtl',
     fontWeight: '500',
@@ -171,10 +108,11 @@ const salamStyles = StyleSheet.create({
     paddingHorizontal: SPACING.sm,
   },
   translation: {
-    fontSize: TYPE.callout.fontSize,
-    lineHeight: 20,
+    fontSize: TYPE.footnote.fontSize,
+    lineHeight: 19,
     textAlign: 'center',
     fontStyle: 'italic',
+    paddingHorizontal: SPACING.lg,
   },
 });
 
@@ -202,6 +140,7 @@ export function SalamScreen({ onAdvance }: { onAdvance: () => void }) {
 
   return (
     <OnboardingFrame
+      center
       progress={null}
       topRow={
         <Pressable
@@ -219,6 +158,9 @@ export function SalamScreen({ onAdvance }: { onAdvance: () => void }) {
             },
             pressed && { opacity: 0.6 },
           ]}>
+          {/* The glyph is what makes the pill read as a control rather
+              than as a label that happens to say "English". */}
+          <TranslationIcon size={14} color={palette.mutedSolid} />
           <Text style={[typeStyle('footnote'), { color: palette.muted }]}>
             {current}
           </Text>
@@ -231,17 +173,34 @@ export function SalamScreen({ onAdvance }: { onAdvance: () => void }) {
           onPress={onAdvance}
         />
       }>
+      {/* THREE TIERS, AND THE SALĀM IS THE MIDDLE ONE.
+       *
+       * The mark anchors the composition, the greeting is the hero, and
+       * the app's name and what it does come last and quietest — because
+       * the salām has already done the welcoming, and a title the same
+       * weight as it would be a second greeting arguing with the first.
+       * The gap between the tiers is what says so; nothing is boxed or
+       * ruled off. */}
+      <View style={styles.mark}>
+        <MihrabLogoIcon size={52} color={palette.accentSolid} />
+      </View>
       <SalamHero
         accentColor={palette.accentSolid}
         mutedColor={palette.mutedSolid}
       />
-      <OnboardingHeading
-        title={t('onboarding.welcome.title', 'Welcome to Mihrab')}
-        body={t(
-          'onboarding.welcome.body',
-          'Prayer times and the Qur’an, with nothing watching you.',
-        )}
-      />
+      <View style={styles.tail}>
+        <Text
+          style={[typeStyle('title2'), styles.name, { color: palette.text }]}>
+          {t('onboarding.welcome.title', 'Welcome to Mihrab')}
+        </Text>
+        <Text
+          style={[typeStyle('body'), styles.line, { color: palette.muted }]}>
+          {t(
+            'onboarding.welcome.body',
+            'Prayer times and the Qur’an, with nothing watching you.',
+          )}
+        </Text>
+      </View>
       <LanguageModal
         visible={picker}
         current={settings.language}
@@ -255,8 +214,17 @@ export function SalamScreen({ onAdvance }: { onAdvance: () => void }) {
 
 const styles = StyleSheet.create({
   chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
     borderWidth: StyleSheet.hairlineWidth,
     paddingVertical: SPACING.xs,
     paddingHorizontal: SPACING.md,
   },
+  mark: { alignItems: 'center', marginBottom: SPACING.lg },
+  // The one big gap on the screen, and the only thing separating the
+  // greeting from the introduction.
+  tail: { marginTop: SPACING.xxl, gap: SPACING.sm },
+  name: { textAlign: 'center' },
+  line: { textAlign: 'center' },
 });

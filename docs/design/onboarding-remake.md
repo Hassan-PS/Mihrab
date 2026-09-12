@@ -146,9 +146,27 @@ of first launch that sets a tone no other prayer app sets.
 
 **Changes from today.** The privacy paragraph becomes one line — the
 current body is three clauses that say "no analytics, no trackers" twice.
-The step counter goes. Reduce Motion is already honoured as of Phase 0
-(`SalamHero`'s effect reads `isReduceMotion()` and assigns the end state);
-nothing more to do here.
+The step counter goes.
+
+**And the greeting loses its entrance.** It used to fade in over 1.1
+seconds while scaling from 0.92 and sliding twenty points sideways, with
+the translation coming up behind it — three effects at once on the first
+thing anybody sees. It read as a splash screen: the scale is the stock
+app-launch zoom, and the slide was a hardcoded `translateX` that pushed
+right-to-left text in whichever direction the number said rather than the
+language did. Phase 0 had fixed the Reduce Motion branch the docblock
+falsely promised; the better answer turned out to be that there is
+nothing to reduce. The flow's own cross-fade and the modal presentation
+already bring the screen in, and a second animation on top of those is
+one too many. Typography and space carry it (principle 4).
+
+**The composition is one centred block**, not a stack under the top row.
+The mark, then the salām, then — after the screen's one real gap — the
+app's name and what it does, in `title2` and `body` rather than `title1`:
+the salām has already done the welcoming, and a title at the same weight
+would be a second greeting arguing with the first. Top-aligning this left
+two thirds of a phone empty between the last line and the button, which
+reads as a layout that broke rather than as calm.
 
 **The language chip.** Label is `languageLabel(i18n.language)` from
 `src/i18n/languages.ts` — the language named in itself, never translated,
@@ -603,12 +621,14 @@ can show (principle 4).
 
 ### 6.3 Motion
 
-Screens cross-fade and slide 16px in the reading direction over 220ms.
+Screens cross-fade over 220ms, and that is the only entrance anything in
+this flow gets — no screen animates its own contents on top of it (§3.1).
+
 Under Reduce Motion — `isReduceMotion()` from `src/theme/motion.ts`, the
-cached read `SalamHero` now uses, not the hook that starts false and
-corrects a frame later — transitions become instant opacity swaps and the
-progress rule jumps. The ʿaṣr value still changes; only its animation
-stops. **Nothing that carries information may be animation-only.**
+cached read, not the hook that starts false and corrects itself a frame
+later — the cross-fade becomes an instant swap and the progress rule
+jumps. The ʿaṣr value still changes; only its animation stops.
+**Nothing that carries information may be animation-only.**
 
 ### 6.4 RTL
 
@@ -934,7 +954,8 @@ Shipped before this document was written, and independent of it:
    — the silent-app bug.
 2. The `onboardingComplete` migration, so upgraders stop being routed
    into the new-user greeting.
-3. Reduce Motion honoured in `SalamHero`.
+3. Reduce Motion honoured in `SalamHero` — since retired with the
+   animation itself (§3.1).
 4. `onboarding.next` / `onboarding.done` deleted from thirteen locales.
 
 Two new test files pin the first two.

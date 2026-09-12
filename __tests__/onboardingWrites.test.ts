@@ -175,12 +175,21 @@ describe('the alerts screen acts on the answer', () => {
 describe('the salam screen', () => {
   const src = read(SALAM);
 
-  it('honours Reduce Motion, which its docblock promised', () => {
-    // The comment claimed the animation "finishes in 1ms" for these
-    // users. Nothing read the setting; it ran at full length for
-    // everyone, including the people who had asked for the opposite.
-    expect(src).toMatch(/isReduceMotion\(\)/);
-    expect(src).toMatch(/opacity\.setValue\(1\)/);
+  it('gives the greeting no entrance of its own', () => {
+    // It used to fade over 1.1s while scaling from 0.92 and sliding
+    // twenty points sideways — three effects at once on the first thing
+    // anybody sees, and the slide was a hardcoded translateX that pushed
+    // right-to-left text whichever way the number said. The flow's own
+    // cross-fade and the modal presentation already bring the screen in.
+    //
+    // This also retires the Reduce Motion assertion that stood here: the
+    // docblock used to promise a static end-state the file did not
+    // deliver, and the honest fix in the end was to have no motion to
+    // reduce. `OnboardingFlow` still reads the setting for the
+    // transition BETWEEN screens, which is where it belongs.
+    expect(src).not.toMatch(/Animated/);
+    expect(src).not.toMatch(/Easing/);
+    expect(src).not.toMatch(/isReduceMotion/);
   });
 
   it('writes languagePicked with the language, never alone', () => {
