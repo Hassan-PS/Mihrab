@@ -11,6 +11,15 @@ applies rather than changes), `docs/design/redesign-plan.md` (the visual
 language this inherits), `docs/DISTRIBUTION.md` (where the permission prompts
 actually land).
 
+> **This document is the direction — what is wrong and why.
+> `docs/design/onboarding-remake.md` is the specification — what gets
+> built.** It was written later the same day, after Hassan asked for the
+> whole walkthrough to be remade in design *and* options, and it changes
+> two things here: the flow now offers an optional personalisation pass
+> after the essential questions (§3 and §11 below are amended for it), and
+> the feature tour is folded in rather than merely retired (§7 stands, with
+> the reuse specified in detail there).
+
 ---
 
 ## 0. The one-paragraph version
@@ -167,7 +176,29 @@ A setting that fails either half has a good default and belongs in Settings,
 where the user will meet it in context, with the app already working.
 
 That rule is what keeps this from becoming a settings dump with a progress
-bar. The hard limit that follows from it: **five screens, four questions.**
+bar. The hard limit that followed from it, as first written: **five screens,
+four questions.**
+
+**Amended, 2026-09-12.** The four-question ceiling is lifted, deliberately
+and in writing. The test above still decides what may be a *question* —
+four settings pass it and nothing else gets a screen — but the flow may
+now also carry a second, weaker kind of thing:
+
+> **A question gets a screen. A preference gets a row on a shelf, and the
+> shelf is optional in one tap.**
+
+A preference qualifies for the shelf only if it is off or neutral by
+default (so skipping costs nothing), is discoverable nowhere obvious, and
+can be decided in one glance. Seven rows pass; the full list, the
+reasoning, and why language is *not* among them are in
+`onboarding-remake.md` §2.
+
+What this preserves is the thing the original ceiling was protecting: the
+user still answers four questions and no more, and the emphasis of the
+flow is unchanged. What it buys is that the eleven genuinely useful
+off-by-default settings — the night times, the adhkār reminders, the
+pre-prayer reminder — stop being invisible to everyone who does not go
+looking.
 
 ---
 
@@ -202,7 +233,13 @@ Four. That is the whole list, and it is not a coincidence that it is short.
 ### Does not ask — fails the rule, stays in Settings
 
 Everything else, and the reasons are worth stating so this does not get
-relitigated every release:
+relitigated every release. **Read this list as "does not get a screen".**
+Seven of the settings below now appear as rows on the optional shelf added
+by the §3 amendment — the theme and accent, three of the extra times, the
+adhkār reminders — which does not make them questions and does not change
+a word of the reasoning here: none of them is *asked*, all of them keep
+their defaults if the shelf is skipped, and all of them stay exactly where
+they are in Settings. The rest of this list is unchanged and unoffered.
 
 - **`calculationMethod`** (`'auto'`) — auto resolves by coordinates and is
   right for the overwhelming majority. A user who knows their mosque follows
@@ -233,6 +270,12 @@ relitigated every release:
 ## 5. The new flow
 
 Five screens. The first and last are not questions.
+
+*(Amended 2026-09-12: six, the sixth being the optional shelf from §3's
+amendment, which sits between the alerts screen and the last. The five
+described below are unchanged in substance and in order;
+`onboarding-remake.md` §3 is the built version of each, with layouts,
+controls and the keys they write.)*
 
 ### Screen 1 — Salam
 
@@ -455,12 +498,19 @@ What to pin, in the repo's existing idiom:
 
 - **It does not ask more.** Four questions is the budget and §3 is the reason.
   Every future "could we also ask about…" should be answered by that rule, in
-  writing, before a screen is added.
+  writing, before a screen is added. *(Amended 2026-09-12: still four
+  questions, and the shelf added by §3's amendment is not a fifth — but
+  "the flow contains exactly four things" is no longer true, and the
+  three-part test in `onboarding-remake.md` §2 is now what a proposed row
+  has to pass.)*
 - **It does not move anything out of Settings.**
 - **It does not add a dependency, an animation library, or an illustration
   set.** The salam and the crescent are the art direction.
 - **It does not touch the location step's permission contract** — guideline
   5.1.1(iv) is not a design opinion.
-- **It does not attempt personalisation beyond the four answers.** No
-  "recommended for you", no inferred madhab from country. The app should ask
-  the person, plainly, and believe them.
+- **It does not infer.** No "recommended for you", no madhab guessed from
+  country, no reciter chosen by language. The app should ask the person,
+  plainly, and believe them. *(This bullet originally read "does not attempt
+  personalisation beyond the four answers"; the shelf is personalisation the
+  user performs, not personalisation the app performs, and it is the second
+  clause — never guessing — that was the point.)*
