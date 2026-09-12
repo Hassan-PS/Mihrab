@@ -1275,8 +1275,6 @@
   },
   "onboarding": {
     "skip": "Şimdilik geç",
-    "next": "İleri",
-    "done": "Bitti",
     "stepLabel": "Adım {{current}} / {{total}}",
     "welcome": {
       "title": "Hoş geldiniz",

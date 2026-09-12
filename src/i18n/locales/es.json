@@ -1275,8 +1275,6 @@
   },
   "onboarding": {
     "skip": "Omitir por ahora",
-    "next": "Siguiente",
-    "done": "Listo",
     "stepLabel": "Paso {{current}} de {{total}}",
     "welcome": {
       "title": "Bienvenido",

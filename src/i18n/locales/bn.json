@@ -1275,8 +1275,6 @@
   },
   "onboarding": {
     "skip": "আপাতত থাক",
-    "next": "পরবর্তী",
-    "done": "সম্পন্ন",
     "stepLabel": "ধাপ {{current}} / {{total}}",
     "welcome": {
       "title": "স্বাগতম",

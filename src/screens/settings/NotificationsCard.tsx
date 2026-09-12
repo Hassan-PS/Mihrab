@@ -10,21 +10,13 @@
  * draws. What is left is one family, and it fits on a screen.
  */
 import { memo, useEffect, useMemo, useState } from 'react';
-import {
-  AppState,
-  PermissionsAndroid,
-  Platform,
-  StyleSheet,
-  Text,
-} from 'react-native';
+import { AppState, Platform, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import notifee, {
-  AndroidNotificationSetting,
-  AuthorizationStatus,
-} from '@notifee/react-native';
+import notifee, { AndroidNotificationSetting } from '@notifee/react-native';
 import { useNotificationsSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { getNotificationSoundOption } from '../../notifications/notificationSounds';
+import { requestNotificationPermission } from '../../notifications/requestNotificationAccess';
 import {
   SettingsGroup,
   SettingsLinkRow,
@@ -90,27 +82,10 @@ function NotificationsCardImpl({
       updateSettings({ notificationsEnabled: false });
       return;
     }
-    if (Platform.OS === 'ios') {
-      const perm = await notifee.requestPermission({
-        alert: true,
-        badge: true,
-        sound: true,
-      });
-      const ok =
-        perm.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
-        perm.authorizationStatus === AuthorizationStatus.PROVISIONAL;
-      if (!ok) return;
-    }
-    if (
-      Platform.OS === 'android' &&
-      typeof Platform.Version === 'number' &&
-      Platform.Version >= 33
-    ) {
-      const result = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-      );
-      if (result !== PermissionsAndroid.RESULTS.GRANTED) return;
-    }
+    // Shared with the onboarding step, which used to ask the same question
+    // its own way and then throw the answer away — see
+    // notifications/requestNotificationAccess.ts for what that cost.
+    if (!(await requestNotificationPermission())) return;
     if (
       Platform.OS === 'android' &&
       typeof Platform.Version === 'number' &&

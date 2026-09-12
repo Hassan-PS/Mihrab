@@ -1275,8 +1275,6 @@
   },
   "onboarding": {
     "skip": "ابھی رہنے دیں",
-    "next": "آگے",
-    "done": "ہو گیا",
     "stepLabel": "مرحلہ {{current}} از {{total}}",
     "welcome": {
       "title": "خوش آمدید",

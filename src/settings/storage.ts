@@ -174,6 +174,22 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
   if (!('locationOnboardingComplete' in parsed)) {
     merged.locationOnboardingComplete = true;
   }
+  // The same argument, for the flag that gates the WHOLE welcome flow, and
+  // it was missing: `locationOnboardingComplete` got this treatment and
+  // `onboardingComplete` never did. So an install whose blob predates the
+  // flag loaded it as false and was routed into the new-user greeting on
+  // update — salam, notifications ask, exact-alarms ask, then the feature
+  // tour — which is how existing users came to be shown a welcome as an
+  // accidental release note. Nobody designed that; see
+  // docs/design/onboarding-plan.md §2.4.
+  //
+  // Reaching here at all means a plaintext blob EXISTS, which means the app
+  // has been run and settings have been written. A genuinely fresh install
+  // returns above, at `if (!plaintextRaw)`, with DEFAULT_SETTINGS and
+  // `onboardingComplete: false` — so this cannot swallow a real first run.
+  if (!('onboardingComplete' in parsed)) {
+    merged.onboardingComplete = true;
+  }
   if (!('dataProviderAuto' in parsed)) {
     merged.dataProviderAuto = false;
   }

@@ -1275,8 +1275,6 @@
   },
   "onboarding": {
     "skip": "Lewati dulu",
-    "next": "Lanjut",
-    "done": "Selesai",
     "stepLabel": "Langkah {{current}} dari {{total}}",
     "welcome": {
       "title": "Selamat datang",

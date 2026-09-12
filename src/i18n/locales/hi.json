@@ -1275,8 +1275,6 @@
   },
   "onboarding": {
     "skip": "अभी रहने दें",
-    "next": "आगे",
-    "done": "हो गया",
     "stepLabel": "{{total}} में से चरण {{current}}",
     "welcome": {
       "title": "ख़ुश आमदीद",

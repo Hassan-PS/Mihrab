@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Easing,
-  PermissionsAndroid,
   Platform,
   Pressable,
   ScrollView,
@@ -28,6 +27,8 @@ import {
   type OnboardingStepId,
 } from '../onboarding/steps';
 import { CrescentIcon } from '../theme/icons';
+import { isReduceMotion } from '../theme/motion';
+import { requestNotificationPermission } from '../notifications/requestNotificationAccess';
 import { RADIUS, SPACING } from '../theme/tokens';
 import { TYPE, typeStyle } from '../theme/typography';
 import type { RootStackParamList } from '../navigation/types';
@@ -58,8 +59,10 @@ import { LocationSetup } from '../components/LocationSetup';
  * وبركاته" appears in Amiri/Scheherazade calligraphic font, fading in
  * with a gentle scale + slide that evokes the iPhone "hello" first-launch
  * moment without copying it. Translation appears below in muted color
- * for non-Arabic speakers. Reduce-motion users see the static
- * end-state instantly via the imperative animation finishing in 1ms.
+ * for non-Arabic speakers. Reduce-motion users get the static end-state:
+ * the effect reads the system setting and assigns the values rather than
+ * animating them — see the comment in the effect, and note that this
+ * paragraph described behaviour the file did not have until 2026-09-12.
  */
 function SalamHero({
   accentColor,
@@ -75,34 +78,61 @@ function SalamHero({
   const { t } = useTranslation();
 
   useEffect(() => {
-    Animated.sequence([
-      Animated.parallel([
-        Animated.timing(opacity, {
+    let alive = true;
+    // REDUCE MOTION IS ASKED, NOT ASSUMED.
+    //
+    // The docblock above has always promised that "Reduce Motion users see
+    // the static end-state instantly via the imperative animation finishing
+    // in 1ms". Nothing here ever read the setting; the greeting slid and
+    // scaled for a second and a tenth for everybody, including the people
+    // who had asked the system for exactly the opposite.
+    //
+    // Not `useReduceMotion()`: that hook starts false and corrects itself a
+    // frame later, which for a once-per-install animation means it would
+    // start and then be cut short — visibly worse than either answer.
+    // Awaiting the cached read costs one frame of an empty hero and gets it
+    // right the first time.
+    void isReduceMotion().then(reduce => {
+      if (!alive) return;
+      if (reduce) {
+        opacity.setValue(1);
+        scale.setValue(1);
+        slide.setValue(0);
+        translationOpacity.setValue(1);
+        return;
+      }
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(opacity, {
+            toValue: 1,
+            duration: 1100,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: true,
+          }),
+          Animated.timing(scale, {
+            toValue: 1,
+            duration: 1100,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: true,
+          }),
+          Animated.timing(slide, {
+            toValue: 0,
+            duration: 1100,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.timing(translationOpacity, {
           toValue: 1,
-          duration: 1100,
-          easing: Easing.out(Easing.cubic),
+          duration: 600,
+          easing: Easing.out(Easing.quad),
           useNativeDriver: true,
         }),
-        Animated.timing(scale, {
-          toValue: 1,
-          duration: 1100,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(slide, {
-          toValue: 0,
-          duration: 1100,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.timing(translationOpacity, {
-        toValue: 1,
-        duration: 600,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-    ]).start();
+      ]).start();
+    });
+    return () => {
+      alive = false;
+    };
   }, [opacity, scale, slide, translationOpacity]);
 
   return (
@@ -234,15 +264,25 @@ export function OnboardingScreen() {
           // locationMode for us. The primary CTA is hidden for this step.
           return;
         } else if (id === 'notifications') {
-          await notifee.requestPermission();
-          if (
-            Platform.OS === 'android' &&
-            typeof Platform.Version === 'number' &&
-            Platform.Version >= 33
-          ) {
-            await PermissionsAndroid.request(
-              PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-            );
+          // ASK, READ THE ANSWER, AND WRITE IT DOWN.
+          //
+          // This step used to request the permission and then set nothing.
+          // `notificationsEnabled` defaults to false and alertModes.ts
+          // turns every prayer silent while it is, so pressing "Enable
+          // alerts" and granting it produced an app that never spoke —
+          // with the OS listing Mihrab as a permitted notifier, which is
+          // the one state in which nobody looks for an in-app switch.
+          //
+          // Only on a yes. A settings key claiming we may notify while the
+          // OS forbids it is a lie the home-screen banner then has to
+          // untangle, and it would make the Settings switch read as on
+          // while nothing arrives.
+          //
+          // `updateAllSettings`, not the sliced `updateSettings` above:
+          // that one is the LOCATION slice and its type does not admit a
+          // notifications key. The compiler caught the first attempt.
+          if (await requestNotificationPermission()) {
+            updateAllSettings({ notificationsEnabled: true });
           }
         } else if (id === 'exactAlarms') {
           const s = await notifee.getNotificationSettings();
@@ -257,7 +297,9 @@ export function OnboardingScreen() {
       }
       advance();
     },
-    [advance, updateSettings],
+    // `updateSettings` was in here while the callback never called it; it
+    // is `updateAllSettings` that is used now, and the list says so.
+    [advance, updateAllSettings],
   );
 
   const step = steps[index];
