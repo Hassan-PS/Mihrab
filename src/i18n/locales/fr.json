@@ -1311,7 +1311,6 @@
     "personalise": {
       "title": "Personnalisez",
       "body": "Rien de tout cela n’est obligatoire.",
-      "groupAlerts": "Alertes",
       "groupTimes": "Horaires",
       "groupDaily": "Quotidien",
       "groupLook": "Apparence",

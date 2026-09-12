@@ -29,7 +29,7 @@
  * One tap, top-trailing, no confirmation. A shelf that asks "are you sure
  * you want to skip?" is a question.
  */
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
@@ -41,10 +41,8 @@ import { useClockFormatter } from '../../hooks/useClockFormatter';
 import {
   SettingsBlock,
   SettingsGroup,
-  SettingsLinkRow,
   SettingsToggleRow,
 } from '../../screens/settings/SettingsGroup';
-import { PreReminderModal } from '../../screens/settings/PreReminderModal';
 import { SegmentedControl } from '../../components/ui';
 import {
   APP_ACCENT_SWATCHES,
@@ -54,7 +52,6 @@ import type {
   AppAccentId,
   AppearancePreference,
 } from '../../settings/types';
-import type { PrePrayerReminderMinutes } from '../../settings/prePrayerReminder';
 import { RADIUS, SPACING } from '../../theme/tokens';
 import { typeStyle } from '../../theme/typography';
 import { previewCoords, previewNightMarks } from '../previewTimes';
@@ -77,7 +74,6 @@ export function PersonaliseScreen({
   const { settings, updateSettings } = usePrayerSettings();
   const { update: updateWidget } = useWidgetSettings();
   const clock = useClockFormatter();
-  const [preModal, setPreModal] = useState(false);
 
   const coords = useMemo(() => previewCoords(settings), [settings]);
   const night = useMemo(
@@ -113,13 +109,6 @@ export function PersonaliseScreen({
 
   const alertsOn = settings.notificationsEnabled;
 
-  const minutesLabel =
-    settings.prePrayerReminderMinutes === 0
-      ? t('settings.prePrayerReminderOff', 'Off')
-      : t('settings.prePrayerReminderOption', {
-          count: settings.prePrayerReminderMinutes,
-        });
-
   return (
     <OnboardingFrame
       progress={progress}
@@ -143,16 +132,11 @@ export function PersonaliseScreen({
         body={t('onboarding.personalise.body', 'None of this is required.')}
       />
 
-      {alertsOn ? (
-        <SettingsGroup title={t('onboarding.personalise.groupAlerts', 'Alerts')}>
-          <SettingsLinkRow
-            testID="personalise-pre-reminder"
-            title={t('onboarding.alerts.preReminder', 'Remind me before')}
-            value={minutesLabel}
-            onPress={() => setPreModal(true)}
-          />
-        </SettingsGroup>
-      ) : null}
+      {/* No "Remind me before" here. It is a preference by the shelf's own
+          test and the spec lists it among the seven — but it lives on the
+          alerts screen, one tap back, beside the permission it depends on.
+          Offering it on two consecutive screens is the redundancy the
+          shelf exists to avoid. */}
 
       <SettingsGroup title={t('onboarding.personalise.groupTimes', 'Times')}>
         <SettingsToggleRow
@@ -182,7 +166,6 @@ export function PersonaliseScreen({
           <SettingsToggleRow
             testID="personalise-adhkar"
             title={t('onboarding.personalise.adhkar', 'Morning & evening adhkār')}
-            help={t('duaReminders.morningHelp')}
             // One habit, one switch, two keys. They are both window-derived
             // — after Fajr before sunrise, after ʿAṣr before sunset — so
             // neither needs a time picker, which is the whole reason this
@@ -252,16 +235,6 @@ export function PersonaliseScreen({
         )}
       </SettingsGroup>
 
-      <PreReminderModal
-        visible={preModal}
-        current={settings.prePrayerReminderMinutes}
-        palette={palette}
-        onSelect={(minutes: PrePrayerReminderMinutes) => {
-          updateSettings({ prePrayerReminderMinutes: minutes });
-          setPreModal(false);
-        }}
-        onClose={() => setPreModal(false)}
-      />
     </OnboardingFrame>
   );
 }

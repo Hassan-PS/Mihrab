@@ -75,8 +75,19 @@ export function OnboardingFlow() {
     };
   }, []);
 
-  /** Cross-fade on every change of screen; an instant swap under Reduce Motion. */
+  /**
+   * Cross-fade on every CHANGE of screen; an instant swap under Reduce
+   * Motion. Not on mount: the modal's own presentation already animates
+   * the first screen in, and the Reduce Motion read has not resolved yet
+   * on the first render — an unconditional fade here would run for
+   * exactly the people who asked for none.
+   */
+  const mounted = useRef(false);
   useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
     if (reduceRef.current) {
       fade.setValue(1);
       return;
@@ -90,7 +101,12 @@ export function OnboardingFlow() {
     }).start();
   }, [index, fade]);
 
+  // Once. A second tap on Start before the modal has gone would pop a
+  // second screen — the Settings page the flow was re-run from, say.
+  const finished = useRef(false);
   const finish = useCallback(() => {
+    if (finished.current) return;
+    finished.current = true;
     if (!location.locationOnboardingComplete) {
       // Even when the location step was left unanswered, the flow is over:
       // the Home banners carry that prompt forward with a path back.
@@ -106,14 +122,10 @@ export function OnboardingFlow() {
   ]);
 
   const advance = useCallback(() => {
-    setIndex(i => {
-      if (i >= steps.length - 1) {
-        // `finish` is called from the effect below rather than here, so a
-        // double tap on the last screen cannot dismiss twice.
-        return i;
-      }
-      return i + 1;
-    });
+    // Never past the end, and never a dismissal: the last screen does not
+    // call this — it calls `finish` through `onFinish` — so nothing but a
+    // deliberate Start can end the flow.
+    setIndex(i => Math.min(i + 1, steps.length - 1));
   }, [steps.length]);
 
   const back = useCallback(() => {

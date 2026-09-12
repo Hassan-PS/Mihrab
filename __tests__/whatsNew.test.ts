@@ -11,9 +11,48 @@
  */
 import {
   compareVersions,
+  lastSeenFrom,
+  LEGACY_BASELINE_VERSION,
   slidesForUpgrade,
   WHATS_NEW,
 } from '../src/polish/whatsNew';
+
+describe('what counts as the last seen version', () => {
+  it('is the stored one when there is one', () => {
+    expect(lastSeenFrom('2.18.6', true)).toBe('2.18.6');
+    expect(lastSeenFrom('2.18.6', false)).toBe('2.18.6');
+  });
+
+  it('is nothing on a fresh install', () => {
+    // No stamp and no tour flag: this phone has never run the app before.
+    expect(lastSeenFrom(null, false)).toBeNull();
+    expect(lastSeenFrom('', false)).toBeNull();
+    expect(lastSeenFrom(undefined, false)).toBeNull();
+  });
+
+  it('is the legacy baseline for an install that predates the stamp', () => {
+    // THE CASE THAT MATTERS ON RELEASE DAY. `lastSeenVersion` did not
+    // exist before 2.18.6, so every existing user updates into "no stored
+    // version" — indistinguishable from a fresh install, which is shown
+    // nothing. The feature tour's flag is what such an install has, and
+    // it means "ran a build before release notes existed".
+    expect(lastSeenFrom(null, true)).toBe(LEGACY_BASELINE_VERSION);
+  });
+
+  it('so the release that introduced release notes can announce itself', () => {
+    const from = lastSeenFrom(null, true);
+    expect(slidesForUpgrade(from, '2.18.6').length).toBeGreaterThan(0);
+    // …and a fresh install still sees nothing.
+    expect(slidesForUpgrade(lastSeenFrom(null, false), '2.18.6')).toEqual([]);
+  });
+
+  it('keeps the baseline behind the first release with notes', () => {
+    // If this ever moves forward past a version in the table, upgraders
+    // from before the feature silently lose that release's notes.
+    const first = Object.keys(WHATS_NEW).sort(compareVersions)[0];
+    expect(compareVersions(LEGACY_BASELINE_VERSION, first)).toBeLessThan(0);
+  });
+});
 
 describe('version comparison', () => {
   it('orders by numeric part', () => {

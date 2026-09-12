@@ -74,10 +74,25 @@ export function ReadyScreen({
         : null,
     [coords, settings.calculationMethod, settings.school],
   );
-  const next = useMemo(
-    () => (day ? getNextPrayerDisplay(day, undefined, new Date()) : null),
-    [day],
-  );
+
+  /**
+   * Which of the five rows is next — today's, or none.
+   *
+   * Only the five: the computed day also carries Sunrise and Imsak, and
+   * `getNextPrayerDisplay` is deliberately order-agnostic — it would name
+   * Sunrise between Fajr and Ẓuhr, which this card has no row for, and the
+   * highlight would go dark for the morning.
+   *
+   * No tomorrow is passed on purpose. After ʿIshāʾ the honest answer is
+   * tomorrow's Fajr, and the only row this card could light for it is
+   * TODAY's Fajr — a time that has been and gone. Lighting nothing is
+   * right; Home has the day carousel for the rest.
+   */
+  const next = useMemo(() => {
+    if (!day) return null;
+    const five = Object.fromEntries(PREVIEW_ROWS.map(r => [r, day[r]]));
+    return getNextPrayerDisplay(five, undefined, new Date());
+  }, [day]);
 
   const city =
     settings.manualLocationLabel ?? settings.autoLocationLabel ?? undefined;
@@ -89,9 +104,11 @@ export function ReadyScreen({
    * skipped it would drop somebody into Settings with the auto-router
    * still waiting to pull them back into onboarding.
    */
-  const goTo = (route: keyof RootStackParamList) => {
+  const goTo = (
+    route: 'SettingsPrayerTimes' | 'SettingsNotifications' | 'SettingsWidgets',
+  ) => {
     onFinish();
-    navigation.navigate(route as never);
+    navigation.navigate(route);
   };
 
   return (

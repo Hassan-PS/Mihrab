@@ -240,7 +240,12 @@ export function RootNavigator() {
           that may be nothing but a full-screen location wall. Leaving
           should be a decision — Skip, Not now, or Start — not a gesture.
           Android's hardware back is intercepted inside the flow, where it
-          steps back one screen. See docs/design/onboarding-remake.md §6.5. */}
+          steps back one screen. See docs/design/onboarding-remake.md §6.5.
+
+          `fullScreenModal`, not `modal`: on iOS the latter is a page
+          sheet, which leaves a sliver of Home showing above the flow and
+          insets the whole thing under a card edge. First launch should
+          not have a half-built Home peeking over its shoulder. */}
       <Stack.Screen
         name="Onboarding"
         component={OnboardingScreen}
@@ -248,7 +253,7 @@ export function RootNavigator() {
           title: '',
           headerShown: false,
           headerLargeTitle: false,
-          presentation: 'modal',
+          presentation: 'fullScreenModal',
           gestureEnabled: false,
         }}
       />

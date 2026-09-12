@@ -154,6 +154,16 @@ describe('the alerts screen acts on the answer', () => {
     expect(src).not.toMatch(/PermissionsAndroid/);
   });
 
+  it('calls itself granted only when the app switch is on too', () => {
+    // The OS permission outlives the in-app switch: someone who turned
+    // alerts off in Settings and re-runs setup still holds it. A face that
+    // read the OS alone would show the adhan list as if alerts were on,
+    // while the shelf — which reads the switch — hid its alert rows.
+    expect(src).toMatch(/osGranted && settings\.notificationsEnabled/);
+    // …and the face is derived, never a stored answer that can go stale.
+    expect(src).not.toMatch(/setAnswer|setFace/);
+  });
+
   it('folds the exact-alarm grant in rather than branching the step list', () => {
     expect(src).toMatch(/openAlarmPermissionSettings/);
     // The step list may still EXPLAIN why the platform branch went away;
@@ -197,8 +207,14 @@ describe('the school screen', () => {
 
   it('turns the Maliki second times back off on a change of mind', () => {
     // Otherwise somebody who picked Mālikī and then Shāfiʿī is left with
-    // a setting whose control they can no longer see.
-    expect(src).toMatch(/malikiSecondTimesEnabled: madhab === 'maliki'/);
+    // a setting whose control they can no longer see. Sliced to `pick`,
+    // where the write is a three-way: on arriving at Mālikī it defaults
+    // on, a Mālikī re-picking their own school keeps what they had, and
+    // every other school writes it off.
+    const pick = src.slice(src.indexOf('const pick ='), src.indexOf('const pickUnsure ='));
+    expect(pick).toMatch(/malikiSecondTimesEnabled:\s*\n\s*madhab === 'maliki'/);
+    expect(pick).toMatch(/\? settings\.malikiSecondTimesEnabled/);
+    expect(pick).toMatch(/: true\s*\n\s*: false/);
   });
 
   it('is honest about what "not sure" means', () => {

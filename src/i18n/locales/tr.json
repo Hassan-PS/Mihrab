@@ -1311,7 +1311,6 @@
     "personalise": {
       "title": "Kendinize göre ayarlayın",
       "body": "Bunların hiçbiri zorunlu değil.",
-      "groupAlerts": "Uyarılar",
       "groupTimes": "Vakitler",
       "groupDaily": "Günlük",
       "groupLook": "Görünüm",

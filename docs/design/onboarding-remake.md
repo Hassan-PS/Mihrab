@@ -94,7 +94,7 @@ the important part is over.
 
 | row | key(s) | default | why not Settings-only |
 |---|---|---|---|
-| Pre-prayer reminder | `prePrayerReminderMinutes` | `0` | The single most-wanted feature nobody finds; meaningless *after* you have missed a prayer |
+| Pre-prayer reminder | `prePrayerReminderMinutes` | `0` | The single most-wanted feature nobody finds; meaningless *after* you have missed a prayer. **Rendered on the alerts screen, not the shelf** — it passes the shelf's test but lives beside the permission it depends on, and offering it on two consecutive screens is the redundancy the shelf exists to avoid |
 | Sunrise | `sunriseEnabled` | `true` | Shown by default, so this is the row that lets someone turn it **off** — the only off-by-default-inverted row here |
 | Islamic midnight | `islamicMidnightEnabled` | `false` | Invisible until enabled; a user who wants it does not know the app has it |
 | Last third of the night | `lastThirdEnabled` | `false` | Same, and it is the one people ask for by name (qiyām) |
@@ -352,8 +352,6 @@ The new part, and the one that must not read as another question.
 │       Make it yours             │
 │   None of this is required.     │
 │                                 │
-│  ALERTS                         │
-│   Remind me before prayers  Off▾│  ← only if alerts were granted
 │  TIMES                          │
 │   Sunrise                   [●] │
 │   Islamic midnight          [○] │
@@ -511,7 +509,6 @@ onboarding.alerts.exactWhy          Android needs one more permission so alerts 
 
 onboarding.personalise.title        Make it yours
 onboarding.personalise.body         None of this is required.
-onboarding.personalise.groupAlerts  Alerts
 onboarding.personalise.groupTimes   Times
 onboarding.personalise.groupDaily   Daily
 onboarding.personalise.groupLook    Look
@@ -700,11 +697,22 @@ screen-reader user meets, and if it fails they never reach the app.
 
 ### 8.1 The permission was already granted
 
-Re-running from Settings, or an OS that pre-grants: screen 4 skips the
-request and opens directly in its granted state, with the adhan list
-showing the current `notificationSound` selected. It must not re-ask —
-`notifee.getNotificationSettings()` on mount decides which face the
-screen wears.
+Re-running from Settings, or an OS that pre-grants: screen 4 opens in its
+granted state, with the adhan list showing the current `notificationSound`
+selected, and does not re-ask — `notifee.getNotificationSettings()` on
+mount and on every return to the foreground decides which face the screen
+wears.
+
+**"Granted" means both halves.** The face is derived, not stored: the OS
+allows it *and* `notificationsEnabled` is on. Somebody re-running setup
+who turned alerts off in Settings still holds the OS permission; showing
+them the adhan list as if alerts were on — while the shelf, which reads
+the switch, hides its alert rows — would be two screens disagreeing about
+one fact. Such a user sees the CTA again, and pressing it (which returns
+at once, the permission being held) is what turns the switch back on.
+Nothing is flipped behind their back. A refusal clears the moment the OS
+reports the permission granted, so the exact-alarm row's trip to system
+settings can bring the user back with it fixed.
 
 ### 8.2 Abandonment
 
@@ -788,6 +796,21 @@ and `CHANGELOG.md` is linked only from the marketing site.
    `'1'`. Shown when the stored version is **present and lower** than the
    running one. Present matters: absent means a fresh install, which has
    just finished onboarding and must not be handed release notes.
+
+   **Except on the day this ships.** `lastSeenVersion` did not exist
+   before 2.18.6, so every existing user updates into "no stored version"
+   — indistinguishable from a fresh install, which is shown nothing. Left
+   there, the release that introduced release notes could never announce
+   itself. What an existing install *does* have is the old tour flag,
+   written the first time Home appeared after onboarding on every build
+   since the tour shipped. So `readLastSeenVersion` reads both keys: a
+   stored version wins; otherwise a present tour flag means "ran a build
+   before release notes existed" and resolves to `LEGACY_BASELINE_VERSION`
+   (`2.18.5`, the last version without them); otherwise fresh. The flag
+   is read, never written again, and a test holds the baseline behind
+   the first version in the table. Whenever there is nothing to show the
+   current version is stamped, so the next update is an upgrade from
+   here rather than from the baseline.
 4. **Content per release.** A small module — `src/polish/whatsNew.ts` —
    mapping a version to a short list of `{ icon, titleKey, bodyKey }`.
    One to three slides, not four by habit; a release with nothing worth a

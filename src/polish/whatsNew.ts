@@ -85,6 +85,39 @@ export function compareVersions(a: string, b: string): number {
 }
 
 /**
+ * The last version a build BEFORE this feature could have been.
+ *
+ * `lastSeenVersion` did not exist until 2.18.6, so on the first launch
+ * after that update every existing user has no stored version — which is
+ * exactly what a fresh install looks like, and a fresh install is shown
+ * nothing. Left there, the release that introduced release notes could
+ * never announce itself, and neither could the one after it for anyone
+ * who skipped 2.18.6.
+ *
+ * What an existing install DOES have is the feature tour's flag: written
+ * the first time Home appeared after onboarding, by every build since the
+ * tour shipped. Its presence means "this phone ran a build before
+ * release notes existed", and the honest value for such a phone's last
+ * seen version is the last version without them.
+ */
+export const LEGACY_BASELINE_VERSION = '2.18.5';
+
+/**
+ * The version to treat as last seen, from what storage actually holds.
+ *
+ * `stored` is the value under `mihrab.lastSeenVersion`; `legacyTourSeen`
+ * is whether `mihrab.featureTour.v1` was ever written. Pure, so the
+ * three cases can be pinned without a storage mock.
+ */
+export function lastSeenFrom(
+  stored: string | null | undefined,
+  legacyTourSeen: boolean,
+): string | null {
+  if (stored) return stored;
+  return legacyTourSeen ? LEGACY_BASELINE_VERSION : null;
+}
+
+/**
  * The slides to show someone who last ran `from` and is now on `to`.
  *
  * Everything newer than `from` and no newer than `to`, oldest first — so

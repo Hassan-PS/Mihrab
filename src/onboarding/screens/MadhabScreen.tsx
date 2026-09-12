@@ -112,9 +112,18 @@ export function MadhabScreen({
       madhab,
       school: asrSchoolFor(madhab),
       // Mālikī users are the only ones the second times mean anything to,
-      // and they have just identified themselves. Everyone else gets it
-      // written back off so no invisible setting survives a change of mind.
-      malikiSecondTimesEnabled: madhab === 'maliki',
+      // and they have just identified themselves: on ARRIVING at Mālikī
+      // the row defaults on. Someone already Mālikī — re-running setup,
+      // say — who turned it off in Settings keeps that; tapping their own
+      // school again is not a request to undo a choice. Everyone else
+      // gets it written back off, so no invisible setting survives a
+      // change of mind.
+      malikiSecondTimesEnabled:
+        madhab === 'maliki'
+          ? chosen === 'maliki'
+            ? settings.malikiSecondTimesEnabled
+            : true
+          : false,
     });
   };
 

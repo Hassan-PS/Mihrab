@@ -49,14 +49,34 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import { getInstalledAppVersionName } from '../appVersion';
 import { RADIUS, SPACING } from '../theme/tokens';
 import { TYPE } from '../theme/typography';
-import { slidesForUpgrade, type WhatsNewSlide } from './whatsNew';
+import {
+  lastSeenFrom,
+  slidesForUpgrade,
+  type WhatsNewSlide,
+} from './whatsNew';
 
 const SEEN_KEY = 'mihrab.lastSeenVersion';
+/**
+ * The feature tour's flag, read but never written again. Its presence is
+ * how an install that predates release notes is told apart from a fresh
+ * one — see `lastSeenFrom` and `LEGACY_BASELINE_VERSION` in ./whatsNew.
+ */
+const LEGACY_TOUR_KEY = 'mihrab.featureTour.v1';
 
-/** The version this user last ran, or null on a fresh install. */
+/**
+ * The version this user last ran, or null on a fresh install.
+ *
+ * An install from before this key existed has no value under it, and
+ * would read as fresh — so the tour flag every such install carries
+ * stands in, as the last version that had no release notes to show.
+ */
 export async function readLastSeenVersion(): Promise<string | null> {
   try {
-    return await AsyncStorage.getItem(SEEN_KEY);
+    const [stored, legacy] = await AsyncStorage.multiGet([
+      SEEN_KEY,
+      LEGACY_TOUR_KEY,
+    ]);
+    return lastSeenFrom(stored[1], legacy[1] === '1');
   } catch {
     // Storage unavailable → err on the side of NOT interrupting.
     return getInstalledAppVersionName();
@@ -82,11 +102,17 @@ export async function markVersionSeen(version?: string): Promise<void> {
 export async function pendingWhatsNew(): Promise<WhatsNewSlide[]> {
   const current = getInstalledAppVersionName();
   const last = await readLastSeenVersion();
-  if (!last) {
+  const slides = last ? slidesForUpgrade(last, current) : [];
+  if (slides.length === 0) {
+    // Nothing to show — a fresh install, a release with no notes, or a
+    // version already seen. Stamp now so the next launch does not have
+    // to work this out again, and so the NEXT update reads as an upgrade
+    // from here rather than from the legacy baseline.
     await markVersionSeen(current);
-    return [];
   }
-  return slidesForUpgrade(last, current);
+  // With slides, the stamp waits for the modal's own finish: a user who
+  // kills the app mid-way is shown them again, which is the right answer.
+  return slides;
 }
 
 type Props = {

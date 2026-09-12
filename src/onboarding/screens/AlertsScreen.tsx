@@ -74,7 +74,7 @@ const SHORTLIST: NotificationSoundId[] = [
   'default',
 ];
 
-type Answer = 'unasked' | 'granted' | 'denied';
+type Face = 'unasked' | 'granted' | 'denied';
 
 export function AlertsScreen({
   progress,
@@ -87,14 +87,35 @@ export function AlertsScreen({
   const { palette } = useAppPalette();
   const { settings, updateSettings } = usePrayerSettings();
   const active = useIsActive();
-  const [answer, setAnswer] = useState<Answer>('unasked');
+  const [osGranted, setOsGranted] = useState(false);
+  const [refused, setRefused] = useState(false);
   const [alarmOk, setAlarmOk] = useState(true);
   const [preModal, setPreModal] = useState(false);
   const [previewing, setPreviewing] = useState<NotificationSoundId | null>(null);
 
   /**
-   * Which face this screen wears.
+   * Which face this screen wears — derived, not stored.
    *
+   * "Granted" means BOTH that the OS allows it and that the app's own
+   * master switch is on. Somebody re-running setup who turned alerts off
+   * in Settings still has the OS permission; showing them the adhan list
+   * as if alerts were on, while the shelf (which reads the switch) then
+   * hides its alert rows, is two screens disagreeing about one fact. So
+   * such a user sees the CTA again, and pressing it — which returns at
+   * once, the permission being already held — is what turns the switch
+   * back on. Nothing is flipped behind their back.
+   *
+   * "Denied" is the OS saying no to THIS screen's request, and it clears
+   * the moment the OS says yes: the row that sends the user to system
+   * settings can bring them back with the permission granted.
+   */
+  const face: Face = refused
+    ? 'denied'
+    : osGranted && settings.notificationsEnabled
+      ? 'granted'
+      : 'unasked';
+
+  /**
    * Re-read whenever the app comes back to the foreground, because the
    * exact-alarm row sends the user out to system settings and they return
    * to this same screen — which is the whole reason it is a row here and
@@ -106,13 +127,8 @@ export function AlertsScreen({
       const ok =
         s.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
         s.authorizationStatus === AuthorizationStatus.PROVISIONAL;
-      // Unasked stays unasked — the CTA has not been pressed yet, and a
-      // not-yet-granted permission is not a refusal. Anything else that
-      // is no longer granted is: the user may have revoked it from the
-      // system settings the exact-alarm row sent them to.
-      setAnswer(prev =>
-        ok ? 'granted' : prev === 'unasked' ? 'unasked' : 'denied',
-      );
+      setOsGranted(ok);
+      if (ok) setRefused(false);
       setAlarmOk(
         Platform.OS !== 'android' ||
           s.android.alarm === AndroidNotificationSetting.ENABLED,
@@ -139,16 +155,17 @@ export function AlertsScreen({
     try {
       if (await requestNotificationPermission()) {
         updateSettings({ notificationsEnabled: true });
-        setAnswer('granted');
+        setOsGranted(true);
+        setRefused(false);
         await refresh();
       } else {
-        setAnswer('denied');
+        setRefused(true);
       }
     } catch (e) {
       // Permission errors must not block the flow — the home banner
       // carries the same prompt with a "Tap to grant" affordance.
       console.warn('Onboarding notification request failed:', e);
-      setAnswer('denied');
+      setRefused(true);
     }
   };
 
@@ -175,7 +192,7 @@ export function AlertsScreen({
     <OnboardingFrame
       progress={progress}
       footer={
-        answer === 'unasked' ? (
+        face === 'unasked' ? (
           <>
             <PrimaryAction
               testID="onboarding-alerts-grant"
@@ -206,7 +223,7 @@ export function AlertsScreen({
         )}
       />
 
-      {answer === 'denied' ? (
+      {face === 'denied' ? (
         <Text
           style={[typeStyle('footnote'), styles.denied, { color: palette.muted }]}>
           {t(
@@ -216,7 +233,7 @@ export function AlertsScreen({
         </Text>
       ) : null}
 
-      {answer === 'granted' ? (
+      {face === 'granted' ? (
         <>
           <View
             accessibilityRole="radiogroup"
