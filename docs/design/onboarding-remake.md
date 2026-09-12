@@ -219,27 +219,49 @@ on the main screen.
 │                                 │
 │        How do you pray?         │  ← title1, the question IS the headline
 │                                 │
+│                     ʿAṣr today  │  ← column label
 │  ┌───────────────────────────┐  │
-│  │ Ḥanafī                  ○ │  │
-│  │ Mālikī                  ○ │  │
-│  │ Shāfiʿī                 ● │  │
-│  │ Ḥanbalī                 ○ │  │
+│  │ ○  Hanafi           17:02 │  │
+│  │ ○  Maliki           16:08 │  │
+│  │ ●  Shafii           16:08 │  │
+│  │ ○  Hanbali          16:08 │  │
+│  │ ○  I'm not sure     16:08 │  │
 │  └───────────────────────────┘  │
-│                                 │
-│   ʿAṣr today      16:12 → 17:38 │  ← live, tabular, animates on change
-│                                 │
-│   I'm not sure                  │  ← quiet text button
+│  Only the Hanafi reckoning      │
+│  moves ʿaṣr — the other schools │
+│  share the majority time.       │
 │          [  Continue  ]         │
 └─────────────────────────────────┘
 ```
 
-**The design point is the ʿaṣr line.** It shows the user's own ʿaṣr for
-today, and it changes as they tap. Choosing Ḥanafī moves it forward by
-45–90 minutes depending on latitude and season, and the row shows both
-values with an arrow for about a second before settling on the new one.
-Nobody has to know what a shadow ratio is to see what the choice does —
-which is the entire argument for asking this question here rather than
-leaving `madhab: null` to render as "Custom" in Settings forever.
+**The design point is the column of times.** Each row carries the ʿaṣr
+that choosing it produces, computed for today at the user's own
+coordinates. Nobody has to know what a shadow ratio is to see what the
+choice does — which is the entire argument for asking this question here
+rather than leaving `madhab: null` to render as "Custom" in Settings
+forever.
+
+> **It was one animated line, and that was wrong.** The first build put
+> a single "ʿAṣr today" row under the list which animated `16:12 → 17:38`
+> for a second when the choice changed, then settled on the new value.
+> It was a riddle. The old time flashed and vanished, so anyone not
+> watching at that moment was left with a bare number and no reason
+> attached; anyone who did catch it saw two numbers and an arrow with
+> nothing saying what had moved; and on first arrival there was no
+> "from" at all, so the line opened as a time with no context whatever.
+>
+> A column needs none of it: the consequence is permanently on screen,
+> comparable at a glance rather than from memory, and it tells the truth
+> the picker has always encoded — four names, two answers. Nothing
+> animates, so nothing has to be caught. The sentence under the card is
+> there because three rows showing the same time reads as a bug until
+> something says it is not.
+
+**"I'm not sure" is the fifth row**, not a text button beside the list.
+It is a real answer — somebody may genuinely not claim a school — so it
+belongs in the group, selectable, carrying its own time like the rest.
+Selected, it shows what it means as a second line rather than leaving
+the user to infer it from the word "Custom" in Settings later.
 
 **Writes**, on each tap, immediately (§6.6):
 

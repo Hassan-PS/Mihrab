@@ -36,9 +36,21 @@ type Palette = {
 
 type Props = {
   palette: Palette;
+  /**
+   * Drop the widget's own headline and subtitle.
+   *
+   * For the first-launch flow, which asks "Where are you?" in its own
+   * type and adds the sentence about coordinates never leaving the
+   * device. With both showing, the screen asked the question twice and
+   * answered it twice — "Where are you?" over "Set your location", and
+   * two near-identical sentences beginning "Prayer times depend on where
+   * you…". Settings has no heading of its own above this, so it keeps
+   * them.
+   */
+  hideIntro?: boolean;
 };
 
-export function LocationSetup({ palette }: Props) {
+export function LocationSetup({ palette, hideIntro }: Props) {
   const { t } = useTranslation();
   const { updateSettings } = usePrayerSettings();
   const [step, setStep] = useState<'choose' | 'manual'>('choose');
@@ -153,12 +165,16 @@ export function LocationSetup({ palette }: Props) {
         style={[styles.fill, { backgroundColor: palette.bg }]}
         contentContainerStyle={styles.chooseContent}
         keyboardShouldPersistTaps="handled">
-        <Text style={[styles.headline, { color: palette.text }]}>
-          {t('locationSetup.headline')}
-        </Text>
-        <Text style={[styles.sub, { color: palette.muted }]}>
-          {t('locationSetup.sub')}
-        </Text>
+        {hideIntro ? null : (
+          <>
+            <Text style={[styles.headline, { color: palette.text }]}>
+              {t('locationSetup.headline')}
+            </Text>
+            <Text style={[styles.sub, { color: palette.muted }]}>
+              {t('locationSetup.sub')}
+            </Text>
+          </>
+        )}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('locationSetup.useAutomatic')}

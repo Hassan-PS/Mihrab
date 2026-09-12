@@ -141,6 +141,11 @@ export function LocationScreen({
       ) : (
         <View style={styles.embed}>
           <LocationSetup
+            // This screen asks the question in its own type, in the same
+            // voice as the five around it; the widget's own headline and
+            // subtitle would ask it a second time, in different words,
+            // four lines lower.
+            hideIntro
             palette={{
               bg: palette.bg,
               text: palette.text,

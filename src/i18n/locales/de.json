@@ -1294,7 +1294,8 @@
       "asr": "ʿAsr heute",
       "unsure": "Ich bin mir nicht sicher",
       "unsureNote": "Wir verwenden das ʿAsr der Mehrheit – du kannst das jederzeit in den Einstellungen ändern.",
-      "malikiSecond": "Auch die zweiten Gebetszeiten anzeigen (ikhtiyārī und ḍarūrī)"
+      "malikiSecond": "Auch die zweiten Gebetszeiten anzeigen (ikhtiyārī und ḍarūrī)",
+      "note": "Nur die hanafitische Berechnung verschiebt ʿAsr — die anderen Rechtsschulen teilen sich die Zeit der Mehrheit."
     },
     "alerts": {
       "title": "Zu den Gebetszeiten benachrichtigen?",

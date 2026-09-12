@@ -1294,7 +1294,8 @@
       "asr": "ʿAsr aujourd’hui",
       "unsure": "Je ne sais pas",
       "unsureNote": "Nous utiliserons le ʿasr majoritaire — vous pourrez le changer à tout moment dans les Réglages.",
-      "malikiSecond": "Afficher aussi les secondes heures de prière (ikhtiyārī et ḍarūrī)"
+      "malikiSecond": "Afficher aussi les secondes heures de prière (ikhtiyārī et ḍarūrī)",
+      "note": "Seul le calcul hanafite décale le ʿasr — les autres écoles partagent l’heure majoritaire."
     },
     "alerts": {
       "title": "Vous notifier aux heures de prière ?",

@@ -1294,7 +1294,8 @@
       "asr": "ʿAsr idag",
       "unsure": "Jag är osäker",
       "unsureNote": "Vi använder majoritetens ʿasr — du kan ändra det när som helst i Inställningar.",
-      "malikiSecond": "Visa även de andra bönetiderna (ikhtiyārī och ḍarūrī)"
+      "malikiSecond": "Visa även de andra bönetiderna (ikhtiyārī och ḍarūrī)",
+      "note": "Endast den hanafitiska beräkningen flyttar ʿasr — de övriga rättsskolorna delar majoritetens tid."
     },
     "alerts": {
       "title": "Avisera dig vid bönetiderna?",

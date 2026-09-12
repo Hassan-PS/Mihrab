@@ -1294,7 +1294,8 @@
       "asr": "今日晡礼",
       "unsure": "我不确定",
       "unsureNote": "我们将采用多数派的晡礼时间——你可以随时在设置中更改。",
-      "malikiSecond": "同时显示第二礼拜时间（ikhtiyārī 与 ḍarūrī）"
+      "malikiSecond": "同时显示第二礼拜时间（ikhtiyārī 与 ḍarūrī）",
+      "note": "只有哈乃斐学派的算法会推迟晡礼——其余学派共用多数派的时间。"
     },
     "alerts": {
       "title": "在礼拜时间通知你吗？",

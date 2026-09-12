@@ -1294,7 +1294,8 @@
       "asr": "Bugün ikindi",
       "unsure": "Emin değilim",
       "unsureNote": "Çoğunluğun ikindi vaktini kullanacağız — bunu istediğiniz zaman Ayarlar’dan değiştirebilirsiniz.",
-      "malikiSecond": "İkinci namaz vakitlerini de göster (ihtiyârî ve zarûrî)"
+      "malikiSecond": "İkinci namaz vakitlerini de göster (ihtiyârî ve zarûrî)",
+      "note": "İkindiyi yalnızca Hanefî hesabı öteler — diğer mezhepler çoğunluğun vaktini paylaşır."
     },
     "alerts": {
       "title": "Namaz vakitlerinde bildirim gönderelim mi?",

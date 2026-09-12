@@ -1294,7 +1294,8 @@
       "asr": "ʿAṣr today",
       "unsure": "I’m not sure",
       "unsureNote": "We’ll use the majority ʿaṣr — you can change this any time in Settings.",
-      "malikiSecond": "Also show the second prayer times (ikhtiyārī and ḍarūrī)"
+      "malikiSecond": "Also show the second prayer times (ikhtiyārī and ḍarūrī)",
+      "note": "Only the Hanafi reckoning moves ʿaṣr — the other schools share the majority time."
     },
     "alerts": {
       "title": "Notify you at prayer times?",

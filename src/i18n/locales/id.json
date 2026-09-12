@@ -1294,7 +1294,8 @@
       "asr": "Asar hari ini",
       "unsure": "Saya tidak yakin",
       "unsureNote": "Kami akan memakai asar mayoritas — Anda dapat mengubahnya kapan saja di Pengaturan.",
-      "malikiSecond": "Tampilkan juga waktu salat kedua (ikhtiyārī dan ḍarūrī)"
+      "malikiSecond": "Tampilkan juga waktu salat kedua (ikhtiyārī dan ḍarūrī)",
+      "note": "Hanya perhitungan Hanafi yang menggeser asar — mazhab lainnya memakai waktu mayoritas yang sama."
     },
     "alerts": {
       "title": "Beri tahu Anda saat waktu salat?",

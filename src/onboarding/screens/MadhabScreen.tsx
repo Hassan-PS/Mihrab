@@ -29,8 +29,8 @@
  * writes it back off — otherwise somebody who changed their mind is left
  * with a setting they can no longer see the control for.
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { AccessibilityInfo, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { usePrayerSettings } from '../../context/PrayerSettingsContext';
@@ -45,7 +45,6 @@ import {
   OnboardingFrame,
   OnboardingHeading,
   PrimaryAction,
-  QuietAction,
 } from '../OnboardingChrome';
 
 export function MadhabScreen({
@@ -55,7 +54,7 @@ export function MadhabScreen({
   progress: { now: number; total: number } | null;
   onAdvance: () => void;
 }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { palette } = useAppPalette();
   const { settings, updateSettings } = usePrayerSettings();
   const clock = useClockFormatter();
@@ -73,39 +72,24 @@ export function MadhabScreen({
     [coords, settings.calculationMethod],
   );
 
-  const currentAsr = asrBy
-    ? asrBy[chosen ?? 'shafii']
-    : null;
-
-  // The value the line is moving FROM, kept for one render so the change
-  // is visible as a change rather than a silent substitution.
-  const previous = useRef<string | null>(null);
-  const [from, setFrom] = useState<string | null>(null);
-  useEffect(() => {
-    if (!currentAsr) return undefined;
-    if (previous.current && previous.current !== currentAsr) {
-      setFrom(previous.current);
-      const id = setTimeout(() => setFrom(null), 1200);
-      previous.current = currentAsr;
-      return () => clearTimeout(id);
-    }
-    previous.current = currentAsr;
-    return undefined;
-  }, [currentAsr]);
-
-  // The consequence a sighted user sees, said out loud for one who does
-  // not. Announced on change only, never on mount.
-  const announced = useRef<string | null>(null);
-  useEffect(() => {
-    if (!currentAsr) return;
-    if (announced.current && announced.current !== currentAsr) {
-      AccessibilityInfo.announceForAccessibility(
-        `${t('onboarding.madhab.asr', 'ʿAṣr today')}, ${clock(currentAsr)}`,
-      );
-    }
-    announced.current = currentAsr;
-  }, [currentAsr, clock, t]);
-
+  /**
+   * WHY THE TIME IS ON EVERY ROW, AND NOT ON A LINE OF ITS OWN.
+   *
+   * It used to be one line under the list that showed the chosen ʿaṣr,
+   * and animated `16:12 → 17:38` for a second when the choice changed
+   * before settling on the new value. That was a riddle: the first time
+   * flashed and vanished, so anyone not watching at that moment saw a
+   * bare number with no reason attached, and anyone who did see it was
+   * shown two numbers and an arrow with nothing saying what had moved.
+   * On first arrival there was no "from" at all, so the line opened as a
+   * time with no context whatsoever.
+   *
+   * A column of times, one per row, needs none of that. The consequence
+   * is permanently on screen, it is comparable at a glance rather than
+   * from memory, and it tells the truth the picker has always encoded:
+   * four names, two answers — only the Ḥanafī reckoning moves ʿaṣr.
+   * Nothing animates, so nothing has to be caught.
+   */
   const pick = (madhab: Madhab) => {
     setUnsure(false);
     updateSettings({
@@ -139,8 +123,6 @@ export function MadhabScreen({
     });
   };
 
-  const arrow = i18n.dir() === 'rtl' ? '←' : '→';
-
   return (
     <OnboardingFrame
       progress={progress}
@@ -156,6 +138,12 @@ export function MadhabScreen({
         body={t('onboarding.madhab.body', 'This sets when ʿaṣr begins for you.')}
       />
 
+      <View style={styles.columnLabel}>
+        <Text style={[typeStyle('label'), { color: palette.muted }]}>
+          {t('onboarding.madhab.asr', 'ʿAṣr today')}
+        </Text>
+      </View>
+
       <View
         accessibilityRole="radiogroup"
         accessibilityLabel={t('onboarding.madhab.title', 'How do you pray?')}
@@ -165,65 +153,111 @@ export function MadhabScreen({
         ]}>
         {MADHABS.map((m, i) => {
           const selected = !unsure && chosen === m;
+          const time = asrBy ? clock(asrBy[m]) : '—';
           return (
             <Pressable
               key={m}
               testID={`onboarding-madhab-${m}`}
               accessibilityRole="radio"
               accessibilityState={{ checked: selected }}
-              accessibilityLabel={t(`settings.madhab_${m}`)}
+              // The time is part of what the row IS, so it belongs in the
+              // label rather than being left for a screen reader to find
+              // as a separate, unexplained number.
+              accessibilityLabel={`${t(`settings.madhab_${m}`)}, ${t(
+                'onboarding.madhab.asr',
+                'ʿAṣr today',
+              )} ${time}`}
               onPress={() => pick(m)}
               style={({ pressed }) => [
                 styles.option,
-                i > 0 ? { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: palette.border } : null,
+                i > 0 ? styles.divided : null,
+                i > 0 ? { borderTopColor: palette.border } : null,
                 pressed && { opacity: 0.6 },
               ]}>
-              <Text style={[typeStyle('body'), { color: palette.text }]}>
-                {t(`settings.madhab_${m}`)}
-              </Text>
               <Text
                 style={[
                   typeStyle('headline'),
                   { color: selected ? palette.accentSolid : palette.muted },
                 ]}>
-                {selected ? '●' : '○'}
+                {selected ? '\u25cf' : '\u25cb'}
+              </Text>
+              <Text style={[typeStyle('body'), styles.name, { color: palette.text }]}>
+                {t(`settings.madhab_${m}`)}
+              </Text>
+              <Text
+                style={[
+                  typeStyle('body'),
+                  tabularNumeralStyle,
+                  { color: selected ? palette.text : palette.muted },
+                ]}>
+                {time}
               </Text>
             </Pressable>
           );
         })}
-      </View>
 
-      {currentAsr ? (
-        <View
-          accessibilityLiveRegion="polite"
-          style={[styles.asrRow, { borderColor: palette.border }]}>
-          <Text style={[typeStyle('footnote'), { color: palette.muted }]}>
-            {t('onboarding.madhab.asr', 'ʿAṣr today')}
-          </Text>
+        {/* A real answer, not a skip: somebody may genuinely not claim a
+            school, and the app should say what it will do then rather
+            than hide behind the word "Custom". Last in the group, and
+            quieter, because it is the answer for the person the four
+            above did not fit. */}
+        <Pressable
+          testID="onboarding-madhab-unsure"
+          accessibilityRole="radio"
+          accessibilityState={{ checked: unsure }}
+          accessibilityLabel={t('onboarding.madhab.unsure', 'I\u2019m not sure')}
+          accessibilityHint={t(
+            'onboarding.madhab.unsureNote',
+            'We\u2019ll use the majority \u02bfa\u1e63r \u2014 you can change this any time in Settings.',
+          )}
+          onPress={pickUnsure}
+          style={({ pressed }) => [
+            styles.option,
+            styles.divided,
+            { borderTopColor: palette.border },
+            pressed && { opacity: 0.6 },
+          ]}>
           <Text
             style={[
-              typeStyle('title3'),
-              tabularNumeralStyle,
-              { color: palette.text },
+              typeStyle('headline'),
+              { color: unsure ? palette.accentSolid : palette.muted },
             ]}>
-            {from ? `${clock(from)} ${arrow} ${clock(currentAsr)}` : clock(currentAsr)}
+            {unsure ? '\u25cf' : '\u25cb'}
           </Text>
-        </View>
-      ) : null}
+          <View style={styles.name}>
+            <Text style={[typeStyle('body'), { color: palette.text }]}>
+              {t('onboarding.madhab.unsure', 'I\u2019m not sure')}
+            </Text>
+            {unsure ? (
+              <Text
+                style={[typeStyle('footnote'), styles.hint, { color: palette.muted }]}>
+                {t(
+                  'onboarding.madhab.unsureNote',
+                  'We\u2019ll use the majority \u02bfa\u1e63r \u2014 you can change this any time in Settings.',
+                )}
+              </Text>
+            ) : null}
+          </View>
+          <Text
+            style={[
+              typeStyle('body'),
+              tabularNumeralStyle,
+              { color: unsure ? palette.text : palette.muted },
+            ]}>
+            {asrBy ? clock(asrBy.shafii) : '\u2014'}
+          </Text>
+        </Pressable>
+      </View>
 
-      <QuietAction
-        testID="onboarding-madhab-unsure"
-        label={t('onboarding.madhab.unsure', 'I’m not sure')}
-        onPress={pickUnsure}
-      />
-      {unsure ? (
-        <Text style={[typeStyle('footnote'), styles.note, { color: palette.muted }]}>
-          {t(
-            'onboarding.madhab.unsureNote',
-            'We’ll use the majority ʿaṣr — you can change this any time in Settings.',
-          )}
-        </Text>
-      ) : null}
+      {/* The sentence that answers "so what am I looking at". Without it
+          three rows showing the same time reads as a bug rather than as
+          the fact it is. */}
+      <Text style={[typeStyle('footnote'), styles.note, { color: palette.muted }]}>
+        {t(
+          'onboarding.madhab.note',
+          'Only the Hanafi reckoning moves \u02bfa\u1e63r \u2014 the other schools share the majority time.',
+        )}
+      </Text>
 
       {chosen === 'maliki' ? (
         <SettingsGroup>
@@ -243,21 +277,23 @@ export function MadhabScreen({
 }
 
 const styles = StyleSheet.create({
-  card: { overflow: 'hidden', marginTop: SPACING.sm },
+  // Sits over the trailing edge of the card, naming the column of times
+  // under it the way a table header would.
+  columnLabel: {
+    alignItems: 'flex-end',
+    paddingHorizontal: SPACING.lg,
+    marginTop: SPACING.sm,
+  },
+  card: { overflow: 'hidden' },
   option: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: SPACING.md,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.lg,
   },
-  asrRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    paddingTop: SPACING.lg,
-    marginTop: SPACING.lg,
-  },
-  note: { textAlign: 'center' },
+  divided: { borderTopWidth: StyleSheet.hairlineWidth },
+  name: { flex: 1 },
+  hint: { marginTop: SPACING.xs },
+  note: { textAlign: 'center', marginTop: SPACING.sm },
 });

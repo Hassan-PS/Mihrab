@@ -1294,7 +1294,8 @@
       "asr": "ʿAsr hoy",
       "unsure": "No estoy seguro",
       "unsureNote": "Usaremos el ʿasr de la mayoría; puedes cambiarlo cuando quieras en Ajustes.",
-      "malikiSecond": "Mostrar también los segundos tiempos de oración (ikhtiyārī y ḍarūrī)"
+      "malikiSecond": "Mostrar también los segundos tiempos de oración (ikhtiyārī y ḍarūrī)",
+      "note": "Solo el cálculo hanafí mueve el ʿasr; las demás escuelas comparten el tiempo de la mayoría."
     },
     "alerts": {
       "title": "¿Avisarte a las horas de oración?",
