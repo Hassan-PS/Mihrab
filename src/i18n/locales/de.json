@@ -258,8 +258,8 @@
     "prayerOffsetsDecrease": "Zeitversatz für {{prayer}} verringern",
     "prayerOffsetsReset": "Alle zurücksetzen",
     "dataAndPrivacy": "Daten & Datenschutz",
-    "replayOnboarding": "Einführung erneut zeigen",
-    "replayOnboardingHelp": "Den Willkommensablauf durchgehen.",
+    "replayOnboarding": "Erneut einrichten",
+    "replayOnboardingHelp": "Standort, Rechtsschule, Hinweise und den Rest erneut durchgehen.",
     "attributions": "Zuschreibungen",
     "attributionsBlurb": "Wessen Arbeit in dieser App steckt",
     "attribQuran": "Quran-Text",
@@ -304,10 +304,8 @@
     "accent_rose": "Rosé",
     "accent_violet": "Violett",
     "laDesignMarkers": "Markierungen",
-    "showTour": "App-Tour anzeigen",
     "rateApp": "Mihrab bewerten",
     "rateAppHelp": "Gefällt dir die App? Eine Bewertung hilft anderen, sie zu finden.",
-    "showTourHelp": "Die kurze Funktions-Tour erneut ansehen.",
     "ayahOfDay": "Tägliche Aya-Benachrichtigung",
     "ayahOfDayHelp": "Jeden Tag eine zufällig gewählte Aya mit Übersetzung.",
     "ayahOfDayTime": "Benachrichtigungszeit",
@@ -1274,29 +1272,60 @@
     "iftarIn": "Iftar in {{time}}"
   },
   "onboarding": {
-    "skip": "Vorerst überspringen",
-    "stepLabel": "Schritt {{current}} von {{total}}",
+    "skip": "Überspringen",
     "welcome": {
-      "title": "Willkommen",
-      "body": "Eine angenehme, private App für Gebetszeiten. Keine Analyse, keine Tracker — nur ruhige Erinnerungen an die fünf täglichen Gebete.",
-      "salam": "Friede sei mit dir, und Allahs Barmherzigkeit und Sein Segen."
+      "title": "Willkommen bei Mihrab",
+      "body": "Gebetszeiten und der Koran – ohne dass dich etwas beobachtet.",
+      "salam": "Friede sei mit dir, und Allahs Barmherzigkeit und Sein Segen.",
+      "language": "Sprache"
     },
     "location": {
-      "title": "Dein Standort",
-      "body": "Wir verwenden deine ungefähre Position, um genaue Gebetszeiten zu berechnen. Die Koordinaten bleiben verschlüsselt auf diesem Gerät — sie verlassen es nie.",
-      "cta": "Meinen Standort verwenden"
+      "title": "Wo bist du?",
+      "body": "Die Gebetszeiten hängen davon ab, wo du stehst. Deine Koordinaten werden auf diesem Gerät verschlüsselt und verlassen es nie.",
+      "ready": "Heute in {{city}}"
     },
-    "notifications": {
-      "title": "Gebetsbenachrichtigungen",
-      "body": "Wir können dich zu jeder Gebetszeit leise benachrichtigen. Du kannst einen Ton wählen, eine Erinnerung einstellen oder das jederzeit ausschalten.",
-      "cta": "Benachrichtigungen aktivieren"
+    "salamA11y": "As-salāmu ʿalaykum wa raḥmatu llāhi taʿālā wa barakātuh",
+    "notNow": "Jetzt nicht",
+    "start": "Loslegen",
+    "progressA11y": "Einrichtungsfortschritt",
+    "madhab": {
+      "title": "Wie betest du?",
+      "body": "Das legt fest, wann für dich ʿAsr beginnt.",
+      "asr": "ʿAsr heute",
+      "unsure": "Ich bin mir nicht sicher",
+      "unsureNote": "Wir verwenden das ʿAsr der Mehrheit – du kannst das jederzeit in den Einstellungen ändern.",
+      "malikiSecond": "Auch die zweiten Gebetszeiten anzeigen (ikhtiyārī und ḍarūrī)"
     },
-    "exactAlarms": {
-      "title": "Punktgenaue Benachrichtigungen",
-      "body": "Auf neueren Android-Versionen brauchen Gebetsbenachrichtigungen eine zusätzliche Berechtigung, damit sie pünktlich kommen und nicht ein paar Minuten später.",
-      "cta": "Exakte Alarme zulassen"
+    "alerts": {
+      "title": "Sollen wir dich rufen?",
+      "body": "Zu jeder Gebetszeit, nur auf diesem Gerät.",
+      "cta": "Ja, erinnere mich",
+      "denied": "Dein Telefon blockiert Mitteilungen von Mihrab. Du kannst sie später unter Einstellungen → Mitteilungen aktivieren.",
+      "adhan": "Adhan",
+      "adhanMore": "Weitere Adhans in den Einstellungen",
+      "preReminder": "Vorher erinnern",
+      "exact": "Exaktes Timing",
+      "exactFix": "Beheben",
+      "exactWhy": "Android braucht eine weitere Berechtigung, damit Hinweise auf die Minute kommen und nicht Minuten später."
     },
-    "salamA11y": "As-salāmu ʿalaykum wa raḥmatu llāhi taʿālā wa barakātuh"
+    "personalise": {
+      "title": "Mach es zu deinem",
+      "body": "Nichts davon ist nötig.",
+      "groupAlerts": "Hinweise",
+      "groupTimes": "Zeiten",
+      "groupDaily": "Täglich",
+      "groupLook": "Aussehen",
+      "adhkar": "Morgen- und Abend-Adhkār",
+      "theme": "Design",
+      "accent": "Akzent"
+    },
+    "ready": {
+      "title": "Du bist bereit",
+      "body": "Die meisten ändern als Nächstes eines davon.",
+      "method": "Berechnungsmethode",
+      "alerts": "Hinweise pro Gebet",
+      "widgets": "Widgets"
+    }
   },
   "backup": {
     "exportSection": "Export",
@@ -1417,19 +1446,6 @@
     "month_10": "Shawwal",
     "month_11": "Dhul-Qa'dah",
     "month_12": "Dhul-Hijjah"
-  },
-  "tour": {
-    "welcomeTitle": "Willkommen bei Mihrab",
-    "welcomeBody": "Gebetszeiten, der Koran und Werkzeuge für die tägliche Andacht — von Grund auf privat. Keine Konten, keine Tracker.",
-    "timesTitle": "Gebetszeiten auf einen Blick",
-    "timesBody": "Genaue Zeiten für deinen Standort, mit Live-Countdown bis zum nächsten Gebet. Wische über die Tageskarte, um die kommenden Tage zu sehen.",
-    "quranTitle": "Der Koran, schön dargestellt",
-    "quranBody": "Lies den Madina-Mushaf, höre Rezitationen von fünf Rezitatoren, setze Lesezeichen bei Versen und verfolge deine Khatma.",
-    "customizeTitle": "Ganz nach deinem Geschmack",
-    "customizeBody": "Widgets für den Startbildschirm, ein Live-Aktivitäts-Countdown, Themes und Akzentfarben — alles in den Einstellungen.",
-    "skip": "Überspringen",
-    "next": "Weiter",
-    "done": "Los geht's"
   },
   "downloads": {
     "title": "Downloads verwalten",
@@ -1772,6 +1788,18 @@
     "meaning": {
       "hawqala": "Es gibt keine Macht und keine Kraft außer bei Allah",
       "subhanallahwabihamdih": "Gepriesen sei Allah, und Lob sei Ihm"
+    }
+  },
+  "whatsNew": {
+    "title": "Neu",
+    "skip": "Überspringen",
+    "next": "Weiter",
+    "done": "Fortfahren",
+    "v2186": {
+      "setupTitle": "Die Einrichtung, neu gemacht",
+      "setupBody": "Der erste Start fragt jetzt die vier Dinge, die entscheiden, ob die App für dich stimmt — wo du bist, welcher Rechtsschule du folgst und ob sie dich rufen darf — und zeigt deine eigenen Zeiten, während du antwortest.",
+      "alertsTitle": "Hinweise, die ankommen",
+      "alertsBody": "Die Mitteilungs-Berechtigung schaltet die Hinweise jetzt wirklich ein, und du kannst gleich einen Adhan wählen."
     }
   }
 }

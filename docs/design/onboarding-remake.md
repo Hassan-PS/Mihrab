@@ -304,10 +304,20 @@ conclude a prayer app has no adhan. Four rows only: `adhan_makkah`,
 `adhan_madina`, `adhan_abdul_basit`, `default`. Each has a play control
 using the existing `previewAdhanSound(id)` /`stopAdhanPreview()` from
 `src/notifications/prayerNotifications.ts`; preview stops on unmount and
-on advance. Selecting writes `notificationSound`. The other thirteen live
-in `SoundPickerModal`, reachable by a single **"More adhans"** row that
-opens the same modal this screen's list is a subset of — not a
-reimplementation of it.
+on advance. Selecting writes `notificationSound`. Labels come off each
+option's own `labelKey`, so this list is a filter over the registry
+rather than a second copy of four names.
+
+> **Built as a caption, not a modal.** The first draft of this section
+> gave the remaining thirteen a "More adhans" row opening
+> `SoundPickerModal`. That modal also owns the import-your-own path —
+> `customAdhan`, `importingCustom`, `onImportCustom`, `onRemoveCustom`,
+> and the native `pickCustomAdhan` / `removeCustomAdhan` / `syncCustomAdhan`
+> plumbing behind them. Opening it here means either wiring all of that
+> into first launch, or passing no-ops and rendering an Import row that
+> does nothing. Neither is worth it on a screen whose question is whether
+> the app speaks at all, so "More adhans in Settings" is a muted caption
+> under the four rows, and `SoundPickerModal` keeps one call site.
 
 Volume and per-prayer alert modes are not here. They are per-prayer
 decisions made in context, and this screen is about whether the app
@@ -394,9 +404,16 @@ mode.
 
 ### 3.6 Ready — the proof
 
-Not a summary of what was chosen. **The real Today card**, with the real
-city and the real times, rendered from the same `TodayCard` the Home
-screen uses, in its compact (non-`fullBleed`, non-`expanded`) form.
+Not a summary of what was chosen. The user's own day: their city, their
+times, and the prayer that is actually next, picked by
+`getNextPrayerDisplay` — the very function Home's watchdog calls.
+
+> **Built without instantiating `TodayCard`,** and §11.3 is the reason.
+> The promise this screen has to keep is that the user sees their own
+> data rather than a description of it, and it keeps that promise. What
+> it does not do is assemble a second, subtly different version of Home's
+> prop bag. When `useTodayCardProps()` exists, this screen calls it and
+> the card appears here for real.
 
 Under it, one line and three links — the three things people change next,
 each a deep link into the page that owns it:
@@ -858,6 +875,18 @@ If that proves more invasive than it looks, the fallback is to render only
 the hero portion on screen 6 with the same hook's subset, and **not** to
 duplicate the props. A copy is not an acceptable third option.
 
+**It proved more invasive than it looks, and the fallback is what
+shipped.** The assembly is a ~70-line memo inside `HomeScreen` that
+filters the four optional non-prayer rows by their toggles, injects the
+Mālikī second times across past-plus-week and splits them apart again,
+plus a thirty-second watchdog holding `nextInfo` in state. Lifting that
+is a refactor of the most delicate screen in the app, and riding it along
+inside an onboarding change is how a release breaks. So screen 6 shows
+the same real times the three screens before it computed, and calls
+`getNextPrayerDisplay` — Home's own function — for what is next. No
+duplicated derivations, and the promise the screen makes to the user is
+unchanged. `useTodayCardProps()` remains the right next step, on its own.
+
 ---
 
 ## 12. Phases
@@ -877,7 +906,7 @@ Shipped before this document was written, and independent of it:
 
 Two new test files pin the first two.
 
-### Phase 1 — the questions
+### Phase 1 — the questions  ·  **done, 2026-09-12**
 
 Screens 3 and 4: madhab, and the rebuilt alerts screen with the adhan
 list, the pre-prayer row and the folded-in exact-alarm row. `exactAlarms`
@@ -888,7 +917,7 @@ stacked buttons. It just asks the right things. **This is where most of
 the user-visible value is**, and it is deliberately first: a beautiful
 flow that asks nothing is what we have now.
 
-### Phase 2 — the design
+### Phase 2 — the design  ·  **done, 2026-09-12**
 
 Screens 1, 2, 5 and 6, and the chrome: the language chip, the computed-
 times pause, the shelf, the live Today card, the progress rule, the modal
@@ -899,7 +928,7 @@ The shelf is the largest single piece of new UI in the project and could
 be split out as its own step if Phase 2 runs long — screens 1, 2 and 6
 are coherent without it.
 
-### Phase 3 — what's new
+### Phase 3 — what's new  ·  **done, 2026-09-12**
 
 §9, whole. Independent; could equally ship first.
 

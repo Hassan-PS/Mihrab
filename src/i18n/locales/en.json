@@ -258,8 +258,8 @@
     "prayerOffsetsDecrease": "Decrease {{prayer}} offset",
     "prayerOffsetsReset": "Reset all offsets",
     "dataAndPrivacy": "Data & privacy",
-    "replayOnboarding": "Show onboarding again",
-    "replayOnboardingHelp": "Walk through the welcome flow.",
+    "replayOnboarding": "Set up again",
+    "replayOnboardingHelp": "Revisit your location, school, alerts and the rest.",
     "attributions": "Attributions",
     "attributionsBlurb": "Whose work this app is made of",
     "attribQuran": "Quran text",
@@ -304,10 +304,8 @@
     "accent_rose": "Rose",
     "accent_violet": "Violet",
     "laDesignMarkers": "Markers",
-    "showTour": "Show the app tour",
     "rateApp": "Rate Mihrab",
     "rateAppHelp": "Enjoying the app? A rating helps others find it.",
-    "showTourHelp": "Replay the quick feature walkthrough.",
     "ayahOfDay": "Daily ayah notification",
     "ayahOfDayHelp": "A randomly chosen ayah with its translation, every day.",
     "ayahOfDayTime": "Notification time",
@@ -1274,29 +1272,60 @@
     "iftarIn": "Iftar in {{time}}"
   },
   "onboarding": {
-    "skip": "Skip for now",
-    "stepLabel": "Step {{current}} of {{total}}",
+    "skip": "Skip",
     "welcome": {
-      "title": "Welcome",
-      "body": "A pleasant, private prayer-times app. No analytics, no trackers — just calm reminders for the five daily prayers.",
-      "salam": "Peace be upon you, and the mercy of Allah and His blessings."
+      "title": "Welcome to Mihrab",
+      "body": "Prayer times and the Qur’an, with nothing watching you.",
+      "salam": "Peace be upon you, and the mercy of Allah and His blessings.",
+      "language": "Language"
     },
     "location": {
-      "title": "Your location",
-      "body": "We use your approximate position to calculate accurate prayer times. Coordinates stay encrypted on this device — they never leave it.",
-      "cta": "Use my location"
+      "title": "Where are you?",
+      "body": "Prayer times depend on where you stand. Your coordinates are encrypted on this device and never leave it.",
+      "ready": "Today in {{city}}"
     },
-    "notifications": {
-      "title": "Prayer alerts",
-      "body": "We can quietly notify you at each prayer time. You can pick a sound, set a reminder, or turn this off any time.",
-      "cta": "Enable alerts"
+    "salamA11y": "As-salāmu ʿalaykum wa raḥmatu llāhi taʿālā wa barakātuh",
+    "notNow": "Not now",
+    "start": "Start",
+    "progressA11y": "Setup progress",
+    "madhab": {
+      "title": "How do you pray?",
+      "body": "This sets when ʿaṣr begins for you.",
+      "asr": "ʿAṣr today",
+      "unsure": "I’m not sure",
+      "unsureNote": "We’ll use the majority ʿaṣr — you can change this any time in Settings.",
+      "malikiSecond": "Also show the second prayer times (ikhtiyārī and ḍarūrī)"
     },
-    "exactAlarms": {
-      "title": "Exact-time alerts",
-      "body": "On newer Android, prayer alerts need an extra permission so they fire on time, not minutes late.",
-      "cta": "Allow exact alerts"
+    "alerts": {
+      "title": "Should we call you?",
+      "body": "At every prayer time, on this device only.",
+      "cta": "Yes, alert me",
+      "denied": "Your phone is set to block notifications from Mihrab. You can turn them on later in Settings → Notifications.",
+      "adhan": "Adhan",
+      "adhanMore": "More adhans in Settings",
+      "preReminder": "Remind me before",
+      "exact": "Exact timing",
+      "exactFix": "Fix",
+      "exactWhy": "Android needs one more permission so alerts fire on the minute, not minutes late."
     },
-    "salamA11y": "As-salāmu ʿalaykum wa raḥmatu llāhi taʿālā wa barakātuh"
+    "personalise": {
+      "title": "Make it yours",
+      "body": "None of this is required.",
+      "groupAlerts": "Alerts",
+      "groupTimes": "Times",
+      "groupDaily": "Daily",
+      "groupLook": "Look",
+      "adhkar": "Morning & evening adhkār",
+      "theme": "Theme",
+      "accent": "Accent"
+    },
+    "ready": {
+      "title": "You’re ready",
+      "body": "Most people change one of these next.",
+      "method": "Calculation method",
+      "alerts": "Per-prayer alerts",
+      "widgets": "Widgets"
+    }
   },
   "backup": {
     "exportSection": "Export",
@@ -1417,19 +1446,6 @@
     "month_10": "Shawwal",
     "month_11": "Dhul-Qa'dah",
     "month_12": "Dhul-Hijjah"
-  },
-  "tour": {
-    "welcomeTitle": "Welcome to Mihrab",
-    "welcomeBody": "Prayer times, the Quran, and daily worship tools — private by design. No accounts, no trackers.",
-    "timesTitle": "Prayer times at a glance",
-    "timesBody": "Accurate times for your location, with a live countdown to the next prayer. Swipe the day card to peek at the coming days.",
-    "quranTitle": "The Quran, beautifully",
-    "quranBody": "Read the Madinah mushaf, listen to recitation with five reciters, bookmark ayahs, and track your khatmah.",
-    "customizeTitle": "Make it yours",
-    "customizeBody": "Home-screen widgets, a Live Activity countdown, themes and accent colors — all in Settings.",
-    "skip": "Skip",
-    "next": "Next",
-    "done": "Get started"
   },
   "downloads": {
     "title": "Manage downloads",
@@ -1772,6 +1788,18 @@
     "meaning": {
       "hawqala": "There is no power nor strength except with Allah",
       "subhanallahwabihamdih": "Glory be to Allah, and praise be to Him"
+    }
+  },
+  "whatsNew": {
+    "title": "What’s new",
+    "skip": "Skip",
+    "next": "Next",
+    "done": "Continue",
+    "v2186": {
+      "setupTitle": "Setup, remade",
+      "setupBody": "First launch now asks the four things that decide whether the app is right for you — where you are, which school you follow, and whether it may call you — and shows your own times as you answer.",
+      "alertsTitle": "Alerts that arrive",
+      "alertsBody": "Granting notification permission now actually turns alerts on, and you can pick an adhan while you are there."
     }
   }
 }

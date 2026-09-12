@@ -258,8 +258,8 @@
     "prayerOffsetsDecrease": "减少{{prayer}}的时间偏移",
     "prayerOffsetsReset": "全部重置",
     "dataAndPrivacy": "数据与隐私",
-    "replayOnboarding": "重新显示引导",
-    "replayOnboardingHelp": "浏览欢迎流程。",
+    "replayOnboarding": "重新设置",
+    "replayOnboardingHelp": "重新查看你的位置、教法学派、提醒等设置。",
     "attributions": "署名",
     "attributionsBlurb": "这款应用由谁的作品构成",
     "attribQuran": "《古兰经》原文",
@@ -304,10 +304,8 @@
     "accent_rose": "玫瑰红",
     "accent_violet": "紫罗兰",
     "laDesignMarkers": "标记",
-    "showTour": "显示应用导览",
     "rateApp": "为 Mihrab 评分",
     "rateAppHelp": "喜欢这个应用吗？评分能帮助更多人发现它。",
-    "showTourHelp": "重新播放功能导览。",
     "ayahOfDay": "每日经文通知",
     "ayahOfDayHelp": "每天随机挑选一节经文及其译文。",
     "ayahOfDayTime": "通知时间",
@@ -1274,29 +1272,60 @@
     "iftarIn": "{{time}} 后开斋"
   },
   "onboarding": {
-    "skip": "暂时跳过",
-    "stepLabel": "第 {{current}} 步，共 {{total}} 步",
+    "skip": "跳过",
     "welcome": {
-      "title": "欢迎",
-      "body": "一款安静而私密的礼拜时间应用。没有分析统计，没有追踪器，只有五番主命拜的平和提醒。",
-      "salam": "愿平安、真主的慈悯与祝福与你同在。"
+      "title": "欢迎使用 Mihrab",
+      "body": "礼拜时间与《古兰经》，没有任何追踪。",
+      "salam": "愿平安、真主的慈悯与祝福与你同在。",
+      "language": "语言"
     },
     "location": {
-      "title": "你的位置",
-      "body": "我们用你的大致位置来推算准确的礼拜时间。坐标以加密方式留在这台设备上，不会离开它。",
-      "cta": "使用我的位置"
+      "title": "你在哪里？",
+      "body": "礼拜时间取决于你所在的位置。你的坐标在本设备上加密保存，绝不外传。",
+      "ready": "今天在{{city}}"
     },
-    "notifications": {
-      "title": "礼拜提醒",
-      "body": "我们可以在每番礼拜的时间安静地提醒你。你可以选择提示音、设置提前提醒，也可以随时关闭。",
-      "cta": "开启提醒"
+    "salamA11y": "愿真主的平安、慈悲与吉庆与你们同在",
+    "notNow": "暂不",
+    "start": "开始",
+    "progressA11y": "设置进度",
+    "madhab": {
+      "title": "你依哪个学派礼拜？",
+      "body": "这决定你的晡礼（ʿAsr）从何时开始。",
+      "asr": "今日晡礼",
+      "unsure": "我不确定",
+      "unsureNote": "我们将采用多数派的晡礼时间——你可以随时在设置中更改。",
+      "malikiSecond": "同时显示第二礼拜时间（ikhtiyārī 与 ḍarūrī）"
     },
-    "exactAlarms": {
-      "title": "准时提醒",
-      "body": "在较新的 Android 上，礼拜提醒需要一项额外权限，才能准时送达，而不是晚上几分钟。",
-      "cta": "允许准时提醒"
+    "alerts": {
+      "title": "需要我们提醒你吗？",
+      "body": "在每个礼拜时间，仅在本设备上。",
+      "cta": "好，提醒我",
+      "denied": "你的手机已阻止 Mihrab 的通知。稍后可在「设置 → 通知」中开启。",
+      "adhan": "宣礼",
+      "adhanMore": "更多宣礼声见设置",
+      "preReminder": "提前提醒",
+      "exact": "精确定时",
+      "exactFix": "修复",
+      "exactWhy": "Android 需要额外一项权限，提醒才能准点触发，而不是延迟几分钟。"
     },
-    "salamA11y": "愿真主的平安、慈悲与吉庆与你们同在"
+    "personalise": {
+      "title": "打造你的样子",
+      "body": "以下都不是必填项。",
+      "groupAlerts": "提醒",
+      "groupTimes": "时间",
+      "groupDaily": "每日",
+      "groupLook": "外观",
+      "adhkar": "晨昏记主（adhkār）",
+      "theme": "主题",
+      "accent": "强调色"
+    },
+    "ready": {
+      "title": "一切就绪",
+      "body": "大多数人接下来会修改其中一项。",
+      "method": "计算方法",
+      "alerts": "各拜功提醒",
+      "widgets": "小组件"
+    }
   },
   "backup": {
     "exportSection": "导出",
@@ -1417,19 +1446,6 @@
     "month_10": "闪瓦鲁月",
     "month_11": "都尔喀尔德月",
     "month_12": "都尔黑哲月"
-  },
-  "tour": {
-    "welcomeTitle": "欢迎使用 Mihrab",
-    "welcomeBody": "礼拜时间、《古兰经》以及日常功修工具——隐私为本。无需账户，没有跟踪器。",
-    "timesTitle": "礼拜时间一目了然",
-    "timesBody": "根据您的位置提供精准时间，并实时倒计时至下一次礼拜。滑动日期卡片即可预览未来几天。",
-    "quranTitle": "精美呈现的《古兰经》",
-    "quranBody": "阅读麦地那版《古兰经》，聆听五位诵读者的诵读，收藏经文，并记录您的古兰经完读进度。",
-    "customizeTitle": "打造专属体验",
-    "customizeBody": "主屏幕小组件、实时活动倒计时、主题与强调色——尽在设置中。",
-    "skip": "跳过",
-    "next": "下一步",
-    "done": "开始使用"
   },
   "downloads": {
     "title": "管理下载",
@@ -1772,6 +1788,18 @@
     "meaning": {
       "hawqala": "除安拉外，无能无力",
       "subhanallahwabihamdih": "赞主清净，一切赞颂归于他"
+    }
+  },
+  "whatsNew": {
+    "title": "新增内容",
+    "skip": "跳过",
+    "next": "下一步",
+    "done": "继续",
+    "v2186": {
+      "setupTitle": "全新的设置流程",
+      "setupBody": "首次启动现在会询问决定这款应用是否适合你的四件事——你在哪里、你遵循哪个教法学派、是否允许提醒你——并在你作答时显示你自己的时间。",
+      "alertsTitle": "真正会响的提醒",
+      "alertsBody": "授予通知权限现在会真正开启提醒，并且可以顺手挑一段宣礼声。"
     }
   }
 }

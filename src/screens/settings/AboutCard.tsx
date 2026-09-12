@@ -13,7 +13,6 @@ import type { RootStackParamList } from '../../navigation/types';
 import { resetAppData } from '../../settings/storage';
 import { DEFAULT_SETTINGS } from '../../settings/types';
 import { rateApp } from '../../polish/rateApp';
-import { resetFeatureTour } from '../../polish/FeatureTourModal';
 import { NestedPageRows } from './NestedPageRows';
 import {
   SettingsGroup,
@@ -160,20 +159,12 @@ function AboutCardImpl() {
             <Text style={[styles.star, { color: palette.accent }]}>★</Text>
           }
         />
-        <SettingsLinkRow
-          title={t('settings.showTour', 'Show the app tour')}
-          help={t(
-            'settings.showTourHelp',
-            'Replay the quick feature walkthrough.',
-          )}
-          onPress={() => {
-            // Clear the seen-flag and pop back to Home, where the tour
-            // auto-presents (same path as a fresh install).
-            void resetFeatureTour().then(() => {
-              navigation.navigate('Home');
-            });
-          }}
-        />
+        {/* "Show the app tour" was here. The tour is gone from first
+            launch — the setup flow's last screen shows the user their own
+            times instead of four slides describing them — and what it
+            became is a what's-new screen shown after an update. Replaying
+            release notes on demand is a changelog, and CHANGELOG.md is
+            already that. See docs/design/onboarding-remake.md §9. */}
         <SettingsLinkRow
           title={t('settings.replayOnboarding')}
           help={t('settings.replayOnboardingHelp')}

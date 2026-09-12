@@ -86,10 +86,14 @@ const STAYS: Record<string, string> = {
     'migrating. The part that IS a record, the completed sets per day, is ' +
     'prayerapp.dhikr.v1 and that does travel, so nothing about someone’s ' +
     'dhikr history is lost by leaving this behind',
-  'mihrab.featureTour.v1': 'describes this phone — whether the tour was seen',
+  'mihrab.lastSeenVersion':
+    'describes this INSTALL — the app version this phone last ran, which is ' +
+    'what decides whether to show release notes. Importing another device’s ' +
+    'would either hide what changed or announce it twice. It replaced ' +
+    'mihrab.featureTour.v1, which was device-local for the same reason',
   'mihrab.syncHint.dismissed.v1':
     'describes this phone — which one-off pointers the user has waved away, ' +
-    'the same kind of thing as the feature tour flag',
+    'the same kind of thing as the what’s-new version stamp',
 
   'quran/riwayat/v1':
     'content, not record — a muṣḥaf the reader obtained from its publisher ' +

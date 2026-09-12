@@ -65,21 +65,17 @@ function CalculationCardImpl({
 
   return (
     <SettingsGroup title={t('settings.calculation')}>
-      {providerHidesCalculationMethod(effectiveProvider) ? (
-        <SettingsBlock>
-          <Text style={[s.help, { color: palette.muted }]}>
-            {effectiveProvider === 'islamiska_forbundet'
-              ? t('settings.calcHiddenSweden')
-              : t('settings.calcHiddenPraytimes')}
-          </Text>
-        </SettingsBlock>
-      ) : (
-        <SettingsLinkRow
-          title={t('settings.method')}
-          value={getMethodLabel(settings.calculationMethod)}
-          onPress={onOpenMethodPicker}
-        />
-      )}
+      {/* THE SCHOOL FIRST, THE METHOD LAST — 2026-09-12.
+       *
+       * These were the other way round, which put the row people come
+       * here looking for underneath a control most of them should never
+       * touch. `calculationMethod` defaults to 'auto' and auto is right
+       * for the overwhelming majority; the school is the thing the app
+       * now asks on first launch and the thing somebody changes when
+       * their ʿaṣr looks wrong. So it leads, and the method sits at the
+       * foot of the card with the offsets.
+       *
+       * See docs/design/onboarding-remake.md §10.1. */}
 
       {/* THE SCHOOL, and then the shadow it implies — issue #21.
        *
@@ -201,6 +197,24 @@ function CalculationCardImpl({
           />
         </SettingsBlock>
       ) : null}
+
+      {/* The method, at the foot of the card — see the note at the top of
+          this group for why it is no longer the first row. */}
+      {providerHidesCalculationMethod(effectiveProvider) ? (
+        <SettingsBlock>
+          <Text style={[s.help, { color: palette.muted }]}>
+            {effectiveProvider === 'islamiska_forbundet'
+              ? t('settings.calcHiddenSweden')
+              : t('settings.calcHiddenPraytimes')}
+          </Text>
+        </SettingsBlock>
+      ) : (
+        <SettingsLinkRow
+          title={t('settings.method')}
+          value={getMethodLabel(settings.calculationMethod)}
+          onPress={onOpenMethodPicker}
+        />
+      )}
 
       {/*
        * Per-prayer offsets — task #22. Always available regardless of

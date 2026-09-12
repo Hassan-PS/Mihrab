@@ -258,8 +258,8 @@
     "prayerOffsetsDecrease": "Minska förskjutningen för {{prayer}}",
     "prayerOffsetsReset": "Återställ alla",
     "dataAndPrivacy": "Data & integritet",
-    "replayOnboarding": "Visa introduktion igen",
-    "replayOnboardingHelp": "Gå igenom välkomstflödet.",
+    "replayOnboarding": "Gör om introduktionen",
+    "replayOnboardingHelp": "Gå igenom plats, rättsskola, aviseringar och resten igen.",
     "attributions": "Erkännanden",
     "attributionsBlurb": "Vems arbete den här appen är gjord av",
     "attribQuran": "Koranens text",
@@ -304,10 +304,8 @@
     "accent_rose": "Rosa",
     "accent_violet": "Violett",
     "laDesignMarkers": "Markörer",
-    "showTour": "Visa rundturen i appen",
     "rateApp": "Betygsätt Mihrab",
     "rateAppHelp": "Gillar du appen? Ett betyg hjälper andra att hitta den.",
-    "showTourHelp": "Spela upp funktionsgenomgången igen.",
     "ayahOfDay": "Daglig aya-avisering",
     "ayahOfDayHelp": "En slumpmässigt vald aya med översättning, varje dag.",
     "ayahOfDayTime": "Aviseringstid",
@@ -1274,29 +1272,60 @@
     "iftarIn": "Iftar om {{time}}"
   },
   "onboarding": {
-    "skip": "Hoppa över just nu",
-    "stepLabel": "Steg {{current}} av {{total}}",
+    "skip": "Hoppa över",
     "welcome": {
-      "title": "Välkommen",
-      "body": "En trevlig och privat app för bönetider. Ingen analys, inga spårare — bara lugna påminnelser om de fem dagliga bönerna.",
-      "salam": "Frid vare med dig, och Allahs nåd och Hans välsignelser."
+      "title": "Välkommen till Mihrab",
+      "body": "Bönetider och Koranen — utan att något spårar dig.",
+      "salam": "Frid vare med dig, och Allahs nåd och Hans välsignelser.",
+      "language": "Språk"
     },
     "location": {
-      "title": "Din plats",
-      "body": "Vi använder din ungefärliga position för att räkna ut exakta bönetider. Koordinaterna förblir krypterade på den här enheten — de lämnar den aldrig.",
-      "cta": "Använd min plats"
+      "title": "Var befinner du dig?",
+      "body": "Bönetiderna beror på var du står. Dina koordinater krypteras på den här enheten och lämnar den aldrig.",
+      "ready": "Idag i {{city}}"
     },
-    "notifications": {
-      "title": "Böneaviseringar",
-      "body": "Vi kan diskret avisera dig vid varje bönetid. Du kan välja ett ljud, ställa in en påminnelse eller stänga av det här när som helst.",
-      "cta": "Aktivera aviseringar"
+    "salamA11y": "As-salāmu ʿalaykum wa raḥmatu llāhi taʿālā wa barakātuh",
+    "notNow": "Inte nu",
+    "start": "Kom igång",
+    "progressA11y": "Förlopp för introduktionen",
+    "madhab": {
+      "title": "Hur ber du?",
+      "body": "Det här avgör när ʿasr börjar för dig.",
+      "asr": "ʿAsr idag",
+      "unsure": "Jag är osäker",
+      "unsureNote": "Vi använder majoritetens ʿasr — du kan ändra det när som helst i Inställningar.",
+      "malikiSecond": "Visa även de andra bönetiderna (ikhtiyārī och ḍarūrī)"
     },
-    "exactAlarms": {
-      "title": "Aviseringar på exakt tid",
-      "body": "På nyare Android behöver böneaviseringar en extra behörighet för att komma i tid och inte några minuter för sent.",
-      "cta": "Tillåt exakta aviseringar"
+    "alerts": {
+      "title": "Ska vi kalla dig?",
+      "body": "Vid varje bönetid, bara på den här enheten.",
+      "cta": "Ja, påminn mig",
+      "denied": "Din telefon blockerar aviseringar från Mihrab. Du kan slå på dem senare i Inställningar → Aviseringar.",
+      "adhan": "Adhan",
+      "adhanMore": "Fler adhaner finns i Inställningar",
+      "preReminder": "Påminn mig innan",
+      "exact": "Exakt tidpunkt",
+      "exactFix": "Åtgärda",
+      "exactWhy": "Android behöver ytterligare en behörighet för att aviseringarna ska komma på minuten, inte minuter för sent."
     },
-    "salamA11y": "As-salāmu ʿalaykum wa raḥmatu llāhi taʿālā wa barakātuh"
+    "personalise": {
+      "title": "Gör den till din",
+      "body": "Inget av det här är nödvändigt.",
+      "groupAlerts": "Aviseringar",
+      "groupTimes": "Tider",
+      "groupDaily": "Dagligt",
+      "groupLook": "Utseende",
+      "adhkar": "Morgonens och kvällens adhkār",
+      "theme": "Tema",
+      "accent": "Accentfärg"
+    },
+    "ready": {
+      "title": "Du är redo",
+      "body": "De flesta ändrar något av det här härnäst.",
+      "method": "Beräkningsmetod",
+      "alerts": "Aviseringar per bön",
+      "widgets": "Widgetar"
+    }
   },
   "backup": {
     "exportSection": "Exportera",
@@ -1417,19 +1446,6 @@
     "month_10": "Shawwal",
     "month_11": "Dhul-Qa'dah",
     "month_12": "Dhul-Hijjah"
-  },
-  "tour": {
-    "welcomeTitle": "Välkommen till Mihrab",
-    "welcomeBody": "Bönetider, Koranen och verktyg för daglig dyrkan — privat i grunden. Inga konton, inga spårare.",
-    "timesTitle": "Bönetider i ett ögonkast",
-    "timesBody": "Exakta tider för din plats, med en nedräkning till nästa bön. Svep på dagskortet för att se de kommande dagarna.",
-    "quranTitle": "Koranen, vackert återgiven",
-    "quranBody": "Läs Madinah-mushafen, lyssna på recitation från fem recitatörer, bokmärk verser och följ din khatmah.",
-    "customizeTitle": "Gör den till din",
-    "customizeBody": "Hemskärmswidgetar, en nedräkning i Live-aktivitet, teman och accentfärger — allt i Inställningar.",
-    "skip": "Hoppa över",
-    "next": "Nästa",
-    "done": "Kom igång"
   },
   "downloads": {
     "title": "Hantera nedladdningar",
@@ -1772,6 +1788,18 @@
     "meaning": {
       "hawqala": "Det finns ingen makt och ingen kraft utom hos Allah",
       "subhanallahwabihamdih": "Ära vare Allah, och lov och pris tillkommer Honom"
+    }
+  },
+  "whatsNew": {
+    "title": "Nyheter",
+    "skip": "Hoppa över",
+    "next": "Nästa",
+    "done": "Fortsätt",
+    "v2186": {
+      "setupTitle": "Introduktionen är omgjord",
+      "setupBody": "Första starten frågar nu om de fyra saker som avgör om appen stämmer för dig — var du är, vilken rättsskola du följer och om den får kalla dig — och visar dina egna tider medan du svarar.",
+      "alertsTitle": "Aviseringar som kommer fram",
+      "alertsBody": "Att ge aviseringsbehörighet slår nu faktiskt på aviseringarna, och du kan välja en adhan på samma gång."
     }
   }
 }

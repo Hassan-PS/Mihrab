@@ -83,7 +83,14 @@ describe('locale parity for new feature keys', () => {
     expect(data.fasting).toBeTruthy();
     expect(data.onboarding).toBeTruthy();
     expect(data.onboarding.welcome).toBeTruthy();
-    expect(data.onboarding.notifications).toBeTruthy();
+    // `onboarding.notifications` was the old step's label bag. The
+    // remake's screen is `alerts`, and it carries the adhan shortlist and
+    // the exact-alarm row that used to be a page of their own.
+    expect(data.onboarding.alerts).toBeTruthy();
+    expect(data.onboarding.madhab).toBeTruthy();
+    expect(data.onboarding.personalise).toBeTruthy();
+    expect(data.onboarding.ready).toBeTruthy();
+    expect(data.whatsNew).toBeTruthy();
     expect(data.settings.prayerOffsets).toBeTruthy();
   });
 });

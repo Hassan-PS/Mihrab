@@ -248,12 +248,12 @@ describe('the user choice is honoured on both sides', () => {
     seedUsedPhone();
     mockStore.set('mihrab.first_seen_day', '2020-01-01');
     mockStore.set('prayer_times_cache.v2', '{"caches":{}}');
-    mockStore.set('mihrab.featureTour.v1', '1');
+    mockStore.set('mihrab.lastSeenVersion', '2.18.5');
     const text = JSON.stringify(buildSnapshot(await collectData(), everything(), NOW));
     expect(text).not.toContain('first_seen');
     expect(text).not.toContain('2020-01-01');
     expect(text).not.toContain('prayer_times_cache');
-    expect(text).not.toContain('featureTour');
+    expect(text).not.toContain('lastSeenVersion');
   });
 });
 

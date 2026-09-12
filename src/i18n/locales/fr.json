@@ -258,8 +258,8 @@
     "prayerOffsetsDecrease": "Réduire le décalage de {{prayer}}",
     "prayerOffsetsReset": "Tout réinitialiser",
     "dataAndPrivacy": "Données et confidentialité",
-    "replayOnboarding": "Réafficher l'introduction",
-    "replayOnboardingHelp": "Parcourir le flux de bienvenue.",
+    "replayOnboarding": "Reconfigurer",
+    "replayOnboardingHelp": "Revoyez votre lieu, votre école, vos alertes et le reste.",
     "attributions": "Mentions",
     "attributionsBlurb": "Le travail dont cette application est faite",
     "attribQuran": "Texte du Coran",
@@ -304,10 +304,8 @@
     "accent_rose": "Rose",
     "accent_violet": "Violet",
     "laDesignMarkers": "Repères",
-    "showTour": "Afficher la visite guidée",
     "rateApp": "Évaluer Mihrab",
     "rateAppHelp": "Vous aimez l'application ? Une note aide les autres à la découvrir.",
-    "showTourHelp": "Revoir la visite rapide des fonctionnalités.",
     "ayahOfDay": "Notification quotidienne d'un verset",
     "ayahOfDayHelp": "Un verset choisi au hasard avec sa traduction, chaque jour.",
     "ayahOfDayTime": "Heure de la notification",
@@ -1274,29 +1272,60 @@
     "iftarIn": "Iftar dans {{time}}"
   },
   "onboarding": {
-    "skip": "Passer pour l’instant",
-    "stepLabel": "Étape {{current}} sur {{total}}",
+    "skip": "Passer",
     "welcome": {
-      "title": "Bienvenue",
-      "body": "Une application d’horaires de prière agréable et privée. Aucune analyse, aucun traceur — juste de calmes rappels pour les cinq prières quotidiennes.",
-      "salam": "Que la paix soit sur vous, ainsi que la miséricorde d’Allah et Ses bénédictions."
+      "title": "Bienvenue dans Mihrab",
+      "body": "Les heures de prière et le Coran, sans que rien ne vous observe.",
+      "salam": "Que la paix soit sur vous, ainsi que la miséricorde d’Allah et Ses bénédictions.",
+      "language": "Langue"
     },
     "location": {
-      "title": "Votre position",
-      "body": "Nous utilisons votre position approximative pour calculer des horaires de prière exacts. Les coordonnées restent chiffrées sur cet appareil — elles ne le quittent jamais.",
-      "cta": "Utiliser ma position"
+      "title": "Où êtes-vous ?",
+      "body": "Les heures de prière dépendent de l’endroit où vous êtes. Vos coordonnées sont chiffrées sur cet appareil et ne le quittent jamais.",
+      "ready": "Aujourd’hui à {{city}}"
     },
-    "notifications": {
-      "title": "Alertes de prière",
-      "body": "Nous pouvons vous prévenir discrètement à chaque horaire de prière. Vous pouvez choisir un son, régler un rappel ou désactiver tout cela à tout moment.",
-      "cta": "Activer les alertes"
+    "salamA11y": "As-salāmu ʿalaykum wa raḥmatu llāhi taʿālā wa barakātuh",
+    "notNow": "Pas maintenant",
+    "start": "Commencer",
+    "progressA11y": "Progression de la configuration",
+    "madhab": {
+      "title": "Comment priez-vous ?",
+      "body": "Cela détermine quand ʿasr commence pour vous.",
+      "asr": "ʿAsr aujourd’hui",
+      "unsure": "Je ne sais pas",
+      "unsureNote": "Nous utiliserons le ʿasr majoritaire — vous pourrez le changer à tout moment dans les Réglages.",
+      "malikiSecond": "Afficher aussi les secondes heures de prière (ikhtiyārī et ḍarūrī)"
     },
-    "exactAlarms": {
-      "title": "Alertes à l’heure exacte",
-      "body": "Sur les versions récentes d’Android, les alertes de prière ont besoin d’une autorisation supplémentaire pour arriver à l’heure, et non quelques minutes plus tard.",
-      "cta": "Autoriser les alertes exactes"
+    "alerts": {
+      "title": "Devons-nous vous appeler ?",
+      "body": "À chaque heure de prière, sur cet appareil uniquement.",
+      "cta": "Oui, prévenez-moi",
+      "denied": "Votre téléphone bloque les notifications de Mihrab. Vous pourrez les activer plus tard dans Réglages → Notifications.",
+      "adhan": "Adhan",
+      "adhanMore": "Plus d’adhans dans les Réglages",
+      "preReminder": "Me rappeler avant",
+      "exact": "Horaire exact",
+      "exactFix": "Corriger",
+      "exactWhy": "Android a besoin d’une autorisation supplémentaire pour que les alertes se déclenchent à la minute près."
     },
-    "salamA11y": "As-salāmu ʿalaykum wa raḥmatu llāhi taʿālā wa barakātuh"
+    "personalise": {
+      "title": "Personnalisez",
+      "body": "Rien de tout cela n’est obligatoire.",
+      "groupAlerts": "Alertes",
+      "groupTimes": "Horaires",
+      "groupDaily": "Quotidien",
+      "groupLook": "Apparence",
+      "adhkar": "Adhkār du matin et du soir",
+      "theme": "Thème",
+      "accent": "Accent"
+    },
+    "ready": {
+      "title": "Vous êtes prêt",
+      "body": "La plupart des gens modifient ensuite l’un de ces réglages.",
+      "method": "Méthode de calcul",
+      "alerts": "Alertes par prière",
+      "widgets": "Widgets"
+    }
   },
   "backup": {
     "exportSection": "Exporter",
@@ -1417,19 +1446,6 @@
     "month_10": "Chawwal",
     "month_11": "Dhou al-Qi'da",
     "month_12": "Dhou al-Hijja"
-  },
-  "tour": {
-    "welcomeTitle": "Bienvenue dans Mihrab",
-    "welcomeBody": "Horaires de prière, le Coran et des outils d'adoration au quotidien — privé par conception. Pas de compte, pas de traceurs.",
-    "timesTitle": "Les horaires de prière en un coup d'œil",
-    "timesBody": "Des horaires précis pour votre position, avec un compte à rebours en direct vers la prochaine prière. Balayez la carte du jour pour voir les jours à venir.",
-    "quranTitle": "Le Coran, magnifiquement présenté",
-    "quranBody": "Lisez le mushaf de Médine, écoutez la récitation avec cinq récitateurs, ajoutez des signets aux versets et suivez votre khatma.",
-    "customizeTitle": "Faites-la vôtre",
-    "customizeBody": "Des widgets sur l'écran d'accueil, un compte à rebours en activité en direct, des thèmes et des couleurs d'accent — tout est dans les Paramètres.",
-    "skip": "Passer",
-    "next": "Suivant",
-    "done": "Commencer"
   },
   "downloads": {
     "title": "Gérer les téléchargements",
@@ -1772,6 +1788,18 @@
     "meaning": {
       "hawqala": "Il n’est de puissance ni de force qu’en Allah",
       "subhanallahwabihamdih": "Gloire à Allah, et à Lui la louange"
+    }
+  },
+  "whatsNew": {
+    "title": "Nouveautés",
+    "skip": "Passer",
+    "next": "Suivant",
+    "done": "Continuer",
+    "v2186": {
+      "setupTitle": "La configuration, refaite",
+      "setupBody": "Le premier lancement pose désormais les quatre questions qui décident si l’app vous convient — où vous êtes, quelle école vous suivez et si elle peut vous appeler — et affiche vos propres horaires au fur et à mesure.",
+      "alertsTitle": "Des alertes qui arrivent",
+      "alertsBody": "Accorder l’autorisation de notification active désormais réellement les alertes, et vous pouvez choisir un adhan au passage."
     }
   }
 }

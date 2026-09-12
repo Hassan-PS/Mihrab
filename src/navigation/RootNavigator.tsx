@@ -233,13 +233,24 @@ export function RootNavigator() {
           headerLargeTitle: false,
         }}
       />
-      {/* The Log: prayers and fasting on one screen (design review 2c).
-          The route keeps its old name so the "Log prayer" notification
-          action and every existing deep link still land somewhere. */}
+      {/* A modal, not a pushed card, and no gesture.
+
+          It used to be an ordinary push with a header, so the back arrow
+          and the swipe both dropped the user out mid-flow onto a Home
+          that may be nothing but a full-screen location wall. Leaving
+          should be a decision — Skip, Not now, or Start — not a gesture.
+          Android's hardware back is intercepted inside the flow, where it
+          steps back one screen. See docs/design/onboarding-remake.md §6.5. */}
       <Stack.Screen
         name="Onboarding"
         component={OnboardingScreen}
-        options={{ title: '', headerLargeTitle: false }}
+        options={{
+          title: '',
+          headerShown: false,
+          headerLargeTitle: false,
+          presentation: 'modal',
+          gestureEnabled: false,
+        }}
       />
       <Stack.Screen
         name="Backup"

@@ -53,7 +53,9 @@ describe('the label token', () => {
       'src/screens/FastingScreen.tsx',
       'src/screens/SyncScreen.tsx',
       'src/screens/BackupScreen.tsx',
-      'src/screens/OnboardingScreen.tsx',
+      // The onboarding route is a re-export now; the flow's own labels
+      // live on the shelf, which is the screen that has section headings.
+      'src/onboarding/screens/PersonaliseScreen.tsx',
     ]) {
       expect(read(f)).toContain("typeStyle('label')");
     }

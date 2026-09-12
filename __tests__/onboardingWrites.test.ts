@@ -105,48 +105,169 @@ describe('asking to notify', () => {
   });
 });
 
-describe('the onboarding screen acts on the answer', () => {
-  const src = require('fs').readFileSync(
-    require('path').join(__dirname, '..', 'src/screens/OnboardingScreen.tsx'),
+/**
+ * ── READING THE SOURCE, AND WHY ───────────────────────────────────────
+ *
+ * What follows asserts against the text of the flow's files rather than
+ * rendering them. That is a real limitation and it is the repo's existing
+ * idiom for this class of contract: these are statements about what the
+ * code is ALLOWED to write, and the failure mode being guarded is a write
+ * that is missing, unconditional, or split from its pair — all of which
+ * are visible in the source and none of which a happy-path render would
+ * catch. A render harness for six screens with four native permission
+ * surfaces between them would pin less and break more.
+ */
+const read = (rel: string): string =>
+  require('fs').readFileSync(
+    require('path').join(__dirname, '..', rel),
     'utf8',
   ) as string;
 
-  /** Just the notifications arm of the step switch. */
-  const branch = src.slice(
-    src.indexOf("id === 'notifications'"),
-    src.indexOf("id === 'exactAlarms'"),
-  );
+const ALERTS = 'src/onboarding/screens/AlertsScreen.tsx';
+const SALAM = 'src/onboarding/screens/SalamScreen.tsx';
+const MADHAB = 'src/onboarding/screens/MadhabScreen.tsx';
+const LOCATION = 'src/onboarding/screens/LocationScreen.tsx';
+const PERSONALISE = 'src/onboarding/screens/PersonaliseScreen.tsx';
+const FLOW = 'src/onboarding/OnboardingFlow.tsx';
+
+describe('the alerts screen acts on the answer', () => {
+  const src = read(ALERTS);
 
   it('writes notificationsEnabled, and only when granted', () => {
-    // Sliced to the branch rather than matched as one literal line, so
-    // that a comment between the guard and the write does not fail this
-    // — but an UNCONDITIONAL write still does. That is the same bug
-    // wearing the opposite mask: a settings key claiming we may notify
-    // while the OS forbids it, which reads as ON in Settings while
-    // nothing ever arrives.
-    expect(branch).toMatch(/if \(await requestNotificationPermission\(\)\)/);
-    expect(branch).toMatch(
-      /updateAllSettings\(\{ notificationsEnabled: true \}\)/,
-    );
-    // Exactly one write, and it is inside the guard.
-    expect(branch.match(/notificationsEnabled: true/g)).toHaveLength(1);
-    expect(branch.indexOf('requestNotificationPermission()')).toBeLessThan(
-      branch.indexOf('notificationsEnabled: true'),
+    // An UNCONDITIONAL write is the same bug wearing the opposite mask: a
+    // settings key claiming we may notify while the OS forbids it, which
+    // reads as ON in Settings while nothing ever arrives.
+    expect(src).toMatch(/if \(await requestNotificationPermission\(\)\)/);
+    expect(src).toMatch(/updateSettings\(\{ notificationsEnabled: true \}\)/);
+    expect(src.match(/notificationsEnabled: true/g)).toHaveLength(1);
+    expect(src.indexOf('requestNotificationPermission()')).toBeLessThan(
+      src.indexOf('notificationsEnabled: true'),
     );
   });
 
   it('does not ask for the permission its own way', () => {
     // The divergence WAS the bug: Settings asked properly and read the
-    // answer, onboarding asked differently and discarded it.
+    // answer, onboarding asked differently and discarded it. Reading the
+    // CURRENT state with getNotificationSettings is a different act and
+    // stays allowed.
     expect(src).not.toMatch(/notifee\.requestPermission/);
     expect(src).not.toMatch(/PermissionsAndroid/);
   });
 
-  it('honours Reduce Motion in the salam, which its docblock promised', () => {
+  it('folds the exact-alarm grant in rather than branching the step list', () => {
+    expect(src).toMatch(/openAlarmPermissionSettings/);
+    // The step list may still EXPLAIN why the platform branch went away;
+    // what it may not do is declare the step again.
+    expect(read('src/onboarding/steps.ts')).not.toMatch(/'exactAlarms'/);
+  });
+});
+
+describe('the salam screen', () => {
+  const src = read(SALAM);
+
+  it('honours Reduce Motion, which its docblock promised', () => {
     // The comment claimed the animation "finishes in 1ms" for these
     // users. Nothing read the setting; it ran at full length for
     // everyone, including the people who had asked for the opposite.
     expect(src).toMatch(/isReduceMotion\(\)/);
     expect(src).toMatch(/opacity\.setValue\(1\)/);
+  });
+
+  it('writes languagePicked with the language, never alone', () => {
+    // `languagePicked` is what stops the app following the phone. A
+    // language written without it is a choice the next launch discards.
+    expect(src).toMatch(/language: lang, languagePicked: true/);
+  });
+});
+
+describe('the school screen', () => {
+  const src = read(MADHAB);
+
+  it('writes madhab and school in one call', () => {
+    // `selectedMadhab()` falls back to Custom when the stored school no
+    // longer describes the stored madhab, so writing one without the
+    // other silently discards the answer the user just gave.
+    expect(src).toMatch(/madhab,\s*\n\s*school: asrSchoolFor\(madhab\)/);
+  });
+
+  it('derives the school rather than hard-coding the Hanafi 1', () => {
+    expect(src).toMatch(/asrSchoolFor/);
+    expect(src).not.toMatch(/school: 1/);
+  });
+
+  it('turns the Maliki second times back off on a change of mind', () => {
+    // Otherwise somebody who picked Mālikī and then Shāfiʿī is left with
+    // a setting whose control they can no longer see.
+    expect(src).toMatch(/malikiSecondTimesEnabled: madhab === 'maliki'/);
+  });
+
+  it('is honest about what "not sure" means', () => {
+    expect(src).toMatch(/madhab: null,\s*\n\s*school: 0/);
+    expect(src).toMatch(/unsureNote/);
+  });
+});
+
+describe('the location screen', () => {
+  const src = read(LOCATION);
+
+  it('has no skip control', () => {
+    // App Store guideline 5.1.1(iv): a location pre-permission screen
+    // must lead to the prompt with no exit or delay affordance. The
+    // manual city path inside LocationSetup is the escape hatch. This is
+    // a compliance contract and exactly what a redesign loses quietly.
+    expect(src).not.toMatch(/QuietAction/);
+    expect(src).not.toMatch(/onboarding\.skip/);
+    expect(src).not.toMatch(/onboarding\.notNow/);
+  });
+});
+
+describe('the personalisation shelf', () => {
+  const src = read(PERSONALISE);
+
+  it('writes both adhkar keys from one switch', () => {
+    // One habit, one switch. Morning without evening is half a feature
+    // and a row whose label lies.
+    expect(src).toMatch(
+      /morningDuaReminderEnabled: v,\s*\n\s*eveningDuaReminderEnabled: v/,
+    );
+  });
+
+  it('skips without writing anything', () => {
+    // The contract that makes an optional shelf safe to offer: the Skip
+    // control advances and does nothing else.
+    const skip = src.slice(
+      src.indexOf('onboarding-personalise-skip'),
+      src.indexOf('footer='),
+    );
+    expect(skip).toMatch(/onPress=\{onAdvance\}/);
+    expect(skip).not.toMatch(/updateSettings/);
+  });
+
+  it('offers nothing that needs a permission the user refused', () => {
+    // The adhan list and the advance reminder are meaningless to
+    // somebody who just declined notifications.
+    expect(src).toMatch(/const alertsOn = settings\.notificationsEnabled/);
+  });
+});
+
+describe('the flow', () => {
+  const src = read(FLOW);
+
+  it('writes onboardingComplete only at the end', () => {
+    expect(src.match(/onboardingComplete: true/g)).toHaveLength(1);
+    // …and only from `finish`, which only the last screen calls.
+    const finish = src.slice(
+      src.indexOf('const finish ='),
+      src.indexOf('const advance ='),
+    );
+    expect(finish).toMatch(/onboardingComplete: true/);
+    expect(src).toMatch(/onFinish=\{finish\}/);
+  });
+
+  it('intercepts hardware back instead of dismissing', () => {
+    // Leaving should be a decision — Skip, Not now, or Start — not a
+    // gesture that drops the user onto a possibly-broken Home.
+    expect(src).toMatch(/hardwareBackPress/);
+    expect(src).toMatch(/if \(index === 0\) return true/);
   });
 });

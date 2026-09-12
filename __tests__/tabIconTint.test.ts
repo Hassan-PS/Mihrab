@@ -50,7 +50,9 @@ describe('anything that colours a drawn icon gets a hex', () => {
     expect(read('src/screens/home/QiblaChip.tsx')).toContain(
       'color={palette.accentSolid}',
     );
-    expect(read('src/screens/OnboardingScreen.tsx')).toContain(
+    // The salām hero moved with the screen it belongs to when first
+    // launch was rebuilt; it still paints text the SVG trap applies to.
+    expect(read('src/onboarding/screens/SalamScreen.tsx')).toContain(
       'mutedColor={palette.mutedSolid}',
     );
   });

@@ -258,8 +258,8 @@
     "prayerOffsetsDecrease": "Kurangi penyesuaian {{prayer}}",
     "prayerOffsetsReset": "Setel ulang semua",
     "dataAndPrivacy": "Data & privasi",
-    "replayOnboarding": "Tampilkan onboarding lagi",
-    "replayOnboardingHelp": "Lihat alur sambutan.",
+    "replayOnboarding": "Siapkan ulang",
+    "replayOnboardingHelp": "Tinjau kembali lokasi, mazhab, peringatan, dan lainnya.",
     "attributions": "Atribusi",
     "attributionsBlurb": "Karya siapa saja yang membentuk aplikasi ini",
     "attribQuran": "Teks Al-Quran",
@@ -304,10 +304,8 @@
     "accent_rose": "Mawar",
     "accent_violet": "Ungu",
     "laDesignMarkers": "Penanda",
-    "showTour": "Tampilkan tur aplikasi",
     "rateApp": "Beri nilai Mihrab",
     "rateAppHelp": "Suka aplikasinya? Penilaian membantu orang lain menemukannya.",
-    "showTourHelp": "Putar ulang tur fitur singkat.",
     "ayahOfDay": "Notifikasi ayat harian",
     "ayahOfDayHelp": "Satu ayat yang dipilih acak beserta terjemahannya, setiap hari.",
     "ayahOfDayTime": "Waktu notifikasi",
@@ -1274,29 +1272,60 @@
     "iftarIn": "Berbuka dalam {{time}}"
   },
   "onboarding": {
-    "skip": "Lewati dulu",
-    "stepLabel": "Langkah {{current}} dari {{total}}",
+    "skip": "Lewati",
     "welcome": {
-      "title": "Selamat datang",
-      "body": "Aplikasi jadwal salat yang nyaman dan pribadi. Tanpa analitik, tanpa pelacak — hanya pengingat yang tenang untuk salat lima waktu.",
-      "salam": "Semoga keselamatan, rahmat Allah, dan berkah-Nya menyertaimu."
+      "title": "Selamat datang di Mihrab",
+      "body": "Waktu salat dan Al-Qur’an, tanpa ada yang mengawasi Anda.",
+      "salam": "Semoga keselamatan, rahmat Allah, dan berkah-Nya menyertaimu.",
+      "language": "Bahasa"
     },
     "location": {
-      "title": "Lokasi Anda",
-      "body": "Kami memakai perkiraan posisi Anda untuk menghitung jadwal salat yang akurat. Koordinat tersimpan terenkripsi di perangkat ini — tidak pernah keluar dari sini.",
-      "cta": "Gunakan lokasi saya"
+      "title": "Di mana Anda berada?",
+      "body": "Waktu salat bergantung pada lokasi Anda. Koordinat Anda dienkripsi di perangkat ini dan tidak pernah meninggalkannya.",
+      "ready": "Hari ini di {{city}}"
     },
-    "notifications": {
-      "title": "Pengingat salat",
-      "body": "Kami bisa memberi tahu Anda dengan tenang pada setiap waktu salat. Anda bisa memilih suara, mengatur pengingat, atau mematikannya kapan saja.",
-      "cta": "Aktifkan pengingat"
+    "salamA11y": "Assalāmu ʿalaikum warahmatullāhi taʿālā wabarakātuh",
+    "notNow": "Nanti saja",
+    "start": "Mulai",
+    "progressA11y": "Kemajuan penyiapan",
+    "madhab": {
+      "title": "Bagaimana Anda salat?",
+      "body": "Ini menentukan kapan asar dimulai bagi Anda.",
+      "asr": "Asar hari ini",
+      "unsure": "Saya tidak yakin",
+      "unsureNote": "Kami akan memakai asar mayoritas — Anda dapat mengubahnya kapan saja di Pengaturan.",
+      "malikiSecond": "Tampilkan juga waktu salat kedua (ikhtiyārī dan ḍarūrī)"
     },
-    "exactAlarms": {
-      "title": "Pengingat tepat waktu",
-      "body": "Di Android versi baru, pengingat salat perlu izin tambahan agar berbunyi tepat waktu, bukan terlambat beberapa menit.",
-      "cta": "Izinkan pengingat tepat waktu"
+    "alerts": {
+      "title": "Perlukah kami memanggil Anda?",
+      "body": "Pada setiap waktu salat, hanya di perangkat ini.",
+      "cta": "Ya, ingatkan saya",
+      "denied": "Ponsel Anda memblokir notifikasi dari Mihrab. Anda dapat mengaktifkannya nanti di Pengaturan → Notifikasi.",
+      "adhan": "Azan",
+      "adhanMore": "Azan lainnya ada di Pengaturan",
+      "preReminder": "Ingatkan sebelumnya",
+      "exact": "Waktu tepat",
+      "exactFix": "Perbaiki",
+      "exactWhy": "Android memerlukan satu izin lagi agar peringatan berbunyi tepat waktu, bukan terlambat beberapa menit."
     },
-    "salamA11y": "Assalāmu ʿalaikum warahmatullāhi taʿālā wabarakātuh"
+    "personalise": {
+      "title": "Sesuaikan",
+      "body": "Tidak ada yang wajib di sini.",
+      "groupAlerts": "Peringatan",
+      "groupTimes": "Waktu",
+      "groupDaily": "Harian",
+      "groupLook": "Tampilan",
+      "adhkar": "Zikir pagi dan petang",
+      "theme": "Tema",
+      "accent": "Aksen"
+    },
+    "ready": {
+      "title": "Anda siap",
+      "body": "Kebanyakan orang mengubah salah satu dari ini berikutnya.",
+      "method": "Metode perhitungan",
+      "alerts": "Peringatan tiap salat",
+      "widgets": "Widget"
+    }
   },
   "backup": {
     "exportSection": "Ekspor",
@@ -1417,19 +1446,6 @@
     "month_10": "Syawal",
     "month_11": "Zulkaidah",
     "month_12": "Zulhijah"
-  },
-  "tour": {
-    "welcomeTitle": "Selamat datang di Mihrab",
-    "welcomeBody": "Jadwal salat, Al-Qur'an, dan sarana ibadah harian — privat sejak awal. Tanpa akun, tanpa pelacak.",
-    "timesTitle": "Jadwal salat dalam sekejap",
-    "timesBody": "Waktu yang akurat untuk lokasi Anda, dengan hitungan mundur langsung ke salat berikutnya. Usap kartu hari untuk melihat hari-hari mendatang.",
-    "quranTitle": "Al-Qur'an, dalam tampilan indah",
-    "quranBody": "Baca mushaf Madinah, dengarkan tilawah dari lima qari, tandai ayat, dan pantau khataman Anda.",
-    "customizeTitle": "Jadikan milik Anda",
-    "customizeBody": "Widget layar utama, hitungan mundur Aktivitas langsung, tema dan warna aksen — semuanya di Pengaturan.",
-    "skip": "Lewati",
-    "next": "Berikutnya",
-    "done": "Mulai"
   },
   "downloads": {
     "title": "Kelola unduhan",
@@ -1772,6 +1788,18 @@
     "meaning": {
       "hawqala": "Tiada daya dan kekuatan kecuali dengan Allah",
       "subhanallahwabihamdih": "Mahasuci Allah, dan segala puji bagi-Nya"
+    }
+  },
+  "whatsNew": {
+    "title": "Yang baru",
+    "skip": "Lewati",
+    "next": "Berikutnya",
+    "done": "Lanjutkan",
+    "v2186": {
+      "setupTitle": "Penyiapan, dirombak",
+      "setupBody": "Peluncuran pertama kini menanyakan empat hal yang menentukan apakah aplikasi ini cocok untuk Anda — di mana Anda berada, mazhab apa yang Anda ikuti, dan bolehkah ia memanggil Anda — sambil menampilkan waktu Anda sendiri.",
+      "alertsTitle": "Peringatan yang benar-benar datang",
+      "alertsBody": "Memberikan izin notifikasi kini benar-benar menyalakan peringatan, dan Anda bisa sekalian memilih azan."
     }
   }
 }

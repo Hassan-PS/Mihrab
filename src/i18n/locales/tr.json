@@ -258,8 +258,8 @@
     "prayerOffsetsDecrease": "{{prayer}} sapmasını azalt",
     "prayerOffsetsReset": "Tümünü sıfırla",
     "dataAndPrivacy": "Veri ve gizlilik",
-    "replayOnboarding": "Tanıtımı tekrar göster",
-    "replayOnboardingHelp": "Karşılama akışını izle.",
+    "replayOnboarding": "Yeniden kur",
+    "replayOnboardingHelp": "Konumunuzu, mezhebinizi, uyarılarınızı ve gerisini yeniden gözden geçirin.",
     "attributions": "Atıflar",
     "attributionsBlurb": "Bu uygulamanın kimlerin emeğinden yapıldığı",
     "attribQuran": "Kuran metni",
@@ -304,10 +304,8 @@
     "accent_rose": "Gül",
     "accent_violet": "Mor",
     "laDesignMarkers": "İşaretler",
-    "showTour": "Uygulama turunu göster",
     "rateApp": "Mihrab'ı değerlendir",
     "rateAppHelp": "Uygulamayı beğendiniz mi? Puanınız başkalarının bulmasına yardımcı olur.",
-    "showTourHelp": "Hızlı özellik turunu yeniden izleyin.",
     "ayahOfDay": "Günlük ayet bildirimi",
     "ayahOfDayHelp": "Her gün rastgele seçilen bir ayet ve meali.",
     "ayahOfDayTime": "Bildirim saati",
@@ -1274,29 +1272,60 @@
     "iftarIn": "İftara {{time}}"
   },
   "onboarding": {
-    "skip": "Şimdilik geç",
-    "stepLabel": "Adım {{current}} / {{total}}",
+    "skip": "Atla",
     "welcome": {
-      "title": "Hoş geldiniz",
-      "body": "Sade ve gizliliğe saygılı bir namaz vakitleri uygulaması. Analiz yok, takip yok — yalnızca beş vakit için sakin hatırlatmalar.",
-      "salam": "Selam üzerinize olsun, Allah’ın rahmeti ve bereketi de."
+      "title": "Mihrab’a hoş geldiniz",
+      "body": "Namaz vakitleri ve Kur’an — sizi izleyen hiçbir şey olmadan.",
+      "salam": "Selam üzerinize olsun, Allah’ın rahmeti ve bereketi de.",
+      "language": "Dil"
     },
     "location": {
-      "title": "Konumunuz",
-      "body": "Namaz vakitlerini doğru hesaplamak için yaklaşık konumunuzu kullanıyoruz. Koordinatlar bu cihazda şifreli kalır — hiçbir zaman dışarı çıkmaz.",
-      "cta": "Konumumu kullan"
+      "title": "Neredesiniz?",
+      "body": "Namaz vakitleri bulunduğunuz yere bağlıdır. Koordinatlarınız bu cihazda şifrelenir ve cihazdan asla çıkmaz.",
+      "ready": "Bugün {{city}}"
     },
-    "notifications": {
-      "title": "Namaz bildirimleri",
-      "body": "Her namaz vaktinde sizi sessizce uyarabiliriz. Bir ses seçebilir, hatırlatma kurabilir ya da bunu istediğiniz zaman kapatabilirsiniz.",
-      "cta": "Bildirimleri aç"
+    "salamA11y": "Es-selâmü aleyküm ve rahmetullâhi teâlâ ve berekâtüh",
+    "notNow": "Şimdi değil",
+    "start": "Başla",
+    "progressA11y": "Kurulum ilerlemesi",
+    "madhab": {
+      "title": "Nasıl namaz kılıyorsunuz?",
+      "body": "Bu, sizin için ikindinin ne zaman başladığını belirler.",
+      "asr": "Bugün ikindi",
+      "unsure": "Emin değilim",
+      "unsureNote": "Çoğunluğun ikindi vaktini kullanacağız — bunu istediğiniz zaman Ayarlar’dan değiştirebilirsiniz.",
+      "malikiSecond": "İkinci namaz vakitlerini de göster (ihtiyârî ve zarûrî)"
     },
-    "exactAlarms": {
-      "title": "Tam vaktinde bildirim",
-      "body": "Yeni Android sürümlerinde namaz bildirimlerinin dakikalar sonra değil tam vaktinde çalması için ek bir izin gerekir.",
-      "cta": "Tam zamanlı bildirime izin ver"
+    "alerts": {
+      "title": "Sizi çağıralım mı?",
+      "body": "Her namaz vaktinde, yalnızca bu cihazda.",
+      "cta": "Evet, beni uyar",
+      "denied": "Telefonunuz Mihrab bildirimlerini engelliyor. Daha sonra Ayarlar → Bildirimler’den açabilirsiniz.",
+      "adhan": "Ezan",
+      "adhanMore": "Daha fazla ezan Ayarlar’da",
+      "preReminder": "Önceden hatırlat",
+      "exact": "Tam zamanında",
+      "exactFix": "Düzelt",
+      "exactWhy": "Uyarıların dakikasında çalması için Android’in bir izne daha ihtiyacı var."
     },
-    "salamA11y": "Es-selâmü aleyküm ve rahmetullâhi teâlâ ve berekâtüh"
+    "personalise": {
+      "title": "Kendinize göre ayarlayın",
+      "body": "Bunların hiçbiri zorunlu değil.",
+      "groupAlerts": "Uyarılar",
+      "groupTimes": "Vakitler",
+      "groupDaily": "Günlük",
+      "groupLook": "Görünüm",
+      "adhkar": "Sabah ve akşam zikirleri",
+      "theme": "Tema",
+      "accent": "Vurgu"
+    },
+    "ready": {
+      "title": "Hazırsınız",
+      "body": "Çoğu kişi sırada bunlardan birini değiştirir.",
+      "method": "Hesaplama yöntemi",
+      "alerts": "Namaz başına uyarılar",
+      "widgets": "Widget’lar"
+    }
   },
   "backup": {
     "exportSection": "Dışa aktar",
@@ -1417,19 +1446,6 @@
     "month_10": "Şevval",
     "month_11": "Zilkade",
     "month_12": "Zilhicce"
-  },
-  "tour": {
-    "welcomeTitle": "Mihrab'a hoş geldiniz",
-    "welcomeBody": "Namaz vakitleri, Kur'an ve günlük ibadet araçları — tasarımı gereği gizli. Hesap yok, izleyici yok.",
-    "timesTitle": "Namaz vakitleri bir bakışta",
-    "timesBody": "Konumunuza göre doğru vakitler ve sıradaki namaza canlı geri sayım. Önümüzdeki günlere göz atmak için gün kartını kaydırın.",
-    "quranTitle": "Kur'an, en güzel haliyle",
-    "quranBody": "Medine Mushafı'nı okuyun, beş kâriden tilavet dinleyin, ayetleri yer imlerine ekleyin ve hatminizi takip edin.",
-    "customizeTitle": "Kendinize göre uyarlayın",
-    "customizeBody": "Ana ekran widget'ları, canlı etkinlik geri sayımı, temalar ve vurgu renkleri — hepsi Ayarlar'da.",
-    "skip": "Atla",
-    "next": "Sonraki",
-    "done": "Başla"
   },
   "downloads": {
     "title": "İndirmeleri yönet",
@@ -1772,6 +1788,18 @@
     "meaning": {
       "hawqala": "Güç ve kuvvet ancak Allah’tandır",
       "subhanallahwabihamdih": "Allah’ı hamd ile tesbih ederim"
+    }
+  },
+  "whatsNew": {
+    "title": "Yenilikler",
+    "skip": "Atla",
+    "next": "İleri",
+    "done": "Devam",
+    "v2186": {
+      "setupTitle": "Kurulum yenilendi",
+      "setupBody": "İlk açılış artık uygulamanın size uyup uymadığını belirleyen dört şeyi soruyor — neredesiniz, hangi mezhebi izliyorsunuz ve sizi çağırabilir mi — ve siz yanıtlarken kendi vakitlerinizi gösteriyor.",
+      "alertsTitle": "Gerçekten gelen uyarılar",
+      "alertsBody": "Bildirim iznini vermek artık uyarıları gerçekten açıyor ve aynı yerde bir ezan seçebiliyorsunuz."
     }
   }
 }

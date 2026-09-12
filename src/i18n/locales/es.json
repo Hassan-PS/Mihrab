@@ -258,8 +258,8 @@
     "prayerOffsetsDecrease": "Reducir el ajuste de {{prayer}}",
     "prayerOffsetsReset": "Restablecer todo",
     "dataAndPrivacy": "Datos y privacidad",
-    "replayOnboarding": "Mostrar bienvenida de nuevo",
-    "replayOnboardingHelp": "Recorrer la bienvenida.",
+    "replayOnboarding": "Configurar de nuevo",
+    "replayOnboardingHelp": "Revisa tu ubicación, escuela, avisos y lo demás.",
     "attributions": "Atribuciones",
     "attributionsBlurb": "De quién es el trabajo del que está hecha esta app",
     "attribQuran": "Texto del Corán",
@@ -304,10 +304,8 @@
     "accent_rose": "Rosa",
     "accent_violet": "Violeta",
     "laDesignMarkers": "Marcadores",
-    "showTour": "Mostrar el recorrido de la app",
     "rateApp": "Valora Mihrab",
     "rateAppHelp": "¿Te gusta la app? Una valoración ayuda a otros a encontrarla.",
-    "showTourHelp": "Vuelve a ver el recorrido rápido por las funciones.",
     "ayahOfDay": "Notificación diaria de aleya",
     "ayahOfDayHelp": "Una aleya elegida al azar con su traducción, cada día.",
     "ayahOfDayTime": "Hora de la notificación",
@@ -1274,29 +1272,60 @@
     "iftarIn": "Iftar en {{time}}"
   },
   "onboarding": {
-    "skip": "Omitir por ahora",
-    "stepLabel": "Paso {{current}} de {{total}}",
+    "skip": "Omitir",
     "welcome": {
-      "title": "Bienvenido",
-      "body": "Una app de horarios de oración agradable y privada. Sin analíticas ni rastreadores — solo recordatorios tranquilos para las cinco oraciones diarias.",
-      "salam": "La paz sea contigo, y la misericordia de Alá y Sus bendiciones."
+      "title": "Te damos la bienvenida a Mihrab",
+      "body": "Los tiempos de oración y el Corán, sin que nada te observe.",
+      "salam": "La paz sea contigo, y la misericordia de Alá y Sus bendiciones.",
+      "language": "Idioma"
     },
     "location": {
-      "title": "Tu ubicación",
-      "body": "Usamos tu posición aproximada para calcular horarios de oración precisos. Las coordenadas se quedan cifradas en este dispositivo — nunca salen de él.",
-      "cta": "Usar mi ubicación"
+      "title": "¿Dónde estás?",
+      "body": "Los tiempos de oración dependen de dónde estés. Tus coordenadas se cifran en este dispositivo y nunca salen de él.",
+      "ready": "Hoy en {{city}}"
     },
-    "notifications": {
-      "title": "Avisos de oración",
-      "body": "Podemos avisarte con discreción a la hora de cada oración. Puedes elegir un sonido, poner un recordatorio o desactivarlo cuando quieras.",
-      "cta": "Activar avisos"
+    "salamA11y": "As-salāmu ʿalaykum wa raḥmatu llāhi taʿālā wa barakātuh",
+    "notNow": "Ahora no",
+    "start": "Empezar",
+    "progressA11y": "Progreso de la configuración",
+    "madhab": {
+      "title": "¿Cómo rezas?",
+      "body": "Esto determina cuándo comienza el ʿasr para ti.",
+      "asr": "ʿAsr hoy",
+      "unsure": "No estoy seguro",
+      "unsureNote": "Usaremos el ʿasr de la mayoría; puedes cambiarlo cuando quieras en Ajustes.",
+      "malikiSecond": "Mostrar también los segundos tiempos de oración (ikhtiyārī y ḍarūrī)"
     },
-    "exactAlarms": {
-      "title": "Avisos a la hora exacta",
-      "body": "En las versiones recientes de Android, los avisos de oración necesitan un permiso adicional para sonar a su hora y no minutos más tarde.",
-      "cta": "Permitir avisos exactos"
+    "alerts": {
+      "title": "¿Quieres que te llamemos?",
+      "body": "En cada tiempo de oración, solo en este dispositivo.",
+      "cta": "Sí, avísame",
+      "denied": "Tu teléfono bloquea las notificaciones de Mihrab. Puedes activarlas más tarde en Ajustes → Notificaciones.",
+      "adhan": "Adhán",
+      "adhanMore": "Más adhanes en Ajustes",
+      "preReminder": "Recordarme antes",
+      "exact": "Precisión horaria",
+      "exactFix": "Arreglar",
+      "exactWhy": "Android necesita un permiso más para que los avisos suenen al minuto y no con minutos de retraso."
     },
-    "salamA11y": "As-salāmu ʿalaykum wa raḥmatu llāhi taʿālā wa barakātuh"
+    "personalise": {
+      "title": "Hazla tuya",
+      "body": "Nada de esto es obligatorio.",
+      "groupAlerts": "Avisos",
+      "groupTimes": "Tiempos",
+      "groupDaily": "Diario",
+      "groupLook": "Aspecto",
+      "adhkar": "Adhkār de la mañana y la tarde",
+      "theme": "Tema",
+      "accent": "Acento"
+    },
+    "ready": {
+      "title": "Todo listo",
+      "body": "La mayoría cambia uno de estos a continuación.",
+      "method": "Método de cálculo",
+      "alerts": "Avisos por oración",
+      "widgets": "Widgets"
+    }
   },
   "backup": {
     "exportSection": "Exportar",
@@ -1417,19 +1446,6 @@
     "month_10": "Shawwal",
     "month_11": "Dhul-Qa'dah",
     "month_12": "Dhul-Hiyyah"
-  },
-  "tour": {
-    "welcomeTitle": "Te damos la bienvenida a Mihrab",
-    "welcomeBody": "Horarios de oración, el Corán y herramientas para la adoración diaria — privado por diseño. Sin cuentas, sin rastreadores.",
-    "timesTitle": "Horarios de oración de un vistazo",
-    "timesBody": "Horarios precisos para tu ubicación, con cuenta regresiva en vivo hasta la próxima oración. Desliza la tarjeta del día para ver los días siguientes.",
-    "quranTitle": "El Corán, bellamente presentado",
-    "quranBody": "Lee el mushaf de Medina, escucha la recitación con cinco recitadores, marca aleyas y sigue tu khatmah.",
-    "customizeTitle": "Hazla tuya",
-    "customizeBody": "Widgets en la pantalla de inicio, cuenta regresiva de actividad en vivo, temas y colores de acento — todo en Ajustes.",
-    "skip": "Omitir",
-    "next": "Siguiente",
-    "done": "Comenzar"
   },
   "downloads": {
     "title": "Gestionar descargas",
@@ -1772,6 +1788,18 @@
     "meaning": {
       "hawqala": "No hay poder ni fuerza sino en Allah",
       "subhanallahwabihamdih": "Gloria a Allah, y a Él la alabanza"
+    }
+  },
+  "whatsNew": {
+    "title": "Novedades",
+    "skip": "Omitir",
+    "next": "Siguiente",
+    "done": "Continuar",
+    "v2186": {
+      "setupTitle": "Configuración, rehecha",
+      "setupBody": "El primer inicio ahora pregunta las cuatro cosas que deciden si la app es adecuada para ti — dónde estás, qué escuela sigues y si puede avisarte — y muestra tus propios tiempos mientras respondes.",
+      "alertsTitle": "Avisos que sí llegan",
+      "alertsBody": "Conceder el permiso de notificaciones ahora activa de verdad los avisos, y de paso puedes elegir un adhán."
     }
   }
 }

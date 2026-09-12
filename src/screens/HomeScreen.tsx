@@ -73,9 +73,10 @@ import { HomeStatusBand } from './home/HomeStatusBand';
 import { rescheduleEndOfDayLogReminders } from '../notifications/endOfDayLog';
 import { rescheduleDuaReminders } from '../notifications/duaReminders';
 import {
-  FeatureTourModal,
-  hasSeenFeatureTour,
-} from '../polish/FeatureTourModal';
+  WhatsNewModal,
+  pendingWhatsNew,
+} from '../polish/WhatsNewModal';
+import type { WhatsNewSlide } from '../polish/whatsNew';
 import { SPACING } from '../theme/tokens';
 
 /**
@@ -285,13 +286,26 @@ export function HomeScreen() {
   );
   // Focus + foreground; see the watchdog effect below and useIsActive.
   const homeActive = useIsActive();
-  const [tourVisible, setTourVisible] = useState(false);
+  /**
+   * What changed since this user last opened the app.
+   *
+   * This used to be the four-slide feature tour, shown once per install
+   * on the first focus after onboarding — a second welcome immediately
+   * after the first. The remake's last screen does that job with the
+   * user's own times, so what is left here is the surface the app never
+   * had: release notes, on the first launch after an update, to people
+   * who already use it.
+   *
+   * A fresh install returns an empty list and gets its version stamped,
+   * so the NEXT update is an upgrade rather than a first sighting.
+   */
+  const [whatsNew, setWhatsNew] = useState<WhatsNewSlide[]>([]);
   useFocusEffect(
     useCallback(() => {
       if (!settings.onboardingComplete) return;
       let cancelled = false;
-      void hasSeenFeatureTour().then(seen => {
-        if (!cancelled && !seen) setTourVisible(true);
+      void pendingWhatsNew().then(slides => {
+        if (!cancelled && slides.length > 0) setWhatsNew(slides);
       });
       return () => {
         cancelled = true;
@@ -1276,9 +1290,10 @@ export function HomeScreen() {
       </CenteredColumn>
 
 
-      <FeatureTourModal
-        visible={tourVisible}
-        onClose={() => setTourVisible(false)}
+      <WhatsNewModal
+        visible={whatsNew.length > 0}
+        slides={whatsNew}
+        onClose={() => setWhatsNew([])}
       />
     </ScrollView>
     {/* Over the page, and only on the phone's full-bleed hero: the

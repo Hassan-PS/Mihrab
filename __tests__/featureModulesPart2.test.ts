@@ -11,7 +11,10 @@ import {
   ramadanDayNumber,
   upsertFastEntry,
 } from '../src/fasting/fasting';
-import { buildOnboardingSteps } from '../src/onboarding/steps';
+import {
+  buildOnboardingSteps,
+  onboardingProgress,
+} from '../src/onboarding/steps';
 import {
   BACKUP_FORMAT_VERSION,
   buildPayload,
@@ -112,28 +115,47 @@ describe('fasting tracker', () => {
 // #30 Onboarding
 // ─────────────────────────────────────────────────────────────────────────
 describe('onboarding step builder', () => {
-  test('first run includes welcome + location + notifications', () => {
-    const steps = buildOnboardingSteps(false);
-    const ids = steps.map(s => s.id);
-    expect(ids[0]).toBe('welcome');
-    expect(ids).toContain('location');
-    expect(ids).toContain('notifications');
+  test('first run is the six screens, in order', () => {
+    expect(buildOnboardingSteps(false)).toEqual([
+      'salam',
+      'location',
+      'madhab',
+      'alerts',
+      'personalise',
+      'ready',
+    ]);
   });
 
   test('skips location when locationOnboardingComplete is true', () => {
     const steps = buildOnboardingSteps(true);
-    const ids = steps.map(s => s.id);
-    expect(ids).not.toContain('location');
-    expect(ids).toContain('notifications');
+    expect(steps).not.toContain('location');
+    expect(steps).toEqual(['salam', 'madhab', 'alerts', 'personalise', 'ready']);
   });
 
-  test('every step exposes title/body/primary/secondary i18n keys', () => {
-    for (const s of buildOnboardingSteps(false)) {
-      expect(s.titleKey).toBeTruthy();
-      expect(s.bodyKey).toBeTruthy();
-      expect(s.primaryKey).toBeTruthy();
-      expect(s.secondaryKey).toBeTruthy();
-    }
+  /**
+   * `exactAlarms` was a whole screen on Android 12+ whose content was a
+   * paragraph about a system dialog. It is a row on the alerts screen
+   * now, so the list is the same everywhere and nothing here may branch
+   * on the platform again without a reason written down.
+   */
+  test('no platform branch remains', () => {
+    expect(buildOnboardingSteps(false)).not.toContain('exactAlarms');
+    expect(buildOnboardingSteps(true)).not.toContain('exactAlarms');
+  });
+
+  test('progress does not count the greeting', () => {
+    const steps = buildOnboardingSteps(false);
+    // The salām is not a question; a rule already one-sixth full on it
+    // would claim the user has done something they have not.
+    expect(onboardingProgress(steps, 0)).toBeNull();
+    expect(onboardingProgress(steps, 1)).toEqual({ now: 1, total: 5 });
+    expect(onboardingProgress(steps, 5)).toEqual({ now: 5, total: 5 });
+  });
+
+  test('progress re-counts when location is skipped', () => {
+    const steps = buildOnboardingSteps(true);
+    expect(onboardingProgress(steps, 1)).toEqual({ now: 1, total: 4 });
+    expect(onboardingProgress(steps, 4)).toEqual({ now: 4, total: 4 });
   });
 });
 
