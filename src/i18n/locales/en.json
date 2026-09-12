@@ -1297,9 +1297,9 @@
       "malikiSecond": "Also show the second prayer times (ikhtiyārī and ḍarūrī)"
     },
     "alerts": {
-      "title": "Should we call you?",
-      "body": "At every prayer time, on this device only.",
-      "cta": "Yes, alert me",
+      "title": "Notify you at prayer times?",
+      "body": "A notification when each prayer comes in — with the adhan, or your phone’s own tone. This device only.",
+      "cta": "Yes, notify me",
       "denied": "Your phone is set to block notifications from Mihrab. You can turn them on later in Settings → Notifications.",
       "adhan": "Adhan",
       "adhanMore": "More adhans in Settings",
@@ -1796,7 +1796,7 @@
     "done": "Continue",
     "v2186": {
       "setupTitle": "Setup, remade",
-      "setupBody": "First launch now asks the four things that decide whether the app is right for you — where you are, which school you follow, and whether it may call you — and shows your own times as you answer.",
+      "setupBody": "First launch now asks the four things that decide whether the app is right for you — where you are, which school you follow, and whether it may notify you — and shows your own times as you answer.",
       "alertsTitle": "Alerts that arrive",
       "alertsBody": "Granting notification permission now actually turns alerts on, and you can pick an adhan while you are there."
     }

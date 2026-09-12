@@ -1297,8 +1297,8 @@
       "malikiSecond": "Mostrar también los segundos tiempos de oración (ikhtiyārī y ḍarūrī)"
     },
     "alerts": {
-      "title": "¿Quieres que te llamemos?",
-      "body": "En cada tiempo de oración, solo en este dispositivo.",
+      "title": "¿Avisarte a las horas de oración?",
+      "body": "Una notificación cuando entra cada oración: con el adhán, o con el tono de tu teléfono. Solo en este dispositivo.",
       "cta": "Sí, avísame",
       "denied": "Tu teléfono bloquea las notificaciones de Mihrab. Puedes activarlas más tarde en Ajustes → Notificaciones.",
       "adhan": "Adhán",

@@ -1297,9 +1297,9 @@
       "malikiSecond": "Visa även de andra bönetiderna (ikhtiyārī och ḍarūrī)"
     },
     "alerts": {
-      "title": "Ska vi kalla dig?",
-      "body": "Vid varje bönetid, bara på den här enheten.",
-      "cta": "Ja, påminn mig",
+      "title": "Avisera dig vid bönetiderna?",
+      "body": "En avisering när varje bön går in — med adhan, eller telefonens egen ton. Bara på den här enheten.",
+      "cta": "Ja, avisera mig",
       "denied": "Din telefon blockerar aviseringar från Mihrab. Du kan slå på dem senare i Inställningar → Aviseringar.",
       "adhan": "Adhan",
       "adhanMore": "Fler adhaner finns i Inställningar",
@@ -1796,7 +1796,7 @@
     "done": "Fortsätt",
     "v2186": {
       "setupTitle": "Introduktionen är omgjord",
-      "setupBody": "Första starten frågar nu om de fyra saker som avgör om appen stämmer för dig — var du är, vilken rättsskola du följer och om den får kalla dig — och visar dina egna tider medan du svarar.",
+      "setupBody": "Första starten frågar nu om de fyra saker som avgör om appen stämmer för dig — var du är, vilken rättsskola du följer och om den får avisera dig — och visar dina egna tider medan du svarar.",
       "alertsTitle": "Aviseringar som kommer fram",
       "alertsBody": "Att ge aviseringsbehörighet slår nu faktiskt på aviseringarna, och du kan välja en adhan på samma gång."
     }

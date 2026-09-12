@@ -252,7 +252,7 @@ disappears if the user changes their mind — and when it disappears the key
 is written back to `false`, so a Mālikī-then-Shāfiʿī user is not left with
 a setting they can no longer see. No other school sees this row at all.
 
-### 3.4 Being called — alerts and adhan
+### 3.4 Alerts — the permission, and what it will sound like
 
 One screen that finally does the whole job, and the screen where §2.1 of
 the plan is already half-fixed (Phase 0 shipped the write; this rebuilds
@@ -262,11 +262,13 @@ what surrounds it).
 ┌─────────────────────────────────┐
 │ ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁░░░░░░░░░░░░░░ │
 │                                 │
-│      Should we call you?        │
-│   At every prayer time, on      │
-│   this device only.             │
+│  Notify you at prayer times?    │
+│   A notification when each       │
+│   prayer comes in — with the     │
+│   adhan, or your phone's own     │
+│   tone. This device only.        │
 │                                 │
-│          [  Yes, alert me  ]    │  ← triggers the OS prompt
+│          [  Yes, notify me  ]   │  ← triggers the OS prompt
 │                                 │
 │  ── after a grant ──────────────│
 │   Adhan                         │
@@ -281,6 +283,14 @@ what surrounds it).
 │              Not now            │
 └─────────────────────────────────┘
 ```
+
+> **It says "notify", not "call".** The first draft asked *"Should we
+> call you?"*, which reads as a promise of the adhan — and the adhan is
+> one of four choices on this very screen, the default being the phone's
+> own tone. A screen that asks for permission to do one thing and then
+> offers to do a quieter thing instead has mis-sold itself in its own
+> headline. The body now names both outcomes, so the question and the
+> rows under it agree.
 
 **The permission, and what it writes.** `requestNotificationPermission()`
 (`src/notifications/requestNotificationAccess.ts`, added in Phase 0) is
@@ -496,9 +506,9 @@ onboarding.madhab.unsure            I'm not sure
 onboarding.madhab.unsureNote        We'll use the majority ʿaṣr — you can change this any time in Settings.
 onboarding.madhab.malikiSecond      Also show the second prayer times (ikhtiyārī and ḍarūrī)
 
-onboarding.alerts.title             Should we call you?
-onboarding.alerts.body              At every prayer time, on this device only.
-onboarding.alerts.cta               Yes, alert me
+onboarding.alerts.title             Notify you at prayer times?
+onboarding.alerts.body              A notification when each prayer comes in — with the adhan, or your phone's own tone. This device only.
+onboarding.alerts.cta               Yes, notify me
 onboarding.alerts.denied            Your phone is set to block notifications from Mihrab. You can turn them on later in Settings → Notifications.
 onboarding.alerts.adhan             Adhan
 onboarding.alerts.adhanMore         More adhans

@@ -1,5 +1,5 @@
 /**
- * Screen 4 — being called.
+ * Screen 4 — alerts.
  *
  * One screen that finally does the whole job: the permission, the setting
  * the permission implies, the adhan, the advance reminder, and — on
@@ -196,7 +196,7 @@ export function AlertsScreen({
           <>
             <PrimaryAction
               testID="onboarding-alerts-grant"
-              label={t('onboarding.alerts.cta', 'Yes, alert me')}
+              label={t('onboarding.alerts.cta', 'Yes, notify me')}
               onPress={() => {
                 void ask();
               }}
@@ -216,10 +216,10 @@ export function AlertsScreen({
         )
       }>
       <OnboardingHeading
-        title={t('onboarding.alerts.title', 'Should we call you?')}
+        title={t('onboarding.alerts.title', 'Notify you at prayer times?')}
         body={t(
           'onboarding.alerts.body',
-          'At every prayer time, on this device only.',
+          'A notification when each prayer comes in — with the adhan, or your phone’s own tone. This device only.',
         )}
       />
 

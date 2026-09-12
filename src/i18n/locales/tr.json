@@ -1297,9 +1297,9 @@
       "malikiSecond": "İkinci namaz vakitlerini de göster (ihtiyârî ve zarûrî)"
     },
     "alerts": {
-      "title": "Sizi çağıralım mı?",
-      "body": "Her namaz vaktinde, yalnızca bu cihazda.",
-      "cta": "Evet, beni uyar",
+      "title": "Namaz vakitlerinde bildirim gönderelim mi?",
+      "body": "Her namaz vakti girdiğinde bir bildirim — ezanla ya da telefonunuzun kendi sesiyle. Yalnızca bu cihazda.",
+      "cta": "Evet, bildir",
       "denied": "Telefonunuz Mihrab bildirimlerini engelliyor. Daha sonra Ayarlar → Bildirimler’den açabilirsiniz.",
       "adhan": "Ezan",
       "adhanMore": "Daha fazla ezan Ayarlar’da",
@@ -1796,7 +1796,7 @@
     "done": "Devam",
     "v2186": {
       "setupTitle": "Kurulum yenilendi",
-      "setupBody": "İlk açılış artık uygulamanın size uyup uymadığını belirleyen dört şeyi soruyor — neredesiniz, hangi mezhebi izliyorsunuz ve sizi çağırabilir mi — ve siz yanıtlarken kendi vakitlerinizi gösteriyor.",
+      "setupBody": "İlk açılış artık uygulamanın size uyup uymadığını belirleyen dört şeyi soruyor — neredesiniz, hangi mezhebi izliyorsunuz ve size bildirim gönderebilir mi — ve siz yanıtlarken kendi vakitlerinizi gösteriyor.",
       "alertsTitle": "Gerçekten gelen uyarılar",
       "alertsBody": "Bildirim iznini vermek artık uyarıları gerçekten açıyor ve aynı yerde bir ezan seçebiliyorsunuz."
     }

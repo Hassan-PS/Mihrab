@@ -1297,9 +1297,9 @@
       "malikiSecond": "Auch die zweiten Gebetszeiten anzeigen (ikhtiyārī und ḍarūrī)"
     },
     "alerts": {
-      "title": "Sollen wir dich rufen?",
-      "body": "Zu jeder Gebetszeit, nur auf diesem Gerät.",
-      "cta": "Ja, erinnere mich",
+      "title": "Zu den Gebetszeiten benachrichtigen?",
+      "body": "Eine Mitteilung, wenn jedes Gebet beginnt – mit dem Adhan oder dem eigenen Ton deines Telefons. Nur auf diesem Gerät.",
+      "cta": "Ja, benachrichtigen",
       "denied": "Dein Telefon blockiert Mitteilungen von Mihrab. Du kannst sie später unter Einstellungen → Mitteilungen aktivieren.",
       "adhan": "Adhan",
       "adhanMore": "Weitere Adhans in den Einstellungen",
@@ -1796,7 +1796,7 @@
     "done": "Fortfahren",
     "v2186": {
       "setupTitle": "Die Einrichtung, neu gemacht",
-      "setupBody": "Der erste Start fragt jetzt die vier Dinge, die entscheiden, ob die App für dich stimmt — wo du bist, welcher Rechtsschule du folgst und ob sie dich rufen darf — und zeigt deine eigenen Zeiten, während du antwortest.",
+      "setupBody": "Der erste Start fragt jetzt die vier Dinge, die entscheiden, ob die App für dich stimmt — wo du bist, welcher Rechtsschule du folgst und ob sie dich benachrichtigen darf — und zeigt deine eigenen Zeiten, während du antwortest.",
       "alertsTitle": "Hinweise, die ankommen",
       "alertsBody": "Die Mitteilungs-Berechtigung schaltet die Hinweise jetzt wirklich ein, und du kannst gleich einen Adhan wählen."
     }

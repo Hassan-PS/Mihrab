@@ -1297,9 +1297,9 @@
       "malikiSecond": "Afficher aussi les secondes heures de prière (ikhtiyārī et ḍarūrī)"
     },
     "alerts": {
-      "title": "Devons-nous vous appeler ?",
-      "body": "À chaque heure de prière, sur cet appareil uniquement.",
-      "cta": "Oui, prévenez-moi",
+      "title": "Vous notifier aux heures de prière ?",
+      "body": "Une notification à l’entrée de chaque prière — avec l’adhan, ou la sonnerie de votre téléphone. Sur cet appareil uniquement.",
+      "cta": "Oui, notifiez-moi",
       "denied": "Votre téléphone bloque les notifications de Mihrab. Vous pourrez les activer plus tard dans Réglages → Notifications.",
       "adhan": "Adhan",
       "adhanMore": "Plus d’adhans dans les Réglages",
@@ -1796,7 +1796,7 @@
     "done": "Continuer",
     "v2186": {
       "setupTitle": "La configuration, refaite",
-      "setupBody": "Le premier lancement pose désormais les quatre questions qui décident si l’app vous convient — où vous êtes, quelle école vous suivez et si elle peut vous appeler — et affiche vos propres horaires au fur et à mesure.",
+      "setupBody": "Le premier lancement pose désormais les quatre questions qui décident si l’app vous convient — où vous êtes, quelle école vous suivez et si elle peut vous notifier — et affiche vos propres horaires au fur et à mesure.",
       "alertsTitle": "Des alertes qui arrivent",
       "alertsBody": "Accorder l’autorisation de notification active désormais réellement les alertes, et vous pouvez choisir un adhan au passage."
     }

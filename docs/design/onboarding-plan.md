@@ -320,7 +320,7 @@ Choosing Mālikī reveals one inline row — *"Also show the second prayer times
 (ikhtiyārī and ḍarūrī)"* — defaulted **on** for Mālikī users, which sets
 `malikiSecondTimesEnabled`. No other school sees it.
 
-### Screen 4 — Being called
+### Screen 4 — Alerts
 
 One screen that finally does the whole job.
 
