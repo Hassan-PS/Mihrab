@@ -70,7 +70,7 @@ export const LAYOUT = {
 const RAW = {
   // Daylight (warm paper, deep emerald) — task #35.
   paperWarm: '#FAF7F2',
-  paperLifted: '#FFFFFF',
+  paperLifted: '#FFFDF9',
   inkDeep: '#1A1814',
   inkSoft: '#2A2823',
   warmGray: '#6B6660',
@@ -80,13 +80,20 @@ const RAW = {
   emeraldHover: '#1A5240',
   emeraldTint: '#E2EEE9',
 
-  // Night (deep ink-blue) — task #35.
-  inkBlue: '#0E1218',
-  inkBlueLifted: '#161B23',
-  inkBlueSunken: '#080A0E',
+  // Night — task #35, warmed 2026-09-12.
+  //
+  // These were an ink-BLUE ladder (#0E1218 / #161B23 / #080A0E), cool by
+  // 10 to 13 points of red-minus-blue, under ink that is warm by 10. The
+  // names said blue and the theme looked it: ivory text on slate. Warmed
+  // to meet the ink at the same lightness, and renamed, because a
+  // constant called `inkBlue` that is not blue is a comment that lies.
+  // See DARK_BASE in appPalette.ts for the full reasoning.
+  inkNight: '#141210',
+  inkNightLifted: '#1D1A17',
+  inkNightSunken: '#0C0A08',
   bone: '#E8E5DE',
-  boneMuted: '#8A8780',
-  divNight: '#1F2530',
+  boneMuted: '#95918A',
+  divNight: '#2A2622',
   emeraldLifted: '#3A8E72',
   emeraldHoverDark: '#46A081',
   emeraldTintDark: '#152F25',
@@ -101,7 +108,7 @@ const RAW = {
 
   // Pure-black OLED variant.
   oledBlack: '#000000',
-  oledLifted: '#0E1218',
+  oledLifted: '#141210',
 } as const;
 
 // ─── Semantic palette per theme ──────────────────────────────────────────
@@ -144,10 +151,10 @@ export const PALETTE_LIGHT: SemanticPalette = {
 };
 
 export const PALETTE_DARK: SemanticPalette = {
-  bg: RAW.inkBlue,
-  surface: RAW.inkBlueLifted,
-  surfaceElevated: RAW.inkBlueLifted,
-  surfaceSunken: RAW.inkBlueSunken,
+  bg: RAW.inkNight,
+  surface: RAW.inkNightLifted,
+  surfaceElevated: RAW.inkNightLifted,
+  surfaceSunken: RAW.inkNightSunken,
   content: RAW.bone,
   contentSecondary: RAW.boneMuted,
   contentTertiary: '#605E58',

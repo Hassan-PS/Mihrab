@@ -81,6 +81,15 @@ export function pairsToCheck(p: SemanticPalette): Array<{
     { name: 'content on bg', fg: p.content, bg: p.bg, target: 4.5 },
     { name: 'content on surface', fg: p.content, bg: p.surface, target: 4.5 },
     { name: 'contentSecondary on bg', fg: p.contentSecondary, bg: p.bg, target: 4.5 },
+    // Muted text on a CONTROL's own ground, not just on the page.
+    //
+    // Added 2026-09-12, because its absence hid a real miss: dark
+    // `muted` read 4.29:1 on the control background for as long as both
+    // existed, and every test here passed the whole time — they compared
+    // secondary text against `bg` and `surface` and never against the
+    // thing a chip or a segmented track actually paints behind it.
+    { name: 'contentSecondary on surfaceElevated', fg: p.contentSecondary, bg: p.surfaceElevated, target: 4.5 },
+    { name: 'content on surfaceElevated', fg: p.content, bg: p.surfaceElevated, target: 4.5 },
     { name: 'accent on bg', fg: p.accent, bg: p.bg, target: 3.0 }, // UI element
     { name: 'accent on accentTint', fg: p.accent, bg: p.accentTint, target: 3.0 },
     { name: 'error on bg', fg: p.error, bg: p.bg, target: 4.5 },

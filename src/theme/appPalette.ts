@@ -265,30 +265,68 @@ function withBrandAccents(
  * slightly warmer ink tones the design tokens (`tokens.ts`) always intended.
  * Reads as reverent and quiet; the emerald accent does the colour work.
  */
+/**
+ * Standard dark theme — ink on dark parchment.
+ *
+ * ── WHY THESE ARE NO LONGER BLUE ──────────────────────────────────────
+ *
+ * They were: bg #0E1218, card #161B23, border #1F2530 — cool by 10, 13
+ * and 17 points of red-minus-blue. The ink on top of them was, and still
+ * is, warm by 10 (#E8E5DE, #8A8780). So the one theme in the app whose
+ * ground and ink disagreed about temperature was this one: ivory text on
+ * slate, which is what made it read slightly dingy beside the light
+ * theme's warm paper.
+ *
+ * Warmed to agree, at the same lightness — every value here is within a
+ * point of the lightness it replaced, so nothing about the elevation
+ * ladder or the contrast ratios moved (text/bg 14.93 → 14.86, muted/bg
+ * 5.24 → 5.21). The card's lift over the ground is (9, 8, 7) instead of
+ * (8, 9, 11), which is the other half of the fix: the lift itself used
+ * to tilt blue.
+ *
+ * The identity this lands on is the one the light theme already had and
+ * the one the app's name argues for — ink on parchment, at night.
+ */
 const DARK_BASE: PaletteBase = {
-  bg: '#0E1218',
-  card: '#161B23',
+  bg: '#141210',
+  card: '#1D1A17',
   text: '#E8E5DE',
-  muted: '#8A8780',
-  border: '#1F2530',
+  // #8A8780 until 2026-09-12, where it read 4.29:1 on the old controlBg
+  // and 4.19:1 on the warmed one — a WCAG AA miss for normal text that
+  // predates the warming and was never caught, because the contrast test
+  // in themeMap.ts checks `contentSecondary` against the GROUND and never
+  // against a control's own background. Lifted rather than darkening
+  // controlBg: one value fixes muted on bg, on card and on a control at
+  // once, where chasing it down the elevation ladder would have left the
+  // control indistinguishable from the card it sits on (1.05:1).
+  // 4.79:1 on controlBg now, and still 2.49:1 below `text`, so muted
+  // still reads as muted.
+  muted: '#95918A',
+  border: '#2A2622',
   danger: '#F87171',
   overlay: 'rgba(0,0,0,0.6)',
   flatChrome: false,
   glass: false,
-  controlBg: '#1F2530',
+  controlBg: '#2A2622',
 };
 
+/**
+ * OLED variant — true black ground, everything above it warmed with
+ * DARK_BASE so the two dark themes do not disagree about temperature.
+ * `bg` alone stays absolute: that is the whole point of the setting, and
+ * a tinted black is not black.
+ */
 const DARK_PURE_BLACK_BASE: PaletteBase = {
   bg: '#000000',
-  card: '#0E1218',
+  card: '#141210',
   text: '#E8E5DE',
-  muted: '#8A8780',
-  border: '#171C24',
+  muted: '#95918A',
+  border: '#211D19',
   danger: '#F87171',
   overlay: 'rgba(0,0,0,0.75)',
   flatChrome: false,
   glass: false,
-  controlBg: '#171C24',
+  controlBg: '#211D19',
 };
 
 /**
@@ -300,7 +338,14 @@ const DARK_PURE_BLACK_BASE: PaletteBase = {
  */
 const LIGHT_BASE: PaletteBase = {
   bg: '#FAF7F2',
-  card: '#FFFFFF',
+  // Not #FFFFFF. Every other value in this theme is warm — the ground by
+  // 8 points of red-minus-blue, the ink by 6, the divider by 14 — and a
+  // pure-white card was the one neutral surface among them, which made
+  // the warm page beside it read dingy rather than making the card read
+  // clean. Worse, the lift over the ground was (5, 8, 13): the lift
+  // ITSELF tilted blue. At #FFFDF9 it is (5, 6, 7), even, and the card
+  // still sits a clear step above the page.
+  card: '#FFFDF9',
   text: '#1A1814',
   muted: '#6B6660',
   border: '#EDE8DF',
