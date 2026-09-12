@@ -26,15 +26,33 @@
  * re-formatting a half-typed `#1a2` under the cursor is how a hex field
  * becomes impossible to use.
  *
- * ── THE SQUARE ONLY OFFERS COLOURS THAT WORK ──────────────────────────
+ * ── THE SQUARE IS THE SHAPE OF WHAT YOU CAN HAVE ──────────────────────
  *
- * It used to offer all of them and print a red warning under the ones
+ * It used to offer every colour and print a red warning under the ones
  * that would be unreadable on the background they were headed for. Now
- * the unusable part of the square is veiled IN THE BACKGROUND'S OWN
- * COLOUR — which is not decoration: those colours really do sink into
- * that background, and the veil is what that looks like — and the thumb
- * cannot be dragged into it. `constrainToLegible` does the clamping and
- * `legibleBoundary` gives the curve this draws.
+ * it only shows the ones that work: the rest of the square is covered by
+ * a flat inert panel, so the colour field is a shape with a curved edge
+ * and the thumb cannot leave it. `constrainToLegible` does the clamping
+ * and `legibleBoundary` gives the curve.
+ *
+ * The first attempt at this veiled the unusable part in the background's
+ * own colour, on the theory that those colours really do sink into that
+ * background. It read beautifully in the abstract and looked broken on a
+ * device, for a reason worth writing down: the veil is least visible
+ * exactly where it is needed. The unusable colours on a light ground are
+ * the light ones, so washing them towards paper turned the top of the
+ * square into a blank white slab; the unusable ones on a dark ground are
+ * the dark ones, so washing them towards the night ground was invisible
+ * against the black the value gradient already ends in, leaving nothing
+ * but an unexplained diagonal seam. Translucency over a gradient also
+ * leaves a ghost of the spectrum behind, which reads as a rendering
+ * fault rather than as a boundary.
+ *
+ * Clipping has none of those failure modes. There is no ghost, the edge
+ * is the same crisp line whichever way the constraint runs, and the
+ * shape carries real information: sweep the hue to blue at night and the
+ * field collapses to a small wedge, which is the honest picture of how
+ * little usable blue there is on a near-black ground.
  *
  * A typed hex is the one place the limit can still be argued with, since
  * somebody typing six digits is naming an exact colour. It is pulled to
@@ -207,29 +225,57 @@ export function ColorPickerModal({
   const hsvRef = useRef(hsv);
   hsvRef.current = hsv;
   /**
-   * The veil over the part of the square that cannot be used, as an SVG
-   * path in the square's own pixels — which is why it waits for the
-   * measured width. A percentage would do for the rectangles underneath
-   * but a polyline has to be given real points.
+   * The shape of the usable colours, in the square's own pixels — which
+   * is why it waits for the measured width. Percentages do for the
+   * rectangles underneath; a polyline has to be given real points.
    *
-   * The polygon runs along the boundary and closes against whichever
-   * edge the unusable colours are on: the top when the accent has to be
-   * darker than its ground, the bottom when it has to be lighter. A
-   * saturation with nothing legible in it — see `legibleValueEdge` —
-   * pushes the boundary to the far edge, so that column is covered end
-   * to end.
+   * `panel` is the region to COVER and closes against whichever edge the
+   * unusable colours are on: the top when the accent has to be darker
+   * than its ground, the bottom when it has to be lighter. `seam` is the
+   * same curve left open, for the hairline that defines the edge — a
+   * gradient meeting a flat panel is a crisp boundary already, but
+   * without a line on it the eye reads the step as an anti-aliasing
+   * artefact rather than as the edge of something.
+   *
+   * Covered rather than clipped, and that is not a stylistic choice. The
+   * first build of this put the curve in a `<ClipPath>` and drew the
+   * gradients inside it, which is the tidier expression and was wrong on
+   * a device: `react-native-svg` keyed the clip by its `id` and did not
+   * re-apply it when only the path data changed, so sweeping the hue
+   * left the shape from the PREVIOUS hue in place — blue drawn against
+   * green's boundary, showing exactly the colours the shape exists to
+   * withhold. An opaque path on top has no such identity to go stale.
+   *
+   * A saturation with nothing usable in it — see `legibleValueEdge` —
+   * puts the curve on the far edge, so the shape pinches to nothing
+   * there instead of the column being quietly allowed.
    */
-  const veilPath = useMemo(() => {
-    if (!(svW > 0)) return null;
+  const { panelPath, seamPath } = useMemo(() => {
+    if (!(svW > 0)) return { panelPath: null, seamPath: null };
     const last = BOUNDARY_SAMPLES - 1;
     const points = boundary.map((edge, i) => {
       const x = (i / last) * svW;
       const v = edge ?? (mustDarken ? 0 : 1);
       return `${x.toFixed(1)},${((1 - v) * SV_HEIGHT).toFixed(1)}`;
     });
+    const line = `M${points.join(' L')}`;
     const closeAt = mustDarken ? 0 : SV_HEIGHT;
-    return `M0,${closeAt} L${points.join(' L')} L${svW.toFixed(1)},${closeAt} Z`;
+    return {
+      panelPath: `${line} L${svW.toFixed(1)},${closeAt} L0,${closeAt} Z`,
+      seamPath: line,
+    };
   }, [boundary, mustDarken, svW]);
+
+  /**
+   * The inert panel the shape sits on, and the hairline around it.
+   *
+   * Hexes, not palette entries: everything else in this Svg is a colour
+   * the picker was handed, and a `PlatformColor` would be a value
+   * `react-native-svg` cannot paint. Built from the ground rather than
+   * from a token so the panel is the same surface in both themes — a
+   * touch off the background, the way an inset control is.
+   */
+  const panelTint = mustDarken ? '#000000' : '#FFFFFF'; // tokens-ok-line: an opacity over `ground`, not a painted colour
 
   const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 
@@ -386,13 +432,26 @@ export function ColorPickerModal({
                   </Defs>
                   <Rect x="0" y="0" width="100%" height="100%" fill="url(#sat)" />
                   <Rect x="0" y="0" width="100%" height="100%" fill="url(#val)" />
-                  {/* Painted in the BACKGROUND's colour, not in grey: the
-                      colours under here are the ones that would sink into
-                      that background, and this is what that looks like.
-                      Not quite opaque, so the spectrum still reads as one
-                      continuous thing with a part of it out of reach. */}
-                  {veilPath ? (
-                    <Path d={veilPath} fill={ground} fillOpacity={0.87} />
+                  {/* Two passes over the same shape: the ground at full
+                      opacity to bury the spectrum completely — a
+                      translucent one leaves a ghost of it, which reads as
+                      a rendering fault — and a whisper of black or white
+                      over that, so the panel sits a touch off the
+                      background the way an inset control does. */}
+                  {panelPath ? (
+                    <>
+                      <Path d={panelPath} fill={ground} />
+                      <Path d={panelPath} fill={panelTint} opacity={0.07} />
+                    </>
+                  ) : null}
+                  {seamPath ? (
+                    <Path
+                      d={seamPath}
+                      fill="none"
+                      stroke={panelTint}
+                      strokeOpacity={0.25}
+                      strokeWidth={1}
+                    />
                   ) : null}
                 </Svg>
                 <View
