@@ -372,7 +372,7 @@
     "accentPickerHex": "Kode warna",
     "accentPickerSave": "Simpan warna",
     "accentPickerUseOnce": "Pakai tanpa menyimpan",
-    "accentPickerContrast": "Sulit dibaca pada latar ini ({{ratio}}:1, perlu {{min}}:1)."
+    "accentPickerAdjusted": "Dipindahkan ke corak terdekat yang tetap terbaca di latar ini."
   },
   "locationSetup": {
     "headline": "Tetapkan lokasi Anda",

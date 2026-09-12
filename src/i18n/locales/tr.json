@@ -372,7 +372,7 @@
     "accentPickerHex": "Renk kodu",
     "accentPickerSave": "Rengi kaydet",
     "accentPickerUseOnce": "Kaydetmeden kullan",
-    "accentPickerContrast": "Bu arka planda okunması zor ({{ratio}}:1, gereken {{min}}:1)."
+    "accentPickerAdjusted": "Bu arka planda okunabilir kalan en yakın tona taşındı."
   },
   "locationSetup": {
     "headline": "Konumunuzu ayarlayın",

@@ -2,7 +2,7 @@
 // right affordance here, and a hover state on a colour field would sit
 // under the finger that is choosing.
 /**
- * Pick a colour by eye, or by code.
+ * Pick a colour by eye, or by code — from the colours that work.
  *
  * ── WHY IT IS BUILT RATHER THAN INSTALLED ─────────────────────────────
  *
@@ -25,6 +25,22 @@
  * field is re-rendered from it except while it is being edited, because
  * re-formatting a half-typed `#1a2` under the cursor is how a hex field
  * becomes impossible to use.
+ *
+ * ── THE SQUARE ONLY OFFERS COLOURS THAT WORK ──────────────────────────
+ *
+ * It used to offer all of them and print a red warning under the ones
+ * that would be unreadable on the background they were headed for. Now
+ * the unusable part of the square is veiled IN THE BACKGROUND'S OWN
+ * COLOUR — which is not decoration: those colours really do sink into
+ * that background, and the veil is what that looks like — and the thumb
+ * cannot be dragged into it. `constrainToLegible` does the clamping and
+ * `legibleBoundary` gives the curve this draws.
+ *
+ * A typed hex is the one place the limit can still be argued with, since
+ * somebody typing six digits is naming an exact colour. It is pulled to
+ * the nearest colour that works and the sheet says so, once, in the
+ * quiet voice — an account of what happened rather than a warning about
+ * what the person did.
  *
  * ── AND WHY IT DOES NOT MIRROR IN ARABIC ──────────────────────────────
  *
@@ -50,6 +66,7 @@ import {
 import Svg, {
   Defs,
   LinearGradient,
+  Path,
   Rect,
   Stop,
 } from 'react-native-svg';
@@ -62,17 +79,21 @@ import { modalStyles } from '../screens/settings/modalStyles';
 import { RADIUS, SPACING } from '../theme/tokens';
 import { TYPE } from '../theme/typography';
 import {
-  accentLegibility,
-  ACCENT_MIN_CONTRAST,
+  accentMustBeDarker,
+  constrainToLegible,
   hexToHsv,
   hsvToHex,
   HUE_STOPS,
+  legibleBoundary,
   normaliseHex,
   type Hsv,
 } from '../settings/accentColors';
 
 /** Shown in the empty hex field — an example colour CODE, not chrome. */
 const EXAMPLE_HEX = '#22C55E'; // tokens-ok-line: example text, not a painted colour
+
+/** How many segments the legible/illegible boundary is drawn with. */
+const BOUNDARY_SAMPLES = 32;
 
 const SV_HEIGHT = 190;
 const HUE_HEIGHT = 28;
@@ -120,16 +141,29 @@ export function ColorPickerModal({
   const [hsv, setHsv] = useState<Hsv>(() => hexToHsv(initial));
   const [draft, setDraft] = useState(initial);
   const [editing, setEditing] = useState(false);
+  /** Set when a TYPED colour had to be moved. Dragging says it visually. */
+  const [adjusted, setAdjusted] = useState(false);
+  // The responders are created once and close over what they captured,
+  // so the ground has to be reachable through a ref rather than by
+  // capture — a theme change while the sheet is open would otherwise
+  // clamp against the ground it opened on.
+  const groundRef = useRef(ground);
+  groundRef.current = ground;
 
   // Re-seed whenever the sheet opens, so it always starts on the colour
   // the caller passed rather than on wherever it was left last time.
   useEffect(() => {
     if (!visible) return;
     const norm = normaliseHex(initial) ?? initial;
-    setHsv(hexToHsv(norm));
+    // Silently, even when the stored colour does not clear the floor in
+    // this theme — which the app's own `#22C55E` fallback does not on
+    // paper. Opening a picker is not an action to report back on, and
+    // the veil already shows why the thumb is where it is.
+    setHsv(constrainToLegible(hexToHsv(norm), ground));
     setDraft(norm);
     setEditing(false);
-  }, [visible, initial]);
+    setAdjusted(false);
+  }, [visible, initial, ground]);
 
   const hex = useMemo(() => hsvToHex(hsv), [hsv]);
 
@@ -138,10 +172,18 @@ export function ColorPickerModal({
     if (!editing) setDraft(hex);
   }, [hex, editing]);
 
-  const legibility = useMemo(
-    () => accentLegibility(hex, ground),
-    [hex, ground],
+  /**
+   * The crossing, sampled often enough that the curve reads as a curve.
+   * Thirty-two segments across a square this size is one every six
+   * points — past that the gradient underneath is doing more work than
+   * the polyline is.
+   */
+  const boundary = useMemo(
+    () => legibleBoundary(hsv.h, ground, BOUNDARY_SAMPLES),
+    [hsv.h, ground],
   );
+  const mustDarken = useMemo(() => accentMustBeDarker(ground), [ground]);
+
 
   /**
    * Geometry: in state for drawing, in a ref for the drag.
@@ -164,23 +206,65 @@ export function ColorPickerModal({
   const hueWRef = useRef(0);
   const hsvRef = useRef(hsv);
   hsvRef.current = hsv;
+  /**
+   * The veil over the part of the square that cannot be used, as an SVG
+   * path in the square's own pixels — which is why it waits for the
+   * measured width. A percentage would do for the rectangles underneath
+   * but a polyline has to be given real points.
+   *
+   * The polygon runs along the boundary and closes against whichever
+   * edge the unusable colours are on: the top when the accent has to be
+   * darker than its ground, the bottom when it has to be lighter. A
+   * saturation with nothing legible in it — see `legibleValueEdge` —
+   * pushes the boundary to the far edge, so that column is covered end
+   * to end.
+   */
+  const veilPath = useMemo(() => {
+    if (!(svW > 0)) return null;
+    const last = BOUNDARY_SAMPLES - 1;
+    const points = boundary.map((edge, i) => {
+      const x = (i / last) * svW;
+      const v = edge ?? (mustDarken ? 0 : 1);
+      return `${x.toFixed(1)},${((1 - v) * SV_HEIGHT).toFixed(1)}`;
+    });
+    const closeAt = mustDarken ? 0 : SV_HEIGHT;
+    return `M0,${closeAt} L${points.join(' L')} L${svW.toFixed(1)},${closeAt} Z`;
+  }, [boundary, mustDarken, svW]);
 
   const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 
   const pickSv = (x: number, y: number) => {
     const w = svWRef.current;
     if (!(w > 0)) return;
-    setHsv({
-      ...hsvRef.current,
-      s: clamp01(x / w),
-      v: 1 - clamp01(y / SV_HEIGHT),
-    });
+    setAdjusted(false);
+    // Clamped rather than ignored: a finger dragged into the veil keeps
+    // its saturation and rides the edge, which is what a limit should
+    // feel like. Refusing the move instead leaves the thumb stuck under
+    // a finger that is still moving, and reads as a dropped touch.
+    setHsv(
+      constrainToLegible(
+        {
+          ...hsvRef.current,
+          s: clamp01(x / w),
+          v: 1 - clamp01(y / SV_HEIGHT),
+        },
+        groundRef.current,
+      ),
+    );
   };
 
   const pickHue = (x: number) => {
     const w = hueWRef.current;
     if (!(w > 0)) return;
-    setHsv({ ...hsvRef.current, h: clamp01(x / w) * 360 });
+    setAdjusted(false);
+    // Also clamped: the legible band moves with the hue, so a value that
+    // was fine on green can be under the floor on blue.
+    setHsv(
+      constrainToLegible(
+        { ...hsvRef.current, h: clamp01(x / w) * 360 },
+        groundRef.current,
+      ),
+    );
   };
 
   const svResponder = useMemo(
@@ -227,15 +311,22 @@ export function ColorPickerModal({
   const commitDraft = () => {
     setEditing(false);
     const norm = normaliseHex(draft);
-    if (norm) {
-      // Keep the hue the user was on when the typed colour has none of
-      // its own — a grey has no hue, and snapping the strip to red
-      // because somebody typed #888888 loses where they were.
-      const next = hexToHsv(norm);
-      setHsv(next.s === 0 ? { ...next, h: hsvRef.current.h } : next);
-    } else {
+    if (!norm) {
       setDraft(hex);
+      setAdjusted(false);
+      return;
     }
+    // Keep the hue the user was on when the typed colour has none of
+    // its own — a grey has no hue, and snapping the strip to red
+    // because somebody typed #888888 loses where they were.
+    const typed = hexToHsv(norm);
+    const asked = typed.s === 0 ? { ...typed, h: hsvRef.current.h } : typed;
+    const allowed = constrainToLegible(asked, ground);
+    setHsv(allowed);
+    // Compared as hexes, not as HSV: the field shows a hex, and two HSV
+    // triples a thousandth apart round to the same six digits. Saying
+    // "adjusted" about a change nobody can see is worse than silence.
+    setAdjusted(hsvToHex(allowed) !== norm);
   };
 
   const hueHex = hsvToHex({ h: hsv.h, s: 1, v: 1 });
@@ -295,6 +386,14 @@ export function ColorPickerModal({
                   </Defs>
                   <Rect x="0" y="0" width="100%" height="100%" fill="url(#sat)" />
                   <Rect x="0" y="0" width="100%" height="100%" fill="url(#val)" />
+                  {/* Painted in the BACKGROUND's colour, not in grey: the
+                      colours under here are the ones that would sink into
+                      that background, and this is what that looks like.
+                      Not quite opaque, so the spectrum still reads as one
+                      continuous thing with a part of it out of reach. */}
+                  {veilPath ? (
+                    <Path d={veilPath} fill={ground} fillOpacity={0.87} />
+                  ) : null}
                 </Svg>
                 <View
                   pointerEvents="none"
@@ -387,19 +486,19 @@ export function ColorPickerModal({
               />
             </View>
 
-            {/* A custom accent is the one accent with a single value for
-                both themes, so it is the one that can be legible in one
-                and not the other. Said, never enforced. */}
-            {legibility.ok ? null : (
-              <Text style={[styles.warning, { color: palette.danger }]}>
-                {t('settings.accentPickerContrast', {
-                  defaultValue:
-                    'Hard to read on this background ({{ratio}}:1, needs {{min}}:1).',
-                  ratio: legibility.ratio.toFixed(1),
-                  min: ACCENT_MIN_CONTRAST,
-                })}
+            {/* Only after a TYPED colour was moved. Muted, not red: the
+                colour was taken and then placed where it can be read,
+                which is a thing that happened rather than a thing the
+                person got wrong. A drag says the same thing by stopping
+                at the veil, so it says nothing there. */}
+            {adjusted ? (
+              <Text style={[styles.note, { color: palette.muted }]}>
+                {t(
+                  'settings.accentPickerAdjusted',
+                  'Moved to the nearest shade that stays readable on this background.',
+                )}
               </Text>
-            )}
+            ) : null}
 
             <View style={styles.actions}>
               <Pressable
@@ -478,7 +577,7 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
     fontSize: TYPE.body.fontSize,
   },
-  warning: {
+  note: {
     fontSize: TYPE.footnote.fontSize,
     lineHeight: 18,
     marginTop: SPACING.md,

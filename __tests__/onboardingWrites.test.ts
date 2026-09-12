@@ -129,6 +129,7 @@ const MADHAB = 'src/onboarding/screens/MadhabScreen.tsx';
 const LOCATION = 'src/onboarding/screens/LocationScreen.tsx';
 const PERSONALISE = 'src/onboarding/screens/PersonaliseScreen.tsx';
 const FLOW = 'src/onboarding/OnboardingFlow.tsx';
+const APPEARANCE = 'src/screens/settings/AppearanceCard.tsx';
 
 describe('the alerts screen acts on the answer', () => {
   const src = read(ALERTS);
@@ -272,6 +273,26 @@ describe('the personalisation shelf', () => {
     // The adhan list and the advance reminder are meaningless to
     // somebody who just declined notifications.
     expect(src).toMatch(/const alertsOn = settings\.notificationsEnabled/);
+  });
+
+  it('offers the same accent control Settings does, custom colours and all', () => {
+    // It used to draw its own six swatches and stop there, so the one
+    // person most likely to want a colour of their own — somebody
+    // setting the app up — was the one person who could not have one.
+    expect(src).toContain('<AccentShelf');
+    expect(read(APPEARANCE)).toContain('<AccentShelf');
+  });
+
+  it('does not keep a private copy of the swatch row', () => {
+    // Two copies is how the walkthrough fell behind in the first place.
+    expect(src).not.toContain('APP_ACCENT_SWATCHES');
+  });
+
+  it('still hides the whole control under dynamic colours', () => {
+    // The OS drives the app and the widget together in that mode, and a
+    // colour control that cannot change anything is worse than none.
+    expect(src).toMatch(/dynamicColours \? null : \(/);
+    expect(src).toMatch(/settings\.useSystemDynamicTheme/);
   });
 });
 

@@ -372,7 +372,7 @@
     "accentPickerHex": "রঙের কোড",
     "accentPickerSave": "রঙ সংরক্ষণ করুন",
     "accentPickerUseOnce": "সংরক্ষণ না করে ব্যবহার করুন",
-    "accentPickerContrast": "এই পটভূমিতে পড়া কঠিন ({{ratio}}:1, দরকার {{min}}:1)।"
+    "accentPickerAdjusted": "এই পটভূমিতে পড়া যায় এমন নিকটতম শেডে সরানো হয়েছে।"
   },
   "locationSetup": {
     "headline": "আপনার অবস্থান সেট করুন",

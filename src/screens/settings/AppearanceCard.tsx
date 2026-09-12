@@ -8,7 +8,6 @@ import {
   BackHandler,
   NativeModules,
   Platform,
-  Pressable,
   StyleSheet,
   Text,
   View,
@@ -17,25 +16,14 @@ import { useTranslation } from 'react-i18next';
 import {
   useAppearanceSettings,
   usePrayerSettings,
-  useWidgetSettings,
 } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
+import { AccentShelf } from '../../components/AccentShelf';
 import { ConfirmModal } from '../../components/ConfirmModal';
-import { ColorPickerModal } from '../../components/ColorPickerModal';
 import { restartApp as nativeRestartApp } from '../../native/SystemTheme';
 import { saveSettings } from '../../settings/storage';
-import type { AppAccentId } from '../../settings/types';
 import { useClockFormatter } from '../../hooks/useClockFormatter';
 import type { ClockFormat } from '../../utils/clockFormat';
-import {
-  APP_ACCENT_SWATCHES,
-  widgetPatchForAccent,
-} from '../../settings/widgetAccent';
-import {
-  addSavedAccent,
-  MAX_SAVED_ACCENTS,
-  removeSavedAccent,
-} from '../../settings/accentColors';
 import { SegmentedControl } from '../../components/ui';
 import {
   SettingsBlock,
@@ -43,8 +31,7 @@ import {
   SettingsToggleRow,
 } from './SettingsGroup';
 import { sharedSettingsStyles as s } from './sharedStyles';
-import { RADIUS, SPACING } from '../../theme/tokens';
-import { TYPE } from '../../theme/typography';
+import { SPACING } from '../../theme/tokens';
 
 /**
  * Appearance card: theme picker (System / Light / Dark), Android system
@@ -60,18 +47,12 @@ import { TYPE } from '../../theme/typography';
 function AppearanceCardImpl() {
   const { t } = useTranslation();
   const { slice: settings, update: updateSettings } = useAppearanceSettings();
-  const { update: updateWidget } = useWidgetSettings();
   // Need the full settings object (not just the appearance slice) so we
   // can synchronously persist a copy with the toggled value before
   // restarting the process — task #114.
   const { settings: fullSettings } = usePrayerSettings();
   const { palette, isDark } = useAppPalette();
   const clock = useClockFormatter();
-  const [pickerOpen, setPickerOpen] = useState(false);
-  // Two taps to remove a saved colour, the same contract the reciter
-  // sheet uses — a swatch is small and a long-press menu for one verb is
-  // more chrome than the verb is worth.
-  const [pendingRemove, setPendingRemove] = useState<string | null>(null);
   // Pending value for the "restart required" themed confirm modal. Null
   // ⇒ hidden; true/false ⇒ the dynamic-colours value the user is trying
   // to switch to, awaiting confirmation.
@@ -126,27 +107,6 @@ function AppearanceCardImpl() {
     settings.useSystemDynamicTheme &&
     (Platform.OS === 'android' || Platform.OS === 'ios');
 
-  /**
-   * Atomic accent change: write app accent + mirror widget highlight.
-   *
-   * Per #127 the picker is unified: switching the app accent should
-   * also retint the widget so the user sees one color across surfaces.
-   * When dynamic colors are on, this sync is skipped (the OS drives
-   * both already).
-   */
-  const setAccent = (id: AppAccentId, customHex?: string) => {
-    updateSettings({
-      appAccentId: id,
-      ...(customHex ? { appAccentCustomHex: customHex } : {}),
-    });
-    if (!dynamicColorsActive) {
-      updateWidget(widgetPatchForAccent(id, customHex));
-    }
-    // When dynamic colours ARE active the widget is not mirrored, because
-    // the widget does not follow Material You any more (2026-08-27) and
-    // this picker is hidden in that mode. The Widget card carries the
-    // colour control for that case — see WidgetCard.
-  };
 
   return (
     <>
@@ -252,148 +212,13 @@ function AppearanceCardImpl() {
             <Text style={[s.label, { color: palette.muted }]}>
               {t('settings.accentColor', 'Accent color')}
             </Text>
-            <View style={styles.swatchRow}>
-              {APP_ACCENT_SWATCHES.map(sw => {
-                const selected = settings.appAccentId === sw.id;
-                return (
-                  <Pressable
-                    key={sw.id}
-                    accessibilityRole="button"
-                    accessibilityLabel={t(`settings.accent_${sw.id}`, sw.id)}
-                    accessibilityState={{ selected }}
-                    onPress={() => setAccent(sw.id)}
-                    style={[
-                      styles.swatch,
-                      {
-                        backgroundColor: isDark ? sw.dark : sw.light,
-                        borderColor: selected ? palette.accent : palette.border,
-                        borderWidth: selected ? 3 : 2,
-                      },
-                    ]}
-                  />
-                );
-              })}
-              {/* The shelf: colours this person kept, newest first. Tapping
-                  one applies it; tapping a second time removes it, which
-                  is the same two-tap contract the reciter sheet uses. */}
-              {settings.savedAccentColors.map(hex => {
-                const selected =
-                  settings.appAccentId === 'custom' &&
-                  settings.appAccentCustomHex.toUpperCase() === hex;
-                const arming = pendingRemove === hex;
-                return (
-                  <Pressable
-                    key={hex}
-                    accessibilityRole="button"
-                    accessibilityLabel={hex}
-                    accessibilityHint={
-                      arming
-                        ? t('common.confirmDelete', 'Tap again to delete')
-                        : undefined
-                    }
-                    accessibilityState={{ selected }}
-                    onPress={() => {
-                      if (arming) {
-                        setPendingRemove(null);
-                        updateSettings({
-                          savedAccentColors: removeSavedAccent(
-                            settings.savedAccentColors,
-                            hex,
-                          ),
-                        });
-                        return;
-                      }
-                      if (selected) {
-                        // Already the active colour — a second tap on it
-                        // is the only unambiguous "remove this one".
-                        setPendingRemove(hex);
-                        return;
-                      }
-                      setAccent('custom', hex);
-                    }}
-                    style={[
-                      styles.swatch,
-                      {
-                        backgroundColor: hex,
-                        borderColor: arming
-                          ? palette.danger
-                          : selected
-                            ? palette.accent
-                            : palette.border,
-                        borderWidth: arming || selected ? 3 : 2,
-                      },
-                    ]}
-                  />
-                );
-              })}
-
-              {/* Add — opens the picker. Hidden once the shelf is full,
-                  because a button that can only fail is worse than no
-                  button; the oldest colour falls off on save instead. */}
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('settings.accentPickerTitle', 'Custom colour')}
-                accessibilityState={{
-                  selected: settings.appAccentId === 'custom',
-                }}
-                onPress={() => {
-                  setPendingRemove(null);
-                  setPickerOpen(true);
-                }}
-                style={[
-                  styles.swatch,
-                  styles.swatchCustom,
-                  {
-                    backgroundColor: palette.card,
-                    borderColor:
-                      settings.appAccentId === 'custom'
-                        ? palette.accent
-                        : palette.border,
-                    borderWidth: settings.appAccentId === 'custom' ? 3 : 2,
-                  },
-                ]}
-              >
-                <Text
-                  style={[styles.swatchCustomLabel, { color: palette.muted }]}
-                >
-                  {settings.savedAccentColors.length >= MAX_SAVED_ACCENTS
-                    ? t('settings.accent_customAbbr', 'Hex')
-                    : '+'}
-                </Text>
-              </Pressable>
+            <View style={styles.shelf}>
+              <AccentShelf />
             </View>
           </SettingsBlock>
         </SettingsGroup>
       )}
 
-      <ColorPickerModal
-        visible={pickerOpen}
-        initial={settings.appAccentCustomHex}
-        palette={palette}
-        // The ground this accent will sit on. The standard base as a hex
-        // rather than `palette.bg`, which can be a PlatformColor the
-        // contrast maths cannot read — the picker is unreachable under
-        // dynamic colours anyway, but a colour that cannot be measured
-        // should not silently measure as black.
-        ground={isDark ? '#141210' : '#FAF7F2'}
-        onApply={hex => {
-          setAccent('custom', hex);
-          setPickerOpen(false);
-        }}
-        onSave={hex => {
-          // One write: the colour becomes active AND joins the shelf, so
-          // a save that is interrupted cannot leave a colour on the shelf
-          // that was never applied, or the other way round.
-          updateSettings({
-            appAccentId: 'custom',
-            appAccentCustomHex: hex,
-            savedAccentColors: addSavedAccent(settings.savedAccentColors, hex),
-          });
-          if (!dynamicColorsActive) updateWidget(widgetPatchForAccent('custom', hex));
-          setPickerOpen(false);
-        }}
-        onClose={() => setPickerOpen(false)}
-      />
 
       <ConfirmModal
         visible={pendingDynamic !== null}
@@ -418,25 +243,8 @@ function AppearanceCardImpl() {
 export const AppearanceCard = memo(AppearanceCardImpl);
 
 const styles = StyleSheet.create({
-  swatchRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.md,
-    marginTop: SPACING.md,
-    alignItems: 'center',
-  },
-  swatch: {
-    width: 44,
-    height: 44,
-    borderRadius: RADIUS.xl,
-  },
-  swatchCustom: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-  },
-  swatchCustomLabel: {
-    fontSize: TYPE.label.fontSize,
-    fontWeight: '700',
-  },
+  // The label's own `marginBottom` is the settings scale's tightest; a
+  // row of 44pt circles needs more air under a caption than a line of
+  // text does.
+  shelf: { marginTop: SPACING.sm },
 });

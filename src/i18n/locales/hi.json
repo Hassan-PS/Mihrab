@@ -372,7 +372,7 @@
     "accentPickerHex": "रंग कोड",
     "accentPickerSave": "रंग सहेजें",
     "accentPickerUseOnce": "बिना सहेजे इस्तेमाल करें",
-    "accentPickerContrast": "इस पृष्ठभूमि पर पढ़ना कठिन ({{ratio}}:1, चाहिए {{min}}:1)।"
+    "accentPickerAdjusted": "निकटतम ऐसे शेड पर ले जाया गया जो इस पृष्ठभूमि पर पढ़ने योग्य रहे।"
   },
   "locationSetup": {
     "headline": "अपना स्थान निर्धारित करें",

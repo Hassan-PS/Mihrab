@@ -372,7 +372,7 @@
     "accentPickerHex": "رمز اللون",
     "accentPickerSave": "احفظ اللون",
     "accentPickerUseOnce": "استخدمه دون حفظ",
-    "accentPickerContrast": "يصعب قراءته على هذه الخلفية ({{ratio}}:1، والمطلوب {{min}}:1)."
+    "accentPickerAdjusted": "نُقل إلى أقرب درجة تبقى مقروءة على هذه الخلفية."
   },
   "locationSetup": {
     "headline": "حدّد موقعك",

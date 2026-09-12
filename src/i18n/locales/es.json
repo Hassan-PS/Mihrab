@@ -372,7 +372,7 @@
     "accentPickerHex": "Código de color",
     "accentPickerSave": "Guardar color",
     "accentPickerUseOnce": "Usar sin guardar",
-    "accentPickerContrast": "Difícil de leer sobre este fondo ({{ratio}}:1, hacen falta {{min}}:1)."
+    "accentPickerAdjusted": "Movido al tono más cercano que sigue siendo legible sobre este fondo."
   },
   "locationSetup": {
     "headline": "Establece tu ubicación",

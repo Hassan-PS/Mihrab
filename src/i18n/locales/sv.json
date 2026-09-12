@@ -372,7 +372,7 @@
     "accentPickerHex": "Färgkod",
     "accentPickerSave": "Spara färgen",
     "accentPickerUseOnce": "Använd utan att spara",
-    "accentPickerContrast": "Svårläst mot den här bakgrunden ({{ratio}}:1, behöver {{min}}:1)."
+    "accentPickerAdjusted": "Flyttad till närmaste nyans som är läsbar mot den här bakgrunden."
   },
   "locationSetup": {
     "headline": "Ange din plats",

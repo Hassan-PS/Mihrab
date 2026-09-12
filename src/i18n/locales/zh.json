@@ -372,7 +372,7 @@
     "accentPickerHex": "颜色代码",
     "accentPickerSave": "保存颜色",
     "accentPickerUseOnce": "不保存直接使用",
-    "accentPickerContrast": "在此背景上不易辨读（{{ratio}}:1，需要 {{min}}:1）。"
+    "accentPickerAdjusted": "已调整为在此背景上仍然清晰可读的最接近色调。"
   },
   "locationSetup": {
     "headline": "设置您的位置",

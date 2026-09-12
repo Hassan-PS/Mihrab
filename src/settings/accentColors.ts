@@ -160,40 +160,171 @@ export function contrast(a: string, b: string): number {
 }
 
 /**
- * Whether a colour will read as an accent on the ground it is used on.
+ * ── FROM A WARNING TO A RANGE ─────────────────────────────────────────
  *
- * ── WHY THIS ASKS ABOUT ONE GROUND AND NOT BOTH ───────────────────────
+ * This started life as `accentLegibility`: the picker called it, and
+ * under a colour it let you save anyway it printed "Hard to read on this
+ * background (2.1:1, needs 3:1)". The warning was the wrong shape. It
+ * arrives after the choice rather than during it; it quotes a ratio
+ * nobody has an intuition for; it turns finding a workable colour into
+ * trial and error; and in red it reads as a mistake the person made
+ * rather than a limit of the background they chose.
  *
- * The first version of this checked the colour against the light ground
- * AND the dark one and warned unless it cleared 3:1 on both. It was
+ * A picker that cannot hand back an unusable colour needs no warning at
+ * all. What follows is the same contrast maths turned inside out — not
+ * "is this colour legible" but "which colours are" — so the answer can
+ * be drawn on the square instead of printed under it.
+ *
+ * ── WHY IT IS A BAND OF `v` AND NOT A SET OF COLOURS ──────────────────
+ *
+ * Relative luminance rises monotonically with HSV's `v` at a fixed hue
+ * and saturation. So at any point across the square there is exactly one
+ * crossing: on a light ground every value below it clears the floor and
+ * every value above it fails, and on a dark ground the other way round.
+ * One crossing per saturation is a curve across the square, which is
+ * both the thing to draw and the thing to clamp a drag against.
+ *
+ * Hue is never touched by any of this. Moving somebody's hue to make
+ * their colour legible would be answering a question they did not ask.
+ *
+ * ── WHY IT ASKS ABOUT ONE GROUND AND NOT BOTH ─────────────────────────
+ *
+ * An earlier version checked the light ground AND the dark one. It was
  * wrong, and the app's own default proves it: the deep emerald #1F5F4A
- * reads 7.03:1 on warm paper and 2.49:1 on the night ground. So the
- * shipped, hand-tuned, default accent would have been flagged — and so
+ * reads 7.03:1 on warm paper and 2.49:1 on the night ground. The
+ * shipped, hand-tuned default accent would have been rejected, and so
  * would nearly every other sensible colour, because no single hex is a
  * good accent on both a near-white and a near-black.
  *
- * That is exactly why every preset carries TWO values: `ACCENT_SWATCHES`
- * gives green as #1F5F4A light and #46A081 dark. A custom accent is used
- * verbatim in both, which is its real weakness — and the honest thing to
- * tell somebody is whether the colour works in the theme they are
- * looking at, which they can see and act on, rather than a verdict about
- * a theme they may never use.
- *
- * A warning that fires for almost everything teaches people to ignore
- * warnings.
+ * That is exactly why every preset carries TWO values — `ACCENT_SWATCHES`
+ * gives green as #1F5F4A light and #46A081 dark — and it is the real
+ * weakness of a custom accent, which is used verbatim in both. Given
+ * that, the honest range to offer is the one that works in the theme the
+ * person is looking at, which they can see. Constraining to both would
+ * leave a sliver of muddy mid-tones and call it a choice.
  *
  * 3:1 is the WCAG floor for a UI element, which is what an accent is.
- * This warns; it never blocks. It is the user's app, and somebody who
- * only ever uses one theme is entitled to a colour that only works there.
  */
 export const ACCENT_MIN_CONTRAST = 3;
 
-export function accentLegibility(
-  hex: string,
+/** Anything the picker can return clears the floor. Mostly for tests. */
+export function isLegibleAccent(hex: string, ground: string): boolean {
+  return contrast(hex, ground) >= ACCENT_MIN_CONTRAST;
+}
+
+/**
+ * Which way the constraint runs: does the accent have to go darker than
+ * the ground, or lighter?
+ *
+ * By where the room actually is, not by a luminance threshold. If black
+ * contrasts better against this ground than white does, the usable
+ * colours are the dark ones. That answers correctly for a mid-grey
+ * ground too, where a threshold would have to pick a side arbitrarily.
+ */
+export function accentMustBeDarker(ground: string): boolean {
+  return contrast('#000000', ground) >= contrast('#FFFFFF', ground);
+}
+
+/**
+ * Bisection steps for the crossing. Twenty takes the interval below one
+ * part in a million, which is far finer than the 1/255 the result is
+ * quantised to on the way back out to a hex.
+ */
+const EDGE_STEPS = 20;
+
+/**
+ * The `v` at which this hue and saturation meets the contrast floor, or
+ * null when no value of `v` does.
+ *
+ * Null is not an edge case to tidy away: on a dark ground a fully
+ * saturated blue has no legible value at all. #0000FF is the brightest
+ * blue there is and it still reads 2.15:1 on the night ground, so that
+ * whole column of the square is unavailable and the picker has to say
+ * so.
+ *
+ * The returned value is always on the legible side of the crossing,
+ * never the failing side — bisection keeps the endpoint it has proved,
+ * so a colour clamped to this edge clears the floor rather than landing
+ * a rounding error under it.
+ */
+export function legibleValueEdge(
+  h: number,
+  s: number,
   ground: string,
-): { ratio: number; ok: boolean } {
-  const ratio = contrast(hex, ground);
-  return { ratio, ok: ratio >= ACCENT_MIN_CONTRAST };
+): number | null {
+  const at = (v: number) => contrast(hsvToHex({ h, s, v }), ground);
+  const darker = accentMustBeDarker(ground);
+  // The far end of the legible direction: black if the accent must be
+  // darker than its ground, white if it must be lighter. If even that
+  // fails, nothing at this saturation can work.
+  if (at(darker ? 0 : 1) < ACCENT_MIN_CONTRAST) return null;
+
+  let pass = darker ? 0 : 1;
+  let fail = darker ? 1 : 0;
+  for (let i = 0; i < EDGE_STEPS; i += 1) {
+    const mid = (pass + fail) / 2;
+    if (at(mid) >= ACCENT_MIN_CONTRAST) pass = mid;
+    else fail = mid;
+  }
+  return pass;
+}
+
+/**
+ * The crossing sampled across saturation, left edge to right, for
+ * drawing it. `null` marks a saturation with nothing legible in it.
+ */
+export function legibleBoundary(
+  h: number,
+  ground: string,
+  samples: number,
+): Array<number | null> {
+  const n = Math.max(2, Math.floor(samples));
+  const out: Array<number | null> = [];
+  for (let i = 0; i < n; i += 1) {
+    out.push(legibleValueEdge(h, i / (n - 1), ground));
+  }
+  return out;
+}
+
+/**
+ * The nearest legible colour to this one, at the same hue.
+ *
+ * Value is clamped to the legible side of the crossing. Saturation is
+ * only touched when it has to be — when the column the finger is in has
+ * no legible value at all — and then it comes down to the most saturated
+ * column that does, which is the closest thing to what was asked for.
+ * Saturation zero is always legible on either ground (it is white at one
+ * end and black at the other), so the search always terminates somewhere.
+ */
+export function constrainToLegible(hsv: Hsv, ground: string): Hsv {
+  const darker = accentMustBeDarker(ground);
+  const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
+  const h = hsv.h;
+  let s = clamp01(hsv.s);
+  let edge = legibleValueEdge(h, s, ground);
+
+  if (edge === null) {
+    // Desaturating moves towards white or black, and one of those is the
+    // legible end, so the crossing exists again somewhere below here.
+    let ok = 0;
+    let none = s;
+    for (let i = 0; i < EDGE_STEPS; i += 1) {
+      const mid = (ok + none) / 2;
+      if (legibleValueEdge(h, mid, ground) === null) none = mid;
+      else ok = mid;
+    }
+    s = ok;
+    edge = legibleValueEdge(h, s, ground);
+  }
+  // Only reachable if the floor were set above what white or black can
+  // do against this ground, which 3:1 is not.
+  if (edge === null) return { h, s: 0, v: darker ? 0 : 1 };
+
+  return {
+    h,
+    s,
+    v: darker ? Math.min(hsv.v, edge) : Math.max(hsv.v, edge),
+  };
 }
 
 /**

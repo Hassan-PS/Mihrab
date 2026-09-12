@@ -116,17 +116,19 @@ describe('the Widget card carries the picker in the one case it must', () => {
     expect(src).toContain('needsOwnPicker ?');
   });
 
-  it('writes through the same mapping the Appearance card uses', () => {
+  it('writes through the same mapping the accent shelf uses', () => {
     expect(src).toContain('widgetPatchForAccent');
-    const appearance = readFileSync(
-      path.join(
-        __dirname, '..', 'src', 'screens', 'settings', 'AppearanceCard.tsx',
-      ),
+    // The Appearance card's half of this moved into `AccentShelf` when
+    // the walkthrough started drawing the same control. The invariant is
+    // unchanged — one mapping, so the app and the home screen cannot
+    // disagree about what "green" is — only the file it lives in.
+    const shelf = readFileSync(
+      path.join(__dirname, '..', 'src', 'components', 'AccentShelf.tsx'),
       'utf8',
     );
-    expect(appearance).toContain('widgetPatchForAccent');
-    // Neither card may keep its own copy of the swatch table.
-    expect(appearance).not.toMatch(/light: '#1F5F4A'/);
+    expect(shelf).toContain('widgetPatchForAccent');
+    // Neither the shelf nor the card may keep its own copy of the table.
+    expect(shelf).not.toMatch(/light: '#1F5F4A'/);
     expect(src).not.toMatch(/light: '#1F5F4A'/);
   });
 });

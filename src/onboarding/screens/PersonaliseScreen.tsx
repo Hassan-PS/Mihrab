@@ -30,12 +30,11 @@
  * you want to skip?" is a question.
  */
 import { useMemo } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import {
   usePrayerSettings,
-  useWidgetSettings,
 } from '../../context/PrayerSettingsContext';
 import { useClockFormatter } from '../../hooks/useClockFormatter';
 import {
@@ -44,15 +43,9 @@ import {
   SettingsToggleRow,
 } from '../../screens/settings/SettingsGroup';
 import { SegmentedControl } from '../../components/ui';
-import {
-  APP_ACCENT_SWATCHES,
-  widgetPatchForAccent,
-} from '../../settings/widgetAccent';
-import type {
-  AppAccentId,
-  AppearancePreference,
-} from '../../settings/types';
-import { RADIUS, SPACING } from '../../theme/tokens';
+import { AccentShelf } from '../../components/AccentShelf';
+import type { AppearancePreference } from '../../settings/types';
+import { SPACING } from '../../theme/tokens';
 import { typeStyle } from '../../theme/typography';
 import { previewCoords, previewNightMarks } from '../previewTimes';
 import {
@@ -70,9 +63,8 @@ export function PersonaliseScreen({
   onAdvance: () => void;
 }) {
   const { t } = useTranslation();
-  const { palette, isDark } = useAppPalette();
+  const { palette } = useAppPalette();
   const { settings, updateSettings } = usePrayerSettings();
-  const { update: updateWidget } = useWidgetSettings();
   const clock = useClockFormatter();
 
   const coords = useMemo(() => previewCoords(settings), [settings]);
@@ -92,20 +84,14 @@ export function PersonaliseScreen({
   const mark = (value: string | undefined) => (value ? clock(value) : '—');
 
   /**
-   * Accent is unified with the widget highlight (#127), so the app and
-   * the home screen do not disagree about the colour the user just chose.
-   * Skipped under dynamic colours, where the OS drives both and the row
-   * is not shown at all.
+   * Dynamic colours drive both the app and the widget from the OS, so
+   * the accent row is not shown at all in that mode — the same rule
+   * Settings follows, and the reason the shelf itself never has to ask.
    */
   const dynamicColours =
     settings.appearance === 'system' &&
     settings.useSystemDynamicTheme &&
     (Platform.OS === 'android' || Platform.OS === 'ios');
-
-  const setAccent = (id: AppAccentId) => {
-    updateSettings({ appAccentId: id });
-    if (!dynamicColours) updateWidget(widgetPatchForAccent(id));
-  };
 
   const alertsOn = settings.notificationsEnabled;
 
@@ -208,29 +194,13 @@ export function PersonaliseScreen({
               style={[typeStyle('label'), styles.label, { color: palette.muted }]}>
               {t('onboarding.personalise.accent', 'Accent')}
             </Text>
-            <View style={styles.swatchRow}>
-              {APP_ACCENT_SWATCHES.map(sw => {
-                const selected = settings.appAccentId === sw.id;
-                return (
-                  <Pressable
-                    key={sw.id}
-                    testID={`personalise-accent-${sw.id}`}
-                    accessibilityRole="radio"
-                    accessibilityLabel={t(`settings.accent_${sw.id}`, sw.id)}
-                    accessibilityState={{ checked: selected }}
-                    onPress={() => setAccent(sw.id)}
-                    style={[
-                      styles.swatch,
-                      {
-                        backgroundColor: isDark ? sw.dark : sw.light,
-                        borderColor: selected ? palette.accent : palette.border,
-                        borderWidth: selected ? 3 : 2,
-                      },
-                    ]}
-                  />
-                );
-              })}
-            </View>
+            {/* The same control Settings has, custom colours and all:
+                somebody setting the app up for the first time is exactly
+                who is most likely to want a colour of their own, and for
+                a while they were the one person who could not have it.
+                Smaller here — this is one row in a shelf of preferences,
+                not a card about accents. */}
+            <AccentShelf size={36} testIDPrefix="personalise-accent" />
           </SettingsBlock>
         )}
       </SettingsGroup>
@@ -241,14 +211,4 @@ export function PersonaliseScreen({
 
 const styles = StyleSheet.create({
   label: { marginBottom: SPACING.sm },
-  swatchRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.md,
-  },
-  swatch: {
-    width: 36,
-    height: 36,
-    borderRadius: RADIUS.full,
-  },
 });

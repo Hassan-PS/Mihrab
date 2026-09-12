@@ -372,7 +372,7 @@
     "accentPickerHex": "رنگ کا کوڈ",
     "accentPickerSave": "رنگ محفوظ کریں",
     "accentPickerUseOnce": "محفوظ کیے بغیر استعمال کریں",
-    "accentPickerContrast": "اس پس منظر پر پڑھنا مشکل ({{ratio}}:1، درکار {{min}}:1)۔"
+    "accentPickerAdjusted": "قریب ترین ایسے شیڈ پر منتقل کر دیا گیا جو اس پس منظر پر پڑھا جا سکے۔"
   },
   "locationSetup": {
     "headline": "اپنا مقام متعین کریں۔",

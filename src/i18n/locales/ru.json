@@ -372,7 +372,7 @@
     "accentPickerHex": "Код цвета",
     "accentPickerSave": "Сохранить цвет",
     "accentPickerUseOnce": "Применить без сохранения",
-    "accentPickerContrast": "Плохо читается на этом фоне ({{ratio}}:1, нужно {{min}}:1)."
+    "accentPickerAdjusted": "Сдвинут к ближайшему оттенку, который остаётся читаемым на этом фоне."
   },
   "locationSetup": {
     "headline": "Установите свое местоположение",
