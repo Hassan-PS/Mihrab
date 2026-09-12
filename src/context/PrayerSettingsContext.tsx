@@ -51,6 +51,9 @@ export type AppearanceSlice = Pick<
   | 'language'
   | 'appAccentId'
   | 'appAccentCustomHex'
+  // The shelf of kept custom colours, drawn by the same swatch row as
+  // the presets — so the card that renders one renders the other.
+  | 'savedAccentColors'
   // Where a clock time is drawn 12- or 24-hour. It rides with `language`
   // for the same reason: it decides how a rendered string reads, and the
   // screens that care about one care about the other.
@@ -225,6 +228,7 @@ export function PrayerSettingsProvider({
       clockFormat: settings.clockFormat,
       appAccentId: settings.appAccentId,
       appAccentCustomHex: settings.appAccentCustomHex,
+      savedAccentColors: settings.savedAccentColors,
       showPracticeOnHome: settings.showPracticeOnHome,
     }),
     [
@@ -235,6 +239,7 @@ export function PrayerSettingsProvider({
       settings.clockFormat,
       settings.appAccentId,
       settings.appAccentCustomHex,
+      settings.savedAccentColors,
       settings.showPracticeOnHome,
     ],
   );

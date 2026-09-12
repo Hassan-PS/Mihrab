@@ -2,6 +2,7 @@ import { MADHABS, madhabMatches, type Madhab } from '../prayer/madhab';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { resolveDeviceLanguage } from '../i18n/deviceLanguage';
 import { coerceNotificationSoundId } from '../notifications/notificationSounds';
+import { coerceSavedAccents } from './accentColors';
 import { coerceClockFormat } from '../utils/clockFormat';
 import { coerceDhikrReminders } from '../dhikr/dhikrReminders';
 import { coerceDaruriAlerts } from '../prayer/daruriTimes';
@@ -328,6 +329,11 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
   ) {
     merged.activeLocationPresetId = undefined;
   }
+  // Saved accent colours: absent on every blob written before they
+  // existed, so an upgrade lands on an empty shelf rather than on
+  // `undefined` — and anything that is not a hex is dropped rather than
+  // guessed at, because there is no honest correction for "blue".
+  merged.savedAccentColors = coerceSavedAccents(merged.savedAccentColors);
   return merged;
 }
 

@@ -319,8 +319,18 @@ export type PrayerAppSettings = {
    * is on, this is ignored and both app + widget use Material You.
    */
   appAccentId: AppAccentId;
-  /** When `appAccentId` is 'custom', the user-typed #RRGGBB hex. */
+  /** When `appAccentId` is 'custom', the user-picked #RRGGBB hex. */
   appAccentCustomHex: string;
+  /**
+   * Custom colours the user has kept, newest first — see
+   * `src/settings/accentColors.ts` for the shape and the cap.
+   *
+   * The ACTIVE custom colour is still `appAccentCustomHex`; this is the
+   * shelf it can be got back from. Before it existed, choosing a preset
+   * and returning to custom lost whatever had been typed, so every trip
+   * back meant retyping six hex digits from memory.
+   */
+  savedAccentColors: string[];
   /**
    * Live Activity / persistent prayer-countdown notification — task #128.
    *
@@ -584,6 +594,8 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   // upgrade).
   appAccentId: 'green',
   appAccentCustomHex: '#22c55e',
+  // Nobody starts with a colour they did not pick.
+  savedAccentColors: [],
   // Live Activity defaults: OFF; when enabled, the detail-rich layout
   // (full list + hijri + location) is the default — it's the more
   // useful version on the lock screen / shade. Sunrise included because

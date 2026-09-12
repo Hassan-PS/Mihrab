@@ -365,7 +365,14 @@
     "madhabHelp": "شافعی، مالکی اور حنبلی عصر کا ایک ہی سایہ لیتے ہیں، اس لیے ان میں انتخاب سے کوئی وقت نہیں بدلتا۔ مالکی فجر کی فرض کو صبح کہتا ہے اور دوسرے اوقات بھی دیتا ہے۔",
     "dhikrRemindersChannel": "ذکر کی یاد دہانیاں",
     "dhikrRemindersSilentChannel": "ذکر کی یاد دہانیاں (خاموش)",
-    "laDesignNeedsAndroid16": "اسٹائلز کے لیے Android 16 یا نیا درکار ہے۔ یہ فون معیاری کارڈ دکھاتا ہے: نماز، باقی وقت اور پروگریس بار۔"
+    "laDesignNeedsAndroid16": "اسٹائلز کے لیے Android 16 یا نیا درکار ہے۔ یہ فون معیاری کارڈ دکھاتا ہے: نماز، باقی وقت اور پروگریس بار۔",
+    "accentPickerTitle": "اپنا رنگ",
+    "accentPickerField": "سیچوریشن اور چمک",
+    "accentPickerHue": "رنگت",
+    "accentPickerHex": "رنگ کا کوڈ",
+    "accentPickerSave": "رنگ محفوظ کریں",
+    "accentPickerUseOnce": "محفوظ کیے بغیر استعمال کریں",
+    "accentPickerContrast": "اس پس منظر پر پڑھنا مشکل ({{ratio}}:1، درکار {{min}}:1)۔"
   },
   "locationSetup": {
     "headline": "اپنا مقام متعین کریں۔",

@@ -365,7 +365,14 @@
     "madhabHelp": "Şâfiî, Mâlikî ve Hanbelî aynı ikindi gölgesini alır; aralarındaki seçim hiçbir vakti değiştirmez. Mâlikî ayrıca sabah namazını Sabah olarak adlandırır ve ikinci vakitleri sunar.",
     "dhikrRemindersChannel": "Zikir hatırlatmaları",
     "dhikrRemindersSilentChannel": "Zikir hatırlatmaları (sessiz)",
-    "laDesignNeedsAndroid16": "Stiller Android 16 veya üstünü gerektirir. Bu telefonda standart kart gösterilir: namaz, kalan süre ve bir ilerleme çubuğu."
+    "laDesignNeedsAndroid16": "Stiller Android 16 veya üstünü gerektirir. Bu telefonda standart kart gösterilir: namaz, kalan süre ve bir ilerleme çubuğu.",
+    "accentPickerTitle": "Özel renk",
+    "accentPickerField": "Doygunluk ve parlaklık",
+    "accentPickerHue": "Renk tonu",
+    "accentPickerHex": "Renk kodu",
+    "accentPickerSave": "Rengi kaydet",
+    "accentPickerUseOnce": "Kaydetmeden kullan",
+    "accentPickerContrast": "Bu arka planda okunması zor ({{ratio}}:1, gereken {{min}}:1)."
   },
   "locationSetup": {
     "headline": "Konumunuzu ayarlayın",

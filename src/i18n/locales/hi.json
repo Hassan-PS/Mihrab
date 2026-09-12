@@ -365,7 +365,14 @@
     "madhabHelp": "शाफ़िई, मालिकी और हंबली अस्र की एक ही छाया लेते हैं, इसलिए इनमें चुनाव से कोई समय नहीं बदलता। मालिकी फ़ज्र की फ़र्ज़ को सुब्ह कहता है और दूसरे समय भी देता है।",
     "dhikrRemindersChannel": "ज़िक्र रिमाइंडर",
     "dhikrRemindersSilentChannel": "ज़िक्र रिमाइंडर (मौन)",
-    "laDesignNeedsAndroid16": "स्टाइल के लिए Android 16 या नया चाहिए। यह फ़ोन मानक कार्ड दिखाता है: नमाज़, बचा समय और एक प्रगति बार।"
+    "laDesignNeedsAndroid16": "स्टाइल के लिए Android 16 या नया चाहिए। यह फ़ोन मानक कार्ड दिखाता है: नमाज़, बचा समय और एक प्रगति बार।",
+    "accentPickerTitle": "अपना रंग",
+    "accentPickerField": "संतृप्ति और चमक",
+    "accentPickerHue": "रंगत",
+    "accentPickerHex": "रंग कोड",
+    "accentPickerSave": "रंग सहेजें",
+    "accentPickerUseOnce": "बिना सहेजे इस्तेमाल करें",
+    "accentPickerContrast": "इस पृष्ठभूमि पर पढ़ना कठिन ({{ratio}}:1, चाहिए {{min}}:1)।"
   },
   "locationSetup": {
     "headline": "अपना स्थान निर्धारित करें",

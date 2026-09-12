@@ -365,7 +365,14 @@
     "madhabHelp": "Shafiiter, malikiter och hanbaliter tar samma asr-skugga, så valet mellan dem ändrar ingen tid. Malikitisk kallar dessutom gryningsbönen Subh och erbjuder andratiderna.",
     "dhikrRemindersChannel": "Dhikr-påminnelser",
     "dhikrRemindersSilentChannel": "Dhikr-påminnelser (tysta)",
-    "laDesignNeedsAndroid16": "Stilar kräver Android 16 eller senare. Den här telefonen visar standardkortet: bönen, tiden kvar och en förloppsindikator."
+    "laDesignNeedsAndroid16": "Stilar kräver Android 16 eller senare. Den här telefonen visar standardkortet: bönen, tiden kvar och en förloppsindikator.",
+    "accentPickerTitle": "Egen färg",
+    "accentPickerField": "Mättnad och ljusstyrka",
+    "accentPickerHue": "Nyans",
+    "accentPickerHex": "Färgkod",
+    "accentPickerSave": "Spara färgen",
+    "accentPickerUseOnce": "Använd utan att spara",
+    "accentPickerContrast": "Svårläst mot den här bakgrunden ({{ratio}}:1, behöver {{min}}:1)."
   },
   "locationSetup": {
     "headline": "Ange din plats",

@@ -2,7 +2,7 @@
 // hover-ok: list-row / settings-row / sheet pressables. Hover-state
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
-import { memo, useEffect, useState } from 'react';
+import { memo, useState } from 'react';
 import {
   Alert,
   BackHandler,
@@ -11,7 +11,6 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +21,7 @@ import {
 } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { ConfirmModal } from '../../components/ConfirmModal';
+import { ColorPickerModal } from '../../components/ColorPickerModal';
 import { restartApp as nativeRestartApp } from '../../native/SystemTheme';
 import { saveSettings } from '../../settings/storage';
 import type { AppAccentId } from '../../settings/types';
@@ -31,6 +31,11 @@ import {
   APP_ACCENT_SWATCHES,
   widgetPatchForAccent,
 } from '../../settings/widgetAccent';
+import {
+  addSavedAccent,
+  MAX_SAVED_ACCENTS,
+  removeSavedAccent,
+} from '../../settings/accentColors';
 import { SegmentedControl } from '../../components/ui';
 import {
   SettingsBlock,
@@ -62,13 +67,11 @@ function AppearanceCardImpl() {
   const { settings: fullSettings } = usePrayerSettings();
   const { palette, isDark } = useAppPalette();
   const clock = useClockFormatter();
-  const [accentHexDraft, setAccentHexDraft] = useState(
-    settings.appAccentCustomHex,
-  );
-  useEffect(() => {
-    setAccentHexDraft(settings.appAccentCustomHex);
-  }, [settings.appAccentCustomHex]);
-
+  const [pickerOpen, setPickerOpen] = useState(false);
+  // Two taps to remove a saved colour, the same contract the reciter
+  // sheet uses — a swatch is small and a long-press menu for one verb is
+  // more chrome than the verb is worth.
+  const [pendingRemove, setPendingRemove] = useState<string | null>(null);
   // Pending value for the "restart required" themed confirm modal. Null
   // ⇒ hidden; true/false ⇒ the dynamic-colours value the user is trying
   // to switch to, awaiting confirmation.
@@ -270,13 +273,73 @@ function AppearanceCardImpl() {
                   />
                 );
               })}
+              {/* The shelf: colours this person kept, newest first. Tapping
+                  one applies it; tapping a second time removes it, which
+                  is the same two-tap contract the reciter sheet uses. */}
+              {settings.savedAccentColors.map(hex => {
+                const selected =
+                  settings.appAccentId === 'custom' &&
+                  settings.appAccentCustomHex.toUpperCase() === hex;
+                const arming = pendingRemove === hex;
+                return (
+                  <Pressable
+                    key={hex}
+                    accessibilityRole="button"
+                    accessibilityLabel={hex}
+                    accessibilityHint={
+                      arming
+                        ? t('common.confirmDelete', 'Tap again to delete')
+                        : undefined
+                    }
+                    accessibilityState={{ selected }}
+                    onPress={() => {
+                      if (arming) {
+                        setPendingRemove(null);
+                        updateSettings({
+                          savedAccentColors: removeSavedAccent(
+                            settings.savedAccentColors,
+                            hex,
+                          ),
+                        });
+                        return;
+                      }
+                      if (selected) {
+                        // Already the active colour — a second tap on it
+                        // is the only unambiguous "remove this one".
+                        setPendingRemove(hex);
+                        return;
+                      }
+                      setAccent('custom', hex);
+                    }}
+                    style={[
+                      styles.swatch,
+                      {
+                        backgroundColor: hex,
+                        borderColor: arming
+                          ? palette.danger
+                          : selected
+                            ? palette.accent
+                            : palette.border,
+                        borderWidth: arming || selected ? 3 : 2,
+                      },
+                    ]}
+                  />
+                );
+              })}
+
+              {/* Add — opens the picker. Hidden once the shelf is full,
+                  because a button that can only fail is worse than no
+                  button; the oldest colour falls off on save instead. */}
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={t('settings.accent_custom', 'Custom')}
+                accessibilityLabel={t('settings.accentPickerTitle', 'Custom colour')}
                 accessibilityState={{
                   selected: settings.appAccentId === 'custom',
                 }}
-                onPress={() => setAccent('custom')}
+                onPress={() => {
+                  setPendingRemove(null);
+                  setPickerOpen(true);
+                }}
                 style={[
                   styles.swatch,
                   styles.swatchCustom,
@@ -293,40 +356,44 @@ function AppearanceCardImpl() {
                 <Text
                   style={[styles.swatchCustomLabel, { color: palette.muted }]}
                 >
-                  {t('settings.accent_customAbbr', 'Hex')}
+                  {settings.savedAccentColors.length >= MAX_SAVED_ACCENTS
+                    ? t('settings.accent_customAbbr', 'Hex')
+                    : '+'}
                 </Text>
               </Pressable>
             </View>
-            {settings.appAccentId === 'custom' ? (
-              <TextInput
-                style={[
-                  s.input,
-                  {
-                    marginTop: SPACING.md,
-                    borderColor: palette.border,
-                    color: palette.text,
-                    backgroundColor: palette.bg,
-                  },
-                ]}
-                value={accentHexDraft}
-                onChangeText={setAccentHexDraft}
-                onBlur={() => {
-                  const trimmed = accentHexDraft.trim();
-                  if (/^#[0-9A-Fa-f]{6}$/.test(trimmed)) {
-                    setAccent('custom', trimmed);
-                  } else {
-                    setAccentHexDraft(settings.appAccentCustomHex);
-                  }
-                }}
-                placeholder="#22c55e"
-                placeholderTextColor={palette.muted}
-                autoCapitalize="characters"
-                autoCorrect={false}
-              />
-            ) : null}
           </SettingsBlock>
         </SettingsGroup>
       )}
+
+      <ColorPickerModal
+        visible={pickerOpen}
+        initial={settings.appAccentCustomHex}
+        palette={palette}
+        // The ground this accent will sit on. The standard base as a hex
+        // rather than `palette.bg`, which can be a PlatformColor the
+        // contrast maths cannot read — the picker is unreachable under
+        // dynamic colours anyway, but a colour that cannot be measured
+        // should not silently measure as black.
+        ground={isDark ? '#141210' : '#FAF7F2'}
+        onApply={hex => {
+          setAccent('custom', hex);
+          setPickerOpen(false);
+        }}
+        onSave={hex => {
+          // One write: the colour becomes active AND joins the shelf, so
+          // a save that is interrupted cannot leave a colour on the shelf
+          // that was never applied, or the other way round.
+          updateSettings({
+            appAccentId: 'custom',
+            appAccentCustomHex: hex,
+            savedAccentColors: addSavedAccent(settings.savedAccentColors, hex),
+          });
+          if (!dynamicColorsActive) updateWidget(widgetPatchForAccent('custom', hex));
+          setPickerOpen(false);
+        }}
+        onClose={() => setPickerOpen(false)}
+      />
 
       <ConfirmModal
         visible={pendingDynamic !== null}

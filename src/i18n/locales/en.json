@@ -365,7 +365,14 @@
     "madhabHelp": "Shafii, Maliki and Hanbali take the same asr shadow, so choosing between them changes no time. Maliki also names the dawn prayer Subh and offers the second times.",
     "dhikrRemindersChannel": "Dhikr reminders",
     "dhikrRemindersSilentChannel": "Dhikr reminders (silent)",
-    "laDesignNeedsAndroid16": "Styles need Android 16 or newer. This phone shows the standard card: the prayer, the time left and a progress bar."
+    "laDesignNeedsAndroid16": "Styles need Android 16 or newer. This phone shows the standard card: the prayer, the time left and a progress bar.",
+    "accentPickerTitle": "Custom colour",
+    "accentPickerField": "Saturation and brightness",
+    "accentPickerHue": "Hue",
+    "accentPickerHex": "Colour code",
+    "accentPickerSave": "Save colour",
+    "accentPickerUseOnce": "Use without saving",
+    "accentPickerContrast": "Hard to read on this background ({{ratio}}:1, needs {{min}}:1)."
   },
   "locationSetup": {
     "headline": "Set your location",

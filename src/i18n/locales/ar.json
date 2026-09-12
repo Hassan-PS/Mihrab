@@ -365,7 +365,14 @@
     "madhabHelp": "الشافعي والمالكي والحنبلي يعتمدون ظلّ العصر نفسه، فالاختيار بينهم لا يغيّر وقتاً. والمالكي يسمّي صلاة الفجر صبحاً ويتيح الأوقات الثانية.",
     "dhikrRemindersChannel": "تذكيرات الذكر",
     "dhikrRemindersSilentChannel": "تذكيرات الذكر (صامتة)",
-    "laDesignNeedsAndroid16": "تتطلب الأنماط Android 16 أو أحدث. يعرض هذا الهاتف البطاقة القياسية: الصلاة والوقت المتبقي وشريط التقدم."
+    "laDesignNeedsAndroid16": "تتطلب الأنماط Android 16 أو أحدث. يعرض هذا الهاتف البطاقة القياسية: الصلاة والوقت المتبقي وشريط التقدم.",
+    "accentPickerTitle": "لون مخصص",
+    "accentPickerField": "التشبع والسطوع",
+    "accentPickerHue": "درجة اللون",
+    "accentPickerHex": "رمز اللون",
+    "accentPickerSave": "احفظ اللون",
+    "accentPickerUseOnce": "استخدمه دون حفظ",
+    "accentPickerContrast": "يصعب قراءته على هذه الخلفية ({{ratio}}:1، والمطلوب {{min}}:1)."
   },
   "locationSetup": {
     "headline": "حدّد موقعك",
