@@ -29,6 +29,7 @@ import {
   shouldResync,
 } from '../utils/resyncGate';
 import { usePrayerDay } from '../hooks/usePrayerDay';
+import { markFirstPaint, useAfterFirstPaint } from '../boot/firstPaint';
 import { usePrefetchSavedLocations } from '../hooks/usePrefetchSavedLocations';
 import { syncPrayerNotifications } from '../notifications/prayerNotifications';
 import { useNextAlertOverride } from '../notifications/adhanMute';
@@ -111,6 +112,28 @@ export function HomeScreen() {
   const { t, i18n } = useTranslation();
   const { settings, hydrated, updateSettings } = usePrayerSettings();
   const { state, retry } = usePrayerDay(settings, hydrated);
+  /**
+   * The first frame with real times on it is the moment the app's boot-time
+   * bookkeeping may begin — see src/boot/firstPaint.ts for what waits and
+   * why. Committed is not painted: the commit hands the tree to the UI
+   * thread, and the frame after that is when it is on the glass, so the
+   * mark waits one animation frame and one tick beyond the commit.
+   */
+  const firstPaintMarked = useRef(false);
+  useEffect(() => {
+    if (state.phase !== 'ready' || firstPaintMarked.current) return undefined;
+    firstPaintMarked.current = true;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const frame = requestAnimationFrame(() => {
+      timer = setTimeout(markFirstPaint, 0);
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      if (timer) clearTimeout(timer);
+      // Unmounted before the frame — the fallback timer covers it.
+    };
+  }, [state.phase]);
+  const afterFirstPaint = useAfterFirstPaint();
   // Moves when a prayer is logged, a page is turned or a bead is counted —
   // none of which changes a prayer time, all of which change the widget.
   const widgetRevision = useWidgetDataRevision();
@@ -492,6 +515,8 @@ export function HomeScreen() {
 
   useEffect(() => {
     if (!hydrated || state.phase !== 'ready' || !view) return;
+    // After the card is on screen, not in the same breath as drawing it.
+    if (!afterFirstPaint) return;
     syncPrayerNotifications({
       enabled: settings.notificationsEnabled,
       prePrayerReminderMinutes: settings.prePrayerReminderMinutes,
@@ -567,6 +592,7 @@ export function HomeScreen() {
         .catch(e => console.warn('rescheduleDuaReminders:', e));
     }
   }, [
+    afterFirstPaint,
     hydrated,
     settings.notificationsEnabled,
     settings.prePrayerReminderMinutes,
@@ -618,6 +644,7 @@ export function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       if (!hydrated || state.phase !== 'ready' || !view) return;
+      if (!afterFirstPaint) return;
       // Every focus of the Today tab used to tear down and rewrite the whole
       // ~48-alarm set, plus a `getDisplayedNotifications` round-trip and a
       // cancel-diff. The schedule is a function of the times, the sound and
@@ -763,6 +790,7 @@ export function HomeScreen() {
         setNotifPermDenied(false);
       }
     }, [
+      afterFirstPaint,
       hydrated,
       settings.notificationsEnabled,
       settings.prePrayerReminderMinutes,
@@ -798,6 +826,7 @@ export function HomeScreen() {
   // refresh; it updates when the underlying data does.
   useEffect(() => {
     if (!hydrated || state.phase !== 'ready' || !view) return;
+    if (!afterFirstPaint) return;
     const seasonal = computeSeasonalTreatment(
       view.table.today,
       view.table.tomorrow,
@@ -822,6 +851,7 @@ export function HomeScreen() {
       )
       .catch(e => console.warn('syncPrayerWidget (effect):', e));
   }, [
+    afterFirstPaint,
     hydrated,
     state,
     view,
@@ -849,6 +879,7 @@ export function HomeScreen() {
   // recomputes the correct next prayer and pushes updated content.
   useEffect(() => {
     if (!hydrated || state.phase !== 'ready' || !view) return;
+    if (!afterFirstPaint) return;
     const seasonal = computeSeasonalTreatment(
       view.table.today,
       view.table.tomorrow,
@@ -883,6 +914,7 @@ export function HomeScreen() {
       design: settings.liveActivityDesign,
     }).catch(e => console.warn('syncLiveActivity (effect):', e));
   }, [
+    afterFirstPaint,
     hydrated,
     state,
     view,

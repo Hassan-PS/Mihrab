@@ -105,14 +105,40 @@ function jitter(ms: number): number {
   return Math.round(ms * (0.75 + Math.random() * 0.5)); // ±25%
 }
 
-async function loadCachedCity(slug: string): Promise<CachedCity | null> {
+/**
+ * The city file's read, shared while it is in flight.
+ *
+ * `memCity` makes the SECOND ask free, but a cold start makes its first
+ * seven asks at once — one per day of the week — and every one of them
+ * found the memo empty, read the file and parsed it. Seven reads, seven
+ * parses, one city. Sharing the promise makes the first ask the only
+ * one; the memo takes over from there.
+ */
+const cityReadInFlight = new Map<string, Promise<CachedCity | null>>();
+
+function loadCachedCity(slug: string): Promise<CachedCity | null> {
   const memo = memCity.get(slug);
-  if (memo) return memo;
+  if (memo) return Promise.resolve(memo);
+  const pending = cityReadInFlight.get(slug);
+  if (pending) return pending;
+  const p = readCachedCity(slug).finally(() => {
+    if (cityReadInFlight.get(slug) === p) cityReadInFlight.delete(slug);
+  });
+  cityReadInFlight.set(slug, p);
+  return p;
+}
+
+async function readCachedCity(slug: string): Promise<CachedCity | null> {
   try {
     const raw = await AsyncStorage.getItem(cacheKey(slug));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as CachedCity;
     if (parsed && parsed.days && typeof parsed.days === 'object') {
+      // A download that landed while this read was in flight has already
+      // put a newer file in the memo; the older one on disk must not
+      // replace it. Whatever is in the memo by now is the answer.
+      const newer = memCity.get(slug);
+      if (newer) return newer;
       memCity.set(slug, parsed);
       return parsed;
     }
@@ -149,6 +175,10 @@ function downloadCity(slug: string): Promise<void> {
         days: file.days,
       };
       memCity.set(slug, entry);
+      // A read still in flight would settle with the OLD file and put it
+      // in the memo over this one. Drop it; anyone waiting re-asks and
+      // gets the memo.
+      cityReadInFlight.delete(slug);
       await AsyncStorage.setItem(cacheKey(slug), JSON.stringify(entry));
     } catch {
       /* offline / CDN hiccup — keep prior data */
@@ -289,6 +319,7 @@ export async function pollServerIndexNow(): Promise<void> {
 /** Test seam: clear the in-process memo (does not touch AsyncStorage). */
 export function _resetDatasetMemoForTests(): void {
   memCity.clear();
+  cityReadInFlight.clear();
   refreshInFlight.clear();
   nextIndexPollAt = 0;
   indexPollInFlight = null;

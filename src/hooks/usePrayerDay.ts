@@ -144,6 +144,22 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
     locality: ReverseLocality | null;
   } | null>(null);
   const loadedCityIdRef = useRef<string | null>(null);
+  /**
+   * The coordinates the times on screen were loaded AGAINST — set by every
+   * `loadTimes`, including the instant one from the cached coordinates
+   * at launch, which `loadedCityIdRef` never learns about.
+   *
+   * That gap was a whole second pipeline on every cold start. The launch
+   * shows last night's times from the saved coordinates, the fix arrives
+   * a second later, the registry resolves it to the very same city and
+   * anchor — and `cityChanged` was `null !== cityId`, true, so the week
+   * was read again, the card rendered again, and the notifications, the
+   * widget and the Live Activity were all synced a second time, for
+   * nothing. The saved coordinates ARE the anchor from the previous
+   * session (this hook persists `state.latitude` back into settings), so
+   * "the anchor equals what is loaded" is the exact test for "same city".
+   */
+  const loadedCoordsRef = useRef<{ lat: number; lng: number } | null>(null);
   // Latest auto-mode load OUTPUTS (last-fetched coords + resolved city name).
   // Read through a ref — NOT the requestAndLoad dependency array — so that a
   // completed load persisting these back into settings does NOT re-trigger the
@@ -169,6 +185,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
       label?: string,
     ) => {
       const gen = ++loadGenerationRef.current;
+      loadedCoordsRef.current = { lat: latitude, lng: longitude };
       const coords = { latitude, longitude };
       const provider = getEffectiveDataProvider(
         settings.dataProviderAuto,
@@ -190,6 +207,26 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
         // Fetch WEEK_DAYS consecutive days concurrently so the swipeable day
         // carousel loads atomically — no staggered re-renders as later days arrive.
         const now = new Date();
+        // Started HERE, alongside the week, and collected after it. The
+        // status check is independent of the week's results, and it used
+        // to wait for them — 19 ms of a cold start, measured, spent
+        // re-reading the same cache blob the week had just read. Now it
+        // shares that read (`prayerStorage` dedupes the round trip while
+        // it is in flight) and finishes in the week's shadow, and its
+        // answer still lands in the same state update as the times, which
+        // is what keeps the refresh indicator from flashing in a frame late.
+        const cacheParams = {
+          provider,
+          latitude,
+          longitude,
+          calculationMethod: settings.calculationMethod,
+          school: settings.school,
+        };
+        const statusPromise = getCacheStatus(cacheParams).then(
+          status => status.monthsStored < 2 || status.isExpired,
+          // Cache status check failing is non-critical; we just won't fill.
+          () => false,
+        );
         const weekResults = await Promise.allSettled(
           Array.from({ length: WEEK_DAYS }, (_, i) =>
             getOrFetchPrayerTimes({
@@ -228,22 +265,10 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
           applyOffsetsToWeek(weekTimings, settings.prayerOffsets),
         );
 
-        // Check whether the local cache needs a background fill.  We do this
-        // before the final setState so we can include backgroundRefreshing in
-        // the same update — preventing a brief false-idle flash.
-        let needsCacheFill = false;
-        try {
-          const status = await getCacheStatus({
-            provider,
-            latitude,
-            longitude,
-            calculationMethod: settings.calculationMethod,
-            school: settings.school,
-          });
-          needsCacheFill = status.monthsStored < 2 || status.isExpired;
-        } catch {
-          // Cache status check failing is non-critical; we just won't fill.
-        }
+        // Whether the local cache needs a background fill — asked above, in
+        // parallel with the week, collected here so it is in the same
+        // update as the times.
+        const needsCacheFill = await statusPromise;
 
         if (gen !== loadGenerationRef.current) return;
 
@@ -639,7 +664,21 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
 
         // Only (re)fetch when the ACTIVE city changed since the last load —
         // this is what makes intra-city movement free.
-        const cityChanged = loadedCityIdRef.current !== summary.cityId;
+        //
+        // "Changed" is judged against what is actually on screen. The
+        // first fix after launch has no city id to compare with — the
+        // launch load came from saved coordinates, not from the registry —
+        // but it does have coordinates, and if the registry's anchor is
+        // the pair the times were loaded against, this is the same city
+        // and nothing needs reading again. See `loadedCoordsRef`.
+        const loaded = loadedCoordsRef.current;
+        const sameAnchorAsLoaded =
+          loaded != null &&
+          loaded.lat === summary.anchorLat &&
+          loaded.lng === summary.anchorLng;
+        const cityChanged =
+          loadedCityIdRef.current !== summary.cityId && !sameAnchorAsLoaded;
+        if (!cityChanged) loadedCityIdRef.current = summary.cityId;
         if (cityChanged) {
           loadedCityIdRef.current = summary.cityId;
           loadTimes(

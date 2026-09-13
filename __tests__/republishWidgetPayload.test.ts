@@ -21,7 +21,9 @@ jest.mock('../src/native/PrayerWidget', () => ({
 }));
 jest.mock('../src/settings/storage', () => ({ loadSettings: jest.fn() }));
 jest.mock('../src/prayer/prayerStorage', () => ({
-  getCachedPrayerTimes: jest.fn(),
+  // One read for the whole window, answered per date — see
+  // `getCachedPrayerTimesMany`. It used to be one read per day.
+  getCachedPrayerTimesMany: jest.fn(),
 }));
 jest.mock('../src/widget/collectWidgetExtras', () => ({
   collectWidgetExtras: jest.fn(async () => ({})),
@@ -30,7 +32,7 @@ jest.mock('../src/widget/collectWidgetExtras', () => ({
 import { republishWidgetPayload } from '../src/widget/republishWidgetPayload';
 import { getPrayerWidgetModule } from '../src/native/PrayerWidget';
 import { loadSettings } from '../src/settings/storage';
-import { getCachedPrayerTimes } from '../src/prayer/prayerStorage';
+import { getCachedPrayerTimesMany } from '../src/prayer/prayerStorage';
 
 const NOW = new Date(2026, 7, 18, 14, 0, 0);
 
@@ -71,11 +73,9 @@ beforeEach(() => {
   Platform.OS = 'android';
   (getPrayerWidgetModule as jest.Mock).mockReturnValue({ setData });
   (loadSettings as jest.Mock).mockResolvedValue(settingsWith());
-  let i = -1;
-  (getCachedPrayerTimes as jest.Mock).mockImplementation(async () => {
-    i += 1;
-    return day(i);
-  });
+  (getCachedPrayerTimesMany as jest.Mock).mockImplementation(
+    async (_params: unknown, dates: Date[]) => dates.map((_, i) => day(i)),
+  );
 });
 
 describe('republishWidgetPayload', () => {
@@ -85,8 +85,9 @@ describe('republishWidgetPayload', () => {
     const payload = pushed();
     expect((payload.days as unknown[]).length).toBe(30);
     expect(payload.locationName).toBe('Stockholm');
-    // Day 0 is today's; the drift proves the days did not all come from one
-    // cached read.
+    // Day 0 is today's; the drift proves each day is its own entry rather
+    // than today's repeated — they DO come from one read of the cache now,
+    // which is the point of `getCachedPrayerTimesMany`.
     expect((payload.rows as { key: string; time: string }[])[0].time).toBe('05:00');
     expect(
       ((payload.days as { rows: { time: string }[] }[])[1].rows[0]).time,
@@ -118,7 +119,9 @@ describe('republishWidgetPayload', () => {
     // is computed locally rather than left empty, because "no cache yet" is
     // not the same as "no prayer times exist" — and this path must never
     // reach the network.
-    (getCachedPrayerTimes as jest.Mock).mockResolvedValue(null);
+    (getCachedPrayerTimesMany as jest.Mock).mockImplementation(
+      async (_params: unknown, dates: Date[]) => dates.map(() => null),
+    );
 
     await expect(republishWidgetPayload('launch', NOW)).resolves.toBe(true);
     const payload = pushed();

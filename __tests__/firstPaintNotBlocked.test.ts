@@ -120,6 +120,35 @@ describe('what the screen is handed in the meantime', () => {
   });
 });
 
+describe('the second pass, on the device clock', () => {
+  // Measured relative to the process start rather than the host's clock,
+  // which the first pass had trusted and which was skewed. The cache read
+  // itself was 49 ms: 29 for the week and 19 for a status check that ran
+  // AFTER it and re-read the same blob. And a second, identical pipeline
+  // ran a second later on every launch, because the first GPS fix had no
+  // city id to compare with and so always counted as a change of city.
+  it('asks the cache status alongside the week rather than after it', () => {
+    const started = HOOK.indexOf('const statusPromise = getCacheStatus(');
+    const week = HOOK.indexOf('await Promise.allSettled(');
+    expect(started).toBeGreaterThan(-1);
+    expect(started).toBeLessThan(week);
+    expect(HOOK).toContain('const needsCacheFill = await statusPromise;');
+    expect(HOOK).not.toContain('await getCacheStatus(');
+  });
+
+  it('does not reload a city it already has on screen', () => {
+    // The launch load came from saved coordinates and set no city id, so
+    // `loadedCityIdRef.current !== summary.cityId` was `null !== id`:
+    // always true, always a reload. The coordinates the times were loaded
+    // against ARE the previous session's anchor, so comparing the fix's
+    // anchor with them is the exact test for "same city".
+    expect(HOOK).toContain('loadedCoordsRef.current = { lat: latitude, lng: longitude };');
+    expect(HOOK).toMatch(
+      /const cityChanged =\s*loadedCityIdRef\.current !== summary\.cityId && !sameAnchorAsLoaded;/,
+    );
+  });
+});
+
 describe('the boot path carries no measurement probes', () => {
   it('has no leftover timing logs', () => {
     // The numbers above came from `console.log` marks in index.js, the

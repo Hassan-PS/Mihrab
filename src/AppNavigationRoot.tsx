@@ -31,6 +31,7 @@ import {
   republishWidgetPayload,
   startWidgetPayloadSync,
 } from './widget/republishWidgetPayload';
+import { afterFirstPaint } from './boot/firstPaint';
 import { getPrayerLiveActivityModule } from './native/PrayerLiveActivity';
 import { isMacCatalyst } from './responsive/breakpoints';
 import { rescheduleAyahOfDay } from './notifications/ayahOfDay';
@@ -180,7 +181,15 @@ export function AppNavigationRoot() {
       void rescheduleDhikrReminders({ reminders: settings.dhikrReminders });
 
     };
-    sync(true);
+    // At launch, after the first frame with real times on it — this is
+    // the rebuild the comment above calls not cheap, and it was starting
+    // while the Today card was still a skeleton. Foreground resyncs and
+    // the companion/khatmah subscriptions below are untouched: the app is
+    // drawn by then. See src/boot/firstPaint.ts.
+    let live = true;
+    void afterFirstPaint().then(() => {
+      if (live) sync(true);
+    });
     const sub = AppState.addEventListener('change', state => {
       if (state === 'active') sync(false);
     });
@@ -227,6 +236,7 @@ export function AppNavigationRoot() {
       });
     });
     return () => {
+      live = false;
       sub.remove();
       unsubQuran();
       unsubKhatmah();
@@ -325,7 +335,13 @@ export function AppNavigationRoot() {
         syncWidgetTasbihQueue(),
       ]).then(() => republishWidgetPayload('queue-drain'));
     };
-    drain();
+    // The mount-time drain waits for the first frame with real times on
+    // it: it reads settings, both queues and the journal, then builds and
+    // writes a payload — a fair amount of the JS thread, spent during the
+    // few hundred milliseconds the reader is looking at a skeleton. On
+    // foreground it runs at once, as it always has: the app is already
+    // drawn then. See src/boot/firstPaint.ts.
+    void afterFirstPaint().then(drain);
     const sub = AppState.addEventListener('change', state => {
       if (state === 'active') drain();
     });

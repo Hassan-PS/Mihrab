@@ -180,10 +180,34 @@ function pickStalestCacheKey(v2: V2Shape, exclude: string): string | null {
   });
 }
 
+/**
+ * The raw blob's read, shared by everyone who asks while it is in flight.
+ *
+ * The cache is one AsyncStorage value of ~170 KB, and a cold start asks
+ * for it from several places within the same few milliseconds — the
+ * week's seven days, the cache-status check, the widget window. Each was
+ * its own round trip through the storage bridge. Only the READ is shared,
+ * and only while it is in flight: every caller still gets its own parsed
+ * object, because callers mutate what `loadV2` hands them before saving
+ * it back, and two callers holding one object would save each other's
+ * half-finished edits. Nothing is kept once the read settles, so no
+ * caller can ever be handed a blob older than a write that preceded it.
+ */
+let rawV2Inflight: Promise<string | null> | null = null;
+
+function readRawV2(): Promise<string | null> {
+  if (rawV2Inflight) return rawV2Inflight;
+  const p = AsyncStorage.getItem(STORAGE_KEY_V2).finally(() => {
+    if (rawV2Inflight === p) rawV2Inflight = null;
+  });
+  rawV2Inflight = p;
+  return p;
+}
+
 async function loadV2(): Promise<V2Shape> {
   // Try the v2 shape first.
   try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY_V2);
+    const raw = await readRawV2();
     if (raw) {
       const parsed = JSON.parse(raw) as V2Shape;
       if (parsed && typeof parsed === 'object' && parsed.caches) {
@@ -208,6 +232,7 @@ async function loadV2(): Promise<V2Shape> {
         };
         // Best-effort: write the new shape and drop the legacy key.
         try {
+          rawV2Inflight = null;
           await AsyncStorage.setItem(STORAGE_KEY_V2, JSON.stringify(v2));
           await AsyncStorage.removeItem(STORAGE_KEY_LEGACY);
         } catch {
@@ -224,6 +249,9 @@ async function loadV2(): Promise<V2Shape> {
 }
 
 async function saveV2Once(v2: V2Shape): Promise<SaveResult> {
+  // A read that is still in flight would answer with the blob from before
+  // this write; nobody who asks from here on may be handed it.
+  rawV2Inflight = null;
   try {
     await AsyncStorage.setItem(STORAGE_KEY_V2, JSON.stringify(v2));
     return { ok: true };
@@ -314,6 +342,7 @@ export async function getStoredPrayerData(): Promise<StoredPrayerData | null> {
 }
 
 export async function clearStoredPrayerData(): Promise<void> {
+  rawV2Inflight = null;
   try {
     await AsyncStorage.removeItem(STORAGE_KEY_V2);
     // Legacy too, in case migration hadn'\''t run yet.
@@ -326,18 +355,38 @@ export async function clearStoredPrayerData(): Promise<void> {
 export async function getCachedPrayerTimes(
   params: Omit<StoredPrayerData, 'months'> & { date: Date },
 ): Promise<TimingsMap | null> {
+  const [day] = await getCachedPrayerTimesMany(params, [params.date]);
+  return day;
+}
+
+/**
+ * Several days from the cache for ONE parse of it.
+ *
+ * `getCachedPrayerTimes` loads and parses the whole ~170 KB blob to
+ * answer for one day, which is fine for one day. The widget's window
+ * asked for it twenty-three times in a row, and the days behind today
+ * seven more, each a fresh round trip and a fresh parse of the same
+ * bytes — 209 ms of a cold start, measured, spent re-reading a value
+ * that had not changed between one iteration and the next. A caller
+ * with a run of dates asks once here and gets them all.
+ *
+ * Positional: `result[i]` answers `dates[i]`, null where the cache has
+ * no such day, so a caller that wants "consecutive days until the first
+ * gap" can stop at the first null without a second read.
+ */
+export async function getCachedPrayerTimesMany(
+  params: Omit<StoredPrayerData, 'months'>,
+  dates: readonly Date[],
+): Promise<Array<TimingsMap | null>> {
+  if (dates.length === 0) return [];
   const v2 = await loadV2();
-  const k = cacheKey(params);
-  const entry = v2.caches[k];
-  if (!entry) return null;
-
-  const monthKey = getMonthKey(params.date);
-  const dayKey = getDayKey(params.date);
-
-  if (entry.months[monthKey] && entry.months[monthKey][dayKey]) {
-    return entry.months[monthKey][dayKey];
-  }
-  return null;
+  const entry = v2.caches[cacheKey(params)];
+  if (!entry) return dates.map(() => null);
+  return dates.map(date => {
+    const month = entry.months[getMonthKey(date)];
+    const day = month ? month[getDayKey(date)] : undefined;
+    return day ?? null;
+  });
 }
 
 /**
@@ -409,29 +458,45 @@ async function fetchWithLocalLastResort(
 export async function getStoredPrayerTimes(
   params: Omit<StoredPrayerData, 'months'> & { date: Date },
 ): Promise<TimingsMap | null> {
-  if (
-    params.provider === 'islamiska_forbundet' ||
-    params.provider === 'habous'
-  ) {
-    try {
-      const ds =
-        params.provider === 'habous'
-          ? await getHabousDatasetTimes({
-              latitude: params.latitude,
-              longitude: params.longitude,
-              date: params.date,
-            })
-          : await getIslamiskaForbundetDatasetTimes({
-              latitude: params.latitude,
-              longitude: params.longitude,
-              date: params.date,
-            });
-      return ds.timings;
-    } catch {
-      /* dataset miss — the cache may still have it */
-    }
-  }
+  const ds = await getDatasetPrayerTimesOrNull(params);
+  if (ds) return ds;
   return getCachedPrayerTimes(params);
+}
+
+/**
+ * The prepared dataset's answer for one day, or null: null for a provider
+ * that has no dataset, and null for a day the dataset does not cover.
+ * The dataset half of `getStoredPrayerTimes`, on its own so a caller with
+ * a run of days can ask it per day (it is memoised in memory) and go to
+ * the cache ONCE for the rest, instead of per day for both.
+ */
+export async function getDatasetPrayerTimesOrNull(
+  params: Omit<StoredPrayerData, 'months'> & { date: Date },
+): Promise<TimingsMap | null> {
+  if (
+    params.provider !== 'islamiska_forbundet' &&
+    params.provider !== 'habous'
+  ) {
+    return null;
+  }
+  try {
+    const ds =
+      params.provider === 'habous'
+        ? await getHabousDatasetTimes({
+            latitude: params.latitude,
+            longitude: params.longitude,
+            date: params.date,
+          })
+        : await getIslamiskaForbundetDatasetTimes({
+            latitude: params.latitude,
+            longitude: params.longitude,
+            date: params.date,
+          });
+    return ds.timings;
+  } catch {
+    /* dataset miss — the cache may still have it */
+    return null;
+  }
 }
 
 export async function getOrFetchPrayerTimes(

@@ -10,7 +10,10 @@
  * both, so the foreground and headless paths cannot drift into disagreeing
  * about the size of the window.
  */
-import { getCachedPrayerTimes, getStoredPrayerTimes } from './prayerStorage';
+import {
+  getCachedPrayerTimesMany,
+  getDatasetPrayerTimesOrNull,
+} from './prayerStorage';
 import type { PrayerAppSettings } from '../settings/types';
 import type { TimingsMap } from '../types/prayer';
 import { addDays } from '../utils/prayerTimes';
@@ -32,7 +35,7 @@ export const WIDGET_WINDOW_DAYS = 30;
 
 /** The cache-key half of a prayer-times lookup, without the date. */
 export type DayWindowParams = {
-  provider: Parameters<typeof getCachedPrayerTimes>[0]['provider'];
+  provider: Parameters<typeof getCachedPrayerTimesMany>[0]['provider'];
   latitude: number;
   longitude: number;
   calculationMethod: PrayerAppSettings['calculationMethod'];
@@ -53,18 +56,29 @@ export async function cachedDaysFrom(
   params: DayWindowParams,
   now: Date,
 ): Promise<TimingsMap[]> {
-  const extra: TimingsMap[] = [];
-  for (let i = from; i < WIDGET_WINDOW_DAYS; i++) {
-    let day: TimingsMap | null = null;
-    try {
-      day = await getCachedPrayerTimes({ ...params, date: addDays(now, i) });
-    } catch {
-      break;
-    }
-    if (!day) break;
-    extra.push(day);
+  // One read of the cache for the whole run, not one per day. The loop
+  // this replaced parsed the ~170 KB blob twenty-three times in a row —
+  // 209 ms of every cold start, measured — to learn the same answer it
+  // would have learned from one parse.
+  const dates: Date[] = [];
+  for (let i = from; i < WIDGET_WINDOW_DAYS; i++) dates.push(addDays(now, i));
+  let days: Array<TimingsMap | null>;
+  try {
+    days = await getCachedPrayerTimesMany(params, dates);
+  } catch {
+    return [];
   }
-  return extra;
+  return gaplessPrefix(days);
+}
+
+/** Everything up to the first missing day — the invariant the arrays keep. */
+function gaplessPrefix(days: ReadonlyArray<TimingsMap | null>): TimingsMap[] {
+  const out: TimingsMap[] = [];
+  for (const day of days) {
+    if (!day) break;
+    out.push(day);
+  }
+  return out;
 }
 
 /**
@@ -93,16 +107,24 @@ export async function cachedDaysBefore(
   params: DayWindowParams,
   now: Date,
 ): Promise<TimingsMap[]> {
-  const past: TimingsMap[] = [];
-  for (let i = 1; i <= PAST_DAYS; i++) {
-    let day: TimingsMap | null = null;
+  const dates: Date[] = [];
+  for (let i = 1; i <= PAST_DAYS; i++) dates.push(addDays(now, -i));
+  // The dataset first, per day — it is memoised in memory once read, so
+  // this costs nothing after the first ask — and then ONE read of the
+  // cache for every day the dataset did not have, rather than one per day.
+  const fromDataset = await Promise.all(
+    dates.map(date => getDatasetPrayerTimesOrNull({ ...params, date })),
+  );
+  const missing = dates.filter((_, i) => fromDataset[i] == null);
+  let fromCache: Array<TimingsMap | null> = [];
+  if (missing.length > 0) {
     try {
-      day = await getStoredPrayerTimes({ ...params, date: addDays(now, -i) });
+      fromCache = await getCachedPrayerTimesMany(params, missing);
     } catch {
-      break;
+      fromCache = missing.map(() => null);
     }
-    if (!day) break;
-    past.push(day);
   }
-  return past;
+  let m = 0;
+  const days = fromDataset.map(d => (d != null ? d : fromCache[m++] ?? null));
+  return gaplessPrefix(days);
 }

@@ -99,6 +99,31 @@ function coerceWidgetOpacity(value: unknown): number {
 }
 
 /**
+ * The one read in flight, shared by everyone who asks while it is.
+ *
+ * Six callers ask for the settings inside the first 35 ms of a cold
+ * start — the provider that hydrates the app, the widget payload, the
+ * Live Activity, the widget-queue drain — and each used to do its own
+ * AsyncStorage read, its own Keychain/Keystore read, its own parse and
+ * its own pass through the migrations below, all racing each other for
+ * the storage bridge while the first screen waited on the same bridge.
+ * Measured: the hydration read that should have taken 34 ms was landing
+ * in the middle of five others.
+ *
+ * Concurrent callers now share the promise. Only CONCURRENT ones: the
+ * slot is emptied the moment the read settles, so the next call reads
+ * fresh — and it is emptied by every write, so a caller who asks after
+ * a save never receives the answer from before it. Nothing is cached
+ * across time; nothing is served stale.
+ */
+let inflightLoad: Promise<PrayerAppSettings> | null = null;
+
+/** Forget the in-flight read: what it would return is no longer current. */
+function invalidateInflightLoad(): void {
+  inflightLoad = null;
+}
+
+/**
  * Load settings — task #16.
  *
  * Settings live in TWO stores:
@@ -113,20 +138,36 @@ function coerceWidgetOpacity(value: unknown): number {
  * inline on every `loadSettings()` call but is idempotent — once the
  * plaintext blob no longer carries coordinates, subsequent loads no-op.
  */
-export async function loadSettings(): Promise<PrayerAppSettings> {
+export function loadSettings(): Promise<PrayerAppSettings> {
+  if (inflightLoad) return inflightLoad;
+  const p = loadSettingsUncached().finally(() => {
+    // Only clear our own slot: a write may already have replaced it.
+    if (inflightLoad === p) inflightLoad = null;
+  });
+  inflightLoad = p;
+  return p;
+}
+
+async function loadSettingsUncached(): Promise<PrayerAppSettings> {
+  // Two stores, one round trip. The plaintext blob and the encrypted one
+  // are independent reads that were awaited one after the other; on a
+  // phone the Keychain is the slower of the two and it was queued behind
+  // the other for no reason.
   let plaintextRaw: string | null = null;
-  try {
-    plaintextRaw = await AsyncStorage.getItem(KEY);
-  } catch {
+  let secure: SecureSettings = {};
+  const [plainResult, secureResult] = await Promise.allSettled([
+    AsyncStorage.getItem(KEY),
+    loadSecureSettings(),
+  ]);
+  if (plainResult.status === 'rejected') {
     return DEFAULT_SETTINGS;
   }
-
-  let secure: SecureSettings = {};
-  try {
-    secure = await loadSecureSettings();
-  } catch {
-    // Already logged inside loadSecureSettings. Fall through with empty.
+  plaintextRaw = plainResult.value;
+  if (secureResult.status === 'fulfilled') {
+    secure = secureResult.value;
   }
+  // A rejected secure read was already logged inside loadSecureSettings;
+  // fall through with empty, as before.
 
   if (!plaintextRaw) {
     // First-ever launch (no plaintext blob). Encrypted store may still
@@ -380,6 +421,9 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
 let _saveQueue: Promise<void> = Promise.resolve();
 
 async function performSave(settings: PrayerAppSettings): Promise<void> {
+  // Before the write, not after: a read that starts during the write must
+  // not be handed the promise that started before it.
+  invalidateInflightLoad();
   const secure = extractSecureFields(settings as unknown as Record<string, unknown>);
   const plaintext = stripSecureFields(
     settings as unknown as Record<string, unknown>,
@@ -448,6 +492,7 @@ export async function resetAppData(): Promise<void> {
     // re-fetch fresh.
     'islamiska_forbundet.reverse.v1',
   ];
+  invalidateInflightLoad();
   try {
     await AsyncStorage.multiRemove(asyncKeys);
   } catch (e) {

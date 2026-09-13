@@ -13,15 +13,23 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { cachedDaysBefore, PAST_DAYS } from '../src/prayer/widgetDayWindow';
 
-const mockCached = jest.fn();
+const mockDataset = jest.fn();
+const mockMany = jest.fn();
 jest.mock('../src/prayer/prayerStorage', () => ({
-  getCachedPrayerTimes: (...a: unknown[]) => mockCached(...a),
-  // The device-only reader: dataset first, then the cache, never a fetch.
-  getStoredPrayerTimes: (...a: unknown[]) => mockCached(...a),
+  // The device-only readers: the dataset rung per day, then the cache
+  // ONCE for every day the dataset did not have. Never a fetch.
+  getDatasetPrayerTimesOrNull: (...a: unknown[]) => mockDataset(...a),
+  getCachedPrayerTimesMany: (...a: unknown[]) => mockMany(...a),
 }));
 
 const read = (p: string) =>
   readFileSync(join(__dirname, '..', p), 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, '');
+
+/** A cache that holds the days for which `has(date)` is true. */
+const cacheWith = (has: (d: Date) => boolean) =>
+  mockMany.mockImplementation(async (_p: unknown, dates: Date[]) =>
+    dates.map(d => (has(d) ? { Fajr: `0${d.getDate()}:00` } : null)),
+  );
 
 describe('the days behind today', () => {
   const params = {
@@ -33,33 +41,61 @@ describe('the days behind today', () => {
   };
   const now = new Date(2026, 8, 9, 12, 0);
 
+  beforeEach(() => {
+    mockDataset.mockReset();
+    mockMany.mockReset();
+    mockDataset.mockResolvedValue(null);
+  });
+
   it('come from the cache alone, nearest first, and stop at the first gap', async () => {
-    mockCached.mockImplementation(async ({ date }: { date: Date }) =>
-      date.getDate() >= 5 ? { Fajr: `0${date.getDate()}:00` } : null,
-    );
+    cacheWith(d => d.getDate() >= 5);
     const past = await cachedDaysBefore(params, now);
     expect(past.map(d => d.Fajr)).toEqual(['08:00', '07:00', '06:00', '05:00']);
-    // Never a fetch: the only thing asked is the cache.
-    expect(mockCached).toHaveBeenCalledTimes(5);
+    // Never a fetch: the only thing asked is the cache — and asked ONCE,
+    // for the whole week behind, not once per day. The loop this replaced
+    // parsed the ~170 KB blob seven times to learn what one parse tells.
+    expect(mockMany).toHaveBeenCalledTimes(1);
+    expect((mockMany.mock.calls[0][1] as Date[]).map(d => d.getDate())).toEqual([
+      8, 7, 6, 5, 4, 3, 2,
+    ]);
   });
 
   it('reach a week back at most', async () => {
-    mockCached.mockResolvedValue({ Fajr: '04:00' });
+    cacheWith(() => true);
     const past = await cachedDaysBefore(params, now);
     expect(past).toHaveLength(PAST_DAYS);
     expect(PAST_DAYS).toBe(7);
   });
 
   it('treat a cache that throws as a cache that has nothing', async () => {
-    mockCached.mockRejectedValue(new Error('disk'));
+    mockMany.mockRejectedValue(new Error('disk'));
     await expect(cachedDaysBefore(params, now)).resolves.toEqual([]);
+  });
+
+  it('read the dataset rung first, and the cache only for what it lacks', async () => {
+    // A Swedish reader: the dataset has the two nearest days, the cache
+    // the two before that, and nothing holds the fifth. The dataset is
+    // asked per day (memoised, free after the first), the cache once
+    // for exactly the days the dataset did not answer — and the result
+    // is still one gapless run, nearest first.
+    mockDataset.mockImplementation(async ({ date }: { date: Date }) =>
+      date.getDate() >= 7 ? { Fajr: `ds-${date.getDate()}` } : null,
+    );
+    cacheWith(d => d.getDate() === 5 || d.getDate() === 6);
+    const past = await cachedDaysBefore(params, now);
+    expect(past.map(d => d.Fajr)).toEqual(['ds-8', 'ds-7', '06:00', '05:00']);
+    expect(mockDataset).toHaveBeenCalledTimes(7);
+    expect(mockMany).toHaveBeenCalledTimes(1);
+    expect((mockMany.mock.calls[0][1] as Date[]).map(d => d.getDate())).toEqual([
+      6, 5, 4, 3, 2,
+    ]);
   });
 
   it('read through the dataset rung, which the cache never holds', () => {
     // The two dataset providers are served before the cache and never
     // written to it — a cache-only reader saw nothing for them.
     const src = readFileSync(join(__dirname, '..', 'src/prayer/widgetDayWindow.ts'), 'utf8');
-    expect(src).toMatch(/getStoredPrayerTimes\(\{ \.\.\.params, date: addDays\(now, -i\) \}\)/);
+    expect(src).toMatch(/getDatasetPrayerTimesOrNull\(\{ \.\.\.params, date \}\)/);
     const storage = readFileSync(join(__dirname, '..', 'src/prayer/prayerStorage.ts'), 'utf8');
     const fn = storage.slice(storage.indexOf('export async function getStoredPrayerTimes'), storage.indexOf('export async function getOrFetchPrayerTimes'));
     expect(fn).toMatch(/getIslamiskaForbundetDatasetTimes/);
