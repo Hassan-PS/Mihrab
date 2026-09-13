@@ -82,27 +82,33 @@ export function ResetScopePicker({
       statusBarTranslucent
       onRequestClose={onCancel}
     >
-      {/*
-        `accessible={false}` on both, and it is not cosmetic. A Pressable is
-        an accessibility element, and on iOS an element with children
-        SWALLOWS them: VoiceOver reads the whole card as one long label and
-        the four scope rows cannot be reached individually. Found by
-        `idb ui describe-all` on the simulator, which returned exactly one
-        node for the entire sheet. Android exposes the children either way,
-        which is why it looked fine there.
-      */}
-      <Pressable
-        accessible={false}
-        style={[styles.scrim, { backgroundColor: palette.overlay }]}
-        onPress={onCancel}
-      >
+      <View style={[styles.scrim, { backgroundColor: palette.overlay }]}>
+        {/*
+          THE DISMISS TARGET SITS BEHIND THE CARD, NOT AROUND IT — see the
+          long note in responsive/ResponsiveModal.tsx. A Pressable wrapped
+          around a card claims the touch responder on touch-down, which
+          stops the native scroll view inside from ever starting; a fling
+          beats the round trip and scrolls, a thumb does not. The list of
+          scopes below is a ScrollView, so this sheet had the same fault.
+
+          `accessible={false}`, and it is not cosmetic. A Pressable is an
+          accessibility element, and on iOS an element with children
+          SWALLOWS them: VoiceOver reads the whole card as one long label
+          and the four scope rows cannot be reached individually. Found by
+          `idb ui describe-all` on the simulator, which returned exactly
+          one node for the entire sheet. Android exposes the children
+          either way, which is why it looked fine there.
+        */}
         <Pressable
           accessible={false}
+          style={StyleSheet.absoluteFill}
+          onPress={onCancel}
+        />
+        <View
           style={[
             styles.sheet,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
           ]}
-          onPress={() => {}}
         >
           <Text style={[styles.title, { color: palette.text }]}>
             {t('log.resetTitle', 'Reset the prayer log')}
@@ -187,8 +193,8 @@ export function ResetScopePicker({
               {t('common.cancel', 'Cancel')}
             </Text>
           </Pressable>
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }

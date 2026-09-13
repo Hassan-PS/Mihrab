@@ -16,6 +16,7 @@ import {
   Modal,
   Pressable,
   StyleSheet,
+  View,
   useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -67,17 +68,43 @@ export function ResponsiveModal({
       transparent
       animationType={wide ? 'fade' : 'slide'}
       onRequestClose={onClose}>
-      <Pressable
-        accessibilityLabel={closeLabel}
-        onPress={onClose}
+      <View
         style={[
           styles.backdrop,
           { backgroundColor: palette.overlay },
           wide ? styles.center : styles.bottom,
         ]}>
-        {/* Inner Pressable swallows taps so touching the card doesn't dismiss. */}
+        {/*
+          THE DISMISS TARGET SITS BEHIND THE CARD, NOT AROUND IT.
+
+          It used to wrap it: a Pressable for the backdrop, and a second
+          Pressable around the card whose only job was to swallow taps so
+          touching the sheet did not close it. That second one also
+          swallowed SCROLLING, and it did it in a way that looked like a
+          working sheet to every test.
+
+          A Pressable claims the JS touch responder on touch-down, and RN
+          on Android answers that by telling the native hierarchy to stop
+          intercepting — which is precisely what a native ScrollView does
+          to start scrolling. The claim is a round trip through the JS
+          thread, so the outcome is a RACE: a fast fling reaches the
+          native scroll view before the answer comes back and scrolls
+          normally; a finger dragging at human speed does not, and the
+          list sits still. `adb shell input swipe … 300` scrolled the
+          changelog on every device tried; the same swipe over 1800 ms
+          never moved it once. So did a person's thumb.
+
+          A plain View underneath needs no responder: taps on the card
+          land on a view with no handler and do nothing, which is all the
+          swallowing that was ever wanted, and the scroll view below is
+          left to negotiate with the platform on its own.
+        */}
         <Pressable
-          onPress={() => {}}
+          accessibilityLabel={closeLabel}
+          onPress={onClose}
+          style={StyleSheet.absoluteFill}
+        />
+        <View
           style={[
             bare ? styles.bareCard : styles.card,
             { backgroundColor: palette.card },
@@ -94,8 +121,8 @@ export function ResponsiveModal({
             maxHeightRatio ? { maxHeight: height * maxHeightRatio } : null,
           ]}>
           {children}
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }
