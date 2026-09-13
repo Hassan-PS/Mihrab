@@ -50,7 +50,7 @@ import { getInstalledAppVersionName } from '../appVersion';
 import { isRtlLanguage } from '../i18n/layoutDirection';
 import { RADIUS, SPACING } from '../theme/tokens';
 import { TYPE, typeStyle } from '../theme/typography';
-import { parseNote, type NoteBlock } from './notesMarkup';
+import { parseNote, type NoteBlock, type Span } from './notesMarkup';
 import {
   CHANGELOG,
   compareVersions,
@@ -171,62 +171,105 @@ export async function pendingChangelog(): Promise<string | null> {
 /**
  * One note's blocks, drawn.
  *
- * `language` is the note's own, which is not always the reader's: ten of
- * the app's thirteen languages have no translated notes and get the
- * English one. An English paragraph inside an Arabic reader's mirrored
- * layout is laid out right-to-left unless it is told otherwise, which
- * puts the full stop on the left and the bullet on the right of text
- * that reads the other way. `writingDirection` is that instruction.
+ * `language` is the note's own, `reader` is the app's. They differ for
+ * exactly the languages that have no translated notes and fall back to
+ * English — and of those, Urdu is laid out right to left. An English
+ * paragraph inside a mirrored tree is laid out by the tree: the block
+ * hugs the right edge, the bullet sits on the right of the text, and the
+ * bidi algorithm puts the full stop at the START of the line, because in
+ * a right-to-left paragraph that is where the end is.
+ *
+ * Three things put it right, and all three are needed:
+ *
+ *   • `textAlign` to the note's own side — physical `left`/`right`, since
+ *     the tree's `start` is the wrong side by definition here;
+ *   • `row-reverse` on the bullet rows, which inside a mirrored tree is
+ *     the way to say "the other way round" — the ONE place in this file
+ *     that reverses, and only when the two directions disagree;
+ *   • the text wrapped in a directional isolate, so the punctuation at
+ *     its ends belongs to the run and not to the paragraph. This is what
+ *     Android needs: `writingDirection` is honoured on iOS only.
+ *
+ * When the two agree — every other reader — none of this fires and the
+ * tree's own direction does the work, as i18n/layoutDirection.ts asks.
  */
+const RLI = String.fromCharCode(0x2067);
+
+/**
+ * The `textAlign` that puts a note against its OWN edge when the layout
+ * runs the other way. It is `right` — for an English note in an Urdu
+ * layout AND for the reverse — and the reason is worth writing down,
+ * because `left` is what anyone would reach for first, and `left` puts
+ * the English on the right on both platforms.
+ *
+ * Neither platform treats `left`/`right` as physical once a layout is
+ * mirrored. iOS mirrors the word against the LAYOUT direction: under a
+ * right-to-left layout, `right` means the left edge. Android mirrors it
+ * against the TEXT direction whenever that disagrees with the layout's:
+ * English under a right-to-left layout is such a disagreement, and there
+ * `right` resolves to the text's own normal edge, which for English is
+ * the left. Two different rules, and in the one situation this function
+ * is for — text and layout disagreeing — both send `right` to the same
+ * place: the text's own start. `left` goes the other way on both.
+ *
+ * Seen on the Android emulator and the iOS simulator, both words, before
+ * this was settled. Only ever used when the two directions disagree; when
+ * they agree the tree's own `start` is right and nothing is set.
+ */
+export const ALIGN_TO_OWN_SIDE = 'right' as const;
+
 const NoteBody = memo(function NoteBody({
   blocks,
   language,
+  reader,
 }: {
   blocks: NoteBlock[];
   language: string;
+  reader: string;
 }) {
   const { palette } = useAppPalette();
   const rtl = isRtlLanguage(language);
-  const dir = { writingDirection: rtl ? 'rtl' : 'ltr' } as const;
+  const mismatched = rtl !== isRtlLanguage(reader);
+  const text = [
+    typeStyle('body'),
+    { color: palette.text, writingDirection: rtl ? 'rtl' : 'ltr' } as const,
+    mismatched ? { textAlign: ALIGN_TO_OWN_SIDE } : null,
+  ];
+  const open = mismatched ? (rtl ? RLI : LRI) : '';
+  const close = mismatched ? PDI : '';
+
+  // An array rather than a fragment, so the isolates are the Text's own
+  // first and last children — which is what the test can see, and what a
+  // reader of the tree expects to find.
+  const spans = (runs: Span[]) => [
+    open,
+    ...runs.map((s, k) => (
+      <Text key={k} style={s.bold ? styles.bold : undefined}>
+        {s.text}
+      </Text>
+    )),
+    close,
+  ];
 
   return (
     <View style={styles.body}>
       {blocks.map((block, i) =>
         block.kind === 'paragraph' ? (
-          <Text
-            key={i}
-            style={[typeStyle('body'), dir, { color: palette.text }]}>
-            {block.spans.map((s, j) => (
-              <Text key={j} style={s.bold ? styles.bold : undefined}>
-                {s.text}
-              </Text>
-            ))}
+          <Text key={i} style={text}>
+            {spans(block.spans)}
           </Text>
         ) : (
           <View key={i} style={styles.list}>
             {block.items.map((item, j) => (
-              // `row` and not `row-reverse`: inside a mirrored tree the
-              // direction has already been applied, and reversing here
-              // would flip it back. See i18n/layoutDirection.ts.
-              <View key={j} style={styles.item}>
+              <View
+                key={j}
+                style={[styles.item, mismatched ? styles.itemReversed : null]}>
                 <Text
                   style={[styles.bullet, { color: palette.muted }]}
                   accessibilityElementsHidden>
-                  {'•'}
+                  {'\u2022'}
                 </Text>
-                <Text
-                  style={[
-                    typeStyle('body'),
-                    styles.itemText,
-                    dir,
-                    { color: palette.text },
-                  ]}>
-                  {item.map((s, k) => (
-                    <Text key={k} style={s.bold ? styles.bold : undefined}>
-                      {s.text}
-                    </Text>
-                  ))}
-                </Text>
+                <Text style={[styles.itemText, text]}>{spans(item)}</Text>
               </View>
             ))}
           </View>
@@ -307,7 +350,7 @@ function ReleaseRow({
           </Text>
         ) : null}
       </View>
-      <NoteBody blocks={blocks} language={note.language} />
+      <NoteBody blocks={blocks} language={note.language} reader={language} />
     </View>
   );
 }
@@ -467,11 +510,13 @@ const styles = StyleSheet.create({
   },
   body: { gap: SPACING.sm },
   list: { gap: SPACING.sm },
-  item: { flexDirection: 'row', alignItems: 'flex-start' },
+  // `gap`, not a margin on the bullet: a margin has a side, and the side
+  // is wrong the moment the row is reversed.
+  item: { flexDirection: 'row', alignItems: 'flex-start', gap: SPACING.sm },
+  itemReversed: { flexDirection: 'row-reverse' },
   bullet: {
     fontSize: TYPE.body.fontSize,
     lineHeight: TYPE.body.lineHeight,
-    marginEnd: SPACING.sm,
   },
   itemText: { flex: 1 },
   bold: { fontWeight: '700' },

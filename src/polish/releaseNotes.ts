@@ -146,7 +146,12 @@ export function noteFor(
   // 'en-US', 'zh-Hans', 'sv' → 'en', 'zh', 'sv'. i18next hands back
   // whatever the device reported, which is not always the bare code.
   const base = (language ?? '').split(/[-_]/)[0].toLowerCase();
-  const text = base ? release.notes[base] : undefined;
+  // Own keys only: `notes` is a plain object, and a plain object answers
+  // `notes.constructor` with a function. No language is called that, but
+  // a lookup keyed by outside input should not be able to find out.
+  const text = Object.prototype.hasOwnProperty.call(release.notes, base)
+    ? release.notes[base]
+    : undefined;
   if (text) return { text, language: base };
   return {
     text: release.notes[BASE_LANGUAGE] ?? '',

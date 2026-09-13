@@ -11,7 +11,7 @@ export type ReleaseNote = {
   code: number;
   /** The name a reader knows it as, e.g. '2.18.5'. */
   version: string;
-  /** ISO date of the release tag, or null for one not yet tagged. */
+  /** ISO date of the release tag. Null only if git could not date it. */
   date: string | null;
   /** Locale code to the note's raw text. 'en' is always present. */
   notes: Record<string, string>;

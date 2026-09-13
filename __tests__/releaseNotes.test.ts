@@ -83,6 +83,43 @@ describe('the generated table', () => {
   });
 });
 
+describe('release.sh carries the table through a release', () => {
+  const script = readFileSync(
+    require.resolve('../scripts/release.sh'),
+    'utf8',
+  );
+  const stamp = script.indexOf('sed -i \'\' "s/versionCode $OLD_CODE/versionCode $CODE/"');
+  const rebuild = script.indexOf('scripts/build-release-notes.js" >/dev/null');
+  const build = script.indexOf('assemblePlayRelease bundlePlayRelease');
+
+  it('rebuilds it AFTER stamping the version and BEFORE building', () => {
+    // The generator reads build.gradle to know which release is being
+    // cut. Run before the stamp it reads the OLD code, files the new
+    // notes as a future release, and the APK ships a changelog that
+    // stops one release short of itself. This is the order that bit.
+    expect(stamp).toBeGreaterThan(0);
+    expect(rebuild).toBeGreaterThan(stamp);
+    expect(build).toBeGreaterThan(rebuild);
+  });
+
+  it('refuses to build unless the table names the version being cut', () => {
+    expect(script).toMatch(/grep -q "version: '\$VERSION',"/);
+  });
+
+  it('commits the rebuilt table into the release commit', () => {
+    // Left out of the `git add` list the APK is right and the tag wrong:
+    // F-Droid builds from the tag.
+    const add = script.slice(script.indexOf('git add "$GRADLE_FILE"'));
+    const commit = add.indexOf('git commit -q -m "Release');
+    expect(add.slice(0, commit)).toContain('src/polish/releaseNotes.generated.ts');
+  });
+
+  it('reverts it with everything else phase 2 writes', () => {
+    const revert = /^REVERT="([^"]+)"/m.exec(script)?.[1] ?? '';
+    expect(revert.split(' ')).toContain('src/polish/releaseNotes.generated.ts');
+  });
+});
+
 describe('what counts as the last seen version', () => {
   it('is the stored one when there is one', () => {
     expect(lastSeenFrom('2.18.6', true)).toBe('2.18.6');
@@ -228,5 +265,9 @@ describe('which language a note is read in', () => {
     expect(noteFor(release, undefined).language).toBe('en');
     expect(noteFor(release, '').language).toBe('en');
     expect(noteFor(release, 'zz-ZZ').text).toBe(release.notes.en);
+    // A plain object answers `.constructor` with a function; a lookup
+    // keyed by outside input must not be able to find it.
+    expect(noteFor(release, 'constructor').text).toBe(release.notes.en);
+    expect(noteFor(release, '__proto__').text).toBe(release.notes.en);
   });
 });

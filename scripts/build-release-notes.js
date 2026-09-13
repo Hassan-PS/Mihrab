@@ -32,12 +32,19 @@
  * done here, once, and the result is committed.
  *
  * `--check` re-runs the join and fails if the committed file does not
- * match, which is what `releaseNotesGenerated.test.ts` calls. It does NOT
- * need git for a release already in the table: the version and date it
- * found last time are read back out of the generated file and reused. Git
- * is consulted only for a versionCode that has appeared since — which is
- * exactly the moment somebody is cutting a release, on a machine that has
- * the tags.
+ * match, which is what `releaseNotes.test.ts` calls. It does NOT need git
+ * for a release already in the table: the version and date it found last
+ * time are read back out of the generated file and reused. Git is
+ * consulted for a versionCode that has appeared since — the moment
+ * somebody is cutting a release, on a machine that has the tags — and for
+ * an entry whose date is missing, so a table can repair itself but never
+ * forget.
+ *
+ * The release being cut is the one case with notes and no tag: release.sh
+ * writes the notes, runs this, THEN tags. It is dated today, which is what
+ * the tag will say. Notes for a version higher than build.gradle's are
+ * simply not in the table yet — writing the notes before the bump is the
+ * right order, and it should not fail the suite in between.
  */
 
 const { execFileSync } = require('child_process');
@@ -49,28 +56,42 @@ const FASTLANE = path.join(ROOT, 'fastlane', 'metadata', 'android');
 const GRADLE = path.join(ROOT, 'android', 'app', 'build.gradle');
 const OUT = path.join(ROOT, 'src', 'polish', 'releaseNotes.generated.ts');
 
-/**
- * Play's folder names to the app's own locale codes.
- *
- * Only these three have notes. The other ten Play folders exist for the
- * store listing and carry no changelogs, and the app falls back to English
- * for them — see `noteFor` in releaseNotes.ts. Adding a language here is
- * adding a folder of .txt files and nothing else.
- */
-const LOCALES = [
-  { play: 'en-US', app: 'en' },
-  { play: 'ar', app: 'ar' },
-  { play: 'sv-SE', app: 'sv' },
-];
-
 /** The one that must exist for a release to be in the table at all. */
 const BASE = 'en';
+
+/**
+ * Every Play locale folder that carries any changelogs, mapped to the
+ * app's own code: `en-US` → `en`, `sv-SE` → `sv`, `ar` → `ar`. Discovered
+ * rather than listed, so translating the notes into a fourth language is
+ * a folder of .txt files and nothing else — no edit here, no test to
+ * update. Today that is three folders; the other ten exist for the store
+ * listing and carry no changelogs, and the app falls back to English for
+ * them (see `noteFor` in releaseNotes.ts).
+ *
+ * Sorted with English first and the rest alphabetical, so the generated
+ * file is byte-stable whatever order the filesystem returns.
+ */
+function locales() {
+  const found = [];
+  for (const play of fs.readdirSync(FASTLANE)) {
+    const dir = path.join(FASTLANE, play, 'changelogs');
+    if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) continue;
+    if (!fs.readdirSync(dir).some(f => /^\d+\.txt$/.test(f))) continue;
+    found.push({ play, app: play.split('-')[0].toLowerCase() });
+  }
+  return found.sort((a, b) =>
+    a.app === BASE ? -1 : b.app === BASE ? 1 : a.app.localeCompare(b.app),
+  );
+}
+const LOCALES = locales();
 
 // ------------------------------------------------------------- inputs
 
 /** Every versionCode that has an English note, oldest first. */
 function codesWithNotes() {
-  const dir = path.join(FASTLANE, 'en-US', 'changelogs');
+  const base = LOCALES.find(l => l.app === BASE);
+  if (!base) throw new Error(`no ${BASE} changelogs under ${FASTLANE}`);
+  const dir = path.join(FASTLANE, base.play, 'changelogs');
   return fs
     .readdirSync(dir)
     .filter(f => /^\d+\.txt$/.test(f))
@@ -147,6 +168,13 @@ function fromTags() {
   return tagCache;
 }
 
+/** The local calendar date, the way `git log --date=short` would print it. */
+function today() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 function git(args) {
   return execFileSync('git', args, {
     cwd: ROOT,
@@ -196,17 +224,32 @@ function build() {
     // than an absence.
     if (!notes[BASE]) continue;
 
+    // What the committed file already knows is reused as-is — EXCEPT a
+    // missing date, which is asked of git again every time. A date can
+    // only be missing for a release that was generated before its tag
+    // existed, and a table that trusted its own null would keep it for
+    // the life of the file.
     let resolved = known.get(code);
-    if (!resolved) resolved = fromTags().get(code);
-    if (!resolved && code === tree.code) {
-      // Written ahead of the tag, which is the order release.sh enforces.
-      resolved = { version: tree.version, date: null };
+    if (!resolved || resolved.date === null) {
+      resolved = fromTags().get(code) ?? resolved;
     }
     if (!resolved) {
-      throw new Error(
-        `versionCode ${code} has release notes but no tag and no entry in ` +
-          `${path.relative(ROOT, OUT)}. Run this script on a clone with tags.`,
-      );
+      if (code === tree.code) {
+        // The release being cut right now: release.sh writes the notes,
+        // runs this, then tags — so the tag does not exist yet and the
+        // date is today's. The tag, minutes later, agrees.
+        resolved = { version: tree.version, date: today() };
+      } else if (code > tree.code) {
+        // Notes written ahead of the version bump. Not shipped, not being
+        // shipped, not in the table — and not an error, because writing
+        // the notes first is the right order to do it in.
+        continue;
+      } else {
+        throw new Error(
+          `versionCode ${code} has release notes but no tag and no entry ` +
+            `in ${path.relative(ROOT, OUT)}. Run this on a clone with tags.`,
+        );
+      }
     }
     entries.push({ code, ...resolved, notes });
   }
@@ -259,7 +302,7 @@ export type ReleaseNote = {
   code: number;
   /** The name a reader knows it as, e.g. '2.18.5'. */
   version: string;
-  /** ISO date of the release tag, or null for one not yet tagged. */
+  /** ISO date of the release tag. Null only if git could not date it. */
   date: string | null;
   /** Locale code to the note's raw text. 'en' is always present. */
   notes: Record<string, string>;
@@ -299,10 +342,7 @@ function main() {
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   fs.writeFileSync(OUT, next);
   const count = (next.match(/^  \{$/gm) || []).length;
-  console.log(
-    `wrote ${path.relative(ROOT, OUT)} — ${count} releases, ` +
-      `${(Buffer.byteLength(next) / 1024).toFixed(1)} KB`,
-  );
+  console.log(`wrote ${path.relative(ROOT, OUT)} — ${count} releases`);
 }
 
 // Importable so the test can regenerate in memory and compare, the same

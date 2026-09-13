@@ -502,6 +502,18 @@ done
 Under 500 **characters** each — `wc -m`, not `wc -c`; Arabic and Swedish
 are well under the limit in characters and can be over it in bytes.
 
+These three files are also what the app itself shows. The "What's new"
+sheet that opens on the first launch after an update, and again from
+Settings → About, is built from every `changelogs/<code>.txt` there is —
+joined to the version name and the tag date in
+`src/polish/releaseNotes.generated.ts`, which `release.sh` rebuilds after
+stamping the version and commits with the release. The other ten
+languages fall back to the English note; add a `changelogs/` folder under
+a locale and the app picks it up. Write for the reader, not the reviewer:
+the CHANGELOG.md entry can say what was wrong and why, the note should
+say what is different now. Bullets (`•`) and plain paragraphs are the
+whole format; `**bold**` is honoured if you ever want a lead-in.
+
 ### If something fails partway
 
 - **Before the "Publishing" step** — nothing has left your machine. The

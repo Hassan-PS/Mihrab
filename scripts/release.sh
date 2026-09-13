@@ -250,7 +250,7 @@ JOURNAL="$ROOT/docs/release-log.md"
 # site is fourteen files and a list of them here goes stale the moment it
 # grows. An abort that leaves half the site stamped is an abort that makes
 # the next run refuse to start on a dirty tree, with no clue why.
-REVERT="git checkout -- android/app/build.gradle ios/PrayerApp.xcodeproj/project.pbxproj docs contrib/fdroid/com.prayer_times.yml"
+REVERT="git checkout -- android/app/build.gradle ios/PrayerApp.xcodeproj/project.pbxproj docs contrib/fdroid/com.prayer_times.yml src/polish/releaseNotes.generated.ts"
 
 current_version() { grep -o 'versionName "[^"]*"' "$GRADLE_FILE" | head -1 | cut -d'"' -f2; }
 current_code()    { grep -o 'versionCode [0-9]*'  "$GRADLE_FILE" | head -1 | awk '{print $2}'; }
@@ -353,15 +353,6 @@ for loc in $LOCALES; do
     || die "$loc/changelogs/$CODE.txt is $chars characters — Play's limit is 500"
   ok "release notes for $loc ($chars chars)"
 done
-
-# The same notes, joined to this version's name and date for the app's own
-# changelog sheet. Regenerated here rather than left to the test that
-# checks it: the notes for $CODE were written minutes ago and the table is
-# stale by definition, and failing the suite over a file this script can
-# write itself is a gate that teaches nothing.
-node "$ROOT/scripts/build-release-notes.js" >/dev/null \
-  || die "could not rebuild src/polish/releaseNotes.generated.ts"
-ok "in-app release notes rebuilt"
 
 # The cask is the only code that runs when a Mac replaces the app, and it
 # is what stops the widgets freezing on upgrade — and, since 2026-08-29,
@@ -498,6 +489,21 @@ node "$ROOT/scripts/build-site.js" --check >/dev/null \
 [ "$(current_code)" = "$CODE" ] || die "gradle stamp did not take"
 grep -q "MARKETING_VERSION = $VERSION;" "$PBXPROJ" || die "pbxproj stamp did not take"
 ok "build.gradle, pbxproj, site and F-Droid recipe all say $VERSION ($CODE)"
+
+# The in-app changelog, AFTER the stamp and BEFORE the build. The
+# generator takes build.gradle's versionCode as "the release being cut"
+# and dates it today; run before the stamp it would read $OLD_CODE, treat
+# $CODE's notes as a future release and leave them out — and the APK
+# built a minute later would carry a changelog that stops one release
+# short of itself. Phase 1's jest passed against the committed table
+# because, before the stamp, that table WAS current.
+node "$ROOT/scripts/build-release-notes.js" >/dev/null \
+  || die "could not rebuild src/polish/releaseNotes.generated.ts"
+node "$ROOT/scripts/build-release-notes.js" --check >/dev/null \
+  || die "the in-app changelog is still out of date after rebuilding it"
+grep -q "version: '$VERSION'," "$ROOT/src/polish/releaseNotes.generated.ts" \
+  || die "the in-app changelog does not carry $VERSION — is $CODE.txt in place?"
+ok "in-app changelog carries $VERSION ($CODE)"
 
 step "Android"
 # TWO INVOCATIONS, deliberately. The play and fdroid flavors have
@@ -654,10 +660,16 @@ step "Publishing"
 # 2.15.0 in English and 2.14.4 everywhere else: the stamp lands on disk
 # either way, so local jest is green before and after and the mismatch is
 # only visible in CI, on a commit that is already tagged and published.
+#
+# And the in-app changelog table, rebuilt in phase 2 with this release in
+# it. Left out of this list the APK would be right and the tag wrong: an
+# F-Droid build from the tag would ship a changelog one release short,
+# and `releaseNotes.test.ts` would fail on the tagged commit.
 git add "$GRADLE_FILE" "$PBXPROJ" "$ROOT/docs" \
         "$ROOT/contrib/fdroid/com.prayer_times.yml" \
         "$JOURNAL" \
-        "$ROOT/fastlane/metadata/android" || die "git add failed"
+        "$ROOT/fastlane/metadata/android" \
+        "$ROOT/src/polish/releaseNotes.generated.ts" || die "git add failed"
 git commit -q -m "Release $VERSION ($CODE)" || die "commit failed"
 ok "committed"
 

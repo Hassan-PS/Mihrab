@@ -13,7 +13,7 @@
 import * as React from 'react';
 import { act } from 'react';
 import { create, type ReactTestRenderer } from 'react-test-renderer';
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 
 const INSTALLED = '2.18.3';
 
@@ -37,6 +37,11 @@ jest.mock('../src/hooks/useAppPalette', () => ({
   }),
 }));
 
+// Mutable so one test can put the reader in Urdu — a right-to-left
+// language with no translated notes, which is the one combination that
+// makes the note's direction and the layout's disagree.
+const mockReader = { language: 'en' };
+
 jest.mock('react-i18next', () => ({
   ...jest.requireActual('react-i18next'),
   useTranslation: () => ({
@@ -48,7 +53,7 @@ jest.mock('react-i18next', () => ({
         fallback,
       );
     },
-    i18n: { language: 'en' },
+    i18n: mockReader,
   }),
 }));
 
@@ -66,7 +71,7 @@ jest.mock('../src/responsive/breakpoints', () => ({
   useBreakpoint: () => 'compact',
 }));
 
-const { ChangelogSheet } = require('../src/polish/ChangelogSheet');
+const { ChangelogSheet, ALIGN_TO_OWN_SIDE } = require('../src/polish/ChangelogSheet');
 const { CHANGELOG } = require('../src/polish/releaseNotes');
 
 type Node = { props: Record<string, unknown>; children?: unknown };
@@ -188,5 +193,81 @@ describe('the note itself', () => {
     const shown = texts(render(null));
     const year = release.date.slice(0, 4);
     expect(shown.some(s => s.includes(year))).toBe(true);
+  });
+});
+
+describe('a note in the other direction from the layout', () => {
+  // Urdu is laid out right to left and has no translated notes, so an
+  // Urdu reader gets the English note inside a mirrored tree. Laid out by
+  // the tree, that puts the bullet on the right, the block against the
+  // right edge and the full stop at the start of the line. This is the
+  // only reader for whom any of the three corrections below fire.
+  const LRI = String.fromCharCode(0x2066);
+  const PDI = String.fromCharCode(0x2069);
+
+  function flat(style: unknown): Record<string, unknown> {
+    return Object.assign(
+      {},
+      ...(Array.isArray(style) ? style.flat(Infinity) : [style]).filter(
+        Boolean,
+      ),
+    );
+  }
+
+  afterEach(() => {
+    mockReader.language = 'en';
+  });
+
+  it('is left as the tree lays it out when the two agree', () => {
+    const tree = render(null);
+    const rows = tree.root
+      .findAllByType(View)
+      .filter((v: Node) => flat(v.props.style).flexDirection === 'row-reverse');
+    expect(rows).toHaveLength(0);
+    const isolated = tree.root
+      .findAllByType(Text)
+      .filter((n: Node) =>
+        Array.isArray(n.props.children) &&
+        (n.props.children as unknown[]).includes(LRI),
+      );
+    expect(isolated).toHaveLength(0);
+  });
+
+  it('turns the bullet rows round, aligns to its own side, and isolates the text', () => {
+    mockReader.language = 'ur';
+    const tree = render(null);
+    // An English note was used (Urdu has none)…
+    const shown = texts(tree);
+    const release = CHANGELOG.find(
+      (r: { version: string }) => r.version === INSTALLED,
+    );
+    expect(shown).toContain(
+      release.notes.en.split('\n')[0].replace(/^•\s*/, '').trim(),
+    );
+    // …every bullet row is reversed…
+    const rows = tree.root
+      .findAllByType(View)
+      .filter((v: Node) => flat(v.props.style).flexDirection === 'row-reverse');
+    expect(rows.length).toBeGreaterThan(0);
+    // …the text is aligned to its own side, not the tree's "start" —
+    // and that is `right`, on both platforms, for reasons the constant's
+    // comment sets out (both mirror the word; both mirrors land here)…
+    const bodies = tree.root
+      .findAllByType(Text)
+      .filter((n: Node) => flat(n.props.style).textAlign === ALIGN_TO_OWN_SIDE);
+    expect(bodies.length).toBeGreaterThan(0);
+    expect(
+      tree.root
+        .findAllByType(Text)
+        .filter((n: Node) => flat(n.props.style).textAlign === 'left'),
+    ).toHaveLength(0);
+    // …and each run is wrapped in a left-to-right isolate so its
+    // punctuation stays with it on Android, where writingDirection is
+    // not honoured.
+    for (const body of bodies) {
+      const kids = (body as Node).props.children as unknown[];
+      expect(kids[0]).toBe(LRI);
+      expect(kids[kids.length - 1]).toBe(PDI);
+    }
   });
 });
