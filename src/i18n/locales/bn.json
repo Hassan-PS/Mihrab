@@ -1205,6 +1205,12 @@
     "reciterDownloadStrip": "{{name}} ডাউনলোড হচ্ছে · {{pct}}%",
     "surahDownloadStrip": "{{surah}} ডাউনলোড হচ্ছে · {{pct}}%"
   },
+  "reading": {
+    "textSize": "লেখার আকার",
+    "textLarger": "লেখা বড় করুন",
+    "textSmaller": "লেখা ছোট করুন",
+    "textSizeReset": "লেখার আকার রিসেট করুন"
+  },
   "mosques": {
     "searching": "কাছাকাছি মসজিদ খোঁজা হচ্ছে…",
     "noneFound": "কাছে কোনো মসজিদ পাওয়া যায়নি। অনুসন্ধান পরিধি বাড়ান।",

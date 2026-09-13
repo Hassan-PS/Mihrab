@@ -1205,6 +1205,12 @@
     "reciterDownloadStrip": "正在下载 {{name}} · {{pct}}%",
     "surahDownloadStrip": "正在下载 {{surah}} · {{pct}}%"
   },
+  "reading": {
+    "textSize": "文字大小",
+    "textLarger": "放大文字",
+    "textSmaller": "缩小文字",
+    "textSizeReset": "重置文字大小"
+  },
   "mosques": {
     "searching": "正在查找附近的清真寺…",
     "noneFound": "附近未找到清真寺，可扩大搜索范围。",

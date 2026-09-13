@@ -1205,6 +1205,12 @@
     "reciterDownloadStrip": "{{name}} indiriliyor · %{{pct}}",
     "surahDownloadStrip": "{{surah}} indiriliyor · %{{pct}}"
   },
+  "reading": {
+    "textSize": "Metin boyutu",
+    "textLarger": "Metni büyült",
+    "textSmaller": "Metni küçült",
+    "textSizeReset": "Metin boyutunu sıfırla"
+  },
   "mosques": {
     "searching": "Yakındaki camiler aranıyor…",
     "noneFound": "Yakında cami bulunamadı. Arama yarıçapını genişletin.",

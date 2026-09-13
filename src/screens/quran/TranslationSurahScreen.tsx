@@ -71,6 +71,9 @@ import { usePrayerSettings } from '../../context/PrayerSettingsContext';
 import type { RootStackParamList } from '../../navigation/types';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { TYPE, arabicTextStyle } from '../../theme/typography';
+import { READING_BASE } from '../../theme/readingText';
+import { useReadingText } from '../../hooks/useReadingText';
+import { TextSizeStepper } from '../../components/ui';
 import { RADIUS, SPACING } from '../../theme/tokens';
 
 type AyahRow = {
@@ -96,6 +99,7 @@ export function TranslationSurahScreen({
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === 'ar';
   const { palette } = useAppPalette();
+  const readingText = useReadingText();
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   /** Whatever the app is downloading — drawn as the strip, see below. */
@@ -595,7 +599,12 @@ export function TranslationSurahScreen({
             {t('quran.tapToReveal', 'Tap to reveal')}
           </Text>
         ) : translation ? (
-          <Text style={[styles.ayahTranslation, { color: palette.muted }]}>
+          <Text
+            style={[
+              styles.ayahTranslation,
+              readingText.style(READING_BASE),
+              { color: palette.muted },
+            ]}>
             {translation}
           </Text>
         ) : null}
@@ -639,6 +648,11 @@ export function TranslationSurahScreen({
           {t('quran.tapToPick', 'choose')}
         </Text>
       </Pressable>
+      {/* Its own line rather than beside the edition. That row already
+          wraps on purpose — "Tafsir: التفسير الميسر" plus a hint overruns a
+          narrow header — and a third thing in it would wrap in most
+          languages rather than a few. */}
+      <TextSizeStepper />
       {hideMode !== 'none' ? (
         <Text style={[styles.hideHint, { color: palette.accentSolid }]}>
           {t('quran.hideModeActive', {
@@ -757,6 +771,7 @@ function TafsirRowText({
 }) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const readingText = useReadingText();
   // undefined = loading, null = unavailable (offline + uncached).
   const [text, setText] = useState<string | null | undefined>(undefined);
   const [expanded, setExpanded] = useState(false);
@@ -779,7 +794,12 @@ function TafsirRowText({
   }
   if (text === null) {
     return (
-      <Text style={[styles.ayahTranslation, { color: palette.muted }]}>
+      <Text
+        style={[
+          styles.ayahTranslation,
+          readingText.style(READING_BASE),
+          { color: palette.muted },
+        ]}>
         {t(
           'quran.tafsirUnavailable',
           'Tafsir unavailable — connect to the internet once to download it.',
@@ -794,6 +814,7 @@ function TafsirRowText({
         numberOfLines={expanded ? undefined : 6}
         style={[
           styles.ayahTranslation,
+          readingText.style(READING_BASE),
           { color: palette.muted },
           rtl && { writingDirection: 'rtl', textAlign: 'right' },
         ]}>

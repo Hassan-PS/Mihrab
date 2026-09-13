@@ -1205,6 +1205,12 @@
     "reciterDownloadStrip": "Descargando {{name}} · {{pct}} %",
     "surahDownloadStrip": "Descargando {{surah}} · {{pct}} %"
   },
+  "reading": {
+    "textSize": "Tamaño del texto",
+    "textLarger": "Texto más grande",
+    "textSmaller": "Texto más pequeño",
+    "textSizeReset": "Restablecer el tamaño"
+  },
   "mosques": {
     "searching": "Buscando mezquitas cercanas…",
     "noneFound": "No se encontraron mezquitas. Prueba a ampliar el radio.",

@@ -48,6 +48,7 @@ import { useBreakpoint } from '../responsive/breakpoints';
 import { ResponsiveModal } from '../responsive/ResponsiveModal';
 import { getInstalledAppVersionName } from '../appVersion';
 import { isRtlLanguage } from '../i18n/layoutDirection';
+import { foreignText, LRI, PDI } from '../i18n/foreignText';
 import { RADIUS, SPACING } from '../theme/tokens';
 import { TYPE, typeStyle } from '../theme/typography';
 import { parseNote, type NoteBlock, type Span } from './notesMarkup';
@@ -81,12 +82,6 @@ const MAX_HEIGHT_RATIO = 0.88;
  * left-to-right thing" without affecting a character outside it. Same
  * pair the compass uses for a bearing — see screens/compass/StatusBanners.
  */
-/** LEFT-TO-RIGHT ISOLATE and POP DIRECTIONAL ISOLATE, by code point
- *  rather than as themselves: an invisible character in source is a
- *  character nobody can see to review. */
-const LRI = String.fromCharCode(0x2066);
-const PDI = String.fromCharCode(0x2069);
-
 function ltr(version: string): string {
   return `${LRI}${version}${PDI}`;
 }
@@ -171,53 +166,13 @@ export async function pendingChangelog(): Promise<string | null> {
 /**
  * One note's blocks, drawn.
  *
- * `language` is the note's own, `reader` is the app's. They differ for
- * exactly the languages that have no translated notes and fall back to
- * English — and of those, Urdu is laid out right to left. An English
- * paragraph inside a mirrored tree is laid out by the tree: the block
- * hugs the right edge, the bullet sits on the right of the text, and the
- * bidi algorithm puts the full stop at the START of the line, because in
- * a right-to-left paragraph that is where the end is.
- *
- * Three things put it right, and all three are needed:
- *
- *   • `textAlign` to the note's own side — physical `left`/`right`, since
- *     the tree's `start` is the wrong side by definition here;
- *   • `row-reverse` on the bullet rows, which inside a mirrored tree is
- *     the way to say "the other way round" — the ONE place in this file
- *     that reverses, and only when the two directions disagree;
- *   • the text wrapped in a directional isolate, so the punctuation at
- *     its ends belongs to the run and not to the paragraph. This is what
- *     Android needs: `writingDirection` is honoured on iOS only.
- *
- * When the two agree — every other reader — none of this fires and the
- * tree's own direction does the work, as i18n/layoutDirection.ts asks.
+ * `language` is the note's own, which is not always the reader's: ten of
+ * the app's thirteen languages have no translated notes and get the
+ * English one, and one of those ten — Urdu — is laid out right to left.
+ * `foreignText` is what keeps an English paragraph readable inside a
+ * mirrored tree, and its header says why all three of its parts are
+ * needed and why the alignment is the word it is.
  */
-const RLI = String.fromCharCode(0x2067);
-
-/**
- * The `textAlign` that puts a note against its OWN edge when the layout
- * runs the other way. It is `right` — for an English note in an Urdu
- * layout AND for the reverse — and the reason is worth writing down,
- * because `left` is what anyone would reach for first, and `left` puts
- * the English on the right on both platforms.
- *
- * Neither platform treats `left`/`right` as physical once a layout is
- * mirrored. iOS mirrors the word against the LAYOUT direction: under a
- * right-to-left layout, `right` means the left edge. Android mirrors it
- * against the TEXT direction whenever that disagrees with the layout's:
- * English under a right-to-left layout is such a disagreement, and there
- * `right` resolves to the text's own normal edge, which for English is
- * the left. Two different rules, and in the one situation this function
- * is for — text and layout disagreeing — both send `right` to the same
- * place: the text's own start. `left` goes the other way on both.
- *
- * Seen on the Android emulator and the iOS simulator, both words, before
- * this was settled. Only ever used when the two directions disagree; when
- * they agree the tree's own `start` is right and nothing is set.
- */
-export const ALIGN_TO_OWN_SIDE = 'right' as const;
-
 const NoteBody = memo(function NoteBody({
   blocks,
   language,
@@ -228,27 +183,27 @@ const NoteBody = memo(function NoteBody({
   reader: string;
 }) {
   const { palette } = useAppPalette();
-  const rtl = isRtlLanguage(language);
-  const mismatched = rtl !== isRtlLanguage(reader);
+  const foreign = foreignText(language, reader);
   const text = [
     typeStyle('body'),
-    { color: palette.text, writingDirection: rtl ? 'rtl' : 'ltr' } as const,
-    mismatched ? { textAlign: ALIGN_TO_OWN_SIDE } : null,
+    { color: palette.text },
+    // Unconditionally, not only when foreign: a note in the reader's own
+    // language still has a direction, and saying so costs nothing.
+    { writingDirection: isRtlLanguage(language) ? 'rtl' : 'ltr' } as const,
+    foreign.style,
   ];
-  const open = mismatched ? (rtl ? RLI : LRI) : '';
-  const close = mismatched ? PDI : '';
 
   // An array rather than a fragment, so the isolates are the Text's own
   // first and last children — which is what the test can see, and what a
   // reader of the tree expects to find.
   const spans = (runs: Span[]) => [
-    open,
+    foreign.open,
     ...runs.map((s, k) => (
       <Text key={k} style={s.bold ? styles.bold : undefined}>
         {s.text}
       </Text>
     )),
-    close,
+    foreign.close,
   ];
 
   return (
@@ -263,7 +218,10 @@ const NoteBody = memo(function NoteBody({
             {block.items.map((item, j) => (
               <View
                 key={j}
-                style={[styles.item, mismatched ? styles.itemReversed : null]}>
+                style={[
+                  styles.item,
+                  foreign.mismatched ? styles.itemReversed : null,
+                ]}>
                 <Text
                   style={[styles.bullet, { color: palette.muted }]}
                   accessibilityElementsHidden>

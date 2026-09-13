@@ -1205,6 +1205,12 @@
     "reciterDownloadStrip": "Загрузка {{name}} · {{pct}} %",
     "surahDownloadStrip": "Загрузка {{surah}} · {{pct}} %"
   },
+  "reading": {
+    "textSize": "Размер текста",
+    "textLarger": "Крупнее",
+    "textSmaller": "Мельче",
+    "textSizeReset": "Сбросить размер текста"
+  },
   "mosques": {
     "searching": "Ищем ближайшие мечети…",
     "noneFound": "Поблизости мечетей не найдено. Расширьте радиус поиска.",

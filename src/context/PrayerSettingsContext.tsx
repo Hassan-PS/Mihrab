@@ -441,6 +441,30 @@ export function usePrayerSettings(): Ctx {
   return ctx;
 }
 
+/**
+ * The settings, or the defaults if there is no provider above.
+ *
+ * For a reader that is a DETAIL of a screen rather than its subject — how
+ * big to draw a paragraph, say. `usePrayerSettings` throws, correctly: a
+ * screen whose whole job is a setting should not silently show a default
+ * and let somebody save over their own answer. But a component that only
+ * reads one number should not be able to take a screen down over it, and
+ * the honest answer without a provider is the shipped value.
+ *
+ * `updateSettings` is then a no-op rather than a crash — there is nowhere
+ * to write to, which the caller cannot do anything about either.
+ */
+export function usePrayerSettingsOrDefaults(): Ctx {
+  const ctx = useContext(PrayerSettingsContext);
+  return ctx ?? FALLBACK_CTX;
+}
+
+const FALLBACK_CTX: Ctx = {
+  settings: DEFAULT_SETTINGS,
+  updateSettings: () => {},
+  hydrated: false,
+};
+
 function useSliceCtx<S>(
   ctx: React.Context<SliceCtxValue<S> | null>,
   name: string,

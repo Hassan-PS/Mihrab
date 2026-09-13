@@ -7,6 +7,7 @@ import { coerceClockFormat } from '../utils/clockFormat';
 import { coerceDhikrReminders } from '../dhikr/dhikrReminders';
 import { coerceDaruriAlerts } from '../prayer/daruriTimes';
 import { coercePrePrayerReminderMinutes } from './prePrayerReminder';
+import { clampReadingScale } from '../theme/readingText';
 import {
   extractSecureFields,
   hasSecureFields,
@@ -274,6 +275,9 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
     parsed.androidWidgetBackgroundOpacity,
   );
   merged.clockFormat = coerceClockFormat(parsed.clockFormat);
+  // Snapped, not merged: a value between rungs — an older ladder, a
+  // hand-edited blob — would leave the stepper unable to say where it is.
+  merged.readingTextScale = clampReadingScale(parsed.readingTextScale);
   // Issue #19. A typed guard rather than a presence check: this decides
   // whether the card prints a second clock time under every prayer, and a
   // truthy non-boolean from a hand-edited blob would turn it on silently.

@@ -1205,6 +1205,12 @@
     "reciterDownloadStrip": "Mengunduh {{name}} · {{pct}}%",
     "surahDownloadStrip": "Mengunduh {{surah}} · {{pct}}%"
   },
+  "reading": {
+    "textSize": "Ukuran teks",
+    "textLarger": "Perbesar teks",
+    "textSmaller": "Perkecil teks",
+    "textSizeReset": "Setel ulang ukuran teks"
+  },
   "mosques": {
     "searching": "Mencari masjid terdekat…",
     "noneFound": "Tidak ada masjid terdekat. Coba perluas radius pencarian.",

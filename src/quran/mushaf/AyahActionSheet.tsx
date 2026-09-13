@@ -25,6 +25,8 @@ import { useTranslation } from 'react-i18next';
 import { useKeyboardInset } from '../../hooks/useKeyboardInset';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { TYPE, arabicTextStyle } from '../../theme/typography';
+import { READING_BASE } from '../../theme/readingText';
+import { useReadingText } from '../../hooks/useReadingText';
 import { findSurah, loadSurah } from '../quran';
 import { getAyahTranslation, QURAN_TRANSLATIONS } from '../translations';
 import { useActiveEdition } from '../useActiveEdition';
@@ -92,6 +94,7 @@ export function AyahActionSheet({
 }: Props) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const readingText = useReadingText();
   const keyboardInset = useKeyboardInset();
   const insets = useSafeAreaInsets();
   // The larger of the two, on both — see the sheet's note.
@@ -469,7 +472,11 @@ export function AyahActionSheet({
                     numberOfLines={
                       translationExpanded ? undefined : TRANSLATION_CLAMP_LINES
                     }
-                    style={[styles.translation, { color: palette.muted }]}>
+                    style={[
+                      styles.translation,
+                      readingText.style(READING_BASE),
+                      { color: palette.muted },
+                    ]}>
                     {translation}
                   </Text>
                   {translation.length > LONG_TRANSLATION
@@ -544,6 +551,7 @@ export function AyahActionSheet({
                     }
                     style={[
                       styles.tafsirText,
+                      readingText.style(READING_BASE),
                       { color: palette.text },
                       tafsirEdition.rtl && styles.tafsirRtl,
                     ]}>

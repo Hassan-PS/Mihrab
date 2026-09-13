@@ -1205,6 +1205,12 @@
     "reciterDownloadStrip": "جارٍ تنزيل {{name}} · {{pct}}٪",
     "surahDownloadStrip": "جارٍ تنزيل {{surah}} · {{pct}}٪"
   },
+  "reading": {
+    "textSize": "حجم النص",
+    "textLarger": "تكبير النص",
+    "textSmaller": "تصغير النص",
+    "textSizeReset": "إعادة حجم النص"
+  },
   "mosques": {
     "searching": "البحث عن مساجد قريبة…",
     "noneFound": "لم يتم العثور على مساجد قريبة. حاول توسيع نطاق البحث.",

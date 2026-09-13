@@ -1205,6 +1205,12 @@
     "reciterDownloadStrip": "Laddar ner {{name}} · {{pct}} %",
     "surahDownloadStrip": "Laddar ner {{surah}} · {{pct}} %"
   },
+  "reading": {
+    "textSize": "Textstorlek",
+    "textLarger": "Större text",
+    "textSmaller": "Mindre text",
+    "textSizeReset": "Återställ textstorleken"
+  },
   "mosques": {
     "searching": "Söker närliggande moskéer…",
     "noneFound": "Inga moskéer hittades i närheten. Försök utöka sökradien.",

@@ -26,10 +26,22 @@ import {
   type DuaCategory,
 } from '../duas/duas';
 import { cardEdgeStyle } from '../theme/chrome';
-import { BackToTopButton, Group, Row, useBackToTop } from '../components/ui';
+import {
+  BackToTopButton,
+  Group,
+  Row,
+  TextSizeStepper,
+  useBackToTop,
+} from '../components/ui';
 import { ShareIcon } from '../theme/icons';
 import { duaShareText } from '../share/shareText';
 import { TYPE, arabicTextStyle } from '../theme/typography';
+import {
+  READING_BASE,
+  READING_BASE_UNLEADED,
+} from '../theme/readingText';
+import { useReadingText } from '../hooks/useReadingText';
+import { foreignText } from '../i18n/foreignText';
 import { TITLE_BAND_MAX_FONT_SCALE, tabularNumeralStyle } from '../theme/textScale';
 import { useTabBarInset } from '../navigation/tabBarInset';
 import { useTabPageTop } from '../navigation/useTabPageTop';
@@ -74,6 +86,7 @@ export function DuasScreen({ route, navigation }: DuasScreenProps = {}) {
   useBreakpoint();
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
+  const readingText = useReadingText();
   const tabBarInset = useTabBarInset();
   const pageTop = useTabPageTop();
   // The bar gets out of the way while reading — see tabBarVisibility.ts.
@@ -94,6 +107,21 @@ export function DuasScreen({ route, navigation }: DuasScreenProps = {}) {
   const isArabic = i18n.language === 'ar';
   const showTranslit = !isArabic;
   const showTranslation = !isArabic;
+  /**
+   * Both aids are Latin script, in every language the app speaks.
+   *
+   * The transliteration is Latin by definition — it is here FOR the
+   * reader who cannot read the line above it. The meaning is English:
+   * `duas.<id>.translation` is not in any locale file, so the
+   * `defaultValue` below is what every reader gets. Neither is a thing
+   * the reader's own direction should lay out, and for Urdu — mirrored,
+   * and shown both — it did: the paragraphs hugged the right edge with a
+   * ragged left one and their full stops came out at the start of the
+   * line. Arabic readers are shown neither, so Urdu is the whole of it
+   * today; asking the question properly keeps it right if a locale ever
+   * gains its own translations.
+   */
+  const latin = foreignText('en', i18n.language);
   /**
    * WHICH CATEGORY, OR NONE — and none is where the screen opens.
    *
@@ -320,6 +348,13 @@ export function DuasScreen({ route, navigation }: DuasScreenProps = {}) {
             <View style={styles.categoryBarSpacer} />
           </View>
         ) : null}
+        {/* Under the category's name, above its duas, and only where it
+            changes something: an Arabic reader is shown neither the
+            pronunciation nor the meaning, so a control for their size
+            would be a control over nothing. */}
+        {selected !== null && (showTranslit || showTranslation) ? (
+          <TextSizeStepper style={styles.textSize} />
+        ) : null}
         {selected === null
           ? /* ── THE INDEX ────────────────────────────────────────────
                Twenty-one categories in five groups, each group one card
@@ -457,18 +492,35 @@ export function DuasScreen({ route, navigation }: DuasScreenProps = {}) {
             ) : null}
             {showTranslit && openParts[`${dua.id}|say`] ? (
               <Text
-                style={[styles.translit, { color: palette.muted }]}
+                style={[
+                  styles.translit,
+                  readingText.style(READING_BASE_UNLEADED),
+                  latin.style,
+                  { color: palette.muted },
+                ]}
                 accessibilityLabel={dua.transliteration}>
+                {latin.open}
                 {dua.transliteration}
+                {latin.close}
               </Text>
             ) : null}
             {showTranslation && openParts[`${dua.id}|mean`] ? (
-              <Text style={[styles.translation, { color: palette.text }]}>
+              <Text
+                style={[
+                  styles.translation,
+                  readingText.style(READING_BASE),
+                  latin.style,
+                  { color: palette.text },
+                ]}>
                 {/* Per-dua localized translation falls back to bundled
-                    English. To add another locale, drop entries under
-                    `duas.<id>.translation` in that locale's JSON. Hidden
-                    entirely when the app language is Arabic. */}
+                    English — which, today, is what every locale gets. To
+                    add another, drop entries under
+                    `duas.<id>.translation` in that locale's JSON AND
+                    teach `latin` above that they exist. Hidden entirely
+                    when the app language is Arabic. */}
+                {latin.open}
                 {t(`duas.${dua.id}.translation`, { defaultValue: dua.translation })}
+                {latin.close}
               </Text>
             ) : null}
             {dua.repeat ? (
@@ -592,6 +644,10 @@ const styles = StyleSheet.create({
   },
   // The arrow is 24 + 8 + 4 wide and the row is pulled 8 out, so 28 on the far side balances it.
   categoryBarSpacer: { width: 28 },
+  // Pulled up under the category's name: the stack's own gap would set it
+  // as far from the title as the cards are from each other, and it
+  // belongs to the title.
+  textSize: { marginTop: -SPACING.xs },
   stack: { gap: SPACING.md },
   card: { borderRadius: RADIUS.lg, padding: SPACING.lg, gap: SPACING.sm },
   titleRow: {

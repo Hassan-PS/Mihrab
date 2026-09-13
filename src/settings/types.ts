@@ -6,6 +6,7 @@ import type { PrayerOffsetMinutes } from './prayerOffsets';
 import type { AlertModeMap } from './alertModes';
 import type { ClockFormat } from '../utils/clockFormat';
 import type { DhikrReminder } from '../dhikr/dhikrReminders';
+import { DEFAULT_READING_SCALE } from '../theme/readingText';
 
 export type LocationMode = 'automatic' | 'manual';
 
@@ -281,6 +282,18 @@ export type PrayerAppSettings = {
    * schema. See `storage.ts`.
    */
   quranModeMushafDefault: boolean;
+  /**
+   * How big the reader's own long-form text is drawn: the Qur'an's
+   * translation and tafsir, and a dua's translation and pronunciation.
+   * A MULTIPLIER on the shipped sizes, on top of the system font scale
+   * rather than instead of it — see `theme/readingText.ts` for the ladder
+   * and for what is deliberately left out of it (the Arabic, the compact
+   * cards, the shared image).
+   *
+   * Here and not in the Qur'an's own prefs blob because it covers the
+   * duas too, and one pair of eyes should not have to set it twice.
+   */
+  readingTextScale: number;
   /**
    * Day-before fasting reminder — task #98.
    *
@@ -581,6 +594,8 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   // toggling to translation view persists per user.
   quranReadingMode: 'mushaf',
   quranModeMushafDefault: true,
+  // 1 = the sizes the app has always drawn. See theme/readingText.ts.
+  readingTextScale: DEFAULT_READING_SCALE,
   fastingRemindersEnabled: false,
   // 8 PM by default — late enough to land after isha, early enough that
   // the user notices before sleeping.

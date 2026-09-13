@@ -71,7 +71,12 @@ jest.mock('../src/responsive/breakpoints', () => ({
   useBreakpoint: () => 'compact',
 }));
 
-const { ChangelogSheet, ALIGN_TO_OWN_SIDE } = require('../src/polish/ChangelogSheet');
+const { ChangelogSheet } = require('../src/polish/ChangelogSheet');
+// From i18n/, where the reasoning for the value lives. Imported rather
+// than written out: a `'right'` typed here would still match if the
+// component stopped setting it, and `undefined` matches every Text that
+// sets no alignment at all — which is how this read as passing once.
+const { ALIGN_TO_OWN_SIDE } = require('../src/i18n/foreignText');
 const { CHANGELOG } = require('../src/polish/releaseNotes');
 
 type Node = { props: Record<string, unknown>; children?: unknown };
@@ -252,6 +257,7 @@ describe('a note in the other direction from the layout', () => {
     // …the text is aligned to its own side, not the tree's "start" —
     // and that is `right`, on both platforms, for reasons the constant's
     // comment sets out (both mirror the word; both mirrors land here)…
+    expect(ALIGN_TO_OWN_SIDE).toBeDefined();
     const bodies = tree.root
       .findAllByType(Text)
       .filter((n: Node) => flat(n.props.style).textAlign === ALIGN_TO_OWN_SIDE);

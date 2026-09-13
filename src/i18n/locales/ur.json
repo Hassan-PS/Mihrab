@@ -1205,6 +1205,12 @@
     "reciterDownloadStrip": "{{name}} ڈاؤن لوڈ ہو رہا ہے · {{pct}}%",
     "surahDownloadStrip": "{{surah}} ڈاؤن لوڈ ہو رہی ہے · {{pct}}%"
   },
+  "reading": {
+    "textSize": "متن کا سائز",
+    "textLarger": "متن بڑا کریں",
+    "textSmaller": "متن چھوٹا کریں",
+    "textSizeReset": "متن کا سائز ری سیٹ کریں"
+  },
   "mosques": {
     "searching": "قریبی مساجد تلاش کیے جا رہے ہیں…",
     "noneFound": "قریب کوئی مسجد نہیں ملی۔ تلاش کا دائرہ بڑھائیں۔",

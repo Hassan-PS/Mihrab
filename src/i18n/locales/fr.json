@@ -1205,6 +1205,12 @@
     "reciterDownloadStrip": "Téléchargement de {{name}} · {{pct}} %",
     "surahDownloadStrip": "Téléchargement de {{surah}} · {{pct}} %"
   },
+  "reading": {
+    "textSize": "Taille du texte",
+    "textLarger": "Texte plus grand",
+    "textSmaller": "Texte plus petit",
+    "textSizeReset": "Réinitialiser la taille"
+  },
   "mosques": {
     "searching": "Recherche de mosquées à proximité…",
     "noneFound": "Aucune mosquée trouvée. Essayez d’élargir le rayon.",

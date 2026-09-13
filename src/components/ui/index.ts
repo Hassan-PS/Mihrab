@@ -8,7 +8,8 @@
  *
  * Surfaces: `Card` (one thing that stands alone), `Group` (rows, nothing
  * else), `Row`, `Tile` (a number on the page — never in a card).
- * Controls: `Button`, `Chip`, `SegmentedControl`, `Stepper`.
+ * Controls: `Button`, `Chip`, `SegmentedControl`, `Stepper`,
+ * `TextSizeStepper`.
  */
 export { BackToTopButton, useBackToTop } from './BackToTop';
 export { Banner } from './Banner';
@@ -25,4 +26,5 @@ export { SegmentedControl } from './SegmentedControl';
 export type { Segment } from './SegmentedControl';
 export { Skeleton } from './Skeleton';
 export { Stepper } from './Stepper';
+export { TextSizeStepper } from './TextSizeStepper';
 export { Tile } from './Tile';
