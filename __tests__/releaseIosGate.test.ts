@@ -193,3 +193,46 @@ describe('the release is the only thing that builds iOS', () => {
     expect(xc).toMatch(/NULL IS NOT A VALUE HERE/);
   });
 });
+
+/**
+ * And the same gate failed the OTHER way on 2026-09-13.
+ *
+ * `shipped` asked for thirty builds `sort=-version`, which sorts the
+ * build NUMBER as a string. The two upload routes number builds
+ * differently — Xcode Cloud rewrites it to its own run number, by now in
+ * the 700s, while a local `build-ios-appstore.sh` upload carries the real
+ * CFBundleVersion — so lexically "718" beat "269" and thirty of Xcode
+ * Cloud's filled the window. Every locally-uploaded release fell off the
+ * end of it.
+ *
+ * So it reported "2.18.5 NEVER REACHED App Store Connect" while build 269
+ * sat there VALID, uploaded two days before. `verify-release.sh` asks
+ * this same function, so it had been reporting the iOS channel as unshipped
+ * for every release that took the local route.
+ */
+describe('builds are read by when they arrived, not by their number', () => {
+  it('sorts the builds query by uploadedDate', () => {
+    const queries = py.match(/\/v1\/builds\?[^"]*/g) ?? [];
+    expect(queries.length).toBeGreaterThan(0);
+    for (const q of queries) expect(q).toContain('sort=-uploadedDate');
+  });
+
+  it('never sorts a build list by version', () => {
+    // The build number is not a number here — it is whichever of two
+    // schemes uploaded it, compared as a string.
+    //
+    // Asserted against the QUERIES, not the file: the comment above the
+    // fixed query names the old parameter to explain what went wrong, and
+    // a test that read the whole file would fail on the explanation.
+    const queries = py.match(/\/v1\/builds\?[^"]*/g) ?? [];
+    expect(queries.length).toBeGreaterThan(0);
+    for (const q of queries) expect(q).not.toContain('sort=-version');
+  });
+
+  it('still matches on the marketing version, not the build number', () => {
+    // Xcode Cloud rewrites the build number, so preReleaseVersion is the
+    // only field that carries "2.18.5" at all.
+    expect(py).toContain('include=preReleaseVersion');
+    expect(py).toMatch(/mv === version|mv == version/);
+  });
+});

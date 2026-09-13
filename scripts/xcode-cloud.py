@@ -398,8 +398,28 @@ def shipped(version: str, commit: str | None = None) -> None:
         print("could not find the app in App Store Connect")
         raise SystemExit(2)
 
+    # SORTED BY WHEN IT ARRIVED, not by its build number, and this file is
+    # the reason to say why.
+    #
+    # `sort=-version` sorts the build number as a STRING, and the two
+    # upload routes number builds differently: Xcode Cloud rewrites it to
+    # its own run number (700-odd by now) while a local
+    # `build-ios-appstore.sh` upload carries the real CFBundleVersion
+    # (269 for 2.18.5). Lexically "718" beats "269", so thirty builds of
+    # Xcode Cloud's filled the window and every locally-uploaded release
+    # fell off the end of it.
+    #
+    # The result was this function reporting "2.18.5 NEVER REACHED App
+    # Store Connect" on 2026-09-13 while build 269 sat there VALID,
+    # uploaded two days earlier. A false NEGATIVE, in the one gate this
+    # repo wrote because a false POSITIVE once let 2.13.0 go out having
+    # never shipped. Either way round, the answer was not the truth.
+    #
+    # Arrival order is also the question actually being asked: "has this
+    # version reached App Store Connect" is about recency, not numbering,
+    # and it is the one ordering both routes agree on.
     res = call(
-        f"/v1/builds?filter[app]={app_id}&limit=30&sort=-version"
+        f"/v1/builds?filter[app]={app_id}&limit=30&sort=-uploadedDate"
         "&include=preReleaseVersion"
         "&fields[builds]=version,processingState,uploadedDate,preReleaseVersion"
         "&fields[preReleaseVersions]=version"
