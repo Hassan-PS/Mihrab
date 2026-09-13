@@ -334,6 +334,20 @@ fi
 # `open -g -j`: launch in the background and hidden. Running the executable
 # directly works too, but it throws a window onto whatever the person is doing,
 # once per build — which is rude when the launch is only a self-check.
+#
+# POLITE FIRST, THEN RELIABLE. A hidden launch is not merely quieter, it is
+# a different state: the scene never becomes foreground-active, and the
+# payload below is written by a screen whose data effect only runs when it
+# is. On a Mac somebody is sitting at, that resolves anyway. On one whose
+# display has gone to sleep it does not, and the check fails on an app that
+# is perfectly healthy — which is exactly what happened to 2.19.0 on
+# 2026-09-13, twenty-eight commits deep and everything else green.
+#
+# Measured that day, on the SHIPPED 2.18.5 from /Applications, so it could
+# not be blamed on the release: hidden, no payload after ninety seconds;
+# visible, today's payload in under ten. So the visible launch is the
+# fallback rather than the default — see `payload_landed` below, which
+# tries this way first and only then puts a window up.
 open -g -j "$APP" 2>>"$LAUNCH_LOG" || true
 # WAIT FOR IT, rather than looking once after fifteen seconds.
 #
@@ -389,25 +403,61 @@ echo "  ▸ alive."
 # single read at 15 s failed a build whose app turned out to be perfectly
 # healthy; waiting the worst case every time would tax every build for the
 # sake of the slowest. So ask repeatedly and stop as soon as it lands.
-if [ "$SIGN_IDENTITY" != "-" ]; then
-  PAYLOAD_OK=0
-  for _ in $(seq 1 12); do
+payload_landed() {  # $1 = how many five-second looks to take
+  local _
+  for _ in $(seq 1 "$1"); do
     if defaults read "$GROUP_DOMAIN" prayer_widget_payload_v1 2>/dev/null |
         grep -q "$(date +%Y-%m-%d)"; then
-      PAYLOAD_OK=1
-      break
+      return 0
     fi
     sleep 5
   done
-  if [ "$PAYLOAD_OK" = "1" ]; then
+  return 1
+}
+
+if [ "$SIGN_IDENTITY" != "-" ]; then
+  if payload_landed 12; then
     echo "  ▸ App Group holds today's payload — the widget will have data."
   else
-    echo "  ✗ $GROUP_NAME has no payload for today." >&2
-    echo "    The widget would render an empty card. Check that the app group" >&2
-    echo "    entitlement is on BOTH the app and the .appex, and that the app" >&2
-    echo "    got far enough to compute prayer times (needs a location)." >&2
+    # THE HIDDEN LAUNCH IS A SUSPECT BEFORE THE APP IS.
+    #
+    # See the note above `open -g -j`. A scene that never becomes
+    # foreground-active never runs the screen that writes this, so the
+    # honest next question is not "what is wrong with the app" but "was
+    # it ever allowed to run properly". Ask that before failing: one
+    # window, once, and only on a build that was about to be rejected
+    # anyway.
+    #
+    # This is what separates the two answers. If the visible launch also
+    # comes up empty, the app genuinely cannot compute times and the
+    # failure below is earned.
+    echo "  ▸ nothing yet — retrying with a visible launch (the hidden one" >&2
+    echo "    never brings the scene to the foreground on a sleeping Mac)." >&2
     kill "$LAUNCH_PID" 2>/dev/null || true
-    exit 1
+    pkill -f "Mihrab.app/Contents/MacOS/PrayerApp" 2>/dev/null || true
+    sleep 3
+    open "$APP" 2>>"$LAUNCH_LOG" || true
+    # Pick the new PID back up, or the `kill` at the end of this block has
+    # nothing to kill and the window we just opened outlives the build. The
+    # wait is short because this is the SECOND launch: Gatekeeper has
+    # already done its slow first-launch verification of this bundle.
+    LAUNCH_PID=""
+    for _ in $(seq 1 10); do
+      sleep 2
+      LAUNCH_PID=$(pgrep -f "$APP/Contents/MacOS/PrayerApp" | head -1 || true)
+      [ -n "$LAUNCH_PID" ] && break
+    done
+    if payload_landed 12; then
+      echo "  ▸ App Group holds today's payload — the widget will have data."
+      echo "    (it took a visible launch; the Mac was probably asleep)"
+    else
+      echo "  ✗ $GROUP_NAME has no payload for today, hidden or visible." >&2
+      echo "    The widget would render an empty card. Check that the app group" >&2
+      echo "    entitlement is on BOTH the app and the .appex, and that the app" >&2
+      echo "    got far enough to compute prayer times (needs a location)." >&2
+      kill "$LAUNCH_PID" 2>/dev/null || true
+      exit 1
+    fi
   fi
 fi
 kill "$LAUNCH_PID" 2>/dev/null || true

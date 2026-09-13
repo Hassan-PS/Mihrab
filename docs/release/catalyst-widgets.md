@@ -104,7 +104,10 @@ Then it launches the app for real, because a signature that verifies is not a
 bundle that runs — `codesign` verification and notarization both pass a bundle
 AMFI will kill on sight. It requires the app to survive 15 seconds, and it
 deletes `prayer_widget_payload_v1` from the group container beforehand and
-requires the app to write it back with today's date.
+requires the app to write it back with today's date. It looks for that payload
+every five seconds for a minute rather than once, and if the minute passes it
+relaunches the app VISIBLY and looks again before failing — see the section
+below for why a hidden launch alone is not enough to judge the app by.
 
 ## The one check that is still manual
 
@@ -400,3 +403,34 @@ Worth knowing how little it takes to make one of these. While testing that
 cleanup, a *fake* bundle — a directory named `Mihrab.app` containing one
 shell script, no `Info.plist` — was registered by LaunchServices simply
 because a process was launched from inside it.
+
+## The hidden launch never writes the payload on a sleeping Mac (2026-09-13)
+
+**Symptom.** `release.sh 2.19.0` — twenty-eight commits, every other gate
+green — died at the macOS step on `✗ … has no payload for today`. The app
+launched, survived its fifteen seconds, and wrote nothing.
+
+**What it is not.** Not the entitlement, not the App Group name, not a stale
+bundle, and not a location: the SHIPPED 2.18.5 in `/Applications`, built and
+verified weeks earlier, failed the identical check on the same machine that
+day. Whatever was wrong was not in the build.
+
+**What it is.** `open -g -j` launches hidden, and hidden is not merely quiet:
+the scene never becomes foreground-active, so the screen that writes
+`prayer_widget_payload_v1` never runs its data effect. Somebody sitting at the
+Mac resolves this without noticing. A Mac whose display has gone to sleep does
+not.
+
+**Measured, on that shipped 2.18.5, payload deleted first each time:**
+
+```
+hidden  (open -g -j)   90s   nothing
+visible (open)         10s   {"dayLabel":"Sun, Sep 13","rows":[…
+```
+
+**What changed.** The gate still launches hidden — the polite way stays the
+default, because a build should not throw a window onto whatever you are
+doing. But an empty minute now buys a visible relaunch and a second minute
+before the build is failed. The distinction is the point: if the visible
+launch is also empty, the app really cannot compute times and the failure is
+earned. A sleeping Mac costs one window; it used to cost the release.
