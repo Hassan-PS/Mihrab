@@ -701,4 +701,42 @@ Changed the release cycle itself:
   - `scripts/release.sh`
   - `scripts/xcode-cloud.py`
 
-**Lesson:** _(unfilled)_
+**Lesson:** three gates were wrong this cycle, all in the same direction —
+each reported on the release when the thing at fault was the gate.
+
+**A gate that launches the app hidden is not looking at the app.** The macOS
+step deletes the App Group payload, launches the signed bundle with
+`open -g -j` and requires it back. A hidden scene never becomes
+foreground-active, so the screen that writes the payload never runs its data
+effect: on a Mac somebody is sitting at it resolves anyway, on one whose
+display has slept it does not. It failed this release outright, and the proof
+that the build was innocent was running the same check against the shipped
+2.18.5 in `/Applications` — hidden, nothing in ninety seconds; visible,
+today's payload in ten. The hidden launch is still the default, because a
+build should not throw a window onto whatever you are doing; it is just no
+longer the only evidence a release can be rejected on.
+
+**`shipped` had been answering no for every locally-uploaded release.** It
+sorted `/v1/builds` by `version`, which is lexical, and this project has two
+build-numbering schemes — Xcode Cloud rewrites the number to its run number
+(the 700s), a local upload carries the real `CFBundleVersion` (270). Sorting
+by `-uploadedDate` is the only question that means "the most recent one".
+Worth noting that this gate was *written* against a false positive and has
+now been fixed for a false negative: both directions cost a day.
+
+**`set -u` turns a variable nobody set into a verdict.** The Xcode Cloud check
+read `$RELEASE_SHA`, which nothing in the script ever assigned. Under
+`set -u`, inside a command substitution, that is a fatal error whose exit
+status the check read as "no run for this release" — so it announced exactly
+that over run #729, which was building that very commit, and fell through to
+the local upload. Silently, and for every release since the line was written:
+the fallback ships, so nothing ever looked wrong. `bash -n` cannot see it —
+the syntax is perfect — and the line runs once per release, in the half of
+the script only a real release reaches. `releaseScript.test.ts` now checks
+every variable these four scripts read against every variable they set.
+
+**And the shape of all three:** a check is code that runs once per release,
+under conditions nothing else reproduces, and is believed absolutely when it
+speaks. That is the least-exercised, most-trusted code in the repo. It
+deserves the tests the app gets, and this release is where it started
+getting them.

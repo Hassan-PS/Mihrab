@@ -673,6 +673,34 @@ git add "$GRADLE_FILE" "$PBXPROJ" "$ROOT/docs" \
 git commit -q -m "Release $VERSION ($CODE)" || die "commit failed"
 ok "committed"
 
+# THE COMMIT iOS IS CUT FROM, named here and nowhere else.
+#
+# Xcode Cloud is asked about this sha, and CI is asked about this sha.
+# Both used to read `git rev-parse HEAD` at the point they asked, which is
+# the same answer — until it is not, and until one of them forgets to ask
+# at all: the Xcode Cloud check referenced $RELEASE_SHA without anything
+# ever setting it, so under `set -u` it died with "unbound variable",
+# reported "Xcode Cloud has no run for this release" over a run that was
+# right there, and fell back to the local build. Every release since that
+# line was written went the local way for that reason, 2.19.0 included.
+RELEASE_SHA="$(git rev-parse HEAD)"
+
+# A SKIP HAS TO BE ACTED ON BEFORE THE PUSH, because the push is what
+# starts the run.
+#
+# SKIP_APP_STORE=1 was written when the workflow was paused between
+# releases: skipping then meant not arming it, and nothing reached Apple.
+# The workflow is enabled now (2026-09-11), so the same flag decided
+# thirty lines below would skip only this script's own upload while Xcode
+# Cloud built the commit and uploaded it anyway — the exact opposite of
+# what someone sets it for, and they would not find out until a build
+# they were holding back appeared in App Store Connect.
+if [ "${SKIP_APP_STORE:-0}" = "1" ]; then
+  $XC pause >/dev/null 2>&1 \
+    || warn "could not pause Xcode Cloud — this push may start a run anyway"
+  ok "Xcode Cloud paused — this push starts nothing"
+fi
+
 # MAIN BEFORE THE TAG, always. A tag pushed while main is still local
 # names a commit nobody else can see, and this project does not move a
 # pushed tag — so the recovery is to merge around it for ever.
@@ -776,6 +804,10 @@ step "App Store build"
 # is queued, and no public commit status is posted — and the closing
 # summary says so and prints the one command that starts it when the hold
 # lifts. Everything else about the release is unchanged.
+#
+# The pause itself happens up in Publishing, BEFORE the push, because with
+# the workflow enabled the push is what starts a run: a skip decided here
+# would skip this script's upload and leave Apple building anyway.
 # ── AND SOMETIMES XCODE CLOUD IS SIMPLY DOWN ──────────────────────────
 #
 # On 2026-09-11 `POST /v1/ciBuildRuns` answered HTTP 500 for an hour —
@@ -949,7 +981,7 @@ fi
 # nothing and the cost of not knowing is another release cut on top of a
 # red one.
 step "CI on the release commit"
-CI_REL_SHA="$(git rev-parse HEAD)"
+CI_REL_SHA="$RELEASE_SHA"
 CI_REL_ROW=""
 # 40 × 15s. Longer than ci.yml has ever taken, short enough that a stuck
 # queue does not hold the console hostage.
@@ -1004,8 +1036,9 @@ else
 fi
 if [ "${XC_STARTED:-0}" = "skipped" ]; then
   XC_APP_STORE_NOTE="NOT BUILT, on purpose (SKIP_APP_STORE=1). Nothing was
-              sent to App Store Connect and the workflow is still paused.
-              When the hold lifts, build this tag — not main:
+              sent to App Store Connect, and the workflow was paused before
+              the push so it started nothing either. When the hold lifts,
+              build this tag — not main, which will have moved:
                 git checkout $TAG
                 ./scripts/xcode-cloud.py resume && ./scripts/xcode-cloud.py start; ./scripts/xcode-cloud.py pause"
 elif [ "${XC_STARTED:-0}" = "1" ]; then
@@ -1014,15 +1047,18 @@ elif [ "${XC_STARTED:-0}" = "1" ]; then
 elif [ "${XC_STARTED:-0}" = "local" ]; then
   XC_APP_STORE_NOTE="UPLOADED FROM THIS MAC, not Xcode Cloud. The build is
               already in App Store Connect — submit it there when
-              processing finishes. Nothing is pending in the cloud and
-              the workflow is still paused. Note that a local export
-              signs against profiles already on this Mac, so this says
-              the build shipped, not that a clean cloud build is green."
+              processing finishes. The push to main will have started a
+              cloud run too, and its build lands beside this one under a
+              different number — check which you are submitting:
+                ./scripts/xcode-cloud.py runs 3
+              Note that a local export signs against profiles already on
+              this Mac, so this says the build shipped, not that a clean
+              cloud build is green."
 else
   XC_APP_STORE_NOTE="NOT BUILDING. Apple refused to start the run and the
               local fallback did not ship it either (see above). Retry
-              either route — the cloud one pauses itself again:
-                ./scripts/xcode-cloud.py resume && ./scripts/xcode-cloud.py start; ./scripts/xcode-cloud.py pause
+              either route:
+                ./scripts/xcode-cloud.py start
                 ./scripts/build-ios-appstore.sh"
 fi
 cat <<EOF
@@ -1035,10 +1071,10 @@ cat <<EOF
     App Store $XC_APP_STORE_NOTE
               Leave main alone until that run finishes — the next push
               cancels it, and iOS then ships the newer commit, not the
-              tag. Nothing else will start one: the workflow is paused
-              between releases, because every run posts a PUBLIC commit
-              status and a cancelled one is a red X on a commit that
-              deserves none. See docs/DISTRIBUTION.md.
+              tag. Every push to main starts one, which is the reason
+              nothing but a release is pushed there: each run posts a
+              PUBLIC commit status, and a cancelled one is a red X on a
+              commit that deserves none. See docs/DISTRIBUTION.md.
 
 EOF
 

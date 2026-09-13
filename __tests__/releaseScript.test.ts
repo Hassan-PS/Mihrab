@@ -99,3 +99,76 @@ describe('the script is the only procedure', () => {
     expect(script).toMatch(/gradlew -q assembleFdroidRelease/);
   });
 });
+
+describe('every variable it reads is one something sets', () => {
+  /**
+   * 2.19.0: the Xcode Cloud check read `$RELEASE_SHA`, and nothing in the
+   * file ever assigned it. Under `set -u` that is fatal inside the command
+   * substitution it sat in — so the check reported "Xcode Cloud has no run
+   * for this release" about a run that was right there, and fell through to
+   * the local build. Every release since that line was written went the
+   * local way for a reason nobody had read.
+   *
+   * `bash -n` is no help: the syntax is perfect. Only running the line
+   * finds it, and that line runs once per release, in the half of the
+   * script that nothing but a real release reaches.
+   */
+  const SCRIPTS = [
+    'release.sh',
+    'verify-release.sh',
+    'build-catalyst.sh',
+    'build-ios-appstore.sh',
+  ];
+
+  /** Set by the shell or the environment, not by the script. */
+  const ENVIRONMENT = new Set([
+    'HOME', 'PATH', 'PWD', 'TMPDIR', 'USER', 'SHELL', 'LANG', 'LC_ALL',
+    'IFS', 'PS1', 'PS4', 'BASH_SOURCE', 'BASH_VERSION', 'FUNCNAME',
+    'RANDOM', 'SECONDS', 'PPID', 'UID', 'EUID', 'OSTYPE', 'HOSTNAME',
+    'LINENO', 'PIPESTATUS', 'SHLVL', 'TERM', 'COLUMNS',
+  ]);
+
+  const NAME = '[A-Za-z_][A-Za-z0-9_]*';
+
+  /** Names this file assigns, anywhere, by any of the usual means. */
+  function assignedIn(code: string): Set<string> {
+    const out = new Set<string>();
+    const add = (n: string) => out.add(n);
+    for (const m of code.matchAll(
+      new RegExp(`(?:^|[\\s;(&|{])(?:export |local |readonly |declare )?(${NAME})(?:\\[[^\\]]*\\])?\\+?=`, 'gm'),
+    )) add(m[1]);
+    for (const m of code.matchAll(new RegExp(`\\bfor\\s+(${NAME})\\s+in\\b`, 'g'))) add(m[1]);
+    // for ((i = 0; i < n; i++))
+    for (const m of code.matchAll(new RegExp(`\\bfor\\s*\\(\\(\\s*(${NAME})\\s*=`, 'g'))) add(m[1]);
+    // read, past its flags and their arguments — `read -r -d '' fw`
+    for (const m of code.matchAll(
+      new RegExp(`\\bread\\s+(?:(?:-[A-Za-z]+|'[^']*'|"[^"]*")\\s+)*(${NAME}(?:\\s+${NAME})*)`, 'g'),
+    )) for (const n of m[1].split(/\s+/)) add(n);
+    return out;
+  }
+
+  /** Names this file reads without a `${x:-default}` to fall back on. */
+  function readUnguarded(code: string): Map<string, number> {
+    const out = new Map<string, number>();
+    code.split('\n').forEach((line, i) => {
+      if (/^\s*#/.test(line)) return;
+      for (const m of line.matchAll(new RegExp(`\\$\\{(${NAME})([^}]*)\\}`, 'g'))) {
+        if (/^:?[-+=?]/.test(m[2])) continue; // has a default, or errors on purpose
+        if (!out.has(m[1])) out.set(m[1], i + 1);
+      }
+      for (const m of line.matchAll(new RegExp(`\\$(${NAME})`, 'g')))
+        if (!out.has(m[1])) out.set(m[1], i + 1);
+    });
+    return out;
+  }
+
+  it.each(SCRIPTS)('%s', name => {
+    const code = readFileSync(path.join(ROOT, 'scripts', name), 'utf8');
+    if (!/set -[a-z]*u/.test(code)) return; // not under `set -u`: not this test's business
+    const assigned = assignedIn(code);
+    const unset = [...readUnguarded(code)]
+      .filter(([n]) => !assigned.has(n) && !ENVIRONMENT.has(n))
+      .map(([n, line]) => `${name}:${line} $${n}`);
+    expect(unset).toEqual([]);
+  });
+});

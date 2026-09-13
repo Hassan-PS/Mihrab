@@ -360,7 +360,7 @@ By hand, if you ever need it:
 ./scripts/xcode-cloud.py pause    # back to silent
 ```
 
-WHY IT IS PAUSED, since a paused build system is the kind of thing that
+WHY IT WAS PAUSED, since a paused build system is the kind of thing that
 looks like an accident. Every run posts its result to GitHub as a commit
 status called `PrayerApp | Default`, and on a public repository every
 status is public — there is no way to report it privately. A run that is
@@ -369,9 +369,12 @@ anyone reading the repo, sitting next to five green GitHub Actions checks
 and saying nothing true about the code. Runs #724–#728 were all
 `COMPLETE/CANCELED`, so `main` wore an X it had not earned.
 
-The cost is that iOS ships only when someone runs `start`, and
-`./scripts/xcode-cloud.py shipped X.Y.Z` reports the version as never
-having reached App Store Connect until they do.
+The cost was that iOS shipped only when someone ran `start`, and
+`./scripts/xcode-cloud.py shipped X.Y.Z` reported the version as never
+having reached App Store Connect until they did. Enabled, the trade runs
+the other way: the release's own push starts the run, and the discipline
+that keeps `main` clean of red X's is that nothing but a release is
+pushed to it.
 
 The same Xcode workspace builds both. There's no Fastlane lane, no `xcrun altool` upload — Xcode Cloud signs the build with the App Store Connect cert + provisioning profile, and runs the iOS Distribution upload itself.
 

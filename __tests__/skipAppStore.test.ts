@@ -56,6 +56,19 @@ describe('the skip', () => {
     expect(script).toContain('elif [ "${XC_STARTED:-0}" = "1" ]; then');
   });
 
+  it('pauses the workflow BEFORE the push, because the push starts the run', () => {
+    // The flag was written when the workflow was paused between releases,
+    // where skipping meant simply not arming it. Since 2026-09-11 it is
+    // left enabled, so a skip acted on at the App Store step — which comes
+    // after Publishing — would skip this script's own upload while Xcode
+    // Cloud built the pushed commit and uploaded it anyway. Someone holding
+    // a build back would find out when it turned up in App Store Connect.
+    const beforePush = script.slice(0, script.indexOf('git push -q origin main'));
+    const guard = beforePush.lastIndexOf('if [ "${SKIP_APP_STORE:-0}" = "1" ]; then');
+    expect(guard).toBeGreaterThan(-1);
+    expect(beforePush.slice(guard)).toContain('$XC pause');
+  });
+
   it('tells the reader to build the TAG, not main', () => {
     // The whole reason iOS builds from the release cut: by the time a
     // hold lifts, main has moved, and a run started then would ship the
