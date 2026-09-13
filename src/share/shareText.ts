@@ -67,21 +67,51 @@ export type DuaShare = {
 };
 
 /**
+ * How much of a dua to send — issue #47.
+ *
+ * "If my system language is Arabic, I would normally want to share only
+ * the Arabic text. I do not necessarily need the translated text to be
+ * included automatically."
+ *
+ * Which is the whole point: what a person sends depends on who they are
+ * sending it to, and the app cannot know that. An Arabic speaker sending
+ * to family does not want an English paragraph under it; someone sending
+ * a dua to a friend who reads no Arabic does not want a block they cannot
+ * read. Both of those used to arrive whatever the sender wanted.
+ *
+ * `both` is what the share has always been, and it stays the default so
+ * nothing changes for the people the old body suited.
+ */
+export type DuaShareParts = 'arabic' | 'translation' | 'both';
+
+/**
  * One dua.
  *
- * The transliteration travels with it. It is behind a toggle on screen —
- * an aid, not the text — but the whole point of sending a dua to someone
- * is that they can say it, and a recipient who does not read Arabic
- * cannot say it from the Arabic. It costs a paragraph.
+ * The transliteration travels with `both`. It is behind a toggle on
+ * screen — an aid, not the text — but the whole point of sending a dua to
+ * someone is that they can say it, and a recipient who does not read
+ * Arabic cannot say it from the Arabic. It costs a paragraph.
+ *
+ * It travels with neither of the other two. A sender who asked for the
+ * Arabic alone is sending the dua as it is said, and a pronunciation
+ * guide under it is the thing they left out; one who asked for the
+ * meaning alone is sending what it means to someone who, by the asking,
+ * does not need help pronouncing it.
+ *
+ * The title and the source are in all three. The source especially: the
+ * rule at the top of this file is not one a share option may spend.
  */
-export function duaShareText({
-  title,
-  arabic,
-  transliteration,
-  translation,
-  source,
-}: DuaShare): string {
-  return attributed([title, arabic, transliteration, translation], source);
+export function duaShareText(
+  { title, arabic, transliteration, translation, source }: DuaShare,
+  parts: DuaShareParts = 'both',
+): string {
+  const blocks =
+    parts === 'arabic'
+      ? [title, arabic]
+      : parts === 'translation'
+        ? [title, translation]
+        : [title, arabic, transliteration, translation];
+  return attributed(blocks, source);
 }
 
 export type TafsirShare = {

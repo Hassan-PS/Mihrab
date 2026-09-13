@@ -928,6 +928,10 @@
     "pronunciation": "Pronunciación",
     "tapToCount": "Toca para contar",
     "shareDua": "Compartir {{title}}",
+    "shareWhat": "Qué enviar",
+    "shareArabicOnly": "Solo árabe",
+    "shareTranslationOnly": "Solo traducción",
+    "shareBoth": "Árabe y traducción",
     "lavatory_01_entering": {
       "title": "Al entrar en el aseo"
     },

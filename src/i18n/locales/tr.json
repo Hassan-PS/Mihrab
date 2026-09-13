@@ -928,6 +928,10 @@
     "pronunciation": "Okunuş",
     "tapToCount": "Saymak için dokun",
     "shareDua": "{{title}} paylaş",
+    "shareWhat": "Ne gönderilsin",
+    "shareArabicOnly": "Yalnızca Arapça",
+    "shareTranslationOnly": "Yalnızca çeviri",
+    "shareBoth": "Arapça ve çeviri",
     "lavatory_01_entering": {
       "title": "Tuvalete girerken"
     },

@@ -928,6 +928,10 @@
     "pronunciation": "النطق",
     "tapToCount": "اضغط للعد",
     "shareDua": "مشاركة {{title}}",
+    "shareWhat": "ماذا تُرسل",
+    "shareArabicOnly": "العربية فقط",
+    "shareTranslationOnly": "الترجمة فقط",
+    "shareBoth": "العربية والترجمة",
     "lavatory_01_entering": {
       "title": "دعاء دخول الخلاء"
     },

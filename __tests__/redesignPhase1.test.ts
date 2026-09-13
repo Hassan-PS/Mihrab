@@ -79,7 +79,15 @@ describe('Duas', () => {
     expect(src).not.toContain('styles.backRow');
     // No title bar on a tab: the arrow and the category name are the
     // page's own first row, drawn only inside a category.
-    expect(src).toMatch(/\{selected !== null \? \(\s*<View style=\{styles\.categoryBar\}>\s*<TabBackButton/);
+    // The arrow and the category name are the page's own bar, drawn only
+    // inside a category. It is no longer the list's first ROW — it is
+    // pinned above the list so it cannot scroll out of reach (#45) — but
+    // it is still one bar, still conditional, and still the only way
+    // back.
+    expect(src).toMatch(
+      /\{selected !== null \? \([\s\S]{0,200}?<View style=\{styles\.categoryBar\}>\s*<TabBackButton/,
+    );
+    expect(src.match(/<TabBackButton/g) ?? []).toHaveLength(1);
     expect(src).not.toContain('setOptions');
   });
 });

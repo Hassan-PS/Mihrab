@@ -928,6 +928,10 @@
     "pronunciation": "Pelafalan",
     "tapToCount": "Ketuk untuk menghitung",
     "shareDua": "Bagikan {{title}}",
+    "shareWhat": "Apa yang dikirim",
+    "shareArabicOnly": "Hanya teks Arab",
+    "shareTranslationOnly": "Hanya terjemahan",
+    "shareBoth": "Arab dan terjemahan",
     "lavatory_01_entering": {
       "title": "Ketika masuk kamar kecil"
     },

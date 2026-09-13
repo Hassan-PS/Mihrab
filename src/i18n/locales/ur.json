@@ -928,6 +928,10 @@
     "pronunciation": "تلفظ",
     "tapToCount": "گننے کے لیے دبائیں",
     "shareDua": "{{title}} شیئر کریں",
+    "shareWhat": "کیا بھیجیں",
+    "shareArabicOnly": "صرف عربی",
+    "shareTranslationOnly": "صرف ترجمہ",
+    "shareBoth": "عربی اور ترجمہ",
     "lavatory_01_entering": {
       "title": "بیت الخلاء میں داخل ہوتے وقت"
     },

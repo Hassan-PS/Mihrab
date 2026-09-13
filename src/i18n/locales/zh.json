@@ -928,6 +928,10 @@
     "pronunciation": "读音",
     "tapToCount": "点击计数",
     "shareDua": "分享{{title}}",
+    "shareWhat": "发送内容",
+    "shareArabicOnly": "仅阿拉伯语原文",
+    "shareTranslationOnly": "仅译文",
+    "shareBoth": "阿拉伯语原文和译文",
     "lavatory_01_entering": {
       "title": "进入厕所时"
     },

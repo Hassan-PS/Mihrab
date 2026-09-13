@@ -17,7 +17,7 @@
 import * as React from 'react';
 import { act } from 'react';
 import { create } from 'react-test-renderer';
-import { Share } from 'react-native';
+import { ActionSheetIOS, Share } from 'react-native';
 import fs from 'fs';
 import path from 'path';
 import {
@@ -174,50 +174,115 @@ import { DuasScreen } from '../src/screens/DuasScreen';
 import { DUAS } from '../src/duas/duas';
 
 describe('the dua card’s share control', () => {
-  it('hands the system sheet a body with the dua’s own source in it', async () => {
+  /**
+   * Opening the card's share now ASKS what to send — issue #47. So the
+   * control no longer hands the system sheet anything by itself; it puts
+   * the question up, and the answer is what builds a body.
+   */
+  const openCategory = (tree: ReturnType<typeof create>) => {
+    // The screen opens on the category index now (#33), so a dua card
+    // exists only once a category has been opened. Any category will do;
+    // what is under test is the share control on the card.
+    act(() => {
+      tree.root
+        .findAll(
+          n =>
+            n.props?.accessibilityLabel === 'duas.cat.morning' &&
+            typeof n.props?.onPress === 'function',
+        )[0]
+        .props.onPress();
+    });
+  };
+
+  const openShare = (tree: ReturnType<typeof create>) => {
+    // By label and handler, not by `findAllByType(Pressable)`: RN's
+    // Pressable renders through a wrapper, so the exported component is
+    // not the type the tree carries. The node that owns the press is the
+    // one with an `onPress`.
+    const buttons = tree.root.findAll(
+      n =>
+        String(n.props?.accessibilityLabel ?? '').startsWith('Share ') &&
+        typeof n.props?.onPress === 'function',
+    );
+    expect(buttons.length).toBeGreaterThan(0);
+    act(() => {
+      buttons[0].props.onPress();
+    });
+  };
+
+  it('asks what to send rather than sending everything', async () => {
     const spy = jest.spyOn(Share, 'share').mockResolvedValue({
       action: 'sharedAction',
     } as never);
+    const sheet = jest
+      .spyOn(ActionSheetIOS, 'showActionSheetWithOptions')
+      .mockImplementation(() => {});
     try {
       let tree!: ReturnType<typeof create>;
       act(() => {
         tree = create(<DuasScreen />);
       });
-      // The screen opens on the category index now (#33), so a dua card
-      // exists only once a category has been opened. Any category will do;
-      // what is under test is the share control on the card.
-      act(() => {
-        tree.root
-          .findAll(
-            n =>
-              n.props?.accessibilityLabel === 'duas.cat.morning' &&
-              typeof n.props?.onPress === 'function',
-          )[0]
-          .props.onPress();
-      });
-      // By label and handler, not by `findAllByType(Pressable)`: RN's
-      // Pressable renders through a wrapper, so the exported component is
-      // not the type the tree carries. The node that owns the press is the
-      // one with an `onPress`.
-      const buttons = tree.root.findAll(
-        n =>
-          String(n.props?.accessibilityLabel ?? '').startsWith('Share ') &&
-          typeof n.props?.onPress === 'function',
-      );
-      expect(buttons.length).toBeGreaterThan(0);
+      openCategory(tree);
+      openShare(tree);
+      // The question, and nothing sent until it is answered.
+      expect(sheet).toHaveBeenCalledTimes(1);
+      expect(spy).not.toHaveBeenCalled();
+      const options = (sheet.mock.calls[0][0] as { options: string[] }).options;
+      expect(options).toHaveLength(4);
+    } finally {
+      sheet.mockRestore();
+      spy.mockRestore();
+    }
+  });
 
-      await act(async () => {
-        buttons[0].props.onPress();
+  it('sends what was asked for, with the dua’s own source in every one', async () => {
+    const spy = jest.spyOn(Share, 'share').mockResolvedValue({
+      action: 'sharedAction',
+    } as never);
+    let answer: (index: number) => void = () => {};
+    const sheet = jest
+      .spyOn(ActionSheetIOS, 'showActionSheetWithOptions')
+      .mockImplementation((_opts, cb) => {
+        answer = cb as (index: number) => void;
       });
-      expect(spy).toHaveBeenCalledTimes(1);
-      const message = (spy.mock.calls[0][0] as { message: string }).message;
+    try {
+      let tree!: ReturnType<typeof create>;
+      act(() => {
+        tree = create(<DuasScreen />);
+      });
+
+      openCategory(tree);
+      const bodyFor = async (index: number) => {
+        spy.mockClear();
+        openShare(tree);
+        await act(async () => {
+          answer(index);
+        });
+        expect(spy).toHaveBeenCalledTimes(1);
+        return (spy.mock.calls[0][0] as { message: string }).message;
+      };
+
+      const both = await bodyFor(2);
       // Whichever dua the first card is, its own citation has to be in
       // there — the field the data model marks "NEVER omit".
-      const first = DUAS.find(d => message.includes(d.arabic));
-      expect(first).toBeDefined();
-      expect(message).toContain(first!.source);
-      expect(message).toContain(first!.transliteration);
+      const dua = DUAS.find(d => both.includes(d.arabic));
+      expect(dua).toBeDefined();
+      expect(both).toContain(dua!.source);
+      expect(both).toContain(dua!.transliteration);
+
+      const arabicOnly = await bodyFor(0);
+      expect(arabicOnly).toContain(dua!.arabic);
+      expect(arabicOnly).toContain(dua!.source);
+      // The point of the option: the meaning is not tacked on.
+      expect(arabicOnly).not.toContain(dua!.translation);
+      expect(arabicOnly).not.toContain(dua!.transliteration);
+
+      const translationOnly = await bodyFor(1);
+      expect(translationOnly).toContain(dua!.translation);
+      expect(translationOnly).toContain(dua!.source);
+      expect(translationOnly).not.toContain(dua!.arabic);
     } finally {
+      sheet.mockRestore();
       spy.mockRestore();
     }
   });

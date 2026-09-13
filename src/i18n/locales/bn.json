@@ -928,6 +928,10 @@
     "pronunciation": "উচ্চারণ",
     "tapToCount": "গুনতে ট্যাপ করুন",
     "shareDua": "{{title}} শেয়ার করুন",
+    "shareWhat": "কী পাঠাবেন",
+    "shareArabicOnly": "শুধু আরবি",
+    "shareTranslationOnly": "শুধু অনুবাদ",
+    "shareBoth": "আরবি ও অনুবাদ",
     "lavatory_01_entering": {
       "title": "শৌচাগারে প্রবেশের সময়"
     },

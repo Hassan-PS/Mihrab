@@ -157,6 +157,40 @@ describe('a category opens, and back closes it', () => {
     expect(shown).not.toContain('duas.cat.travel');
   });
 
+  it('keeps the way back on screen, wherever the reading has got to', () => {
+    /**
+     * Issue #45. The row used to be the list's first child, so on the
+     * morning adhkār — twenty-odd duas, most of them recited three or
+     * seven or a hundred times — the only exit was as far back up as the
+     * reader had come. Someone half way through should not have to leave
+     * the text to leave the screen.
+     *
+     * Asked as "is it inside the thing that scrolls", which is the
+     * property that failed: a test renderer has no viewport, so nothing
+     * here can scroll and nothing would notice if it did.
+     */
+    const tree = render();
+    openMorning(tree);
+    const back = tree.root
+      .findAllByProps({ accessibilityRole: 'button' })
+      .find(n => n.props.accessibilityLabel === 'All duas');
+    expect(back).toBeTruthy();
+    const scrolling = (node: ReactTestInstance | null): boolean => {
+      for (let p = node; p; p = p.parent) {
+        const type = typeof p.type === 'string' ? p.type : (p.type as { displayName?: string })?.displayName;
+        if (type === 'RCTScrollView' || type === 'ScrollView') return true;
+      }
+      return false;
+    };
+    expect(scrolling(back!)).toBe(false);
+    // The duas themselves are still in it — this is a pinned bar above a
+    // scrolling list, not a screen that stopped scrolling.
+    const firstDua = tree.root
+      .findAllByType('Text' as never, { deep: true })
+      .find(n => String(n.props.children) === duasByCategory('morning')[0].arabic);
+    expect(scrolling(firstDua ?? null)).toBe(true);
+  });
+
   it('offers the way back at the top of the page, and it works', () => {
     // There is no title bar on a tab any more, so the way back is the
     // page's own first row: the arrow up to the index, beside the name of

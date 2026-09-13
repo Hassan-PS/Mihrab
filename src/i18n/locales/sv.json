@@ -928,6 +928,10 @@
     "pronunciation": "Uttal",
     "tapToCount": "Tryck för att räkna",
     "shareDua": "Dela {{title}}",
+    "shareWhat": "Vad ska skickas",
+    "shareArabicOnly": "Endast arabiska",
+    "shareTranslationOnly": "Endast översättning",
+    "shareBoth": "Arabiska och översättning",
     "lavatory_01_entering": {
       "title": "När man går in på toaletten"
     },

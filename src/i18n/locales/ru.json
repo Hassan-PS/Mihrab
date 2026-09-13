@@ -928,6 +928,10 @@
     "pronunciation": "Произношение",
     "tapToCount": "Нажмите для счёта",
     "shareDua": "Поделиться: {{title}}",
+    "shareWhat": "Что отправить",
+    "shareArabicOnly": "Только арабский",
+    "shareTranslationOnly": "Только перевод",
+    "shareBoth": "Арабский и перевод",
     "lavatory_01_entering": {
       "title": "При входе в уборную"
     },

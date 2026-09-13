@@ -928,6 +928,10 @@
     "pronunciation": "उच्चारण",
     "tapToCount": "गिनने के लिए टैप करें",
     "shareDua": "{{title}} साझा करें",
+    "shareWhat": "क्या भेजें",
+    "shareArabicOnly": "केवल अरबी",
+    "shareTranslationOnly": "केवल अनुवाद",
+    "shareBoth": "अरबी और अनुवाद",
     "lavatory_01_entering": {
       "title": "शौचालय में प्रवेश करते समय"
     },
