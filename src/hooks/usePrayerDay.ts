@@ -245,36 +245,85 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
           // Cache status check failing is non-critical; we just won't fill.
         }
 
-        // The widget's longer window, taken from whatever the cache already
-        // holds past the fetched week. Built from the RAW days and put through
-        // the same offset + night-time pipeline as `week`, because deriving it
-        // from the already-offset week would apply the user's adjustment twice.
-        const widgetExtra = await cachedDaysFrom(
-          weekTimings.length,
-          {
-            provider,
-            latitude,
-            longitude,
-            calculationMethod: settings.calculationMethod,
-            school: settings.school,
-          },
-          now,
-        );
-        const offsettedWidgetWeek =
-          widgetExtra.length > 0
-            ? injectNightTimes(
-                applyOffsetsToWeek(
-                  weekTimings.concat(widgetExtra),
-                  settings.prayerOffsets,
-                ),
-              )
-            : offsettedWeek;
+        if (gen !== loadGenerationRef.current) return;
+
+        // ── WHAT THE SCREEN IS WAITING FOR, AND WHAT IT IS NOT ──────────
+        //
+        // Everything needed to draw the Today card and the prayer rows is
+        // in hand right here. Two more cache reads used to run before the
+        // state was published — the widget's longer window and the days
+        // behind — and neither is on this screen: `widgetWeek` is built
+        // for the home-screen widget's payload, and `past` is only
+        // reached by swiping the day carousel backwards.
+        //
+        // Measured on an emulator, cold start, warm cache: 915 ms from
+        // launch to the first real content, of which 209 ms — 23% of the
+        // whole start, and 35% of everything after JS begins — was spent
+        // inside `cachedDaysFrom` with a skeleton on screen. The prayer
+        // times were ready at 705 ms and the reader was shown grey bars
+        // for another fifth of a second so the widget could have its
+        // fortnight.
+        //
+        // ONLY the widget window moves. `past` stays here, and that is not
+        // a compromise — it is where the measurement pointed. Of the
+        // 209 ms, `cachedDaysBefore` was 1 ms; every bit of the rest was
+        // `cachedDaysFrom`. Deferring `past` as well bought nothing and
+        // cost correctness: the day carousel is INDEXED off `past.length`
+        // (see HomeScreen, where the daruri span is sliced at
+        // `table.past.length` and the pager anchors at
+        // `addDays(baseDate, -past.length)`), so letting it grow from 0 to
+        // 7 after the first paint slid every one of those indices out from
+        // under the pager and left the card showing an empty page under
+        // today's date. Caught on a device, not in a test.
+        //
+        // `widgetWeek` has no such reader: HomeScreen takes
+        // `state.widgetWeek ?? week` purely to build the widget payload,
+        // and seeding it with the week keeps its "never shorter than
+        // `week`" promise true at every instant rather than only at the end.
+        const widgetWindowLater = async () => {
+          // The widget's longer window, taken from whatever the cache
+          // already holds past the fetched week. Built from the RAW days
+          // and put through the same offset + night-time pipeline as
+          // `week`, because deriving it from the already-offset week
+          // would apply the user's adjustment twice.
+          const widgetExtra = await cachedDaysFrom(
+            weekTimings.length,
+            {
+              provider,
+              latitude,
+              longitude,
+              calculationMethod: settings.calculationMethod,
+              school: settings.school,
+            },
+            now,
+          );
+          const offsettedWidgetWeek =
+            widgetExtra.length > 0
+              ? injectNightTimes(
+                  applyOffsetsToWeek(
+                    weekTimings.concat(widgetExtra),
+                    settings.prayerOffsets,
+                  ),
+                )
+              : offsettedWeek;
+
+          // A newer load has taken over, or the screen has left `ready`:
+          // this window belongs to a location or a day that is no longer
+          // on screen, and merging it in would pair one place's fortnight
+          // with another's today.
+          if (gen !== loadGenerationRef.current) return;
+          setState(prev =>
+            prev.phase === 'ready' ? { ...prev, widgetWeek: offsettedWidgetWeek } : prev,
+          );
+        };
 
         // The week behind, from the cache alone, through the same offset
         // and night-time pipeline. Nearest first is how it is stored;
         // the pipeline wants chronological order (the night times of one
         // day read the next day's Fajr), so it runs on the reversed list
-        // and the result is turned back.
+        // and the result is turned back. On the critical path because the
+        // carousel's indices are derived from its length — one millisecond,
+        // measured, and the card is wrong without it.
         const pastRaw = await cachedDaysBefore(
           {
             provider,
@@ -310,10 +359,16 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
           today: offsettedWeek[0],
           tomorrow: offsettedWeek[1],
           week: offsettedWeek,
-          widgetWeek: offsettedWidgetWeek,
+          // Seeded, not left out: `widgetWeek` promises never to be shorter
+          // than `week`, and the longer one replaces this a moment later.
+          widgetWeek: offsettedWeek,
           past: offsettedPast,
           backgroundRefreshing: needsCacheFill,
         }));
+
+        // Off the critical path, deliberately. Not awaited: nothing below
+        // depends on it, and the point is that the screen does not either.
+        void widgetWindowLater();
 
         if (needsCacheFill) {
           // Fill up to 12 months ahead in the background; clear the indicator
