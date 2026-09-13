@@ -1,0 +1,6 @@
+• Sheets scroll again. The changelog, and every other sheet, ignored a slow finger and moved only for a flick.
+• In the muṣḥaf, back leaves fullscreen instead of leaving the app.
+• A khatmah no longer freezes when one fast swipe crosses several pages.
+• Today's target in the reader, beside the page number.
+• Two Warsh reciters, and an ayah tapped in Warsh gives the Warsh wording.
+• The adhkār keep the way back on screen, and sharing a dua asks what to send.
