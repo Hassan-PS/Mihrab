@@ -59,6 +59,7 @@ import {
   daruriRowState,
   type DaruriKey,
 } from '../../prayer/daruriTimes';
+import { lastTimeOfDay } from '../../prayer/dayRollover';
 import type { TimingsMap } from '../../types/prayer';
 import {
   addDays,
@@ -592,7 +593,6 @@ function TodayCardImpl({
   const { palette } = useAppPalette();
   const clock = useClockFormatter();
   const { settings, updateSettings } = usePrayerSettings();
-  const [selected, setSelected] = useState(0);
   /**
    * The prayer the user aimed the countdown at, or null for "whatever is
    * next".
@@ -622,12 +622,85 @@ function TodayCardImpl({
     [pastDays, week],
   );
 
-  // A new city (or a fresh week of data) puts the table back on today.
-  useEffect(() => setSelected(0), [resetKey]);
-  useEffect(() => setChosenKey(null), [resetKey]);
-  // Never leave the selection pointing off either end.
+  /**
+   * ── THE DAY THE CARD LANDS ON ─────────────────────────────────────
+   *
+   * Today, until today is over, and then tomorrow.
+   *
+   * The hero has always done this: the countdown looks at tomorrow too, so
+   * the instant Ishāʾ passes it is pointed at tomorrow's Fajr. The table
+   * was not, and stayed on the calendar day until midnight — so for the
+   * whole evening the top of the screen counted down to a time the rows
+   * beneath it did not contain, and the times anyone would actually plan
+   * around were a swipe away with nothing saying so.
+   *
+   * "Over" is the LAST row of the card, which is not always Ishāʾ — with
+   * #14's toggle on, the First Third of the night sits a couple of hours
+   * after it. `dayIsSpent` takes the latest instant rather than the last
+   * key, which also keeps the two pre-dawn night times (already behind us
+   * on this card) from answering. It is not a setting: the way back is the
+   * bar below, which says "Back to today" in the accent and is one tap.
+   */
+  const [spentTick, setSpentTick] = useState(0);
+  const lastToday = useMemo(
+    () => lastTimeOfDay(week[0] ?? {}, startOfLocalDay(new Date())),
+    [week],
+  );
+  /**
+   * Only with a tomorrow to land on. A one-day week — the offline cache
+   * down to its last day — has nowhere to go, and a card that landed on a
+   * page it did not have would be blank.
+   */
+  const spent =
+    week.length > 1 && lastToday != null && Date.now() > lastToday.getTime();
+  const landing = spent ? 1 : 0;
+  /**
+   * One timeout to the last time of the day, so the turn happens AT it
+   * rather than at whatever else next re-renders the card. The same shape
+   * as the Mālikī boundary tick below, and for the same reason: the card
+   * carries no per-second clock and this does not add one.
+   */
   useEffect(() => {
-    setSelected(s => (s < week.length && s >= -pastDays.length ? s : 0));
+    if (!lastToday) return undefined;
+    const ms = lastToday.getTime() - Date.now();
+    if (ms <= 0) return undefined;
+    const id = setTimeout(
+      () => setSpentTick(n => n + 1),
+      Math.min(ms + 250, 0x7fffffff),
+    );
+    return () => clearTimeout(id);
+  }, [lastToday, spentTick]);
+
+  /**
+   * Where the card is turned to. Starts where the day says; a reader who
+   * chooses a day keeps it.
+   */
+  const landedAtMount = useRef(landing).current;
+  const [selected, setSelected] = useState(landedAtMount);
+  /**
+   * Whether a human has picked the day on show — a chevron, the swipe, or
+   * the way back. Nothing below may move the table under someone who has.
+   *
+   * Set from the DRAG rather than from the settle: the pager reports a
+   * programmatic scroll the same way it reports a finger, so reading the
+   * settle would have the card's own turn count as the reader's choice and
+   * pin it there.
+   */
+  const chose = useRef(false);
+  const prevLanding = useRef(landing);
+  // A new city (or a fresh week of data) forgets the choice, so the effect
+  // below can put the table back where the day says.
+  useEffect(() => {
+    chose.current = false;
+  }, [resetKey]);
+  useEffect(() => setChosenKey(null), [resetKey]);
+  // Never leave the selection pointing off either end. Clamped rather than
+  // reset: a week that grew or shrank must not also undo the day the card
+  // landed on.
+  useEffect(() => {
+    setSelected(s =>
+      Math.max(-pastDays.length, Math.min(week.length - 1, s)),
+    );
   }, [week.length, pastDays.length]);
 
   /**
@@ -809,16 +882,32 @@ function TodayCardImpl({
   const canGoForward = selected < week.length - 1;
   const handleSelect = useCallback(
     (offset: number) => {
+      chose.current = true;
       setSelected(offset);
       scrollToDay(offset, true);
     },
     [scrollToDay],
   );
-  // A new city (or a fresh week) put the strip back on today; the pager
-  // follows it there.
+  /**
+   * Put the table where the day says, and take the pager with it.
+   *
+   * Three occasions, one rule: the first frame, a new city or a fresh week
+   * (`resetKey`), and the moment the last time of the day passes. Never
+   * once a human has chosen a day — the `chose` guard above — because a
+   * table that moved under a reader looking at Thursday would be the card
+   * overruling them to show them something they did not ask for.
+   */
   useEffect(() => {
-    scrollToDay(0, false);
-  }, [resetKey, scrollToDay]);
+    if (chose.current) return;
+    const wasHere = prevLanding.current === landing;
+    prevLanding.current = landing;
+    setSelected(landing);
+    // Animated only when the day turned under someone watching it, which
+    // is the one case `spentTick` counts. Arriving already past the hour —
+    // opening the app at midnight, or the week loading a beat after the
+    // first frame — should simply BE on tomorrow rather than slide there.
+    scrollToDay(landing, !wasHere && spentTick > 0);
+  }, [landing, resetKey, scrollToDay, spentTick]);
 
   /**
    * What the hero counts down to, and which rows can be aimed at.
@@ -1253,7 +1342,17 @@ function TodayCardImpl({
                 style={[styles.dayWeekday, { color: palette.text }]}
                 numberOfLines={1}
                 maxFontSizeMultiplier={TITLE_BAND_MAX_FONT_SCALE}>
-                {getWeekday(selected)}
+                {/* "Tomorrow", not "Monday", for the one day the card
+                    turned to by itself — otherwise the bar would announce
+                    a change of day with the same words it uses for every
+                    other day, and the reader would have to work out from
+                    the date that the table had moved. A weekday everywhere
+                    else, including tomorrow reached by a swipe on an
+                    ordinary afternoon, so the word means exactly one
+                    thing. */}
+                {spent && selected === 1
+                  ? getDayLabel(1)
+                  : getWeekday(selected)}
                 <Text style={[styles.dayDate, { color: palette.muted }]}>
                   {'  '}
                   {getDayDate(selected)}
@@ -1309,11 +1408,20 @@ function TodayCardImpl({
               // never lands on a blank page mid-render — and open on
               // today, which is not the first of them any more.
               initialNumToRender={pages.length}
-              initialScrollIndex={todayIndex}
+              // …and on the day the card LANDS on, which after the last
+              // time of the night is tomorrow. Read once, at mount, which
+              // is the only time this prop is.
+              initialScrollIndex={todayIndex + landedAtMount}
               data={pages}
               keyExtractor={(_, index) => String(index - todayIndex)}
               getItemLayout={pageLayout}
               onMomentumScrollEnd={onPageSettled}
+              // A finger on the pager is a choice of day, and the card
+              // stops turning itself from here on. The settle cannot say
+              // this: a programmatic scroll settles identically.
+              onScrollBeginDrag={() => {
+                chose.current = true;
+              }}
               // Nested in the page's vertical scroll: this one owns only
               // clearly horizontal drags.
               nestedScrollEnabled
@@ -1322,7 +1430,11 @@ function TodayCardImpl({
               )}
             />
           ) : (
-            renderDay(0)
+            // Before the page has been measured (the first frame, and a
+            // test renderer) there is no pager — so draw the day the card
+            // is on, not today, or an evening open would show today's
+            // rows for a frame under a bar already saying tomorrow.
+            renderDay(selected)
           )}
         </View>
         <LogPassedPrayerSheet

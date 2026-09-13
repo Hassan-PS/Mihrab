@@ -108,10 +108,12 @@ describe('the days behind today', () => {
 describe('the pages', () => {
   const card = read('src/screens/home/TodayCard.tsx');
 
-  it('run from the oldest past day through the week, opening on today', () => {
+  it('run from the oldest past day through the week, opening where the day says', () => {
     expect(card).toMatch(/pastDays\.slice\(\)\.reverse\(\)\.concat\(week\)/);
     expect(card).toMatch(/const todayIndex = pastDays\.length;/);
-    expect(card).toMatch(/initialScrollIndex=\{todayIndex\}/);
+    // Today, until today is spent, and then tomorrow — see
+    // `dayRollsOverAfterLastTime.test.tsx` for the rule itself.
+    expect(card).toMatch(/initialScrollIndex=\{todayIndex \+ landedAtMount\}/);
     expect(card).toMatch(/renderDay\(index - todayIndex\)/);
   });
 
@@ -136,7 +138,10 @@ describe('the day bar', () => {
   );
 
   it('says the weekday and both dates of the day on show', () => {
-    expect(bar).toMatch(/\{getWeekday\(selected\)\}/);
+    // …except for the one day the card turned to by itself, which is named
+    // "Tomorrow" rather than by its weekday — see
+    // `dayRollsOverAfterLastTime.test.tsx`.
+    expect(bar).toMatch(/getWeekday\(selected\)/);
     expect(bar).toMatch(/\{getDayDate\(selected\)\}/);
     expect(bar).toMatch(/getHijriDate\(selected\)/);
     // The weekday is the weekday, today included — "Today" is the dot's word.
