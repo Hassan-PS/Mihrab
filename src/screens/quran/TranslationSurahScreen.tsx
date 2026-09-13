@@ -263,7 +263,14 @@ export function TranslationSurahScreen({
             navigation.canGoBack() ? null : headerSide.padStart,
           ]}>
           {navigation.canGoBack() ? (
-            <TabBackButton onPress={() => navigation.goBack()} />
+            <TabBackButton
+              onPress={() => navigation.goBack()}
+              // The toolbar under it is the platform's, and it places this
+              // slot by the device's direction rather than the app's — so
+              // in Arabic the arrow is still on the left, and still points
+              // there. See the note on `BackArrow`.
+              inNativeHeader
+            />
           ) : null}
           <TextSizeStepper />
         </View>

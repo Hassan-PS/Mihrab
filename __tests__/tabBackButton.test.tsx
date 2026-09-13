@@ -76,13 +76,6 @@ describe('the arrow and the gesture share one destination', () => {
 });
 
 describe('the arrow itself', () => {
-  it('mirrors under RTL', () => {
-    // A chevron is a direction, not a letter: in Arabic and Urdu "back" is
-    // the trailing edge, so the glyph has to point the other way.
-    expect(BUTTON).toMatch(/I18nManager\.isRTL/);
-    expect(BUTTON).toMatch(/scaleX: -1/);
-  });
-
   it('uses the shared label rather than a new string', () => {
     // 13 locales stay in parity; `common.back` is already in all of them.
     expect(BUTTON).toMatch(/t\('common\.back'/);

@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import Svg, { Path } from 'react-native-svg';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { useLayoutRtl } from '../i18n/useLayoutRtl';
 import { HOME_TAB } from './useAndroidSubScreenBack';
 import { SPACING } from '../theme/tokens';
 
@@ -40,12 +41,31 @@ import { SPACING } from '../theme/tokens';
  * use. It has to read as a sibling of the arrow on a pushed settings page,
  * because a user moving between them is looking at one control.
  *
- * Mirrored under RTL. The glyph points at where "back" is on screen, which
- * is the trailing edge in Arabic, Urdu, Farsi and Hebrew — a chevron is
- * direction, not a letter, so it flips.
+ * ── WHICH WAY IT POINTS ───────────────────────────────────────────────
+ *
+ * At the edge it sits on. A chevron is a direction, not a letter, so in
+ * Arabic, Urdu, Farsi and Hebrew, where "back" is the trailing edge, the
+ * glyph turns around.
+ *
+ * Which edge that is depends on who laid the button out, and in this app
+ * the two answers differ. The app mirrors itself with a Yoga `direction`
+ * on the root view rather than `I18nManager.forceRTL` (see
+ * `i18n/useLayoutRtl`), so an ordinary JS row — the Duas category bar —
+ * mirrors with the APP's language and puts the arrow on the right. A
+ * native stack header does not: `react-native-screens` hands its
+ * `headerLeft` slot to the platform's own toolbar, which places it by the
+ * DEVICE's layout direction, and that stays left-to-right for everyone as
+ * long as `forceRTL` is off. So on an English phone with the app in Arabic
+ * the reader's arrow is on the left and the Duas one is on the right, and
+ * both are right — each points at the edge its own container calls back.
+ *
+ * Hence `rtl` is asked for rather than assumed. This shipped reading
+ * `I18nManager.isRTL` unconditionally, which is the device's answer handed
+ * to a row the device did not lay out: the Duas arrow sat on the trailing
+ * edge in Arabic, pointing away from it.
  */
-function BackArrow({ color }: { color: string }) {
-  const flip = I18nManager.isRTL ? [{ scaleX: -1 as const }] : undefined;
+function BackArrow({ color, rtl }: { color: string; rtl: boolean }) {
+  const flip = rtl ? [{ scaleX: -1 as const }] : undefined;
   return (
     <Svg
       width={24}
@@ -78,6 +98,7 @@ function BackArrow({ color }: { color: string }) {
 export function TabBackButton({
   onPress,
   label,
+  inNativeHeader = false,
 }: {
   /**
    * Somewhere other than Today. A tab that opens a page INSIDE itself —
@@ -88,10 +109,18 @@ export function TabBackButton({
    */
   onPress?: () => void;
   label?: string;
+  /**
+   * This one is standing in a native stack's `headerLeft`, not in a row of
+   * ours — so the platform's toolbar placed it, by the device's direction,
+   * and the glyph follows that instead of the app's language. See the note
+   * on `BackArrow`.
+   */
+  inNativeHeader?: boolean;
 } = {}) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
   const navigation = useNavigation();
+  const appRtl = useLayoutRtl();
   return (
     <Pressable
       accessibilityRole="button"
@@ -105,7 +134,10 @@ export function TabBackButton({
       {/* `textSolid`, not `text`: under Liquid Glass the semantic colour
           is a PlatformColor, and react-native-svg given one draws nothing
           — the arrow would simply not be there. */}
-      <BackArrow color={palette.textSolid} />
+      <BackArrow
+        color={palette.textSolid}
+        rtl={inNativeHeader ? I18nManager.isRTL : appRtl}
+      />
     </Pressable>
   );
 }

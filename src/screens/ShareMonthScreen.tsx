@@ -16,7 +16,6 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { I18nManager } from 'react-native';
 import { PinchGestureHandler, State } from 'react-native-gesture-handler';
 import Share from 'react-native-share';
 import ViewShot, { captureRef } from 'react-native-view-shot';
@@ -39,6 +38,7 @@ import {
 } from '../settings/providerUi';
 import type { AppLanguage } from '../settings/types';
 import { isRtlLanguage } from '../i18n/layoutDirection';
+import { useLayoutRtl } from '../i18n/useLayoutRtl';
 import { languageLabel } from '../i18n/languages';
 import { injectNightTimes } from '../utils/nightTimes';
 import { sheetPlaceName } from '../share/sheetPlaceName';
@@ -110,6 +110,9 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
   /** The sheet's own translator, fixed to `sheetLang`. */
   const st = useMemo(() => i18n.getFixedT(sheetLang), [i18n, sheetLang]);
 
+  /** Which way the tree around the sheet runs. */
+  const appRtl = useLayoutRtl();
+
   /**
    * Whether the SHEET has to be mirrored, which is not the same question
    * as whether its language is right-to-left.
@@ -119,9 +122,12 @@ export function ShareMonthScreen({ route, navigation, embedded }: Props & { navi
    * tree flips twice and lands back where it started — the same trap
    * `i18n/layoutDirection` warns about. What the sheet needs is the
    * DIFFERENCE between the direction it wants and the one it is sitting
-   * in.
+   * in — and the one it is sitting in is the APP's, not the phone's. This
+   * asked `I18nManager.isRTL`, which stays false while the tree around it
+   * is mirrored (`i18n/useLayoutRtl`), so an Arabic sheet inside an Arabic
+   * app reversed a row that was reversed already and came out Latin.
    */
-  const sheetRtl = isRtlLanguage(sheetLang) !== I18nManager.isRTL;
+  const sheetRtl = isRtlLanguage(sheetLang) !== appRtl;
 
   const { width: screenWidth } = useWindowDimensions();
   const A4_WIDTH = 794;

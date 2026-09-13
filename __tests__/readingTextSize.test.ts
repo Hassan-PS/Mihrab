@@ -241,8 +241,12 @@ describe('where the size control is', () => {
     // than sharing it, so the arrow is drawn here — the app's own, the
     // one a tab's header uses, popping rather than going to Today.
     expect(src).toMatch(
-      /headerLeft: \(\) => \([\s\S]{0,900}?<TabBackButton onPress=\{\(\) => navigation\.goBack\(\)\} \/>[\s\S]{0,200}?<TextSizeStepper \/>/,
+      /headerLeft: \(\) => \([\s\S]{0,900}?<TabBackButton\b[\s\S]{0,600}?onPress=\{\(\) => navigation\.goBack\(\)\}[\s\S]{0,600}?\/>[\s\S]{0,200}?<TextSizeStepper \/>/,
     );
+    // Drawn into the platform's toolbar, which places this slot by the
+    // device's direction and not the app's — so the glyph follows the
+    // device here. See `tabBackArrowDirection.test.tsx`.
+    expect(src).toMatch(/<TabBackButton[\s\S]{0,600}?inNativeHeader[\s\S]{0,40}?\/>/);
     // And only when there is somewhere to go back to: a widget's deep
     // link opens this screen with nothing beneath it.
     expect(src).toContain('navigation.canGoBack() ? (');
