@@ -685,3 +685,20 @@ gets React's production build, which has no `act`: 195 failures across 35 suites
 none of them real. `jest.config.js` pins it now, so the suite means the same
 thing whatever shell starts it. Before that, an hour of this release's day went
 into deciding which change had broken react-test-renderer. None had.
+
+## 2.19.0 (270) — 2026-09-13
+
+Took 3 aborted attempt(s) before it ran clean:
+
+  - 1 catalyst build failed — /tmp/release-catalyst.log
+  - 2 origin/main has commits main does not — pull first
+
+Changed the release cycle itself:
+
+  - `docs/DISTRIBUTION.md`
+  - `scripts/build-catalyst.sh`
+  - `scripts/build-ios-appstore.sh`
+  - `scripts/release.sh`
+  - `scripts/xcode-cloud.py`
+
+**Lesson:** _(unfilled)_

@@ -19,6 +19,16 @@ export type ReleaseNote = {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    code: 270,
+    version: '2.19.0',
+    date: '2026-09-13',
+    notes: {
+      en: '• A new first launch: the four questions that decide whether the app suits you, each answered in your own times.\n• Any accent colour you like — the picker offers only ones that stay readable.\n• The sky behind the countdown is lit from where the sun really is, and the moon is your own sky\'s.\n• Set the size of the translation, tafsir and pronunciation.\n• What changed after each update, and the whole changelog in Settings → About.\n• The Sky widget is gone; that drawing lives in the app.',
+      ar: '• بداية جديدة عند أول تشغيل: أربعة أسئلة تحدّد ملاءمة التطبيق لك، وكل إجابة تُعرض بأوقاتك أنت.\n• أي لون تميّز تختاره — والمنتقي لا يعرض إلا ما يبقى مقروءًا.\n• السماء خلف العدّ التنازلي مضاءة من موضع الشمس الحقيقي، والقمر قمر سمائك أنت.\n• تحكّم في حجم الترجمة والتفسير والنطق.\n• ما الجديد بعد كل تحديث، وسجل التغييرات كاملًا في الإعدادات ← حول.\n• أداة «السماء» لم تعد موجودة؛ فهذا الرسم يعيش داخل التطبيق.',
+      sv: '• En ny första start: de fyra frågor som avgör om appen passar dig, var och en besvarad med dina egna tider.\n• Vilken accentfärg du vill — väljaren erbjuder bara de som förblir läsbara.\n• Himlen bakom nedräkningen lyses av där solen faktiskt står, och månen är din egen himmels.\n• Ställ in storleken på översättning, tafsir och uttal.\n• Vad som ändrats efter varje uppdatering, och hela ändringsloggen i Inställningar → Om.\n• Himmel-widgeten är borta; teckningen bor i appen.',
+    },
+  },
+  {
     code: 269,
     version: '2.18.5',
     date: '2026-09-11',
