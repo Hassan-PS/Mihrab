@@ -8,8 +8,9 @@
  * scene that moves with the time of day, in five passages that meet at the
  * prayer times themselves:
  *
- *   Isha → Fajr      night. The moon crosses the top of the card, drawn in
- *                    its actual phase — one of the eight — for today.
+ *   Isha → Fajr      night. The moon crosses the top of the card, in its
+ *                    real phase and turned the way the reader's own moon
+ *                    is turned tonight — see moon.ts.
  *   Fajr → Sunrise   dawn. From the dark of Fajr through the saturated
  *                    rose and orange of the horizon to the peach of first
  *                    light; the sun rises into the card near the end.
@@ -43,6 +44,7 @@
  */
 import { combineLocalDateAndTime } from '../../utils/prayerTimes';
 import type { TimingsMap } from '../../types/prayer';
+import { moonView, type MoonView } from './moon';
 
 export type SkyPassage = 'night' | 'dawn' | 'day' | 'sunset' | 'dusk';
 
@@ -217,40 +219,16 @@ export function skyMoment(timings: TimingsMap, now: Date, tomorrowFajr?: string)
   return { passage: 'night', t: frac(isha, end), daylight };
 }
 
-// ── The moon ────────────────────────────────────────────────────────────
-
-/** The eight phases, new moon first, waxing through full and back. */
-export type MoonPhase = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
-
-/** Reference new moon: 2000-01-06 18:14 UTC. Mean synodic month in days. */
-const NEW_MOON_EPOCH_MS = Date.UTC(2000, 0, 6, 18, 14);
-const SYNODIC_DAYS = 29.530588853;
-
-/** 0 at new moon, 0.5 at full, back to 1 at the next new moon. */
-export function moonPhaseFraction(date: Date): number {
-  const days = (date.getTime() - NEW_MOON_EPOCH_MS) / 86_400_000;
-  const f = (days / SYNODIC_DAYS) % 1;
-  return f < 0 ? f + 1 : f;
-}
-
-/** The nearest of the eight main phases. */
-export function moonPhase(date: Date): MoonPhase {
-  return (Math.round(moonPhaseFraction(date) * 8) % 8) as MoonPhase;
-}
-
 // ── The frame the component draws ───────────────────────────────────────
 
 export type SkyBody =
   | { kind: 'none' }
   | { kind: 'sun'; x: number; y: number; alpha: number }
-  | {
+  | ({
       kind: 'moon';
       x: number;
       y: number;
-      phase: MoonPhase;
-      /** How much of the disc is lit, 0–1 — the glow follows it. */
-      lit: number;
-    };
+    } & MoonView);
 
 export type SkyFrame = {
   passage: SkyPassage;
@@ -308,7 +286,18 @@ function sunAt(daylight: number | null): { x: number; y: number } {
   };
 }
 
-export function skyFrame(moment: SkyMoment, moonDate: Date): SkyFrame {
+/**
+ * `where` is the reader's own coordinates, and only the moon uses them:
+ * which way up its crescent sits is the one thing in this scene that is
+ * different in Jakarta from in Stockholm. Omitted — no location set yet —
+ * the moon falls back to the northern hemisphere's, which is what the
+ * whole app drew before it asked.
+ */
+export function skyFrame(
+  moment: SkyMoment,
+  moonDate: Date,
+  where?: { latitude?: number | null; longitude?: number | null },
+): SkyFrame {
   const { passage, t } = moment;
   const { top, bottom } = keyed(KEYS[passage], t);
   // The moon crosses the night, which is one passage, so its own progress
@@ -320,12 +309,12 @@ export function skyFrame(moment: SkyMoment, moonDate: Date): SkyFrame {
   switch (passage) {
     case 'night':
       stars = 1;
-      {
-        const phase = moonPhase(moonDate);
-        // Illuminated fraction of the disc for a phase angle of 2π·p.
-        const lit = (1 - Math.cos((2 * Math.PI * phase) / 8)) / 2;
-        body = { kind: 'moon', x, y: 0.22 - Math.sin(t * Math.PI) * 0.1, phase, lit };
-      }
+      body = {
+        kind: 'moon',
+        x,
+        y: 0.22 - Math.sin(t * Math.PI) * 0.1,
+        ...moonView(moonDate, where?.latitude, where?.longitude),
+      };
       break;
     case 'dawn': {
       // Stars fade as the sky lightens; the sun breaks the strip's floor at

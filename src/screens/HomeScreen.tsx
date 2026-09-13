@@ -1177,6 +1177,8 @@ export function HomeScreen() {
             // The raw day, Sunrise included whatever the rows say: the sky
             // needs it to know where dawn ends.
             skyTimings={state.phase === 'ready' ? state.today : undefined}
+            latitude={readyLat}
+            longitude={readyLng}
             nextInfo={nextInfo}
             resetKey={carouselResetKey}
             getDayLabel={getDayLabel}

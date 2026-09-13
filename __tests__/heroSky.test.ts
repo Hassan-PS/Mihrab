@@ -10,8 +10,6 @@ import {
   INK_SWITCH_LUMINANCE,
   luminance,
   mixHex,
-  moonPhase,
-  moonPhaseFraction,
   skyColorAt,
   skyFrame,
   skyInkAt,
@@ -19,6 +17,7 @@ import {
   type SkyPassage,
 } from '../src/screens/home/skyModel';
 import { moonShadowPath } from '../src/screens/home/HeroSky';
+import { moonIllumination, moonPhaseFraction } from '../src/screens/home/moon';
 
 const read = (p: string) => readFileSync(join(__dirname, '..', p), 'utf8');
 const PASSAGES: SkyPassage[] = ['night', 'dawn', 'day', 'sunset', 'dusk'];
@@ -149,39 +148,80 @@ describe('the ink', () => {
 });
 
 describe('the moon', () => {
-  it('knows its phase from the date', () => {
-    // New moon 2024-01-11 11:57 UTC; full moon 2024-01-25 17:54 UTC.
-    expect(moonPhaseFraction(new Date(Date.UTC(2024, 0, 11, 11, 57)))).toBeLessThan(0.02);
-    expect(moonPhase(new Date(Date.UTC(2024, 0, 11, 11, 57)))).toBe(0);
-    expect(moonPhase(new Date(Date.UTC(2024, 0, 25, 17, 54)))).toBe(4);
-    // First quarter 2024-01-18 03:52 UTC.
-    expect(moonPhase(new Date(Date.UTC(2024, 0, 18, 3, 52)))).toBe(2);
-  });
+  const FULL = new Date(Date.UTC(2024, 0, 25, 17, 54));
 
-  it('is drawn in the night passage only, in its phase, crossing the top strip', () => {
-    const early = skyFrame(
-      { passage: 'night', t: 0.1, daylight: null },
-      new Date(Date.UTC(2024, 0, 25, 17, 54)),
-    );
-    const late = skyFrame(
-      { passage: 'night', t: 0.9, daylight: null },
-      new Date(Date.UTC(2024, 0, 25, 17, 54)),
-    );
-    expect(early.body).toMatchObject({ kind: 'moon', phase: 4 });
-    expect(late.body).toMatchObject({ kind: 'moon' });
+  it('is drawn in the night passage only, crossing the top strip', () => {
+    const early = skyFrame({ passage: 'night', t: 0.1, daylight: null }, FULL);
+    const late = skyFrame({ passage: 'night', t: 0.9, daylight: null }, FULL);
+    expect(early.body.kind).toBe('moon');
+    expect(late.body.kind).toBe('moon');
     if (early.body.kind === 'moon' && late.body.kind === 'moon') {
+      expect(early.body.illuminated).toBeGreaterThan(0.99);
       expect(late.body.x).toBeGreaterThan(early.body.x);
       expect(early.body.y).toBeLessThanOrEqual(0.32);
     }
     expect(skyFrame({ passage: 'dawn', t: 0, daylight: -1 }, at(12)).body.kind).toBe('none');
   });
 
-  it('has no shadow when full and a full shadow when new', () => {
-    expect(moonShadowPath(4, 10, 10, 8)).toBeNull();
+  it('carries the reader\'s coordinates through to the tilt', () => {
+    // The frame is where the location meets the moon; if it stops being
+    // threaded through, every reader gets the northern hemisphere again
+    // and nothing else in the app would notice.
+    const plain = skyFrame({ passage: 'night', t: 0.5, daylight: null }, FULL);
+    const south = skyFrame({ passage: 'night', t: 0.5, daylight: null }, FULL, {
+      latitude: -33.92,
+      longitude: 18.42,
+    });
+    expect(plain.body.kind === 'moon' && plain.body.tilt).toBe(0);
+    expect(south.body.kind === 'moon' && south.body.tilt).not.toBe(0);
+  });
+
+  it('draws the shadow from the light, not from a phase number', () => {
+    // Full: nothing left to draw. New: the whole disc, which the caller
+    // pairs with a faint fill so it reads as a ghost rather than a hole.
+    expect(moonShadowPath(1, 10, 10, 8)).toBeNull();
     expect(moonShadowPath(0, 10, 10, 8)).toMatch(/^M 10 2 A 8 8/);
-    // Quarters: the terminator is a straight line (rx = 0).
-    expect(moonShadowPath(2, 10, 10, 8)).toMatch(/A 0 8 0 0 [01] 10 2/);
-    expect(moonShadowPath(6, 10, 10, 8)).toMatch(/A 0 8 0 0 [01] 10 2/);
+    // Half lit: the terminator is a straight line down the middle (rx 0).
+    expect(moonShadowPath(0.5, 10, 10, 8)).toMatch(/A 0 8 0 0 [01] 10 2/);
+    // The lit side is ALWAYS the right one — which way the real limb
+    // faces is a rotation of the whole disc, not a second shape. So the
+    // dark limb is always walked the same way round, sweep 0.
+    expect(moonShadowPath(0.2, 10, 10, 8)).toContain('A 8 8 0 0 0 10 18');
+    expect(moonShadowPath(0.8, 10, 10, 8)).toContain('A 8 8 0 0 0 10 18');
+    // A crescent's terminator bows into the lit side, a gibbous' away.
+    expect(moonShadowPath(0.2, 10, 10, 8)).toMatch(/A 4\.8 8 0 0 0 10 2/);
+    expect(moonShadowPath(0.8, 10, 10, 8)).toMatch(/A 4\.8 8 0 0 1 10 2/);
+  });
+
+  it('goes on lighting up all the way to full, with no steps', () => {
+    // The old drawing quantised to eight shapes, so the disc jumped every
+    // 3.7 days and sat up to 26 points of light away from the real one.
+    const widths = [0.1, 0.2, 0.3, 0.4].map(k => {
+      // The TERMINATOR arc, which is the one that closes back at the top;
+      // the first arc in the path is the dark limb and is always r.
+      const m = /A ([\d.]+) 8 0 0 [01] 10 2/.exec(moonShadowPath(k, 10, 10, 8) ?? '');
+      return Number(m?.[1]);
+    });
+    for (let i = 1; i < widths.length; i += 1) {
+      expect(widths[i]).toBeLessThan(widths[i - 1]);
+    }
+  });
+
+  it('still knows the eight phases when you ask for them', () => {
+    // Continuous does not mean the primary and intermediate phases went
+    // away: they are the points this passes through, and each one is a
+    // recognisable shape.
+    const eighth = (i: number) => moonIllumination(i / 8);
+    expect(eighth(0)).toBeCloseTo(0, 6); // new
+    expect(eighth(2)).toBeCloseTo(0.5, 6); // first quarter
+    expect(eighth(4)).toBeCloseTo(1, 6); // full
+    expect(eighth(6)).toBeCloseTo(0.5, 6); // last quarter
+    expect(eighth(1)).toBeGreaterThan(0); // waxing crescent
+    expect(eighth(1)).toBeLessThan(0.5);
+    expect(eighth(3)).toBeGreaterThan(0.5); // waxing gibbous
+    expect(eighth(3)).toBeLessThan(1);
+    // …and the date decides which of them tonight is.
+    expect(moonPhaseFraction(FULL)).toBeCloseTo(0.5, 2);
   });
 });
 

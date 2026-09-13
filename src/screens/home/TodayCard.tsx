@@ -146,6 +146,9 @@ export type TodayCardProps = {
    * drawn. Optional; the sky falls back to `week[0]`.
    */
   skyTimings?: TimingsMap;
+  /** The reader's coordinates, for the moon's tilt — see skyFrame. */
+  latitude?: number;
+  longitude?: number;
   nextInfo: { name: string; at: Date } | null;
   /** Changing this returns the strip to today (e.g. the user moved city). */
   resetKey: string;
@@ -217,6 +220,8 @@ const HeroToday = memo(function HeroToday({
   onExpire,
   today,
   skyToday,
+  latitude,
+  longitude,
   tomorrowFajr,
   expanded,
   bleed,
@@ -239,6 +244,13 @@ const HeroToday = memo(function HeroToday({
    * sunrise whether or not the row is on.
    */
   skyToday?: TimingsMap;
+  /**
+   * Where the reader is, for the moon's tilt alone — see skyFrame. Absent
+   * until a location is set, and the moon falls back to the northern
+   * hemisphere's angle.
+   */
+  latitude?: number;
+  longitude?: number;
   /** Tomorrow's Fajr, `HH:mm`, which closes tonight's sky. */
   tomorrowFajr?: string;
   expanded: boolean;
@@ -306,8 +318,12 @@ const HeroToday = memo(function HeroToday({
       skyFrame(
         skyMoment(skyToday ?? today, new Date(minuteKey * 60_000), tomorrowFajr),
         new Date(minuteKey * 60_000),
+        // The reader's own coordinates, for the moon alone: the crescent
+        // hangs at a different angle in Jakarta than in Stockholm, and
+        // upside down in Cape Town. Nothing else in the sky uses them.
+        { latitude, longitude },
       ),
-    [today, skyToday, tomorrowFajr, minuteKey],
+    [today, skyToday, tomorrowFajr, minuteKey, latitude, longitude],
   );
   /**
    * The hero's ink comes from the sky, not the theme (skyModel.ts), and
@@ -564,6 +580,8 @@ function TodayCardImpl({
   roomy = false,
   renderLocation,
   skyTimings,
+  latitude,
+  longitude,
 }: TodayCardProps) {
   const { t, i18n } = useTranslation();
   const { palette } = useAppPalette();
@@ -1137,6 +1155,8 @@ function TodayCardImpl({
             onExpire={clearChosen}
             today={timings}
             skyToday={skyTimings}
+            latitude={latitude}
+            longitude={longitude}
             tomorrowFajr={tomorrow?.Fajr}
             expanded={expanded}
             bleed={{ horizontal: SPACING.xl, top: heroTop, bottom: SPACING.lg }}

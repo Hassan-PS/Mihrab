@@ -3,13 +3,14 @@ import { type LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import Svg, {
   Circle,
   Defs,
+  G,
   LinearGradient,
   Path,
   RadialGradient,
   Rect,
   Stop,
 } from 'react-native-svg';
-import type { MoonPhase, SkyFrame } from './skyModel';
+import type { SkyFrame } from './skyModel';
 
 /** The moon's canvas, dp. */
 export const MOON = 22;
@@ -196,7 +197,7 @@ function HeroSkyImpl({
                   body.kind === 'sun'
                     ? 0.65 * body.alpha
                     : body.kind === 'moon'
-                      ? 0.12 + 0.4 * body.lit
+                      ? 0.12 + 0.4 * body.illuminated
                       : 0
                 }
               />
@@ -230,7 +231,12 @@ function HeroSkyImpl({
       </Svg>
       {body.kind === 'moon' && !cramped ? (
         <View style={[styles.moon, { start: `${body.x * 100}%`, top: sceneY(body.y) }]}>
-          <Moon phase={body.phase} lit={glow} shadow={top} />
+          <Moon
+            illuminated={body.illuminated}
+            tilt={body.tilt}
+            lit={glow}
+            shadow={top}
+          />
         </View>
       ) : null}
     </View>
@@ -238,52 +244,93 @@ function HeroSkyImpl({
 }
 
 /**
- * The moon in one of its eight phases, as seen from the northern
- * hemisphere: waxing lights the right limb, waning the left. The lit disc
- * is drawn whole and the shadow laid over it — the shadow is the sky's own
- * top colour, so the dark part of the moon is sky, as it is. At new moon
- * only a faint rim is left; at full there is no shadow.
+ * A moon barely wider than a word, in tonight's real phase and turned the
+ * way tonight's real moon is turned where the reader is standing.
+ *
+ * The disc is drawn once, lit on the RIGHT, and then rotated — see
+ * moon.ts for where the angle comes from. Waxing and waning are not two
+ * cases here: waning is the same shape turned about half a turn, which
+ * is what it physically is, and a southern reader's moon is a northern
+ * one turned over.
+ *
+ * The lit disc is drawn whole and the shadow laid over it in the sky's
+ * own top colour, so the dark part of the moon is sky, as it is.
  */
-function Moon({ phase, lit, shadow }: { phase: MoonPhase; lit: string; shadow: string }) {
+function Moon({
+  illuminated,
+  tilt,
+  lit,
+  shadow,
+}: {
+  illuminated: number;
+  tilt: number;
+  lit: string;
+  shadow: string;
+}) {
   const r = 9;
   const c = MOON / 2;
-  const shadowPath = useMemo(() => moonShadowPath(phase, c, c, r), [phase, c]);
+  const shadowPath = useMemo(() => moonShadowPath(illuminated, c, c, r), [illuminated, c]);
   return (
     <Svg width={MOON} height={MOON} viewBox={`0 0 ${MOON} ${MOON}`}>
-      <Circle cx={c} cy={c} r={r} fill={lit} fillOpacity={phase === 0 ? 0.18 : 1} />
-      {shadowPath ? <Path d={shadowPath} fill={shadow} /> : null}
+      <G rotation={tilt} origin={`${c}, ${c}`}>
+        <Circle
+          cx={c}
+          cy={c}
+          r={r}
+          fill={lit}
+          fillOpacity={illuminated <= NEW_MOON_BELOW ? 0.18 : 1}
+        />
+        {shadowPath ? <Path d={shadowPath} fill={shadow} /> : null}
+      </G>
     </Svg>
   );
 }
 
+/** Below this much light the disc is drawn as a ghost, not a sliver. */
+export const NEW_MOON_BELOW = 0.02;
+/** Above this the terminator is inside the anti-aliasing; draw none. */
+export const FULL_MOON_ABOVE = 0.995;
+
 /**
- * The shadow on a moon of `phase` (0 new … 4 full … 7 waning crescent).
+ * The shadow over a disc that is `illuminated` (0–1) and lit on its RIGHT.
  *
- * The terminator is a half-ellipse whose horizontal radius is r·cos(2πp)
- * — a straight line at the quarters, bowing toward the lit side for a
- * crescent and toward the dark side for a gibbous. The shadow is the dark
- * limb's semicircle closed by that terminator. Null at full moon (no
- * shadow) and at new moon (handled as a rim by the caller).
+ * Always the right: which way the real limb faces is a rotation applied
+ * to the whole disc, not a second shape. That is not only tidier — it is
+ * the physical account. A waning moon is not a mirrored waxing one, it is
+ * the same lit hemisphere seen with the sun on the other side, and a
+ * southern reader is not looking at a mirrored sky but at the same sky
+ * upside down.
+ *
+ * The terminator is a half-ellipse whose horizontal radius is
+ * r·|1 − 2·illuminated|: a straight line at half, bowing toward the lit
+ * side below half (so the shadow is more than the disc's half) and into
+ * the shadow above it. The shadow is the dark limb's semicircle closed by
+ * that terminator.
+ *
+ * Null when there is effectively no shadow left to draw; a whole disc
+ * when there is effectively no light, which the caller pairs with a
+ * faint fill so a new moon is a ghost rather than a hole.
  */
-export function moonShadowPath(phase: MoonPhase, cx: number, cy: number, r: number): string | null {
-  if (phase === 4) return null;
-  if (phase === 0) return `M ${cx} ${cy - r} A ${r} ${r} 0 1 1 ${cx} ${cy + r} A ${r} ${r} 0 1 1 ${cx} ${cy - r} Z`;
-  const p = phase / 8; // 0 → 1 over the month
-  const waxing = p < 0.5;
-  const rx = Math.round(Math.abs(Math.cos(2 * Math.PI * p)) * r * 1000) / 1000;
-  // Crescent (less than half lit): the terminator bows toward the lit side,
-  // so the shadow is more than half the disc. Gibbous: it bows into the
-  // shadow, which is less than half.
-  const lessThanHalfLit = p < 0.25 || p > 0.75;
-  // Shadow limb: left when waxing (lit on the right), right when waning.
-  const limbSweep = waxing ? 0 : 1; // from top to bottom around the dark limb
-  // Return along the terminator from bottom to top. A crescent's shadow
-  // bows toward the lit side (sweep 0 bows right, 1 bows left); a gibbous'
-  // bows back into the shadow. Verified against a rendering of all eight.
-  const termSweep = waxing ? (lessThanHalfLit ? 0 : 1) : lessThanHalfLit ? 1 : 0;
+export function moonShadowPath(
+  illuminated: number,
+  cx: number,
+  cy: number,
+  r: number,
+): string | null {
+  const k = Math.max(0, Math.min(1, illuminated));
+  if (k >= FULL_MOON_ABOVE) return null;
+  if (k <= NEW_MOON_BELOW) {
+    return `M ${cx} ${cy - r} A ${r} ${r} 0 1 1 ${cx} ${cy + r} A ${r} ${r} 0 1 1 ${cx} ${cy - r} Z`;
+  }
+  const rx = Math.round(Math.abs(1 - 2 * k) * r * 1000) / 1000;
+  // Sweep 0 from bottom to top bows the terminator RIGHT, into the lit
+  // side, which is the crescent; sweep 1 bows it left into the shadow,
+  // which is the gibbous.
+  const termSweep = k < 0.5 ? 0 : 1;
   return [
     `M ${cx} ${cy - r}`,
-    `A ${r} ${r} 0 0 ${limbSweep} ${cx} ${cy + r}`,
+    // Down the dark limb, which is the left one.
+    `A ${r} ${r} 0 0 0 ${cx} ${cy + r}`,
     `A ${rx} ${r} 0 0 ${termSweep} ${cx} ${cy - r}`,
     'Z',
   ].join(' ');

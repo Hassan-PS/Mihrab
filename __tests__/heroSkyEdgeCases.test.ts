@@ -234,10 +234,12 @@ describe.each(DAYS)('$name', ({ t: day, tomorrowFajr }) => {
         expect(frame.body.alpha).toBeLessThanOrEqual(1);
       }
       if (frame.body.kind === 'moon') {
-        expect(frame.body.phase).toBeGreaterThanOrEqual(0);
-        expect(frame.body.phase).toBeLessThanOrEqual(7);
-        expect(frame.body.lit).toBeGreaterThanOrEqual(0);
-        expect(frame.body.lit).toBeLessThanOrEqual(1);
+        expect(frame.body.fraction).toBeGreaterThanOrEqual(0);
+        expect(frame.body.fraction).toBeLessThan(1);
+        expect(frame.body.illuminated).toBeGreaterThanOrEqual(0);
+        expect(frame.body.illuminated).toBeLessThanOrEqual(1);
+        expect(frame.body.tilt).toBeGreaterThanOrEqual(0);
+        expect(frame.body.tilt).toBeLessThan(360);
       }
       // The night has a moon; the day has a sun; the dusk has neither.
       if (x.passage === 'night') expect(frame.body.kind).toBe('moon');
