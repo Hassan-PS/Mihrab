@@ -1,10 +1,15 @@
 /**
- * Regenerates launcher / App Store icons from assets/app-icon-source.png.
+ * Regenerates launcher / App Store icons from branding/app-icon-source.png.
  * Uses uniform scale + center crop so artwork fills the square (and thus
  * circular / squircle / rounded-rect masks) even when edges are clipped.
  *
  * Sharpening: builds a full-size master square from the source, then downsizes
  * each output with bicubic interpolation (clearer than a single aggressive scale).
+ *
+ * The source sits under `branding/` and not `assets/`: `assets/` is an
+ * Android asset root (see android/app/build.gradle), so a 66 KB build
+ * input parked there was shipped to everyone who downloaded the app
+ * despite nothing in `src/` ever requiring it.
  *
  * Run: npm run generate-icons
  */
@@ -13,7 +18,7 @@ const path = require('path');
 const { Jimp, ResizeStrategy } = require('jimp');
 
 const ROOT = path.join(__dirname, '..');
-const SRC = path.join(ROOT, 'assets', 'app-icon-source.png');
+const SRC = path.join(ROOT, 'branding', 'app-icon-source.png');
 
 /** >1 zooms in before crop so masks that cut corners still look full. 1 = minimal (cover + center crop only). */
 const ZOOM = 1;

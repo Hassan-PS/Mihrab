@@ -162,6 +162,41 @@ android {
         }
     }
 
+    /*
+     * ...but that line takes the WHOLE folder, and not everything in it
+     * is read off disk at runtime.
+     *
+     * The four PNGs at the root of `assets/` are `require()`d from JS, so
+     * Metro already copies them into `res/drawable-mdpi/` (as
+     * `assets_qrcode.png` and friends) at bundle time. The asset root
+     * above was shipping a second, byte-identical copy of each — around
+     * 59 KB that nothing ever opened, because the app reaches them
+     * through the require, never through a path.
+     *
+     * Named one by one rather than swept up with `!*.png`, so that a
+     * future image which IS read off disk — the way the Qur'an JSON is —
+     * has to be thought about instead of silently vanishing from the
+     * build. `androidAssetPayload.test.ts` fails if this list and the
+     * contents of `assets/` drift apart.
+     *
+     * Store artwork used to ride along here too (five screenshots and the
+     * 2048px icon source, ~640 KB). Those now live under `branding/`,
+     * which is not an asset root — the right fix for a file that was
+     * never app content in the first place.
+     */
+    androidResources {
+        // `addAll`, not `+=`: the property is read-only in the AGP DSL, so
+        // assigning to it fails at configuration time. Adding is what we
+        // want anyway — AGP's own defaults (.git, .DS_Store, thumbs.db…)
+        // are already in this collection and should stay.
+        ignoreAssetsPatterns.addAll([
+            "!app-icon-rounded.png",
+            "!badge-appstore.png",
+            "!badge-googleplay.png",
+            "!qr-code.png",
+        ])
+    }
+
     defaultConfig {
         applicationId "com.prayer_times"
         minSdkVersion rootProject.ext.minSdkVersion
