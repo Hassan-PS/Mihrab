@@ -11,6 +11,15 @@ import Svg, {
   Stop,
 } from 'react-native-svg';
 import type { SkyFrame } from './skyModel';
+import { SUN_GLOW_PEAK } from './skyLight';
+
+/**
+ * How wide the halo reaches, as a percentage of the sky, at no light and
+ * at the most there is. A new moon barely disturbs the sky around it; the
+ * noon sun washes a third of it.
+ */
+const HALO_MIN_R = 14;
+const HALO_MAX_R = 38;
 
 /** The moon's canvas, dp. */
 export const MOON = 22;
@@ -154,6 +163,16 @@ function HeroSkyImpl({
   );
 
   const bodyXY = body.kind === 'none' || cramped ? null : { x: body.x, y: body.y };
+  /**
+   * The light this body gives off — its colour where the reader is
+   * standing, and how hard it glows. The sun's is worked out from its
+   * real altitude and so changes all day; the moon's from how much of it
+   * is lit. See skyLight.ts. `glow` is the stars' colour and only theirs.
+   */
+  const light =
+    body.kind === 'none'
+      ? null
+      : { hex: body.light, halo: body.halo * (body.kind === 'sun' ? body.alpha : 1) };
   const drawStars = stars > 0 && !cramped;
 
   return (
@@ -185,23 +204,25 @@ function HeroSkyImpl({
             <Stop offset="0" stopColor={top} />
             <Stop offset="1" stopColor={bottom} />
           </LinearGradient>
-          {bodyXY ? (
-            <RadialGradient id="glow" cx={`${bodyXY.x * 100}%`} cy={sceneY(bodyXY.y)} r="26%">
-              <Stop
-                offset="0"
-                stopColor={glow}
-                // A crescent throws far less light than a full moon: the
-                // halo follows the lit fraction, so a thin moon sits in a
-                // near-dark sky rather than a dark disc in a bright one.
-                stopOpacity={
-                  body.kind === 'sun'
-                    ? 0.65 * body.alpha
-                    : body.kind === 'moon'
-                      ? 0.12 + 0.4 * body.illuminated
-                      : 0
-                }
-              />
-              <Stop offset="1" stopColor={glow} stopOpacity={0} />
+          {bodyXY && light ? (
+            <RadialGradient
+              id="glow"
+              cx={`${bodyXY.x * 100}%`}
+              cy={sceneY(bodyXY.y)}
+              // The halo grows with the light, not just brightens: a new
+              // moon has almost none, a full one a soft ring, the noon
+              // sun a wide wash. A fixed radius at varying opacity reads
+              // as the same lamp turned down.
+              //
+              // By the SQUARE ROOT of the strength, because brightness
+              // falls off with the square of the distance: halve the
+              // light and the point at which it fades into the sky comes
+              // in by about a third, not by half. Taken linearly the
+              // setting sun lost its glow altogether, which is backwards
+              // — low sun, thick air, and the light spreads WIDER.
+              r={`${HALO_MIN_R + (HALO_MAX_R - HALO_MIN_R) * Math.sqrt(light.halo / SUN_GLOW_PEAK)}%`}>
+              <Stop offset="0" stopColor={light.hex} stopOpacity={light.halo} />
+              <Stop offset="1" stopColor={light.hex} stopOpacity={0} />
             </RadialGradient>
           ) : null}
         </Defs>
@@ -224,7 +245,7 @@ function HeroSkyImpl({
             cx={`${body.x * 100}%`}
             cy={sceneY(body.y)}
             r={SUN_R}
-            fill={glow}
+            fill={body.light}
             fillOpacity={body.alpha}
           />
         ) : null}
@@ -234,7 +255,7 @@ function HeroSkyImpl({
           <Moon
             illuminated={body.illuminated}
             tilt={body.tilt}
-            lit={glow}
+            lit={body.light}
             shadow={top}
           />
         </View>

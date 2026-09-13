@@ -136,16 +136,52 @@ describe('the Sky widget is the hero', () => {
 
   it('paints the same keyframes as the app', () => {
     // Every hex in the JS model's keyframe table appears in the Kotlin one.
+    // Sliced on the table's own opening and closing rather than on the
+    // comment that follows it: prose moves, and when it did this quietly
+    // widened to the whole file and started comparing things that were
+    // never in the table.
     const jsHex = new Set<string>();
-    const table = model.slice(model.indexOf('const KEYS'), model.indexOf('/** The glow'));
+    const from = model.indexOf('const KEYS');
+    const table = model.slice(from, model.indexOf('\n};', from));
+    expect(table).toContain('night:');
+    expect(table).toContain('dusk:');
     for (const m of table.matchAll(/#[0-9A-Fa-f]{6}/g)) jsHex.add(m[0].toUpperCase());
-    const ktTable = painter.slice(painter.indexOf('private val KEYS'), painter.indexOf('/** The glow'));
+    expect(jsHex.size).toBeGreaterThan(8);
+    const ktFrom = painter.indexOf('private val KEYS');
+    const ktTable = painter.slice(ktFrom, painter.indexOf('\n  )', ktFrom));
     for (const hex of jsHex) expect(ktTable.toUpperCase()).toContain(hex);
-    // And the same glows.
+    // And the same star glow, which is all `GLOW` still carries on either
+    // side — see the note below about the sun and the moon.
     for (const hex of ['#E6E9FF', '#FFD9A0', '#FFF3C4', '#FFC27A', '#F2B3A0']) {
       expect(model).toContain(hex);
       expect(painter).toContain(hex);
     }
+  });
+
+  /**
+   * WHAT THE TWO PORTS NO LONGER SHARE, and it is deliberate rather than
+   * forgotten.
+   *
+   * The app's sun and moon stopped taking their colour from `GLOW` — the
+   * sun's is computed from its real altitude through the air it crosses
+   * (skyLight.ts), and its phase from the real elongation (moon.ts).
+   * Both of those want the reader's coordinates, and the widget payload
+   * carries none: coordinates are the one piece of this app's data that
+   * is nobody else's business, and putting them on disk for a home-screen
+   * widget is a decision for a person, not a refactor.
+   *
+   * So the widget still paints the five-hex table and the mean synodic
+   * month. This test states the gap so it is a known one, and fails if
+   * somebody closes it on the JS side alone.
+   */
+  it('still carries its own older sun and moon, until coordinates are settled', () => {
+    expect(painter).toContain('private val GLOW');
+    expect(painter).toMatch(/SYNODIC|29\.53/);
+    // The app has moved on from both.
+    expect(model).not.toMatch(/29\.53/);
+    expect(read(ROOT, 'src', 'screens', 'home', 'skyLight.ts')).toContain(
+      'apparentBrightness',
+    );
   });
 
   /**

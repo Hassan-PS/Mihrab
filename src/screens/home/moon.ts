@@ -278,6 +278,39 @@ export function moonBrightLimbTilt(
   return norm360(q - chi - 90);
 }
 
+/**
+ * How high the sun is above the horizon, in degrees, from where the
+ * reader is standing. Negative before it rises and after it sets.
+ *
+ * The hero draws the sun on an arc that peaks at solar noon and meets the
+ * horizon at sunrise and Maghrib — the shape of the real day — but the
+ * arc knows nothing about HOW high the peak is, and that is the whole
+ * difference between a Stockholm December and an equatorial noon. In
+ * Stockholm on the shortest day the sun never clears about seven
+ * degrees, so it is amber from the moment it rises to the moment it sets
+ * and never once goes white. That is what this is for: the colour and
+ * the strength of the light come from the real altitude, so the sky is
+ * the reader's own sky and not an average one.
+ */
+export function sunAltitude(
+  date: Date,
+  latitude: number,
+  longitude: number,
+): number {
+  const d = epochDays(date);
+  const s = sun(d);
+  const { ra, dec } = toEquatorial(s, obliquity(d));
+  const hourAngle = norm360(localSiderealTime(date, s, longitude) - ra) * RAD;
+  const lat = latitude * RAD;
+  const decR = dec * RAD;
+  return (
+    Math.asin(
+      Math.sin(lat) * Math.sin(decR) +
+        Math.cos(lat) * Math.cos(decR) * Math.cos(hourAngle),
+    ) / RAD
+  );
+}
+
 export type MoonView = {
   /** 0 at new, 0.5 at full, back to 1 — see `moonPhaseFraction`. */
   fraction: number;

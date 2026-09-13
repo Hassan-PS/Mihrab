@@ -44,7 +44,14 @@
  */
 import { combineLocalDateAndTime } from '../../utils/prayerTimes';
 import type { TimingsMap } from '../../types/prayer';
-import { moonView, type MoonView } from './moon';
+import { moonView, sunAltitude, type MoonView } from './moon';
+import {
+  moonGlow,
+  MOON_SURFACE,
+  sunGlow,
+  SUN_SURFACE,
+  tintedBy,
+} from './skyLight';
 
 export type SkyPassage = 'night' | 'dawn' | 'day' | 'sunset' | 'dusk';
 
@@ -83,7 +90,15 @@ const KEYS: Record<SkyPassage, Key[]> = {
   ],
 };
 
-/** The glow of the sun or moon, per passage. */
+/**
+ * The glow the STARS take, per passage — and only the stars.
+ *
+ * The sun and the moon used to take it too, which is why the sun was one
+ * colour for the whole of the morning and changed by jumping at a prayer
+ * time. They carry their own light now, computed from where they
+ * actually are; see skyLight.ts. A star is a point of white a couple of
+ * pixels across and has no such story.
+ */
 const GLOW: Record<SkyPassage, string> = {
   night: '#E6E9FF',
   dawn: '#FFD9A0',
@@ -223,11 +238,22 @@ export function skyMoment(timings: TimingsMap, now: Date, tomorrowFajr?: string)
 
 export type SkyBody =
   | { kind: 'none' }
-  | { kind: 'sun'; x: number; y: number; alpha: number }
+  | {
+      kind: 'sun';
+      x: number;
+      y: number;
+      alpha: number;
+      /** Its colour where the reader is standing, after the air. */
+      light: string;
+      /** How hard it glows, 0–1 — see skyLight's SUN_GLOW_PEAK. */
+      halo: number;
+    }
   | ({
       kind: 'moon';
       x: number;
       y: number;
+      light: string;
+      halo: number;
     } & MoonView);
 
 export type SkyFrame = {
@@ -293,9 +319,18 @@ function sunAt(daylight: number | null): { x: number; y: number } {
  * the moon falls back to the northern hemisphere's, which is what the
  * whole app drew before it asked.
  */
+/**
+ * Without coordinates there is no real altitude to light the sun by, and
+ * this stands in: the arc's own progress, read as a day that peaks a
+ * little over halfway up. Wrong for a polar winter and roughly right for
+ * everywhere most people are, which is the best a sky can do before it
+ * has been told where it is.
+ */
+const ASSUMED_NOON_ALTITUDE = 55;
+
 export function skyFrame(
   moment: SkyMoment,
-  moonDate: Date,
+  now: Date,
   where?: { latitude?: number | null; longitude?: number | null },
 ): SkyFrame {
   const { passage, t } = moment;
@@ -304,18 +339,35 @@ export function skyFrame(
   // is the whole of its journey.
   const x = X_RISE + t * (X_SET - X_RISE);
   const sun = sunAt(moment.daylight);
+  /**
+   * How high the sun really is, which decides both its colour and how
+   * hard it glows — the arc it is DRAWN on peaks at solar noon wherever
+   * you are, and only the real altitude knows that a Stockholm December
+   * noon is seven degrees and never goes white.
+   */
+  const altitude =
+    typeof where?.latitude === 'number' && typeof where?.longitude === 'number'
+      ? sunAltitude(now, where.latitude, where.longitude)
+      : ASSUMED_NOON_ALTITUDE * Math.sin(Math.PI * clamp01(moment.daylight ?? 0));
+  const sunLight = { light: tintedBy(SUN_SURFACE, altitude), halo: sunGlow(altitude) };
   let stars = 0;
   let body: SkyBody = { kind: 'none' };
   switch (passage) {
-    case 'night':
+    case 'night': {
       stars = 1;
+      const moon = moonView(now, where?.latitude, where?.longitude);
       body = {
         kind: 'moon',
         x,
         y: 0.22 - Math.sin(t * Math.PI) * 0.1,
-        ...moonView(moonDate, where?.latitude, where?.longitude),
+        ...moon,
+        // Moonlight is sunlight off a grey rock, and the rock is the same
+        // colour all night; what changes is how much of it is lit.
+        light: MOON_SURFACE,
+        halo: moonGlow(moon.illuminated),
       };
       break;
+    }
     case 'dawn': {
       // Stars fade as the sky lightens; the sun breaks the strip's floor at
       // t ≈ 0.6 and stands on the horizon line, at the point it rises
@@ -330,12 +382,13 @@ export function skyFrame(
               x: sun.x,
               y: sun.y + (1 - rise) * 0.02,
               alpha: Math.min(1, rise * 1.5),
+              ...sunLight,
             }
           : { kind: 'none' };
       break;
     }
     case 'day':
-      body = { kind: 'sun', x: sun.x, y: sun.y, alpha: 1 };
+      body = { kind: 'sun', x: sun.x, y: sun.y, alpha: 1, ...sunLight };
       break;
     case 'sunset': {
       // The same arc, still coming down — the passage's own progress does
@@ -345,6 +398,7 @@ export function skyFrame(
         x: sun.x,
         y: sun.y,
         alpha: t < 0.9 ? 1 : Math.max(0, Math.round((1 - (t - 0.9) / 0.1) * 1000) / 1000),
+        ...sunLight,
       };
       break;
     }
