@@ -974,6 +974,8 @@
     "mushafDownloadReadHint": "Halaman tampil begitu tiba; sisanya diunduh di latar belakang.",
     "mushafDownloadStrip": "Mengunduh mushaf · {{pct}}%",
     "juzLabel": "Juz {{juz}}",
+    "todayPages": "{{done}}/{{total}} hari ini",
+    "todayPagesLong": "Hari ini: {{done}} dari {{total}} halaman",
     "nightMode": "Mode malam",
     "jumpToPage": "Ke halaman",
     "pageShort": "hlm. {{page}}",

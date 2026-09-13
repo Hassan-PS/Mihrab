@@ -974,6 +974,8 @@
     "mushafDownloadReadHint": "页面到达即显示，其余在后台下载。",
     "mushafDownloadStrip": "正在下载古兰经 · {{pct}}%",
     "juzLabel": "第 {{juz}} 卷",
+    "todayPages": "今日 {{done}}/{{total}}",
+    "todayPagesLong": "今日：{{total}} 页中的 {{done}} 页",
     "nightMode": "夜间模式",
     "jumpToPage": "跳转到页面",
     "pageShort": "第 {{page}} 页",

@@ -974,6 +974,8 @@
     "mushafDownloadReadHint": "صفحات آتے ہی دکھائی دیتے ہیں؛ باقی پس منظر میں ڈاؤن لوڈ ہوتا ہے۔",
     "mushafDownloadStrip": "مصحف ڈاؤن لوڈ ہو رہا ہے · {{pct}}٪",
     "juzLabel": "پارہ {{juz}}",
+    "todayPages": "آج {{done}}/{{total}}",
+    "todayPagesLong": "آج: {{total}} میں سے {{done}} صفحات",
     "nightMode": "نائٹ موڈ",
     "jumpToPage": "صفحے پر جائیں",
     "pageShort": "ص {{page}}",

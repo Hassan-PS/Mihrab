@@ -974,6 +974,8 @@
     "mushafDownloadReadHint": "পাতাগুলো আসার সাথে সাথে দেখা যায়; বাকিটা পটভূমিতে ডাউনলোড হয়।",
     "mushafDownloadStrip": "মুসহাফ ডাউনলোড হচ্ছে · {{pct}}%",
     "juzLabel": "পারা {{juz}}",
+    "todayPages": "আজ {{done}}/{{total}}",
+    "todayPagesLong": "আজ: {{total}}টির মধ্যে {{done}} পৃষ্ঠা",
     "nightMode": "নাইট মোড",
     "jumpToPage": "পৃষ্ঠায় যান",
     "pageShort": "পৃ. {{page}}",

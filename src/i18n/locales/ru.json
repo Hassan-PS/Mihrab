@@ -974,6 +974,8 @@
     "mushafDownloadReadHint": "Страницы появляются по мере загрузки; остальное скачивается в фоне.",
     "mushafDownloadStrip": "Загрузка мусхафа · {{pct}} %",
     "juzLabel": "Джуз {{juz}}",
+    "todayPages": "{{done}}/{{total}} сегодня",
+    "todayPagesLong": "Сегодня: {{done}} из {{total}} страниц",
     "nightMode": "Ночной режим",
     "jumpToPage": "Перейти к странице",
     "pageShort": "с. {{page}}",

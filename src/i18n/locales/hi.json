@@ -974,6 +974,8 @@
     "mushafDownloadReadHint": "पृष्ठ आते ही दिखते हैं; बाकी पृष्ठभूमि में डाउनलोड होते हैं।",
     "mushafDownloadStrip": "मुसहफ़ डाउनलोड हो रहा है · {{pct}}%",
     "juzLabel": "पारा {{juz}}",
+    "todayPages": "आज {{done}}/{{total}}",
+    "todayPagesLong": "आज: {{total}} में से {{done}} पृष्ठ",
     "nightMode": "नाइट मोड",
     "jumpToPage": "पृष्ठ पर जाएँ",
     "pageShort": "पृ. {{page}}",

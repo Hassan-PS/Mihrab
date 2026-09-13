@@ -974,6 +974,8 @@
     "mushafDownloadReadHint": "Sidorna visas när de kommer; resten laddas ner i bakgrunden.",
     "mushafDownloadStrip": "Laddar ner mushafen · {{pct}} %",
     "juzLabel": "Juz {{juz}}",
+    "todayPages": "{{done}}/{{total}} idag",
+    "todayPagesLong": "Idag: {{done}} av {{total}} sidor",
     "nightMode": "Nattläge",
     "jumpToPage": "Gå till sida",
     "pageShort": "s. {{page}}",

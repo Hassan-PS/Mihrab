@@ -974,6 +974,8 @@
     "mushafDownloadReadHint": "Pages appear as they arrive; the rest downloads in the background.",
     "mushafDownloadStrip": "Downloading the mushaf · {{pct}}%",
     "juzLabel": "Juz {{juz}}",
+    "todayPages": "{{done}}/{{total}} today",
+    "todayPagesLong": "Today: {{done}} of {{total}} pages",
     "nightMode": "Night mode",
     "jumpToPage": "Go to page",
     "pageShort": "p. {{page}}",

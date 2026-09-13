@@ -36,12 +36,14 @@ import {
   totalPagesForRiwayah,
 } from './pages';
 import { DEFAULT_RIWAYAH, resolveRiwayah, type RiwayahId } from './riwayat';
+import type { KhatmahPages } from './quranState';
 import {
   KHATMAH_COLOR,
   activeKhatmah,
   drawnReadingPosition,
   khatmahCurrentPortion,
   khatmahMarkerAyah,
+  khatmahPages,
   recordKhatmahPageTurn,
   recordReading,
   setQuranPrefs,
@@ -206,6 +208,9 @@ export type MushafReaderCore = {
   /** The page carrying the finish line, for the footer's pill. Null with
    *  no plan, and null once the book is read. */
   finish: KhatmahFinish | null;
+  /** Today's khatmah portion, in pages of the muṣḥaf on screen. Null with
+   *  no plan — see the note where it is computed. */
+  todayQuota: KhatmahPages | null;
   playback: PlaybackStatus;
   /** The muṣḥaf on screen. Every page number in this object is ITS page. */
   riwayah: RiwayahId;
@@ -560,6 +565,19 @@ export function useMushafReaderCore({
     [quran.bookmarks, plan, readingKey],
   );
 
+  /**
+   * Today's own quota — issue #46.
+   *
+   * "Display today's specific reading progress directly in the reader
+   * view so users can monitor their daily target without exiting to the
+   * dashboard." The numbers are the card's own (`khatmahPages`), so the
+   * reader and the dashboard cannot disagree about what today is.
+   */
+  const todayQuota = useMemo(
+    () => (plan ? khatmahPages(plan, riwayah) : null),
+    [plan, riwayah],
+  );
+
   const finish = useMemo<KhatmahFinish | null>(() => {
     if (!plan) return null;
     const at = khatmahMarkerAyah(plan);
@@ -577,6 +595,7 @@ export function useMushafReaderCore({
     quran,
     marks,
     finish,
+    todayQuota,
     playback,
     riwayah,
     totalPages,

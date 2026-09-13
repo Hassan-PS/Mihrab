@@ -756,6 +756,14 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
           onPeekPage={core.peekPage}
           onOpenJump={core.openJump}
           showJuz
+          today={
+            core.todayQuota
+              ? {
+                  done: core.todayQuota.doneToday,
+                  total: core.todayQuota.today,
+                }
+              : null
+          }
           chrome={TONE_CHROME[tone]}
           trailing={
             <MushafToneButton

@@ -67,6 +67,7 @@ import {
   totalPagesForRiwayah,
 } from './pages';
 import { DEFAULT_RIWAYAH, type RiwayahId } from './riwayat';
+import { KHATMAH_COLOR } from './quranState';
 import { mushafSurahName } from './surahName';
 import type { ToneChrome } from './mushafTone';
 import {
@@ -109,6 +110,17 @@ type Props = {
    */
   showJuz?: boolean;
   /**
+   * Today's khatmah portion, as a third line under the page and the juz —
+   * issue #46: "display today's specific reading progress directly in the
+   * reader view so users can monitor their daily target without exiting
+   * to the dashboard".
+   *
+   * Given rather than read from the store, because this component is the
+   * rail and nothing else: the reader already holds the plan, and a
+   * second reader of it here is a second answer to what today is.
+   */
+  today?: { done: number; total: number } | null;
+  /**
    * Controls after the readout — the phone puts the tone button here, so
    * the bar is one row: ⌗ · rail · page / total · juz · ☀︎.
    */
@@ -134,6 +146,7 @@ function MushafPageScrubberImpl({
   onPeekPage,
   onOpenJump,
   showJuz = false,
+  today = null,
   trailing,
   chrome,
 }: Props) {
@@ -417,6 +430,27 @@ function MushafPageScrubberImpl({
             {t('quran.juzLabel', { juz: juzForPageIn(shown, riwayah) })}
           </Text>
         ) : null}
+        {today ? (
+          // In the khatmah's own colour, which is the pill's: two bare
+          // numbers under two other bare numbers would read as a third
+          // page count. The label says what they are for anyone who
+          // cannot see the colour, or hears the screen instead.
+          <Text
+            style={[styles.readoutToday, { color: KHATMAH_COLOR }]}
+            numberOfLines={1}
+            accessibilityLabel={t('quran.todayPagesLong', {
+              defaultValue: 'Today: {{done}} of {{total}} pages',
+              done: today.done,
+              total: today.total,
+            })}
+            maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
+            {t('quran.todayPages', {
+              defaultValue: '{{done}}/{{total}} today',
+              done: today.done,
+              total: today.total,
+            })}
+          </Text>
+        ) : null}
       </View>
       {trailing}
     </View>
@@ -490,6 +524,13 @@ const styles = StyleSheet.create({
   // Two short lines instead of one wide one, so the rail keeps its length
   // now that the tone button shares the row.
   readoutBoxTight: { minWidth: 56 },
+  readoutToday: {
+    fontSize: TYPE.caption.fontSize,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+    textAlign: 'right',
+    marginTop: 1,
+  },
   readoutJuz: {
     fontSize: TYPE.caption.fontSize,
     fontVariant: ['tabular-nums'],

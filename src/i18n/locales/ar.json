@@ -974,6 +974,8 @@
     "mushafDownloadReadHint": "تظهر الصفحات فور وصولها، ويُنزَّل الباقي في الخلفية.",
     "mushafDownloadStrip": "جارٍ تنزيل المصحف · {{pct}}٪",
     "juzLabel": "الجزء {{juz}}",
+    "todayPages": "{{done}}/{{total}} اليوم",
+    "todayPagesLong": "اليوم: {{done}} من {{total}} صفحة",
     "nightMode": "الوضع الليلي",
     "jumpToPage": "الانتقال إلى صفحة",
     "pageShort": "ص {{page}}",

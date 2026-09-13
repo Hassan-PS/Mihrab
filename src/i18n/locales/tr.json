@@ -974,6 +974,8 @@
     "mushafDownloadReadHint": "Sayfalar geldikçe görünür; gerisi arka planda iner.",
     "mushafDownloadStrip": "Mushaf indiriliyor · %{{pct}}",
     "juzLabel": "{{juz}}. Cüz",
+    "todayPages": "bugün {{done}}/{{total}}",
+    "todayPagesLong": "Bugün: {{total}} sayfadan {{done}}",
     "nightMode": "Gece modu",
     "jumpToPage": "Sayfaya git",
     "pageShort": "s. {{page}}",
