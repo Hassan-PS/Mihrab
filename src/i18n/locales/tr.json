@@ -1217,7 +1217,10 @@
     "surahDownloadDoneTitle": "{{surah}} hazır",
     "surahDownloadDoneBody": "{{name}} okuyuşuyla {{surah}} bu cihazda. Artık bağlantı olmadan çalıyor.",
     "reciterDownloadStrip": "{{name}} indiriliyor · %{{pct}}",
-    "surahDownloadStrip": "{{surah}} indiriliyor · %{{pct}}"
+    "surahDownloadStrip": "{{surah}} indiriliyor · %{{pct}}",
+    "readerTitle": "Sure okuma",
+    "verseByVerse": "Ayet ayet görünüm",
+    "verseByVerseHelp": "Kapalıyken sure mushaf olarak açılır ve öyle kalır. Açıkken her ayetin altında meali bulunan bir ayet listesi olarak da okunabilir ve okuyucunun başlığına ikisi arasında geçiş düğmesi gelir."
   },
   "reading": {
     "textSize": "Metin boyutu",

@@ -1217,7 +1217,10 @@
     "surahDownloadDoneTitle": "{{surah}} är klar",
     "surahDownloadDoneBody": "{{name}}s recitation av {{surah}} finns på den här enheten. Den spelas nu utan anslutning.",
     "reciterDownloadStrip": "Laddar ner {{name}} · {{pct}} %",
-    "surahDownloadStrip": "Laddar ner {{surah}} · {{pct}} %"
+    "surahDownloadStrip": "Laddar ner {{surah}} · {{pct}} %",
+    "readerTitle": "Att läsa en sura",
+    "verseByVerse": "Vers-för-vers-vy",
+    "verseByVerseHelp": "Av öppnas en sura som mushaf och stannar där. På kan den också läsas som en lista med verser, med översättningen under varje vers, och läsarens sidhuvud får en knapp för att växla mellan de två."
   },
   "reading": {
     "textSize": "Textstorlek",

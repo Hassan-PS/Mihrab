@@ -1217,7 +1217,10 @@
     "surahDownloadDoneTitle": "{{surah}} جاهزة",
     "surahDownloadDoneBody": "تلاوة {{name}} لسورة {{surah}} محفوظة على هذا الجهاز، وتُشغَّل الآن دون اتصال.",
     "reciterDownloadStrip": "جارٍ تنزيل {{name}} · {{pct}}٪",
-    "surahDownloadStrip": "جارٍ تنزيل {{surah}} · {{pct}}٪"
+    "surahDownloadStrip": "جارٍ تنزيل {{surah}} · {{pct}}٪",
+    "readerTitle": "قراءة السورة",
+    "verseByVerse": "عرض آية بآية",
+    "verseByVerseHelp": "عند الإيقاف تُفتح السورة في المصحف وتبقى كذلك. وعند التشغيل يمكن قراءتها أيضًا كقائمة آيات تحت كل آية ترجمتها، ويظهر في رأس القارئ زر للتنقل بين العرضين."
   },
   "reading": {
     "textSize": "حجم النص",

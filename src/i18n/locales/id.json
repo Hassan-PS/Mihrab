@@ -1217,7 +1217,10 @@
     "surahDownloadDoneTitle": "{{surah}} siap",
     "surahDownloadDoneBody": "Tilawah {{surah}} oleh {{name}} ada di perangkat ini. Kini diputar tanpa koneksi.",
     "reciterDownloadStrip": "Mengunduh {{name}} · {{pct}}%",
-    "surahDownloadStrip": "Mengunduh {{surah}} · {{pct}}%"
+    "surahDownloadStrip": "Mengunduh {{surah}} · {{pct}}%",
+    "readerTitle": "Membaca surah",
+    "verseByVerse": "Tampilan ayat per ayat",
+    "verseByVerseHelp": "Nonaktif, surah terbuka sebagai mushaf dan tetap begitu. Aktif, surah juga dapat dibaca sebagai daftar ayat dengan terjemahan di bawah setiap ayat, dan header pembaca menampilkan tombol untuk berpindah di antara keduanya."
   },
   "reading": {
     "textSize": "Ukuran teks",

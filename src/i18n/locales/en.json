@@ -1217,7 +1217,10 @@
     "surahDownloadDoneTitle": "{{surah}} is ready",
     "surahDownloadDoneBody": "{{name}}’s recitation of {{surah}} is on this device. It plays without a connection now.",
     "reciterDownloadStrip": "Downloading {{name}} · {{pct}}%",
-    "surahDownloadStrip": "Downloading {{surah}} · {{pct}}%"
+    "surahDownloadStrip": "Downloading {{surah}} · {{pct}}%",
+    "readerTitle": "Reading a surah",
+    "verseByVerse": "Verse-by-verse view",
+    "verseByVerseHelp": "Off, a surah opens as the mushaf and stays there. On, it can also be read as a list of verses with the translation under each one, and the reader’s header carries a button to move between the two."
   },
   "reading": {
     "textSize": "Text size",

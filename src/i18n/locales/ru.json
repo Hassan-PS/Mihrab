@@ -1217,7 +1217,10 @@
     "surahDownloadDoneTitle": "{{surah}} готова",
     "surahDownloadDoneBody": "Чтение суры {{surah}} в исполнении {{name}} сохранено на устройстве и теперь звучит без связи.",
     "reciterDownloadStrip": "Загрузка {{name}} · {{pct}} %",
-    "surahDownloadStrip": "Загрузка {{surah}} · {{pct}} %"
+    "surahDownloadStrip": "Загрузка {{surah}} · {{pct}} %",
+    "readerTitle": "Чтение суры",
+    "verseByVerse": "Аят за аятом",
+    "verseByVerseHelp": "Выключено — сура открывается как мусхаф и им остаётся. Включено — её можно читать и списком аятов с переводом под каждым, а в шапке читалки появляется кнопка перехода между ними."
   },
   "reading": {
     "textSize": "Размер текста",

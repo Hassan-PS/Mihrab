@@ -1217,7 +1217,10 @@
     "surahDownloadDoneTitle": "{{surah}} est prête",
     "surahDownloadDoneBody": "La récitation de {{surah}} par {{name}} est sur cet appareil. Elle se lit désormais sans connexion.",
     "reciterDownloadStrip": "Téléchargement de {{name}} · {{pct}} %",
-    "surahDownloadStrip": "Téléchargement de {{surah}} · {{pct}} %"
+    "surahDownloadStrip": "Téléchargement de {{surah}} · {{pct}} %",
+    "readerTitle": "Lire une sourate",
+    "verseByVerse": "Vue verset par verset",
+    "verseByVerseHelp": "Désactivé, une sourate s’ouvre en mushaf et y reste. Activé, elle peut aussi se lire comme une liste de versets avec la traduction sous chacun, et l’en-tête du lecteur reçoit un bouton pour passer de l’une à l’autre."
   },
   "reading": {
     "textSize": "Taille du texte",

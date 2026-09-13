@@ -1217,7 +1217,10 @@
     "surahDownloadDoneTitle": "{{surah}} প্রস্তুত",
     "surahDownloadDoneBody": "{{surah}}-এর {{name}}-এর তিলাওয়াত এই ডিভাইসে আছে। এখন সংযোগ ছাড়াই বাজবে।",
     "reciterDownloadStrip": "{{name}} ডাউনলোড হচ্ছে · {{pct}}%",
-    "surahDownloadStrip": "{{surah}} ডাউনলোড হচ্ছে · {{pct}}%"
+    "surahDownloadStrip": "{{surah}} ডাউনলোড হচ্ছে · {{pct}}%",
+    "readerTitle": "সূরা পড়া",
+    "verseByVerse": "আয়াত-ভিত্তিক ভিউ",
+    "verseByVerseHelp": "বন্ধ থাকলে সূরা মুসহাফ হিসেবে খোলে এবং সেখানেই থাকে। চালু থাকলে এটি আয়াতের তালিকা হিসেবেও পড়া যায়, প্রতিটি আয়াতের নিচে অনুবাদসহ, আর রিডারের শীর্ষে দুটির মধ্যে যাওয়ার বোতাম আসে।"
   },
   "reading": {
     "textSize": "লেখার আকার",

@@ -1,11 +1,14 @@
 /**
- * The surah route — one route, two readers.
+ * The surah route — one route, one reader, or two if asked.
  *
- * `settings.quranReadingMode` says which one is on screen, and the header
- * of each carries the toggle to the other. This screen hydrates what both
- * need, finds the surah, and renders one of them; everything either reader
- * knows about the navigator — header controls, orientation, fullscreen,
- * content colour, the Mac's back gesture — lives with that reader.
+ * The muṣḥaf is the reader. `settings.quranVerseByVerseEnabled` says
+ * whether the ayah-by-ayah list is offered beside it at all, and only
+ * then does `settings.quranReadingMode` say which of the two is on
+ * screen and does the header of each carry the toggle to the other.
+ * This screen hydrates what both need, finds the surah, and renders one
+ * of them; everything either reader knows about the navigator — header
+ * controls, orientation, fullscreen, content colour, the Mac's back
+ * gesture — lives with that reader.
  *
  * It used to be all one component, 980 lines switching on `isMushaf` in
  * a shared header effect, content style, sheet guard and render. Each
@@ -27,6 +30,7 @@ import {
 import { findSurah } from '../quran/quran';
 import { hydrateRiwayahData } from '../quran/riwayahData';
 import { hydrateQuranState } from '../quran/quranState';
+import { activeReaderMode } from '../quran/readerMode';
 import { playFromAyah as startReciting } from '../quran/audio/playback';
 import { usePrayerSettings } from '../context/PrayerSettingsContext';
 import type { RootStackParamList } from '../navigation/types';
@@ -112,7 +116,22 @@ export function QuranSurahScreen() {
     void startReciting(surahNumber, playFromAyah).catch(() => undefined);
   }, [surahNumber, playFromAyah]);
 
-  const isMushaf = settings.quranReadingMode === 'mushaf';
+  /**
+   * ONE READER, UNLESS ASKED FOR TWO.
+   *
+   * The muṣḥaf is what this route opens. The verse-by-verse list is the
+   * other reader, and `settings.quranVerseByVerseEnabled` decides whether
+   * it is offered at all (Settings → Quran).
+   *
+   * Off, the muṣḥaf is DERIVED rather than written: `quranReadingMode` is
+   * left holding whatever it held. A reader who turns the list back on a
+   * month later returns to the view they left, and nothing had to be
+   * migrated back to give them that. It also means flipping the setting
+   * while a surah is open re-renders this screen into the right reader on
+   * its own — there is no state to keep in step.
+   */
+  const verseByVerse = settings.quranVerseByVerseEnabled;
+  const isMushaf = activeReaderMode(settings) === 'mushaf';
   const toggleMode = useCallback(() => {
     updateSettings({
       quranReadingMode: isMushaf ? 'withTranslation' : 'mushaf',
@@ -132,7 +151,9 @@ export function QuranSurahScreen() {
       surah={surah}
       surahNumber={surahNumber}
       initialPage={initialPage}
-      onToggleMode={toggleMode}
+      // Undefined, not a no-op: the muṣḥaf header draws the control only
+      // when there is somewhere for it to go.
+      onToggleMode={verseByVerse ? toggleMode : undefined}
       onBackAnswer={leaveFullscreen}
     />
   ) : (

@@ -1217,7 +1217,10 @@
     "surahDownloadDoneTitle": "{{surah}} ist bereit",
     "surahDownloadDoneBody": "Die Rezitation von {{surah}} durch {{name}} liegt auf diesem Gerät und spielt jetzt ohne Verbindung.",
     "reciterDownloadStrip": "{{name}} wird geladen · {{pct}} %",
-    "surahDownloadStrip": "{{surah}} wird geladen · {{pct}} %"
+    "surahDownloadStrip": "{{surah}} wird geladen · {{pct}} %",
+    "readerTitle": "Eine Sure lesen",
+    "verseByVerse": "Vers-für-Vers-Ansicht",
+    "verseByVerseHelp": "Aus öffnet sich eine Sure als Mushaf und bleibt dort. An lässt sie sich auch als Liste von Versen lesen, mit der Übersetzung unter jedem Vers, und die Kopfzeile des Lesers erhält eine Schaltfläche zum Wechseln zwischen beiden."
   },
   "reading": {
     "textSize": "Schriftgröße",

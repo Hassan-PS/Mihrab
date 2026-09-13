@@ -274,6 +274,10 @@ export type PrayerAppSettings = {
    * reader — opening a surah lands on the raw mushaf. `withTranslation`
    * shows ayah-by-ayah cards with Arabic + translation. The header
    * toggle persists the user's last choice.
+   *
+   * Only consulted while `quranVerseByVerseEnabled` below is on. With it
+   * off there is one reader, and this is a memory of the last time there
+   * were two.
    */
   quranReadingMode: 'withTranslation' | 'mushaf';
   /**
@@ -282,6 +286,29 @@ export type PrayerAppSettings = {
    * schema. See `storage.ts`.
    */
   quranModeMushafDefault: boolean;
+  /**
+   * Is the verse-by-verse reader offered at all?
+   *
+   * The muṣḥaf is what this app opens a surah as. The other reader — the
+   * ayah-by-ayah list with the translation under each one — used to be
+   * one tap away in every reader header, which put a second answer to
+   * "what does the Qur'an look like" in front of everybody whether or not
+   * they wanted one. Off, it is not there: no toggle in the header, and
+   * `quranReadingMode` below is not consulted.
+   *
+   * On, nothing about the old behaviour changes — the header toggle is
+   * back and `quranReadingMode` remembers which reader you were last in.
+   * That pref is deliberately left alone while this is off rather than
+   * rewritten to 'mushaf', so someone who turns the reader back on lands
+   * in the view they left.
+   *
+   * Grandfathered rather than reset: an install that was sitting in the
+   * verse-by-verse reader AFTER the muṣḥaf became the default had chosen
+   * it, so `storage.ts` turns this on for them once and the update is
+   * invisible. An install that predates that default was merely sitting
+   * in the old one, which is not a choice — see the migration there.
+   */
+  quranVerseByVerseEnabled: boolean;
   /**
    * How big the reader's own long-form text is drawn: the Qur'an's
    * translation and tafsir, and a dua's translation and pronunciation.
@@ -594,6 +621,8 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   // toggling to translation view persists per user.
   quranReadingMode: 'mushaf',
   quranModeMushafDefault: true,
+  // One reader out of the box. Settings → Quran offers the other one.
+  quranVerseByVerseEnabled: false,
   // 1 = the sizes the app has always drawn. See theme/readingText.ts.
   readingTextScale: DEFAULT_READING_SCALE,
   fastingRemindersEnabled: false,

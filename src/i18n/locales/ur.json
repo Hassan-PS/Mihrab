@@ -1217,7 +1217,10 @@
     "surahDownloadDoneTitle": "{{surah}} تیار ہے",
     "surahDownloadDoneBody": "{{surah}} کی {{name}} کی تلاوت اس ڈیوائس پر موجود ہے۔ اب یہ بغیر کنکشن کے چلتی ہے۔",
     "reciterDownloadStrip": "{{name}} ڈاؤن لوڈ ہو رہا ہے · {{pct}}%",
-    "surahDownloadStrip": "{{surah}} ڈاؤن لوڈ ہو رہی ہے · {{pct}}%"
+    "surahDownloadStrip": "{{surah}} ڈاؤن لوڈ ہو رہی ہے · {{pct}}%",
+    "readerTitle": "سورہ پڑھنا",
+    "verseByVerse": "آیت بہ آیت منظر",
+    "verseByVerseHelp": "بند ہونے پر سورہ مصحف کے طور پر کھلتی ہے اور وہیں رہتی ہے۔ آن ہونے پر اسے آیات کی فہرست کے طور پر بھی پڑھا جا سکتا ہے، ہر آیت کے نیچے ترجمے کے ساتھ، اور ریڈر کے اوپر دونوں کے درمیان جانے کا بٹن آ جاتا ہے۔"
   },
   "reading": {
     "textSize": "متن کا سائز",

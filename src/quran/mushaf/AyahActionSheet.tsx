@@ -49,6 +49,7 @@ import {
   READING_COLOR,
   type BookmarkColor,
 } from '../quranState';
+import { activeReaderMode } from '../readerMode';
 import {
   loadTafsir,
   resolveTafsirEdition,
@@ -710,12 +711,12 @@ export function AyahActionSheet({
               // the panel pins it, and then it is. Already pinned here:
               // nothing left to do.
               if (isReadingHere && state.lastRead?.pinned) return;
-              setReadingPosition(
-                surah,
-                ayah,
-                page,
-                settings.quranReadingMode === 'mushaf' ? 'mushaf' : 'withTranslation',
-              );
+              // The reader this sheet is OPEN IN, which is not always the
+              // one the pref remembers — see `activeReaderMode`. What is
+              // written here decides whether the home card counts pages
+              // and whether the daily-ayah notification opens a page or
+              // an ayah, so it has to be the truth.
+              setReadingPosition(surah, ayah, page, activeReaderMode(settings));
             }}
             style={[
               styles.khatmahPin,

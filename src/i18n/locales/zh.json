@@ -1217,7 +1217,10 @@
     "surahDownloadDoneTitle": "{{surah}} 已就绪",
     "surahDownloadDoneBody": "{{name}} 诵读的 {{surah}} 已保存在本设备，现在无需联网即可播放。",
     "reciterDownloadStrip": "正在下载 {{name}} · {{pct}}%",
-    "surahDownloadStrip": "正在下载 {{surah}} · {{pct}}%"
+    "surahDownloadStrip": "正在下载 {{surah}} · {{pct}}%",
+    "readerTitle": "阅读一章",
+    "verseByVerse": "逐节视图",
+    "verseByVerseHelp": "关闭时，一章以经文视图打开并保持不变。开启时，还可以按逐节列表阅读，每节下方附有译文，阅读器顶栏会出现在两者之间切换的按钮。"
   },
   "reading": {
     "textSize": "文字大小",

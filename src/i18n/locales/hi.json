@@ -1217,7 +1217,10 @@
     "surahDownloadDoneTitle": "{{surah}} तैयार है",
     "surahDownloadDoneBody": "{{name}} द्वारा {{surah}} की तिलावत इस डिवाइस पर है। अब यह बिना कनेक्शन के चलती है।",
     "reciterDownloadStrip": "{{name}} डाउनलोड हो रहा है · {{pct}}%",
-    "surahDownloadStrip": "{{surah}} डाउनलोड हो रही है · {{pct}}%"
+    "surahDownloadStrip": "{{surah}} डाउनलोड हो रही है · {{pct}}%",
+    "readerTitle": "सूरह पढ़ना",
+    "verseByVerse": "आयत-दर-आयत दृश्य",
+    "verseByVerseHelp": "बंद होने पर सूरह मसहफ़ के रूप में खुलती है और वहीं रहती है। चालू होने पर उसे आयतों की सूची के रूप में भी पढ़ा जा सकता है, हर आयत के नीचे अनुवाद के साथ, और रीडर के शीर्ष पर दोनों के बीच जाने का बटन आ जाता है।"
   },
   "reading": {
     "textSize": "पाठ का आकार",

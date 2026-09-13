@@ -63,8 +63,14 @@ type Props = {
   surahNumber: number;
   /** Open at an explicit page (deep links from Juz/Page/Bookmark nav). */
   initialPage?: number;
-  /** Switch to the translation reader. */
-  onToggleMode: () => void;
+  /**
+   * Switch to the verse-by-verse reader, when there is one to switch to.
+   *
+   * Absent when `settings.quranVerseByVerseEnabled` is off, which is the
+   * default — the muṣḥaf is then the only reader and the header does not
+   * offer a way out of it.
+   */
+  onToggleMode?: () => void;
   /**
    * Where to publish what Android's back button should do here — see the
    * long note at its other end, in QuranSurahScreen.
@@ -373,17 +379,23 @@ export function MushafSurahScreen({
                 does not put the app's dark green on near-black. */}
             <TilawahIcon color={ink} size={desktopSize(22)} />
           </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t(
-              'quran.switchToTranslation',
-              'Switch to translation view',
-            )}
-            onPress={onToggleMode}
-            hitSlop={10}
-            style={{ paddingHorizontal: SPACING.xs }}>
-            <TranslationIcon color={ink} size={desktopSize(22)} />
-          </Pressable>
+          {onToggleMode ? (
+            // Only when the verse-by-verse reader is switched on in
+            // Settings → Quran. A header control for a reader that is not
+            // there would be a button that does nothing, and the muṣḥaf
+            // header has room for exactly the controls the page needs.
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t(
+                'quran.switchToTranslation',
+                'Switch to translation view',
+              )}
+              onPress={onToggleMode}
+              hitSlop={10}
+              style={{ paddingHorizontal: SPACING.xs }}>
+              <TranslationIcon color={ink} size={desktopSize(22)} />
+            </Pressable>
+          ) : null}
           {riwayahChoiceExists() ? (
             // The riwayah lives with the view controls, as asked — and only
             // here, because the translation reader draws its Arabic from

@@ -219,6 +219,25 @@ export async function loadSettings(): Promise<PrayerAppSettings> {
     merged.quranReadingMode = 'mushaf';
     merged.quranModeMushafDefault = true;
   }
+  // The verse-by-verse reader became opt-in: the muṣḥaf is the reader,
+  // and the ayah-by-ayah list is a setting. Nobody who was USING the list
+  // should open the app to find it gone, so this grandfathers them in
+  // once. The key's own absence is the marker — once written, the user's
+  // switch is the only thing that moves it.
+  //
+  // The condition is narrower than "was on withTranslation", and the
+  // narrowing is the point. Before the v2.7.27 default flip,
+  // `withTranslation` is what every install carried WITHOUT choosing it
+  // — the migration above exists precisely because that value meant
+  // nothing. Grandfathering on it would switch this on for a large
+  // number of people who have never seen the reader it refers to. So we
+  // only count a `withTranslation` that was recorded after the flip,
+  // which is one somebody reached by pressing the toggle.
+  if (!('quranVerseByVerseEnabled' in parsed)) {
+    merged.quranVerseByVerseEnabled =
+      'quranModeMushafDefault' in parsed &&
+      parsed.quranReadingMode === 'withTranslation';
+  }
   // App accent (#127). Older installs persisted no `appAccentId`; fall
   // back to the brand green default and a valid 6-char hex so the
   // palette resolver always has something concrete to work with.

@@ -1217,7 +1217,10 @@
     "surahDownloadDoneTitle": "{{surah}} está lista",
     "surahDownloadDoneBody": "La recitación de {{surah}} por {{name}} está en este dispositivo. Ahora se reproduce sin conexión.",
     "reciterDownloadStrip": "Descargando {{name}} · {{pct}} %",
-    "surahDownloadStrip": "Descargando {{surah}} · {{pct}} %"
+    "surahDownloadStrip": "Descargando {{surah}} · {{pct}} %",
+    "readerTitle": "Leer una sura",
+    "verseByVerse": "Vista versículo a versículo",
+    "verseByVerseHelp": "Desactivado, una sura se abre como mushaf y ahí se queda. Activado, también puede leerse como una lista de versículos con la traducción debajo de cada uno, y la cabecera del lector incluye un botón para pasar de una a otra."
   },
   "reading": {
     "textSize": "Tamaño del texto",
