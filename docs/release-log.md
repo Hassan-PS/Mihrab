@@ -740,3 +740,14 @@ under conditions nothing else reproduces, and is believed absolutely when it
 speaks. That is the least-exercised, most-trusted code in the repo. It
 deserves the tests the app gets, and this release is where it started
 getting them.
+
+## 2.20.0 (271) — 2026-09-13
+
+Ran clean on the first attempt.
+
+Changed the release cycle itself:
+
+  - `docs/DISTRIBUTION.md`
+  - `scripts/release.sh`
+
+**Lesson:** _(unfilled)_

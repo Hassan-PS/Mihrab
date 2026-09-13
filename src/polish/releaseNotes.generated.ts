@@ -19,6 +19,16 @@ export type ReleaseNote = {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    code: 271,
+    version: '2.20.0',
+    date: '2026-09-13',
+    notes: {
+      en: '• Sheets scroll again. The changelog, and every other sheet, ignored a slow finger and moved only for a flick.\n• In the muṣḥaf, back leaves fullscreen instead of leaving the app.\n• A khatmah no longer freezes when one fast swipe crosses several pages.\n• Today\'s target in the reader, beside the page number.\n• Two Warsh reciters, and an ayah tapped in Warsh gives the Warsh wording.\n• The adhkār keep the way back on screen, and sharing a dua asks what to send.',
+      ar: '• عادت الأوراق المنبثقة إلى التمرير. سجل التغييرات وغيره كان يتجاهل الإصبع البطيء ولا يستجيب إلا لنقرة سريعة.\n• في المصحف: زر الرجوع يخرج من ملء الشاشة لا من التطبيق.\n• الختمة لم تعد تتجمد حين يعبر تمرير سريع عدة صفحات.\n• هدف اليوم داخل القارئ، بجانب رقم الصفحة.\n• قارئان برواية ورش، والآية المنقورة في ورش تظهر بنصها في ورش.\n• الأذكار تُبقي طريق العودة ظاهرًا، ومشاركة الدعاء تسأل ماذا تُرسل.',
+      sv: '• Blad går att skrolla igen. Ändringsloggen, och alla andra blad, struntade i ett långsamt finger och rörde sig bara för en snärt.\n• I mushafen lämnar bakåtknappen helskärm i stället för appen.\n• En khatma fryser inte längre när ett snabbt svep hoppar över flera sidor.\n• Dagens mål i läsaren, bredvid sidnumret.\n• Två warsh-recitatörer, och en ayah i warsh visar warsh-texten.\n• Adhkār behåller vägen tillbaka på skärmen, och delning av en dua frågar vad som ska med.',
+    },
+  },
+  {
     code: 270,
     version: '2.19.0',
     date: '2026-09-13',
