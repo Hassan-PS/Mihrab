@@ -1,9 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { httpUserAgent } from '../config/httpIdentity';
-import {
-  reverseLocality,
-  type ReverseLocality,
-} from '../geocoding/nominatim';
 import { getNearestIslamiskaForbundetCity } from './islamiskaForbundetNearest';
 import { computeLocalAdhanTimes } from './localAdhan';
 import { formatLocalDate } from '../utils/date';
@@ -23,113 +18,15 @@ const PROVIDER = 'islamiska_forbundet';
 const WIDGET_URL =
   'https://www.islamiskaforbundet.se/wp-content/plugins/bonetider/Bonetider_Widget.php';
 
-const MAX_REVERSE_CACHE = 200;
-const reverseCache = new Map<string, ReverseLocality>();
 /**
- * Persistent disk-backed cache key in AsyncStorage. Lifts the in-memory
- * Map across app launches so once we know the user is in Stockholm we
- * never call Nominatim for that coordinate again — eliminates the
- * 429 rate-limit cascade the user hit when the 12-month cache fill
- * raced 4 reverse-geocode calls per batch (#137).
+ * The reverse-geocode cache that used to live here is gone.
+ *
+ * `d2ec685b` dropped the Nominatim lookup this provider made per batch —
+ * the nearest-city table answers the same question offline — and left
+ * the machinery behind it orphaned: a disk-backed cache, an in-flight
+ * coalescer and a 200-entry eviction policy, none of them reachable. It
+ * is in the history if the lookup ever comes back.
  */
-const REVERSE_CACHE_KEY = 'islamiska_forbundet.reverse.v1';
-let persistentLoaded = false;
-let persistentLoadPromise: Promise<void> | null = null;
-
-async function loadPersistentReverseCache(): Promise<void> {
-  if (persistentLoaded) return;
-  if (persistentLoadPromise) return persistentLoadPromise;
-  persistentLoadPromise = (async () => {
-    try {
-      const raw = await AsyncStorage.getItem(REVERSE_CACHE_KEY);
-      if (raw) {
-        const obj = JSON.parse(raw) as Record<string, ReverseLocality>;
-        for (const [k, v] of Object.entries(obj)) {
-          if (
-            v &&
-            typeof v.city === 'string' &&
-            typeof v.countryCode === 'string'
-          ) {
-            reverseCache.set(k, v);
-          }
-        }
-      }
-    } catch {
-      /* non-critical — cache will rebuild from network on demand */
-    } finally {
-      persistentLoaded = true;
-    }
-  })();
-  return persistentLoadPromise;
-}
-
-async function persistReverseCache(): Promise<void> {
-  try {
-    const obj: Record<string, ReverseLocality> = {};
-    for (const [k, v] of reverseCache.entries()) {
-      obj[k] = v;
-    }
-    await AsyncStorage.setItem(REVERSE_CACHE_KEY, JSON.stringify(obj));
-  } catch {
-    /* non-critical */
-  }
-}
-
-/**
- * In-flight requests, keyed identically to the result cache. Lets us
- * deduplicate concurrent reverse-geocode hits for the same coords —
- * the 12-month cache fill in `prayerStorage.refreshPrayerDataCache`
- * runs 4 day-fetches in parallel per batch, and before #137 each one
- * raced its own reverse-geocode call. Nominatim rate-limits at ~1
- * req/s, so 4 races → 3 failures until the cache populated. With
- * single-flight, the first pending Promise is shared across all
- * concurrent callers and the cache is filled atomically.
- */
-const reverseInFlight = new Map<string, Promise<ReverseLocality>>();
-
-function localityCacheKey(lat: number, lng: number): string {
-  return `${lat.toFixed(3)},${lng.toFixed(3)}`;
-}
-
-async function resolveLocality(
-  latitude: number,
-  longitude: number,
-): Promise<ReverseLocality> {
-  // Hydrate the disk cache on first call so the first day-fetch in a
-  // batch can hit the warm cache instead of the network.
-  await loadPersistentReverseCache();
-  const k = localityCacheKey(latitude, longitude);
-  const hit = reverseCache.get(k);
-  if (hit) {
-    return hit;
-  }
-  // Coalesce concurrent callers onto a single network request.
-  const inflight = reverseInFlight.get(k);
-  if (inflight) {
-    return inflight;
-  }
-  const promise = reverseLocality(latitude, longitude)
-    .then(v => {
-      if (reverseCache.size >= MAX_REVERSE_CACHE) {
-        const firstKey = reverseCache.keys().next().value;
-        if (firstKey !== undefined) {
-          reverseCache.delete(firstKey);
-        }
-      }
-      reverseCache.set(k, v);
-      // Fire-and-forget — don't block the resolve on the disk write.
-      void persistReverseCache();
-      return v;
-    })
-    .finally(() => {
-      // Drop the in-flight slot whether we succeeded or failed; on
-      // failure the next caller will retry, on success the cache hit
-      // path takes over.
-      reverseInFlight.delete(k);
-    });
-  reverseInFlight.set(k, promise);
-  return promise;
-}
 
 /** Match how the upstream bönetider widget expects city names. */
 function capitalizeForWidget(city: string): string {

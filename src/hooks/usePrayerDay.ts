@@ -435,6 +435,11 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
       settings.dataProviderAuto,
       settings.calculationMethod,
       settings.school,
+      // The offsets are applied to every row this builds, so a changed
+      // offset has to rebuild it — the same reason the method and the
+      // school are here. Stable between settings writes, so listing it
+      // costs nothing on a normal render.
+      settings.prayerOffsets,
     ],
   );
 

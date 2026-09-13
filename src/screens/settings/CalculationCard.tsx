@@ -2,7 +2,7 @@
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
 import { memo, useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { usePrayerSettings } from '../../context/PrayerSettingsContext';
 import { useAppPalette } from '../../hooks/useAppPalette';
@@ -25,8 +25,6 @@ import {
 } from './SettingsGroup';
 import { sharedSettingsStyles as s } from './sharedStyles';
 import { HelpText } from '../../components/ui/InfoSheet';
-import { RADIUS, SPACING } from '../../theme/tokens';
-import { TYPE } from '../../theme/typography';
 
 type CalculationCardProps = {
   onOpenMethodPicker: () => void;
@@ -244,30 +242,3 @@ function countNonZero(offsets: PrayerOffsetMinutes | undefined): number {
 }
 
 export const CalculationCard = memo(CalculationCardImpl);
-
-const styles = StyleSheet.create({
-  alertsBlock: {
-    marginTop: SPACING.lg,
-    paddingTop: SPACING.md,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    gap: SPACING.sm,
-  },
-  chipRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.sm,
-  },
-  chip: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-    borderRadius: RADIUS.lg,
-    borderWidth: 1,
-  },
-  chipLabel: {
-    fontSize: TYPE.label.fontSize,
-    fontWeight: '600',
-  },
-  leadRow: {
-    marginTop: SPACING.xs,
-  },
-});

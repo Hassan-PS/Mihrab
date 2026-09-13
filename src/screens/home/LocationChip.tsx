@@ -83,7 +83,13 @@ function LocationChipImpl({ compactHeader = false, ink, onAddLocation }: Props) 
   const { slice: settings, update: updateSettings } = useLocationSettings();
   const [open, setOpen] = useState(false);
 
-  const presets = settings.locationPresets ?? [];
+  // Memoised, not a bare `?? []`: that literal is a NEW empty array on
+  // every render, so every hook downstream that lists `presets` as a
+  // dependency re-ran every time this chip drew.
+  const presets = useMemo(
+    () => settings.locationPresets ?? [],
+    [settings.locationPresets],
+  );
   const activePreset = useMemo(
     () => findPreset(presets, settings.activeLocationPresetId),
     [presets, settings.activeLocationPresetId],

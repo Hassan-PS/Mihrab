@@ -128,7 +128,10 @@ export function useSyncWidgetUiHints(): void {
     return () => {
       subscription.remove();
     };
-  }, [hydrated]);
+    // `updateSettings` is a `useCallback` with no dependencies of its own
+    // (PrayerSettingsContext), so it is the same function for the life of
+    // the provider and listing it cannot re-subscribe this listener.
+  }, [hydrated, updateSettings]);
 
   useEffect(() => {
     if (!hydrated || !nativeSynced) {
