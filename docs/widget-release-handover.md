@@ -207,7 +207,7 @@ started:
 ## Answered: how a widget is the right size
 
 Every Android provider that decides anything from its size — the prayer
-strip and list, Log today, Streak, Continue reading, Sky — renders through
+strip and list, Log today, Streak, Continue reading — renders through
 `WidgetSizing.responsive`. On Android 12+ that is ONE `RemoteViews` per size
 in `OPTION_APPWIDGET_SIZES`, combined into the platform's size map, so the
 launcher picks the drawing for the size it is actually showing — per
@@ -217,7 +217,7 @@ the single measured pair from `sizeDp`, orientation resolved as before.
 The rule this imposes on every `bind*`: it is a pure function of the
 `(widthDp, heightDp)` it is handed. Nothing inside a render may read the
 options bundle or call `sizeDp` — a render that peeks at "the current size"
-defeats the map. `widgetSizesAndSky.test.ts` pins this.
+defeats the map. `widgetSizes.test.ts` pins this.
 
 The size bands themselves (`STRIP_*`, `LOG_*`, `GRID_MIN_HEIGHT_DP` …) are
 unchanged; what changed is that they are now evaluated against the size the
@@ -299,9 +299,9 @@ byte-identical to the stored one, arriving within a minute of the last push
 that was drawn, is stored and not redrawn. The app pushes from the Home
 focus pass, the data effect and each settling state phase at launch, and
 before this every widget redrew about ten times in the first second —
-three size variants each, a painted bitmap for Sky and Log. Opening the app
-after a longer gap still redraws everything (the sky moves with the clock
-even when the payload does not), and a taken tap queue clears the mark so
+three size variants each, a painted bitmap for Log. Opening the app
+after a longer gap still redraws everything (the countdown moves with the
+clock even when the payload does not), and a taken tap queue clears the mark so
 the next push always redraws, whatever it says.
 
 `ACTION_SCREEN_ON` and `ACTION_WALLPAPER_CHANGED` are gone from all seven
@@ -327,7 +327,7 @@ declaring them made the refresh story look far better covered than it was.
 - **Android redraws each widget behind its own guard**, so one card cannot
   take down the other seven.
 - **A throw inside any Android render is a Mihrab card, not the launcher's.**
-  Next-prayer and Sky catch their own render; Streak, Reading, Hijri, Tasbih
+  Next-prayer catches its own render; Streak, Reading, Hijri, Tasbih
   and Log go through `WidgetErrorCard.guard`. Whatever throws, the user sees
   the card in their own colours with "Couldn't load widget (ClassName)" —
   the class, never the message — and the whole exception is in logcat under
@@ -337,8 +337,8 @@ declaring them made the refresh story look far better covered than it was.
   it — a bare `<View>` spacer, `<Space>`, a Material widget — fails on the
   LAUNCHER side with "Class not allowed to be inflated", where no guard of
   ours can reach it: the user sees "Can't load widget" and nothing else.
-  The Sky widget shipped one build with a `<View>` spacer and did exactly
-  that. `widgetSizesAndSky.test.ts` now holds every `prayer_widget*.xml`,
+  One of these widgets shipped a build with a `<View>` spacer and did
+  exactly that. `widgetSizes.test.ts` now holds every `prayer_widget*.xml`,
   live and preview, to the list; spacers are `FrameLayout`, decorative shapes
   are `ImageView`.
 - **Tap queues** discard entries older than fourteen days at drain, are

@@ -636,7 +636,6 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       PrayerWidgetReadingProvider::class.java,
       PrayerWidgetHijriProvider::class.java,
       PrayerWidgetTasbihProvider::class.java,
-      PrayerWidgetSkyProvider::class.java,
     )
 
     /** Whether the user has any Mihrab widget on a home screen at all. */
@@ -703,7 +702,6 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
       draw(context) { PrayerWidgetReadingProvider.requestUpdate(context) }
       draw(context) { PrayerWidgetHijriProvider.requestUpdate(context) }
       draw(context) { PrayerWidgetTasbihProvider.requestUpdate(context) }
-      draw(context) { PrayerWidgetSkyProvider.requestUpdate(context) }
     }
 
     /** One widget's redraw, contained. */

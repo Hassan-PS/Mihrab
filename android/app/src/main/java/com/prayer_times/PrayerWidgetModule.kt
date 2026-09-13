@@ -119,11 +119,11 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
       // focus pass, the data effect, each state phase that settles — and
       // most of those pushes are byte-identical. Every one used to fan out a
       // full redraw of every placed widget, up to three size variants each
-      // and a painted bitmap for Sky and Log: ten redraws per widget in the
-      // first second of every launch, on the launcher's main thread. A push
-      // that changes nothing, within a minute of the last one that was
-      // drawn, is stored and left at that. The minute keeps "open the app"
-      // a real refresh — the sky moves with the clock even when the payload
+      // and a painted bitmap for Log: ten redraws per widget in the first
+      // second of every launch, on the launcher's main thread. A push that
+      // changes nothing, within a minute of the last one that was drawn, is
+      // stored and left at that. The minute keeps "open the app" a real
+      // refresh — the countdown moves with the clock even when the payload
       // does not — and every other path to a redraw (a prayer time passing,
       // the half-hour period, a placement, an appearance change) is
       // untouched.

@@ -79,7 +79,6 @@ describe('one RemoteViews per size the launcher can show', () => {
     'PrayerWidgetLogProvider',
     'PrayerWidgetStreakProvider',
     'PrayerWidgetReadingProvider',
-    'PrayerWidgetSkyProvider',
     'PrayerWidgetHijriProvider',
     'PrayerWidgetTasbihProvider',
   ])('%s draws through it', name => {
@@ -91,7 +90,6 @@ describe('one RemoteViews per size the launcher can show', () => {
       'PrayerWidgetLogProvider',
       'PrayerWidgetStreakProvider',
       'PrayerWidgetReadingProvider',
-      'PrayerWidgetSkyProvider',
       'PrayerWidgetHijriProvider',
       'PrayerWidgetTasbihProvider',
     ]) {
@@ -129,137 +127,16 @@ describe('one RemoteViews per size the launcher can show', () => {
   });
 });
 
-describe('the Sky widget is the hero', () => {
-  const painter = kt('SkyWidgetPainter');
-  const sky = kt('PrayerWidgetSkyProvider');
-  const model = read(ROOT, 'src', 'screens', 'home', 'skyModel.ts');
-
-  it('paints the same keyframes as the app', () => {
-    // Every hex in the JS model's keyframe table appears in the Kotlin one.
-    // Sliced on the table's own opening and closing rather than on the
-    // comment that follows it: prose moves, and when it did this quietly
-    // widened to the whole file and started comparing things that were
-    // never in the table.
-    const jsHex = new Set<string>();
-    const from = model.indexOf('const KEYS');
-    const table = model.slice(from, model.indexOf('\n};', from));
-    expect(table).toContain('night:');
-    expect(table).toContain('dusk:');
-    for (const m of table.matchAll(/#[0-9A-Fa-f]{6}/g)) jsHex.add(m[0].toUpperCase());
-    expect(jsHex.size).toBeGreaterThan(8);
-    const ktFrom = painter.indexOf('private val KEYS');
-    const ktTable = painter.slice(ktFrom, painter.indexOf('\n  )', ktFrom));
-    for (const hex of jsHex) expect(ktTable.toUpperCase()).toContain(hex);
-    // And the same star glow, which is all `GLOW` still carries on either
-    // side — see the note below about the sun and the moon.
-    for (const hex of ['#E6E9FF', '#FFD9A0', '#FFF3C4', '#FFC27A', '#F2B3A0']) {
-      expect(model).toContain(hex);
-      expect(painter).toContain(hex);
-    }
-  });
-
-  /**
-   * WHAT THE TWO PORTS NO LONGER SHARE, and it is deliberate rather than
-   * forgotten.
-   *
-   * The app's sun and moon stopped taking their colour from `GLOW` — the
-   * sun's is computed from its real altitude through the air it crosses
-   * (skyLight.ts), and its phase from the real elongation (moon.ts).
-   * Both of those want the reader's coordinates, and the widget payload
-   * carries none: coordinates are the one piece of this app's data that
-   * is nobody else's business, and putting them on disk for a home-screen
-   * widget is a decision for a person, not a refactor.
-   *
-   * So the widget still paints the five-hex table and the mean synodic
-   * month. This test states the gap so it is a known one, and fails if
-   * somebody closes it on the JS side alone.
-   */
-  it('still carries its own older sun and moon, until coordinates are settled', () => {
-    expect(painter).toContain('private val GLOW');
-    expect(painter).toMatch(/SYNODIC|29\.53/);
-    // The app has moved on from both.
-    expect(model).not.toMatch(/29\.53/);
-    expect(read(ROOT, 'src', 'screens', 'home', 'skyLight.ts')).toContain(
-      'apparentBrightness',
-    );
-  });
-
-  /**
-   * The widget's sun crosses the day once, exactly as the app's does.
-   * Two ports of one drawing: if only one of them learns that the sun's
-   * place comes from the day rather than the passage, the home screen and
-   * the app disagree about where the sun is at four in the afternoon.
-   */
-  it('places the sun from the whole day, at the same span, as the app does', () => {
-    for (const src of [model, painter]) {
-      expect(src).toMatch(/X_RISE = 0\.12/);
-      expect(src).toMatch(/X_SET = 0\.88/);
-    }
-    // The model solves the arc once and every passage that draws the sun
-    // reads it; the port does the same with `sunX`/`sunY`.
-    expect(model).toMatch(/const sun = sunAt\(moment\.daylight\);/);
-    expect(model).toMatch(/y: Y_LOW - Math\.sin\(f \* Math\.PI\) \* \(Y_LOW - Y_HIGH\)/);
-    expect(painter).toMatch(/val sunX = X_RISE \+ f \* \(X_SET - X_RISE\)/);
-    expect(painter).toMatch(/val sunY = Y_LOW - sin\(f \* PI\)\.toFloat\(\) \* \(Y_LOW - Y_HIGH\)/);
-    // And the day fraction is measured over the same span in both.
-    expect(model).toMatch(/maghrib > sunrise \? \(n - sunrise\) \/ \(maghrib - sunrise\) : null/);
-    expect(painter).toMatch(/if \(maghrib > sunriseAt\) \(n - sunriseAt\)\.toFloat\(\) \/ \(maghrib - sunriseAt\) else null/);
-  });
-
-  it('switches its ink where the app does', () => {
-    expect(model).toMatch(/INK_SWITCH_LUMINANCE = 0\.18/);
-    expect(painter).toMatch(/INK_SWITCH_LUMINANCE = 0\.18/);
-  });
-
-  it('reads a wrapped Isha and a missing Sunrise the way the app does', () => {
-    expect(painter).toMatch(/val wrapped = isha < maghrib/);
-    expect(painter).toMatch(/val sunriseAt = sunrise \?: \(fajr \+ 90\)/);
-    expect(painter).toMatch(/if \(wrapped && n < isha\) return Moment\(Passage\.DUSK/);
-  });
-
-  it('keeps its bodies out of the text and draws none on a sliver', () => {
-    expect(painter).toMatch(/val cramped = room < 40f \* density/);
-    expect(painter).toMatch(/val margin = MOON_DP \* density \/ 2f/);
-  });
-
-  it('is registered everywhere a widget has to be', () => {
-    const manifest = read(ROOT, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
-    expect(manifest).toContain('android:name=".PrayerWidgetSkyProvider"');
-    expect(manifest).toContain('@xml/prayer_widget_sky_info');
-    expect(provider).toMatch(/PrayerWidgetSkyProvider::class\.java,\s*\)/);
-    expect(provider).toMatch(/draw\(context\) \{ PrayerWidgetSkyProvider\.requestUpdate\(context\) \}/);
-    expect(sky).toMatch(/mihrab:\/\/today/);
-  });
-
-  it('places at 2×2 and resizes both ways', () => {
-    const info = read(RES, 'xml', 'prayer_widget_sky_info.xml');
-    expect(info).toMatch(/android:targetCellWidth="2"/);
-    expect(info).toMatch(/android:targetCellHeight="2"/);
-    expect(info).toMatch(/android:resizeMode="horizontal\|vertical"/);
-    expect(info).toContain('@layout/prayer_widget_sky_preview');
-  });
-
-  it('has a name, a description and a preview line in every locale', () => {
-    const dirs = readdirSync(RES).filter(d => /^values(-[a-z]{2})?$/.test(d));
-    expect(dirs.length).toBe(13);
-    for (const d of dirs) {
-      const s = read(RES, d, 'strings.xml');
-      for (const key of ['widget_name_sky', 'widget_description_sky', 'widget_preview_sky_next']) {
-        expect(s).toMatch(new RegExp(`<string name="${key}">[^<]+</string>`));
-      }
-    }
-  });
-});
-
 /**
  * "Can't load widget" — the launcher refuses whole layouts over one class.
  *
  * RemoteViews inflates only an allow-list of view classes; anything else
  * (a bare <View> spacer, <Space>, a Material widget) throws
  * "Class not allowed to be inflated" on the launcher side, where no
- * try/catch of ours can turn it into a Mihrab error card. The Sky widget
- * shipped once with a <View> spacer and showed exactly that. Every layout
- * a widget provider inflates — live and preview — is held to the list.
+ * try/catch of ours can turn it into a Mihrab error card. One of these
+ * widgets shipped once with a <View> spacer and showed exactly that.
+ * Every layout a widget provider inflates — live and preview — is held
+ * to the list.
  */
 describe('every widget layout inflates under RemoteViews', () => {
   // https://developer.android.com/reference/android/widget/RemoteViews (API 31+, without the
@@ -274,9 +151,9 @@ describe('every widget layout inflates under RemoteViews', () => {
   const layouts = readdirSync(layoutDir).filter(f => /^prayer_widget.*\.xml$/.test(f));
 
   it('covers the live and the preview layouts', () => {
-    expect(layouts.length).toBeGreaterThanOrEqual(19);
-    expect(layouts).toContain('prayer_widget_sky.xml');
-    expect(layouts).toContain('prayer_widget_sky_preview.xml');
+    expect(layouts.length).toBeGreaterThanOrEqual(17);
+    expect(layouts).toContain('prayer_widget.xml');
+    expect(layouts).toContain('prayer_widget_tasbih_preview.xml');
   });
 
   for (const f of layouts) {
@@ -292,7 +169,7 @@ describe('every widget layout inflates under RemoteViews', () => {
 
 /**
  * A throw in ANY provider's render is a Mihrab error card, not the
- * launcher's. Next-prayer and Sky catch their own; the rest go through
+ * launcher's. Next-prayer catches its own; the rest go through
  * WidgetErrorCard.guard, and the guard itself never trusts the state it
  * is called in.
  */
@@ -306,9 +183,8 @@ describe('every provider degrades to a Mihrab error card', () => {
     });
   }
 
-  it('Next-prayer and Sky put the class name on the card themselves', () => {
+  it('Next-prayer puts the class name on the card itself', () => {
     expect(provider).toMatch(/widget_error\)\} \(\$\{e\.javaClass\.simpleName\}\)/);
-    expect(kt('PrayerWidgetSkyProvider')).toMatch(/widget_error\)\} \(\$\{e\.javaClass\.simpleName\}\)/);
   });
 
   it('the guard shows the class name, not the message, and survives a broken context', () => {

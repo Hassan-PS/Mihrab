@@ -12,7 +12,7 @@ import android.widget.RemoteViews
  * When a provider's `onUpdate` throws, the launcher shows its own generic
  * "Can't load widget" — no class name, no log line from us, and (as #31
  * proved) no way to learn from a phone nobody here owns what went wrong.
- * The Next-prayer and Sky cards already catch their own render and put the
+ * The Next-prayer card already catches its own render and puts the
  * exception's class name on the card; this is the same guard for every
  * other provider, so the whole family degrades the same way.
  *

@@ -49,7 +49,6 @@ const LIVE_LAYOUTS = [
   'prayer_widget_hijri.xml',
   'prayer_widget_log.xml',
   'prayer_widget_reading.xml',
-  'prayer_widget_sky.xml',
   'prayer_widget_small.xml',
   'prayer_widget_streak.xml',
   'prayer_widget_strip.xml',

@@ -40,7 +40,7 @@
 ### Prayer
 
 - **Prayer times, online or off** — Daily times and a full month view up to a year ahead. Cached on-device so the app opens instantly without a connection; falls back to on-device calculation when the network is away.
-- **The day's own sky** — Behind the countdown, one continuous scene drawn from the clock: night with the moon in its actual phase, dawn through the horizon's rose and orange, the day with the sun climbing to its height about Ẓuhr, sunset, and the afterglow darkening into night. It is true to the hour rather than to the theme — noon is bright in a dark app — and the same sky is a home-screen widget on Android.
+- **The day's own sky** — Behind the countdown, one continuous scene drawn from the clock: night with the moon in its actual phase, dawn through the horizon's rose and orange, the day with the sun climbing to its height about Ẓuhr, sunset, and the afterglow darkening into night. It is true to the hour rather than to the theme — noon is bright in a dark app — and the moon's phase and the sun's light are computed from your own coordinates rather than approximated.
 - **Adhan & reminders** — 17 built-in adhan recordings (or import your own), a pre-prayer reminder window, and exact-alarm scheduling so the adhan lands on time even under aggressive battery managers.
 - **Sources, including national ones** — AlAdhan, PrayTimes.dev, on-device calculation (Adhan JS), or a published national table: **Sweden** (Islamiska Förbundet) and **Morocco** (the Ministry of Habous and Islamic Affairs), rebuilt daily by a workflow in this repo and matched to your nearest listed city. "Automatic" picks the right one for where you are.
 - **Tuned to your mosque** — Per-prayer minute offsets, Hanafi or standard Asr, and the extra marks when you want them: sunrise, Islamic midnight, the last third of the night, and the first third after Isha.
@@ -49,7 +49,7 @@
 - **Saved locations** — Keep the places you check on and switch between them freely; automatic location and saved places are not alternatives, and the month sheet names the city rather than printing coordinates.
 - **A month you can hand over** — The whole month as a sheet, Hijri and Gregorian side by side, exportable as an image or a PDF in any of the app's languages, with a QR back to the app.
 - **Live Activity** — A pinned countdown to the next prayer: Android 16+ status-bar chip and always-on notification in three designs (countdown, timeline, or markers with a proportional bar for the next three events), iOS Lock Screen and Dynamic Island via ActivityKit. What it shows — Hijri date, location, sunrise, the lock-screen button — is yours to switch.
-- **Home-screen widgets** — Prayer times in three sizes, the Sky widget (the day's sky with the next prayer and a live countdown), plus Log Today (with the practice graph and a countdown), Hijri date, streak, tasbih and reading widgets, on iOS, Android **and** the Mac. Per-prayer accents, dynamic colour, adjustable background opacity.
+- **Home-screen widgets** — Prayer times in three sizes, plus Log Today (with the practice graph and a countdown), Hijri date, streak, tasbih and reading widgets, on iOS, Android **and** the Mac. Per-prayer accents, dynamic colour, adjustable background opacity.
 
 ### Quran
 
