@@ -114,6 +114,46 @@ export function duaShareText(
   return attributed(blocks, source);
 }
 
+export type AyahWithTafsirShare = {
+  arabic: string;
+  /** The commentary on that ayah, in the edition the reader has open. */
+  tafsir: string;
+  /** The edition's own name — "Ibn Kathir (abridged)". A proper noun. */
+  edition: string;
+  /** "Al-Baqarah 2:255". */
+  reference: string;
+};
+
+/**
+ * One ayah with its commentary, instead of its translation.
+ *
+ * Asked for after the ayah share became a choice: the reader who wants to
+ * send a verse to somebody often wants to send what it MEANS in the sense
+ * a commentary gives, not the line-for-line translation.
+ *
+ * TWO TEXTS, TWO AUTHORS, ONE MESSAGE — so the attribution has to carry
+ * both, and in this order. `tafsirShareText` names the edition first
+ * because its body IS the commentary and the ayah is only the address;
+ * here the body opens with the revelation, so the reference leads and the
+ * edition follows it. A reader receiving this must be able to see at a
+ * glance which half is the Qur'an and which half is a man's explanation
+ * of it.
+ */
+export function ayahWithTafsirShareText({
+  arabic,
+  tafsir,
+  edition,
+  reference,
+}: AyahWithTafsirShare): string {
+  // Both halves checked before they are joined — see `tafsirShareText`,
+  // which learned this the same way: two empty halves joined by a
+  // separator is a non-empty string, and would ship as an attribution.
+  if (!edition.trim() || !reference.trim()) {
+    throw new Error('shareText: religious content cannot be shared unattributed');
+  }
+  return attributed([arabic, tafsir], `${reference} · ${edition}`);
+}
+
 export type TafsirShare = {
   text: string;
   /** The edition's own name — "Ibn Kathir (abridged)". A proper noun. */

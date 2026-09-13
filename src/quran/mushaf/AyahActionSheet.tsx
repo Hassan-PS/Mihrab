@@ -58,10 +58,14 @@ import { playFromAyah, playRange } from '../audio/playback';
 import { RecitationControls } from '../audio/RecitationControls';
 import { ShareAyahModal } from './ShareAyahModal';
 import { ShareIcon } from '../../theme/icons';
-import { ayahShareText, tafsirShareText } from '../../share/shareText';
+import {
+  ayahShareText,
+  ayahWithTafsirShareText,
+  tafsirShareText,
+} from '../../share/shareText';
 import { usePrayerSettings } from '../../context/PrayerSettingsContext';
 import { RowAction, SectionHead } from '../../components/controls';
-import { ActionSheetIOS, Alert, Platform } from 'react-native';
+import { ChoiceSheet } from '../../components/ui/ChoiceSheet';
 import { MODAL_ORIENTATIONS } from '../../components/modalOrientations';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RADIUS, SPACING } from '../../theme/tokens';
@@ -105,6 +109,8 @@ export function AyahActionSheet({
   const edition = useActiveEdition();
   const state = useQuranState();
   const [arabic, setArabic] = useState<string>('');
+  /** The "as text or as a card" question — see `share` below. */
+  const [formatPicker, setFormatPicker] = useState(false);
   const [shareCardVisible, setShareCardVisible] = useState(false);
 
   // ── Tafsir (v2.7.28; persisted v2.8) ────────────────────────────────
@@ -203,7 +209,10 @@ export function AyahActionSheet({
   // the same failure the reader's dismiss guard exists to prevent. Latch it
   // off as soon as the sheet stops being shown.
   useEffect(() => {
-    if (!visible) setShareCardVisible(false);
+    if (!visible) {
+      setShareCardVisible(false);
+      setFormatPicker(false);
+    }
   }, [visible]);
 
   // Scroll to the recitation section when opened from the header button.
@@ -278,32 +287,18 @@ export function AyahActionSheet({
    *
    * "Share" and "Share as image" sat as equal siblings, so a row of four
    * read as four choices when it was really three plus a format. The
-   * format question is asked only once the user has said they want to
-   * share — on iOS through the system action sheet, on Android through
-   * the same two-button alert pattern the app already uses.
+   * format question is asked only once the reader has said they want to
+   * share.
+   *
+   * IN THIS APP'S OWN SHEET. It used to ask with the platform's dialog — an action sheet on iOS, `Alert.alert` on Android
+   * — and on Android that is a white Material box with two blue words
+   * and a band of empty space where the message would be, which is not
+   * what anything else here looks like. The dua share had the same fault
+   * and the same fix (#47); `ChoiceSheet` is the furniture both use, and
+   * the room it has is what lets each format say what it actually
+   * produces.
    */
-  const share = () => {
-    const asText = t('quran.shareAsText', 'Share the text');
-    const asImage = t('quran.shareAsImage', 'Share as image');
-    if (Platform.OS === 'ios') {
-      ActionSheetIOS.showActionSheetWithOptions(
-        {
-          options: [asText, asImage, t('common.cancel', 'Cancel')],
-          cancelButtonIndex: 2,
-        },
-        index => {
-          if (index === 0) void shareText();
-          if (index === 1) setShareCardVisible(true);
-        },
-      );
-      return;
-    }
-    Alert.alert(t('common.share', 'Share'), undefined, [
-      { text: asText, onPress: () => void shareText() },
-      { text: asImage, onPress: () => setShareCardVisible(true) },
-      { text: t('common.cancel', 'Cancel'), style: 'cancel' },
-    ]);
-  };
+  const share = () => setFormatPicker(true);
 
   const shareText = async () => {
     // Fetch rather than read the state, in the one case where an empty
@@ -343,6 +338,42 @@ export function AyahActionSheet({
       await Share.share({
         message: tafsirShareText({
           text: tafsirText,
+          edition: tafsirEdition.label,
+          reference,
+        }),
+      });
+    } catch {
+      /* user cancelled */
+    }
+  };
+
+  /**
+   * The ayah with its commentary, instead of its translation.
+   *
+   * The third format, and the one that needed a decision: the passage is
+   * NOT always in hand. The tafsir section starts closed, so most of the
+   * time nothing has been fetched for this ayah yet, and a share that
+   * quietly sent an ayah with an empty explanation under it would be
+   * worse than one that did nothing.
+   *
+   * So it fetches, with the same loader the section uses — and when
+   * nothing comes back (no network, no cached passage), it opens the
+   * Tafsir section rather than failing silently. The reader then sees
+   * the loader, and its own empty state, in the place that owns it.
+   */
+  const shareWithTafsir = async () => {
+    const text =
+      tafsirText ??
+      (await loadTafsir(tafsirEdition.id, surah, ayah).catch(() => null));
+    if (!text) {
+      setTafsirOpen(true);
+      return;
+    }
+    try {
+      await Share.share({
+        message: ayahWithTafsirShareText({
+          arabic,
+          tafsir: text,
           edition: tafsirEdition.label,
           reference,
         }),
@@ -784,6 +815,38 @@ export function AyahActionSheet({
           </View>
         </ScrollView>
       </View>
+      <ChoiceSheet
+        visible={formatPicker}
+        onClose={() => setFormatPicker(false)}
+        title={t('common.share', 'Share')}
+        subject={reference.trim()}
+        choices={[
+          {
+            id: 'text',
+            title: t('quran.shareAsText', 'Share the text'),
+            subtitle: t(
+              'quran.shareAsTextHelp',
+              'The ayah, your translation and the reference',
+            ),
+            onPress: () => void shareText(),
+          },
+          {
+            id: 'tafsir',
+            title: t('quran.shareWithTafsir', 'Share with the tafsir'),
+            subtitle: t('quran.shareWithTafsirHelp', {
+              defaultValue: 'The ayah and {{edition}}, instead of the translation',
+              edition: tafsirEdition.label,
+            }),
+            onPress: () => void shareWithTafsir(),
+          },
+          {
+            id: 'image',
+            title: t('quran.shareAsImage', 'Share as image'),
+            subtitle: t('quran.shareAsImageHelp', 'A card with the ayah on it'),
+            onPress: () => setShareCardVisible(true),
+          },
+        ]}
+      />
       <ShareAyahModal
         visible={shareCardVisible}
         onClose={() => setShareCardVisible(false)}

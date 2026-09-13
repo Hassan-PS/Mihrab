@@ -22,6 +22,7 @@ import fs from 'fs';
 import path from 'path';
 import {
   ayahShareText,
+  ayahWithTafsirShareText,
   duaShareText,
   tafsirShareText,
 } from '../src/share/shareText';
@@ -346,14 +347,66 @@ describe('the tafsir share control', () => {
     expect(fn.slice(0, fn.indexOf('};'))).toContain('reference,');
   });
 
-  it('is its own action, not a third format of the ayah share', () => {
-    // The ayah share is deliberately "one action with two FORMATS".
-    // Tafsir is not another format of the ayah; it is a different text by
-    // a different author that happens to be shown underneath.
-    const share = sheet.slice(
-      sheet.indexOf('const share = () =>'),
-      sheet.indexOf('const shareText = async'),
+  it('is its own action, reached from under the passage', () => {
+    // It sends the commentary ALONE. The ayah share grew a format that
+    // also carries a tafsir — the ayah WITH its commentary instead of
+    // its translation — and the two are not the same message: one is a
+    // paragraph of Ibn Kathir, the other is a verse explained. This row
+    // stays where the passage is read.
+    expect(sheet).toContain('quran.shareTafsir');
+    expect(sheet).toContain('onPress={() => void shareTafsir()}');
+  });
+});
+
+describe('the ayah with its commentary — the third format', () => {
+  const sheet = fs.readFileSync(
+    path.join(__dirname, '..', 'src/quran/mushaf/AyahActionSheet.tsx'),
+    'utf8',
+  );
+
+  it('carries both texts, and both attributions', () => {
+    const body = ayahWithTafsirShareText({
+      arabic: 'ARABIC',
+      tafsir: 'THE COMMENTARY',
+      edition: 'Ibn Kathir (abridged)',
+      reference: 'Al-Baqarah 2:255',
+    });
+    expect(body).toContain('ARABIC');
+    expect(body).toContain('THE COMMENTARY');
+    // The reference LEADS here, and the edition follows it: the body
+    // opens with revelation and the commentary is second, so a reader
+    // can see at a glance which half is which. `tafsirShareText` names
+    // the edition first because there the body IS the commentary.
+    expect(body.trimEnd().endsWith('— Al-Baqarah 2:255 · Ibn Kathir (abridged)')).toBe(true);
+    expect(body.indexOf('ARABIC')).toBeLessThan(body.indexOf('THE COMMENTARY'));
+  });
+
+  it('will not build a body crediting nobody', () => {
+    const parts = {
+      arabic: 'ARABIC',
+      tafsir: 'THE COMMENTARY',
+      edition: 'Ibn Kathir (abridged)',
+      reference: 'Al-Baqarah 2:255',
+    };
+    expect(() => ayahWithTafsirShareText({ ...parts, edition: '  ' })).toThrow();
+    expect(() => ayahWithTafsirShareText({ ...parts, reference: '' })).toThrow();
+  });
+
+  it('never sends an ayah with an empty explanation under it', () => {
+    // The tafsir section starts closed, so most of the time nothing has
+    // been fetched for this ayah yet. Fetch, and when nothing comes back
+    // open the section rather than sending half a message.
+    const fn = sheet.slice(
+      sheet.indexOf('const shareWithTafsir'),
+      sheet.indexOf('/** "Show more'),
     );
-    expect(share).not.toContain('tafsir');
+    expect(fn).toContain('await loadTafsir(');
+    expect(fn).toMatch(/if \(!text\) \{\s*setTafsirOpen\(true\);\s*return;/);
+    expect(fn.indexOf('setTafsirOpen(true)')).toBeLessThan(fn.indexOf('Share.share'));
+  });
+
+  it('is offered beside the other two formats, naming the edition', () => {
+    expect(sheet).toContain('quran.shareWithTafsir');
+    expect(sheet).toContain('edition: tafsirEdition.label');
   });
 });
