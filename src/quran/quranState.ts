@@ -1043,6 +1043,29 @@ export function khatmahTracksPage(
  * page and a spread turns two, and in both cases what was completed is
  * the page (or pages) left behind. `recordKhatmahProgress` is a
  * high-water mark, so naming the last completed page covers the pair.
+ *
+ * ── A FLING CROSSES MORE THAN TWO — issue #44 ─────────────────────────
+ *
+ * This used to credit a step of exactly one or two and nothing else, on
+ * the reasoning that one is a phone and two is a spread. But the pager
+ * reports where a scroll came to REST, and a hard fling on Android
+ * crosses several pages before it settles: the reader sees every one of
+ * them go past and the plan is told about none of it.
+ *
+ * That alone would be a page or two lost. What made it a stall is the
+ * gate above: the next turn starts from a page now AHEAD of the plan's
+ * frontier, `khatmahTracksPage` says no, and every turn after it says no
+ * too. One fling and the plan is frozen for the rest of the session,
+ * silently — reported as a khatmah card stuck at page 254 while the
+ * reader was at 264, with "Continue reading" tracking correctly the
+ * whole time, because the marker has no such gate.
+ *
+ * So: any FORWARD settle credits the page left behind, however many that
+ * crossing covered. What it does not do is credit a jump — those do not
+ * come through here as a step at all. `jumpToPage` reports the same page
+ * as both arguments (see mushafReaderCore), so the rail, go-to-page, a
+ * bookmark and a search result all land with nothing completed, which is
+ * the distinction this function actually cares about.
  */
 export function recordKhatmahPageTurn(
   prevPage: number,
@@ -1050,10 +1073,8 @@ export function recordKhatmahPageTurn(
   riwayah: RiwayahId = DEFAULT_RIWAYAH,
 ): void {
   if (!khatmahTracksPage(prevPage, riwayah)) return;
-  if (newPage === prevPage + 1) recordKhatmahProgress(prevPage, riwayah);
-  else if (newPage === prevPage + 2) {
-    recordKhatmahProgress(prevPage + 1, riwayah);
-  }
+  if (newPage <= prevPage) return;
+  recordKhatmahProgress(newPage - 1, riwayah);
 }
 
 /**

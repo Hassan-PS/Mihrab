@@ -87,6 +87,29 @@ describe('recordKhatmahPageTurn', () => {
     expect(plan().pagesRead).toBe(42);
   });
 
+  it('credits every page a fling crossed, not just a step of two', () => {
+    // The pager reports where a scroll came to REST. A hard fling on
+    // Android crosses several pages on the way, and the reader watched
+    // all of them go past.
+    recordKhatmahPageTurn(1, 2);
+    expect(plan().pagesRead).toBe(1);
+    recordKhatmahPageTurn(2, 8);
+    expect(plan().pagesRead).toBe(7);
+  });
+
+  it('does not freeze the plan for the rest of the session — #44', () => {
+    // The stall this cost: one uncredited crossing left the reader ahead
+    // of the frontier, `khatmahTracksPage` then said no to every turn
+    // after it, and the card sat at the page of the last small step while
+    // the reader read on. Reported as a khatmah stuck at 254 with the
+    // reader at 264, and "Continue reading" correct throughout.
+    recordKhatmahPageTurn(1, 6);
+    recordKhatmahPageTurn(6, 7);
+    recordKhatmahPageTurn(7, 8);
+    expect(plan().pagesRead).toBe(7);
+    expect(khatmahCurrentPage(plan())).toBe(8);
+  });
+
   it('ignores a backwards turn', () => {
     recordKhatmahPageTurn(1, 2);
     recordKhatmahPageTurn(2, 1);
