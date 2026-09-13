@@ -48,6 +48,10 @@ import {
   useQuranHydrated,
 } from '../../quran/quranState';
 import type { RootStackParamList } from '../../navigation/types';
+import {
+  usePublishBackAnswer,
+  type BackInterceptRef,
+} from '../../navigation/backIntercept';
 import { arabicTextStyle } from '../../theme/typography';
 import { RiwayahPicker } from '../../quran/RiwayahPicker';
 import { SPACING } from '../../theme/tokens';
@@ -61,6 +65,11 @@ type Props = {
   initialPage?: number;
   /** Switch to the translation reader. */
   onToggleMode: () => void;
+  /**
+   * Where to publish what Android's back button should do here — see the
+   * long note at its other end, in QuranSurahScreen.
+   */
+  onBackAnswer?: BackInterceptRef;
 };
 
 export function MushafSurahScreen({
@@ -68,6 +77,7 @@ export function MushafSurahScreen({
   surahNumber,
   initialPage,
   onToggleMode,
+  onBackAnswer,
 }: Props) {
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === 'ar';
@@ -136,6 +146,24 @@ export function MushafSurahScreen({
    * that had nothing to do with it.
    */
   const toggleFullscreen = useCallback(() => setIsFullscreen(f => !f), []);
+
+  /**
+   * Back leaves fullscreen, and only then leaves the reader.
+   *
+   * Out of fullscreen this answers false and the press falls through to
+   * the ordinary one-level-at-a-time rule, so back out of the reader is
+   * unchanged. Reported as #43: the chrome is gone, a tap on a word opens
+   * an ayah rather than bringing it back, and an edge-swipe on a phone
+   * with gesture navigation leaves the app rather than the mode.
+   */
+  usePublishBackAnswer(
+    onBackAnswer,
+    useCallback(() => {
+      if (!isFullscreen) return false;
+      setIsFullscreen(false);
+      return true;
+    }, [isFullscreen]),
+  );
 
   /**
    * Header title for mushaf mode — the surah the visible PAGE starts with,

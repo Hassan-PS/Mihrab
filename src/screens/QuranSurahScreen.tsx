@@ -20,6 +20,10 @@ import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useBreakpoint } from '../responsive/breakpoints';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
+import {
+  askBackAnswer,
+  type BackAnswer,
+} from '../navigation/backIntercept';
 import { findSurah } from '../quran/quran';
 import { hydrateRiwayahData } from '../quran/riwayahData';
 import { hydrateQuranState } from '../quran/quranState';
@@ -36,7 +40,31 @@ export function QuranSurahScreen() {
   const { settings, updateSettings } = usePrayerSettings();
   const route = useRoute<RouteProp<RootStackParamList, 'QuranSurah'>>();
   const { surahNumber, initialPage, scrollToAyah, playFromAyah } = route.params;
-  useAndroidSubScreenBack();
+
+  /**
+   * BACK LEAVES FULLSCREEN BEFORE IT LEAVES THE READER.
+   *
+   * Fullscreen hides the header, and the header is every control the
+   * reader has: back, audio, the page toggle, the riwayah picker, the ⛶
+   * itself. What is left is the surah name on a strip. Getting out again
+   * is a tap on the strip or a margin — but a tap on a WORD opens that
+   * ayah, so a reader who taps where the text is gets a sheet instead of
+   * the chrome back, and one who does not know about the strip has no way
+   * out at all. Reported as the reader "failing to render its navigation
+   * bar" (#43), which is exactly what it looks like from the outside.
+   *
+   * Back is the control every Android reader already knows. It steps out
+   * of the mode first and out of the screen second — one level at a time,
+   * which is what back means everywhere else in this app.
+   *
+   * The answer is published by the muṣḥaf screen below, because that is
+   * where the fullscreen state lives; see navigation/backIntercept.
+   */
+  const leaveFullscreen = useRef<BackAnswer>(null);
+  useAndroidSubScreenBack(
+    undefined,
+    useCallback(() => askBackAnswer(leaveFullscreen), []),
+  );
 
   const surah = findSurah(surahNumber);
 
@@ -105,6 +133,7 @@ export function QuranSurahScreen() {
       surahNumber={surahNumber}
       initialPage={initialPage}
       onToggleMode={toggleMode}
+      onBackAnswer={leaveFullscreen}
     />
   ) : (
     <TranslationSurahScreen
