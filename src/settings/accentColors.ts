@@ -328,6 +328,31 @@ export function constrainToLegible(hsv: Hsv, ground: string): Hsv {
 }
 
 /**
+ * The nearest usable accent to the one asked for, as a hex.
+ *
+ * The picker cannot HAND BACK an unusable colour, and that is not the
+ * same as the app never USING one. A hex saved before this rule existed,
+ * one restored from a backup or another device, or simply one saved in
+ * the dark theme and then read in the light one, all arrive at the
+ * palette without going anywhere near the picker. So the floor is
+ * enforced here as well, at the point the accent is actually resolved,
+ * and the picker becomes the place you SEE the rule rather than the
+ * place it lives.
+ *
+ * A custom accent carries one value for both themes — that is its whole
+ * difference from a preset, which ships two — so a colour chosen in one
+ * theme genuinely cannot be right in the other. Adjusting it is what a
+ * preset does by having a second value; this is the same answer without
+ * asking the reader to choose twice.
+ */
+export function legibleAccent(hex: string, ground: string): string {
+  const norm = normaliseHex(hex);
+  if (!norm) return legibleAccent(DEFAULT_CUSTOM_HEX, ground);
+  if (isLegibleAccent(norm, ground)) return norm;
+  return hsvToHex(constrainToLegible(hexToHsv(norm), ground));
+}
+
+/**
  * Add a colour to the shelf, newest first.
  *
  * Re-saving a colour already on the shelf moves it to the front rather

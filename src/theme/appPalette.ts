@@ -5,6 +5,7 @@ import {
   PlatformColor,
 } from 'react-native';
 import { getResolvedAccentHex } from '../native/SystemTheme';
+import { legibleAccent } from '../settings/accentColors';
 import type { AppAccentId, AppearancePreference } from '../settings/types';
 
 export type AppPalette = {
@@ -189,15 +190,22 @@ function shiftHex(hex: string, amount: number): string {
  * For 'custom', the user-typed hex is the accent; we derive a softly
  * tinted background by mixing the hex with white (light mode) or black
  * (dark mode). For the named ids, we use the static swatch table.
+ *
+ * The custom hex is held to the same contrast floor the picker offers,
+ * against `ground` — the background it will actually sit on. The picker
+ * cannot hand back an unusable colour, but a hex can reach here without
+ * passing through it: saved before the rule existed, restored from a
+ * backup or another device, or chosen in the dark theme and read in the
+ * light one. See `legibleAccent`.
  */
 function brandAccents(
   isDark: boolean,
   accentId: AppAccentId,
   customHex: string,
+  ground: string,
 ): { accent: ColorValue; accentBg: ColorValue; accentSolid: string } {
   if (accentId === 'custom') {
-    const valid = /^#[0-9a-fA-F]{6}$/.test(customHex.trim());
-    const hex = valid ? customHex.trim() : '#22c55e';
+    const hex = legibleAccent(customHex, ground);
     const accentBg = isDark ? shiftHex(hex, -0.7) : shiftHex(hex, 0.82);
     return { accent: hex, accentBg, accentSolid: hex };
   }
@@ -243,6 +251,11 @@ function withBrandAccents(
     isDark,
     accentId,
     customHex,
+    // The ground the accent will be read against. Every base on this path
+    // states it as a hex; the one that does not is the dynamic-colour
+    // palette, which never reaches here and has no custom accent to hold
+    // to anything.
+    typeof base.bg === 'string' ? base.bg : isDark ? '#141210' : '#FAF7F2',
   );
   return {
     ...base,

@@ -18,6 +18,7 @@ import {
   hsvToHex,
   HUE_STOPS,
   isLegibleAccent,
+  legibleAccent,
   legibleBoundary,
   legibleValueEdge,
   MAX_SAVED_ACCENTS,
@@ -279,6 +280,65 @@ describe('which colours the picker is allowed to offer', () => {
       // person asked for a blue.
       const out = constrainToLegible({ h: 240, s: 1, v: 1 }, DARK);
       expect(out.s).toBeGreaterThan(0.2);
+    });
+  });
+
+  describe('the floor holds wherever a colour came from', () => {
+    // The picker cannot hand back an unusable accent. That is not the
+    // same as the app never using one: a hex saved before the rule
+    // existed, restored from a backup or another device, or chosen in
+    // the dark theme and read in the light one, all reach the palette
+    // without passing through the picker. `legibleAccent` is the floor
+    // at the point the accent actually resolves.
+    it('passes a colour that already works through untouched', () => {
+      expect(legibleAccent('#1F5F4A', LIGHT)).toBe('#1F5F4A');
+      expect(legibleAccent('#46A081', DARK)).toBe('#46A081');
+    });
+
+    it('pulls the app’s own custom fallback into range on paper', () => {
+      // #22C55E reads 2.13:1 on warm paper, so the one colour a user can
+      // reach without ever opening the picker was itself under the floor.
+      expect(isLegibleAccent('#22C55E', LIGHT)).toBe(false);
+      expect(isLegibleAccent(legibleAccent('#22C55E', LIGHT), LIGHT)).toBe(true);
+      // …and is fine at night, where it is left alone.
+      expect(legibleAccent('#22C55E', DARK)).toBe('#22C55E');
+    });
+
+    it('keeps the hue it was given', () => {
+      // The colour a reader saved is still recognisably theirs; only its
+      // lightness moves, which is the same thing a preset does by
+      // shipping two values instead of one.
+      const before = hexToHsv('#22C55E').h;
+      const after = hexToHsv(legibleAccent('#22C55E', LIGHT)).h;
+      expect(Math.abs(after - before)).toBeLessThan(2);
+    });
+
+    it('takes anything at all and still returns something usable', () => {
+      // Storage is not a promise. Whatever is in the blob, the accent
+      // that comes out has to be readable.
+      for (const junk of ['', '   ', 'blue', '#', '#12', 'rgb(1,2,3)', '#GGGGGG']) {
+        for (const ground of [LIGHT, DARK]) {
+          expect(isLegibleAccent(legibleAccent(junk, ground), ground)).toBe(true);
+        }
+      }
+    });
+
+    it('holds for every colour there is, on either ground', () => {
+      for (let h = 0; h < 360; h += 7) {
+        for (const sv of [
+          [1, 1],
+          [1, 0.5],
+          [0.5, 1],
+          [0.2, 0.95],
+          [0, 1],
+          [0, 0],
+        ]) {
+          for (const ground of [LIGHT, DARK]) {
+            const hex = hsvToHex({ h, s: sv[0], v: sv[1] });
+            expect(isLegibleAccent(legibleAccent(hex, ground), ground)).toBe(true);
+          }
+        }
+      }
     });
   });
 
