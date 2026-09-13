@@ -1,0 +1,6 @@
+• A new first launch: the four questions that decide whether the app suits you, each answered in your own times.
+• Any accent colour you like — the picker offers only ones that stay readable.
+• The sky behind the countdown is lit from where the sun really is, and the moon is your own sky's.
+• Set the size of the translation, tafsir and pronunciation.
+• What changed after each update, and the whole changelog in Settings → About.
+• The Sky widget is gone; that drawing lives in the app.
