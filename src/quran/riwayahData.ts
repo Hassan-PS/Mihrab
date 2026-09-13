@@ -34,7 +34,7 @@ import {
   writeRiwayahDataset,
   type RiwayahProvenance,
 } from './riwayahStore';
-import { RIWAYAT, type RiwayahId } from './riwayat';
+import { DEFAULT_RIWAYAH, RIWAYAT, type RiwayahId } from './riwayat';
 
 /** One riwayah's pagination: the same shape `pages.json` has for Hafs. */
 export type RiwayahPageTable = {
@@ -118,6 +118,27 @@ export function loadRiwayahPages(id: RiwayahId): RiwayahPageTable | null {
 /** The ayah text for a `unicode` riwayah, or null when absent. */
 export function loadRiwayahText(id: RiwayahId): RiwayahTextTable | null {
   return textCache.get(id) ?? null;
+}
+
+/**
+ * One ayah in the riwayah the reader is READING, or null for Ḥafṣ.
+ *
+ * Null is the answer for Ḥafṣ deliberately: its text is bundled and
+ * belongs to `quran.ts`, so a caller that gets null here goes there.
+ * Null is also the answer for an `image` riwayah, which has pages but no
+ * ayah text of its own, and for a dataset that has not hydrated yet.
+ *
+ * Exists because every ayah-level surface other than the page itself
+ * asked for the bundled text and got Ḥafṣ — so a Warsh reader tapping a
+ * word on a Warsh page was shown, and shared, the Ḥafṣ wording (#46).
+ */
+export function riwayahAyahText(
+  id: RiwayahId,
+  surah: number,
+  ayah: number,
+): string | null {
+  if (id === DEFAULT_RIWAYAH) return null;
+  return loadRiwayahText(id)?.[`${surah}:${ayah}`] ?? null;
 }
 
 /** Where this device's copy came from, or null when it has none. */

@@ -28,6 +28,8 @@ import { TYPE, arabicTextStyle } from '../../theme/typography';
 import { READING_BASE } from '../../theme/readingText';
 import { useReadingText } from '../../hooks/useReadingText';
 import { findSurah, loadSurah } from '../quran';
+import { resolveRiwayah } from '../riwayat';
+import { riwayahAyahText } from '../riwayahData';
 import { getAyahTranslation, QURAN_TRANSLATIONS } from '../translations';
 import { useActiveEdition } from '../useActiveEdition';
 import {
@@ -161,6 +163,31 @@ export function AyahActionSheet({
     setTafsirText(null);
     setTafsirExpanded(false);
     setTranslationExpanded(false);
+    /**
+     * THE AYAH THIS READER IS LOOKING AT, IN THE RASM THEY ARE READING.
+     *
+     * `loadSurah` is the bundled Ḥafṣ text and only ever that, so a Warsh
+     * reader who tapped a word on a Warsh page got the Ḥafṣ wording back
+     * — on screen, and in everything the sheet hands on from it: copy,
+     * share, the share card. Reported in #46.
+     *
+     * A second riwayah is installed with its own ayah text (that is what
+     * makes it a `unicode` riwayah at all, and it is the same table the
+     * page itself is drawn from), so the sheet asks it first and falls
+     * back to the bundled text only when this riwayah has none — an
+     * `image` riwayah, or a dataset still being hydrated.
+     */
+    const own = riwayahAyahText(
+      resolveRiwayah(state.prefs.riwayah),
+      surah,
+      ayah,
+    );
+    if (own) {
+      setArabic(own);
+      return () => {
+        cancelled = true;
+      };
+    }
     void loadSurah(surah).then(loaded => {
       if (cancelled || !loaded) return;
       setArabic(loaded.arabic[ayah - 1] ?? '');
@@ -168,7 +195,7 @@ export function AyahActionSheet({
     return () => {
       cancelled = true;
     };
-  }, [visible, surah, ayah]);
+  }, [visible, surah, ayah, state.prefs.riwayah]);
 
   // The share card is a <Modal> NESTED inside this sheet's <Modal>. If the
   // sheet is hidden (or torn down) while the card is still flagged visible,
