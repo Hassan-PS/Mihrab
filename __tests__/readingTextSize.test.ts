@@ -218,3 +218,53 @@ describe('the surfaces it reaches, and the ones it must not', () => {
     expect(read('screens', 'QuranScreen.tsx')).not.toContain('useReadingText');
   });
 });
+
+/**
+ * Where the control is, which is the whole of whether it works.
+ *
+ * It sat at the top of the text it sizes — under the surah's name, under
+ * the category's — so the reader who wanted it was, by definition, the
+ * reader who had scrolled away from it. Forty ayahs into al-Baqarah or
+ * twenty duas into the morning adhkār, "make this bigger" meant scrolling
+ * back to the top, changing it, and finding your place again. A control
+ * for text that is hard to read should not have to be read back to.
+ *
+ * Both screens keep it in the bar that is always on screen. What the bars
+ * have spare differs — the reader's is a navigator header whose far side
+ * is already full, the duas' is drawn in JS with an empty far side — so
+ * the side differs and the rule does not.
+ */
+describe('where the size control is', () => {
+  it('is in the reader’s header bar, beside the way back', () => {
+    const src = read('screens', 'quran', 'TranslationSurahScreen.tsx');
+    // A native stack's `headerLeft` takes the back button's slot rather
+    // than sharing it, so the arrow is drawn here — the app's own, the
+    // one a tab's header uses, popping rather than going to Today.
+    expect(src).toMatch(
+      /headerLeft: \(\) => \([\s\S]{0,900}?<TabBackButton onPress=\{\(\) => navigation\.goBack\(\)\} \/>[\s\S]{0,200}?<TextSizeStepper \/>/,
+    );
+    // And only when there is somewhere to go back to: a widget's deep
+    // link opens this screen with nothing beneath it.
+    expect(src).toContain('navigation.canGoBack() ? (');
+  });
+
+  it('is in the duas bar, on the side the arrow is not', () => {
+    const src = read('screens', 'DuasScreen.tsx');
+    expect(src).toMatch(
+      /categoryBarSideEnd\]\}>\s*\{showTranslit \|\| showTranslation \? <TextSizeStepper \/> : null\}/,
+    );
+  });
+
+  it('is not at the top of the text it sizes, on either screen', () => {
+    // The regression this exists to catch: a control put back among the
+    // things it resizes scrolls away with them.
+    for (const file of [
+      ['screens', 'quran', 'TranslationSurahScreen.tsx'],
+      ['screens', 'DuasScreen.tsx'],
+    ]) {
+      const src = read(...file);
+      // Exactly one, and the tests above say where that one is.
+      expect(src.match(/<TextSizeStepper/g) ?? []).toHaveLength(1);
+    }
+  });
+});

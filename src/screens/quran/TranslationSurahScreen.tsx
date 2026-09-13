@@ -30,6 +30,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { TilawahIcon } from '../../quran/audio/PlaybackIcons';
+import { QuranBookIcon } from '../../theme/icons';
 import {
   QuranDownloadStripView,
   useQuranDownloadRun,
@@ -74,6 +75,7 @@ import { TYPE, arabicTextStyle } from '../../theme/typography';
 import { READING_BASE } from '../../theme/readingText';
 import { useReadingText } from '../../hooks/useReadingText';
 import { TextSizeStepper } from '../../components/ui';
+import { TabBackButton } from '../../navigation/TabBackButton';
 import { RADIUS, SPACING } from '../../theme/tokens';
 
 type AyahRow = {
@@ -220,6 +222,52 @@ export function TranslationSurahScreen({
       } as any,
       // The NAME follows the app language.
       title: surahName(surah),
+      /**
+       * THE SIZE CONTROL LIVES IN THE BAR, NOT IN THE SURAH'S HEADER.
+       *
+       * It used to sit under the surah's name, which is the first thing in
+       * the list — so a reader forty ayahs into al-Baqarah who wanted the
+       * translation a size larger had to scroll all the way back to the
+       * top of the surah to reach it, change it, and scroll back down to
+       * where they were reading. The one control whose whole purpose is
+       * "this text is hard to read" was the one you had to read your way
+       * back to.
+       *
+       * In the bar it is in reach from anywhere in the surah, which is
+       * where a reader actually is when the thought occurs.
+       *
+       * ── WHY IT REPLACES THE SYSTEM BACK BUTTON ────────────────────────
+       *
+       * A native stack draws its own back control, and `headerLeft` takes
+       * that slot rather than sharing it — so putting anything beside the
+       * arrow means drawing the arrow. `TabBackButton` is the app's own,
+       * already matched to the navigator's glyph and inset for exactly
+       * this reason (a tab's header has no back control either), and it
+       * takes an `onPress`, so here it pops instead of going to Today.
+       * The swipe-back gesture and Android's hardware back are untouched:
+       * neither goes through this button.
+       *
+       * Only when there IS somewhere to go back to. A deep link from a
+       * widget opens this screen with nothing beneath it, and the system
+       * would draw no arrow there — so neither does this.
+       */
+      headerLeft: () => (
+        <View
+          // Keyed on the settled window size for the same reason the right
+          // side is — see the note there.
+          key={`size-${headerW}x${headerH}`}
+          style={[
+            headerSide.row,
+            // The arrow carries the navigator's own leading inset; without
+            // it the pill would sit flush against the edge of the screen.
+            navigation.canGoBack() ? null : headerSide.padStart,
+          ]}>
+          {navigation.canGoBack() ? (
+            <TabBackButton onPress={() => navigation.goBack()} />
+          ) : null}
+          <TextSizeStepper />
+        </View>
+      ),
       headerRight: () => (
         // Wider gaps on the Mac: these are pointer targets on a desktop,
         // not thumb targets on a tablet, and Catalyst has already scaled
@@ -250,21 +298,21 @@ export function TranslationSurahScreen({
             }}
             hitSlop={10}
             style={{ paddingHorizontal: SPACING.xs }}>
-            {/* Drawn, not typed. `♪` is the system font's glyph: its
-                size, weight and vertical placement are the platform's,
-                and the "gap" after it was a space character. It is the
-                same note the player's own controls carry. */}
-            <View style={audioMark.row}>
-              <TilawahIcon color={String(palette.accentSolid)} size={desktopSize(15)} />
-              <Text
-                style={{
-                  color: palette.accentSolid,
-                  fontSize: desktopSize(15),
-                  fontWeight: '700',
-                }}>
-                {t('quran.audioButton', 'Audio')}
-              </Text>
-            </View>
+            {/* THE MARK ALONE, AS THE MUṢḤAF'S HEADER ALREADY DRAWS IT.
+                This carried the word "Audio" beside the note and the
+                toggle carried "Mushaf" — two labels in the header of a
+                reader, which is the same pair the muṣḥaf dropped to icons
+                and for the same reason: they are the player's own marks
+                and are known by the time anyone looks for them here.
+                It matters more now than it did there. This bar also holds
+                the size control, and at 1.5× system text the two words
+                left the sūrah's name as "Al-…" — the one thing the bar is
+                for. The words live on in the accessibility labels, where
+                a screen reader still says them in full. */}
+            <TilawahIcon
+              color={String(palette.accentSolid)}
+              size={desktopSize(22)}
+            />
           </Pressable>
           <Pressable
             accessibilityRole="button"
@@ -272,14 +320,13 @@ export function TranslationSurahScreen({
             onPress={toggleMushaf}
             hitSlop={10}
             style={{ paddingHorizontal: SPACING.xs }}>
-            <Text
-              style={{
-                color: palette.accentSolid,
-                fontSize: desktopSize(15),
-                fontWeight: '700',
-              }}>
-              {t('quran.viewToggleMushaf', 'Mushaf')}
-            </Text>
+            {/* The open muṣḥaf, which is where this goes — the mirror of
+                the muṣḥaf reader's own toggle, which draws the
+                translation's mark to come back here. */}
+            <QuranBookIcon
+              color={String(palette.accentSolid)}
+              size={desktopSize(22)}
+            />
           </Pressable>
         </View>
       ),
@@ -679,11 +726,6 @@ export function TranslationSurahScreen({
           {t('quran.tapToPick', 'choose')}
         </Text>
       </Pressable>
-      {/* Its own line rather than beside the edition. That row already
-          wraps on purpose — "Tafsir: التفسير الميسر" plus a hint overruns a
-          narrow header — and a third thing in it would wrap in most
-          languages rather than a few. */}
-      <TextSizeStepper />
       {hideMode !== 'none' ? (
         <Text style={[styles.hideHint, { color: palette.accentSolid }]}>
           {t('quran.hideModeActive', {
@@ -900,6 +942,18 @@ function TafsirRowText({
 }
 
 
+/**
+ * The header's leading slot: the back arrow and the size control, as one
+ * row. Its own sheet rather than a line in `styles` below, because this
+ * is header chrome handed to the navigator — it is not laid out with the
+ * list, and it is built inside a `setOptions` effect that must not reach
+ * for anything that re-renders.
+ */
+const headerSide = StyleSheet.create({
+  row: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs },
+  padStart: { paddingStart: SPACING.sm },
+});
+
 const styles = StyleSheet.create({
   scroll: { padding: SPACING.lg, gap: SPACING.md },
   header: {
@@ -973,7 +1027,3 @@ const styles = StyleSheet.create({
 });
 
 
-/** The mark and the word it labels, on one baseline. */
-const audioMark = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs },
-});

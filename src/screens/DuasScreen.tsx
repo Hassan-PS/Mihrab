@@ -356,10 +356,12 @@ export function DuasScreen({ route, navigation }: DuasScreenProps = {}) {
           ]}
         >
           <View style={styles.categoryBar}>
-            <TabBackButton
-              onPress={() => setSelected(null)}
-              label={t('duas.allCategories', 'All duas')}
-            />
+            <View style={styles.categoryBarSide}>
+              <TabBackButton
+                onPress={() => setSelected(null)}
+                label={t('duas.allCategories', 'All duas')}
+              />
+            </View>
             <Text
               style={[styles.categoryTitle, { color: palette.text }]}
               numberOfLines={1}
@@ -367,9 +369,22 @@ export function DuasScreen({ route, navigation }: DuasScreenProps = {}) {
             >
               {t(`duas.cat.${selected}`)}
             </Text>
-            {/* The arrow's width again, so the title is centred on the
-                page and not on what is left beside the arrow. */}
-            <View style={styles.categoryBarSpacer} />
+            {/* THE FAR SIDE OF THE BAR, WHICH WAS EMPTY.
+                The size control used to sit under this title, at the top
+                of the list — so on the morning adhkār, twenty-odd duas
+                long, a reader who wanted the meaning a size larger had to
+                scroll back up to the title to reach it. The same walk the
+                back arrow was moved out here to save, for the same reason.
+                It goes opposite the arrow because that side held nothing
+                but a spacer keeping the title centred, and a control is a
+                better use of the room than a gap.
+                Only where it changes something: an Arabic reader is shown
+                neither the pronunciation nor the meaning, so there is
+                nothing for it to size. The side keeps its width either
+                way, so the title stays centred on the page. */}
+            <View style={[styles.categoryBarSide, styles.categoryBarSideEnd]}>
+              {showTranslit || showTranslation ? <TextSizeStepper /> : null}
+            </View>
           </View>
         </CenteredColumn>
       ) : null}
@@ -401,13 +416,6 @@ export function DuasScreen({ route, navigation }: DuasScreenProps = {}) {
             pass-through on a phone and only grows its inner column on a
             tablet or a Mac. Same fix as LogScreen; see duaCardSpacing. */}
         <CenteredColumn innerStyle={styles.stack} style={styles.stack}>
-          {/* Under the category's name, above its duas, and only where it
-            changes something: an Arabic reader is shown neither the
-            pronunciation nor the meaning, so a control for their size
-            would be a control over nothing. */}
-          {selected !== null && (showTranslit || showTranslation) ? (
-            <TextSizeStepper style={styles.textSize} />
-          ) : null}
           {selected === null
             ? /* ── THE INDEX ────────────────────────────────────────────
                Twenty-one categories in five groups, each group one card
@@ -761,23 +769,38 @@ const styles = StyleSheet.create({
     marginStart: -SPACING.sm,
   },
   categoryTitle: {
-    flex: 1,
+    // Shrinks, but does not take the room: the two sides are what centre
+    // it, and a long category name truncates rather than pushing either
+    // of them off the bar.
+    flexShrink: 1,
     fontSize: TYPE.title2.fontSize,
     fontWeight: '700',
     textAlign: 'center',
   },
-  // The arrow is 24 + 8 + 4 wide and the row is pulled 8 out, so 28 on the far side balances it.
-  categoryBarSpacer: { width: 28 },
+  /**
+   * The bar's two ends, which grow equally and never shrink.
+   *
+   * Equal growth is what centres the title on the PAGE rather than on
+   * whatever is left beside the arrow — the job the fixed 28pt spacer
+   * used to do back when the far side held nothing. It has to be a pair
+   * of flexible ends now that one of them holds a control several times
+   * the arrow's width. `flexShrink: 0` so neither end is squeezed into
+   * its own contents by a long name; the title gives way first.
+   */
+  categoryBarSide: {
+    flexGrow: 1,
+    flexShrink: 0,
+    flexBasis: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  categoryBarSideEnd: { justifyContent: 'flex-end' },
   // The pinned bar's own frame: the list's horizontal padding, so the
   // arrow lands exactly where it did when it was the list's first row.
   categoryBarPinned: {
     paddingHorizontal: SPACING.lg,
     paddingBottom: SPACING.sm,
   },
-  // Pulled up under the category's name: the stack's own gap would set it
-  // as far from the title as the cards are from each other, and it
-  // belongs to the title.
-  textSize: { marginTop: -SPACING.xs },
   stack: { gap: SPACING.md },
   card: { borderRadius: RADIUS.lg, padding: SPACING.lg, gap: SPACING.sm },
   titleRow: {

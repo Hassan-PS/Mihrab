@@ -83,12 +83,30 @@ describe('Duas', () => {
     // inside a category. It is no longer the list's first ROW — it is
     // pinned above the list so it cannot scroll out of reach (#45) — but
     // it is still one bar, still conditional, and still the only way
-    // back.
+    // back. The arrow is the first thing in it; what it now sits in is a
+    // slot, because the far side of the bar holds a control.
     expect(src).toMatch(
-      /\{selected !== null \? \([\s\S]{0,200}?<View style=\{styles\.categoryBar\}>\s*<TabBackButton/,
+      /\{selected !== null \? \([\s\S]{0,400}?<View style=\{styles\.categoryBar\}>\s*<View style=\{styles\.categoryBarSide\}>\s*<TabBackButton/,
     );
     expect(src.match(/<TabBackButton/g) ?? []).toHaveLength(1);
     expect(src).not.toContain('setOptions');
+  });
+
+  it('carries the text-size control opposite the arrow, not down the list', () => {
+    // It used to be the first thing in the list, under the title — so on
+    // the morning adhkār a reader who wanted the meaning larger had to
+    // scroll back to the top to reach it. Same walk the arrow was pinned
+    // out here to save. The far side of the bar was a fixed spacer doing
+    // nothing but centring the title; the control does that job now.
+    const bar = src.slice(
+      src.indexOf('<View style={styles.categoryBar}>'),
+      src.indexOf('</CenteredColumn>'),
+    );
+    expect(bar).toMatch(
+      /categoryBarSideEnd\]\}>\s*\{showTranslit \|\| showTranslation \? <TextSizeStepper \/> : null\}/,
+    );
+    expect(src.match(/<TextSizeStepper/g) ?? []).toHaveLength(1);
+    expect(src).not.toContain('categoryBarSpacer');
   });
 });
 
