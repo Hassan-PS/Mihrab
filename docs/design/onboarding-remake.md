@@ -821,6 +821,25 @@ commit the language change on modal dismiss, not during.
 
 ## 9. The feature tour becomes what's-new
 
+> **Superseded, and worth reading anyway.** Points 1 and 3 shipped and
+> still hold; the version arithmetic in 3 is unchanged and now lives in
+> `src/polish/releaseNotes.ts`. Points 2, 4, 5 and 6 did not survive
+> contact. The pager point 2 preserved was the wrong shape for a
+> changelog — it asks the reader to work for each sentence — and the
+> hand-written slide table of point 4 was only ever filled in for two
+> releases out of fifty-eight, which is what point 4's own warning
+> predicted and did not prevent: a surface whose content is a chore is a
+> surface that is empty.
+>
+> What replaced them is `src/polish/ChangelogSheet.tsx`: one continuous
+> list, the installed release at the top, every release before it
+> underneath, fed by `releaseNotes.generated.ts` — built from the notes
+> the app stores are already given, which `release.sh` will not cut a tag
+> without. Point 6 is reversed with it. "A what's-new screen replayed on
+> demand is a changelog" was right; the conclusion drawn from it — that
+> `CHANGELOG.md` on the marketing site was therefore enough — was not,
+> and Settings → About now opens the same sheet with nothing marked new.
+
 `FeatureTourModal` is a paged, RTL-aware, skippable, full-screen modal
 with a persisted seen-flag and dots. That is not a bad component. It is a
 component pointed at the wrong problem: it is a **second welcome**, in a

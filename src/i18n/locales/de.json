@@ -1799,14 +1799,8 @@
   },
   "whatsNew": {
     "title": "Neu",
-    "skip": "Überspringen",
-    "next": "Weiter",
-    "done": "Fortfahren",
-    "v2186": {
-      "setupTitle": "Die Einrichtung, neu gemacht",
-      "setupBody": "Der erste Start fragt jetzt die vier Dinge, die entscheiden, ob die App für dich stimmt — wo du bist, welcher Rechtsschule du folgst und ob sie dich benachrichtigen darf — und zeigt deine eigenen Zeiten, während du antwortest.",
-      "alertsTitle": "Hinweise, die ankommen",
-      "alertsBody": "Die Mitteilungs-Berechtigung schaltet die Hinweise jetzt wirklich ein, und du kannst gleich einen Adhan wählen."
-    }
+    "installed": "Mihrab {{version}}",
+    "newBadge": "Neu",
+    "settingsHelp": "Alles, was sich geändert hat — Version für Version."
   }
 }

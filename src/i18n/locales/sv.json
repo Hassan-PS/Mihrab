@@ -1799,14 +1799,8 @@
   },
   "whatsNew": {
     "title": "Nyheter",
-    "skip": "Hoppa över",
-    "next": "Nästa",
-    "done": "Fortsätt",
-    "v2186": {
-      "setupTitle": "Introduktionen är omgjord",
-      "setupBody": "Första starten frågar nu om de fyra saker som avgör om appen stämmer för dig — var du är, vilken rättsskola du följer och om den får avisera dig — och visar dina egna tider medan du svarar.",
-      "alertsTitle": "Aviseringar som kommer fram",
-      "alertsBody": "Att ge aviseringsbehörighet slår nu faktiskt på aviseringarna, och du kan välja en adhan på samma gång."
-    }
+    "installed": "Mihrab {{version}}",
+    "newBadge": "Nytt",
+    "settingsHelp": "Allt som har ändrats, version för version."
   }
 }

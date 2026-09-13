@@ -1,7 +1,7 @@
 // hover-ok: list-row / settings-row / sheet pressables. Hover-state
 // treatment would visually noise these dense surfaces; the touch
 // feedback (pressed opacity / ripple) is the right affordance here.
-import { memo, useMemo, useRef } from 'react';
+import { memo, useMemo, useRef, useState } from 'react';
 import { Alert, Linking, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -13,6 +13,7 @@ import type { RootStackParamList } from '../../navigation/types';
 import { resetAppData } from '../../settings/storage';
 import { DEFAULT_SETTINGS } from '../../settings/types';
 import { rateApp } from '../../polish/rateApp';
+import { ChangelogSheet } from '../../polish/ChangelogSheet';
 import { NestedPageRows } from './NestedPageRows';
 import {
   SettingsGroup,
@@ -38,6 +39,7 @@ function AboutCardImpl() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { settings, updateSettings } = usePrayerSettings();
+  const [changelogOpen, setChangelogOpen] = useState(false);
 
   // Hidden "developer mode" unlock: tap the version 5× (resets after a 1.5 s
   // pause) to reveal the data-statistics toggle, à la Android developer mode.
@@ -162,9 +164,17 @@ function AboutCardImpl() {
         {/* "Show the app tour" was here. The tour is gone from first
             launch — the setup flow's last screen shows the user their own
             times instead of four slides describing them — and what it
-            became is a what's-new screen shown after an update. Replaying
-            release notes on demand is a changelog, and CHANGELOG.md is
-            already that. See docs/design/onboarding-remake.md §9. */}
+            became is the sheet this row opens: the same one an update
+            raises by itself, with nothing marked new because from here
+            nothing is. See docs/design/onboarding-remake.md §9. */}
+        <SettingsLinkRow
+          title={t('whatsNew.title', 'What’s new')}
+          help={t(
+            'whatsNew.settingsHelp',
+            'Everything that has changed, release by release.',
+          )}
+          onPress={() => setChangelogOpen(true)}
+        />
         <SettingsLinkRow
           title={t('settings.replayOnboarding')}
           help={t('settings.replayOnboardingHelp')}
@@ -207,6 +217,14 @@ function AboutCardImpl() {
           {MIHRAB_WEBSITE_LABEL}
         </Text>
       </View>
+
+      {/* `since` is deliberately absent: opened from here, every release
+          has been seen, and marking half the list new would be a lie
+          about what this reader has already been told. */}
+      <ChangelogSheet
+        visible={changelogOpen}
+        onClose={() => setChangelogOpen(false)}
+      />
     </>
   );
 }

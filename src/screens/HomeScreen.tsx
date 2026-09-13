@@ -73,10 +73,9 @@ import { HomeStatusBand } from './home/HomeStatusBand';
 import { rescheduleEndOfDayLogReminders } from '../notifications/endOfDayLog';
 import { rescheduleDuaReminders } from '../notifications/duaReminders';
 import {
-  WhatsNewModal,
-  pendingWhatsNew,
-} from '../polish/WhatsNewModal';
-import type { WhatsNewSlide } from '../polish/whatsNew';
+  ChangelogSheet,
+  pendingChangelog,
+} from '../polish/ChangelogSheet';
 import { SPACING } from '../theme/tokens';
 
 /**
@@ -296,16 +295,20 @@ export function HomeScreen() {
    * had: release notes, on the first launch after an update, to people
    * who already use it.
    *
-   * A fresh install returns an empty list and gets its version stamped,
-   * so the NEXT update is an upgrade rather than a first sighting.
+   * A fresh install returns null and gets its version stamped, so the
+   * NEXT update is an upgrade rather than a first sighting.
+   *
+   * What is held here is the version this phone last RAN, not a list of
+   * notes: the sheet shows the whole changelog either way and uses this
+   * to decide how much of it to mark new.
    */
-  const [whatsNew, setWhatsNew] = useState<WhatsNewSlide[]>([]);
+  const [changelogSince, setChangelogSince] = useState<string | null>(null);
   useFocusEffect(
     useCallback(() => {
       if (!settings.onboardingComplete) return;
       let cancelled = false;
-      void pendingWhatsNew().then(slides => {
-        if (!cancelled && slides.length > 0) setWhatsNew(slides);
+      void pendingChangelog().then(since => {
+        if (!cancelled && since) setChangelogSince(since);
       });
       return () => {
         cancelled = true;
@@ -1292,10 +1295,10 @@ export function HomeScreen() {
       </CenteredColumn>
 
 
-      <WhatsNewModal
-        visible={whatsNew.length > 0}
-        slides={whatsNew}
-        onClose={() => setWhatsNew([])}
+      <ChangelogSheet
+        visible={changelogSince !== null}
+        since={changelogSince}
+        onClose={() => setChangelogSince(null)}
       />
     </ScrollView>
     {/* Over the page, and only on the phone's full-bleed hero: the

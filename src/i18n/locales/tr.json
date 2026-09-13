@@ -1799,14 +1799,8 @@
   },
   "whatsNew": {
     "title": "Yenilikler",
-    "skip": "Atla",
-    "next": "İleri",
-    "done": "Devam",
-    "v2186": {
-      "setupTitle": "Kurulum yenilendi",
-      "setupBody": "İlk açılış artık uygulamanın size uyup uymadığını belirleyen dört şeyi soruyor — neredesiniz, hangi mezhebi izliyorsunuz ve size bildirim gönderebilir mi — ve siz yanıtlarken kendi vakitlerinizi gösteriyor.",
-      "alertsTitle": "Gerçekten gelen uyarılar",
-      "alertsBody": "Bildirim iznini vermek artık uyarıları gerçekten açıyor ve aynı yerde bir ezan seçebiliyorsunuz."
-    }
+    "installed": "Mihrab {{version}}",
+    "newBadge": "Yeni",
+    "settingsHelp": "Değişen her şey, sürüm sürüm."
   }
 }

@@ -94,7 +94,7 @@ const STAYS: Record<string, string> = {
   'mihrab.featureTour.v1':
     'describes this phone — the retired feature tour’s seen-flag, no longer ' +
     'written, read once to tell an install that predates release notes ' +
-    'from a fresh one (src/polish/WhatsNewModal.ts, LEGACY_TOUR_KEY)',
+    'from a fresh one (src/polish/ChangelogSheet.tsx, LEGACY_TOUR_KEY)',
   'mihrab.syncHint.dismissed.v1':
     'describes this phone — which one-off pointers the user has waved away, ' +
     'the same kind of thing as the what’s-new version stamp',

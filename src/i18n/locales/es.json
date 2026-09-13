@@ -1799,14 +1799,8 @@
   },
   "whatsNew": {
     "title": "Novedades",
-    "skip": "Omitir",
-    "next": "Siguiente",
-    "done": "Continuar",
-    "v2186": {
-      "setupTitle": "Configuración, rehecha",
-      "setupBody": "El primer inicio ahora pregunta las cuatro cosas que deciden si la app es adecuada para ti — dónde estás, qué escuela sigues y si puede avisarte — y muestra tus propios tiempos mientras respondes.",
-      "alertsTitle": "Avisos que sí llegan",
-      "alertsBody": "Conceder el permiso de notificaciones ahora activa de verdad los avisos, y de paso puedes elegir un adhán."
-    }
+    "installed": "Mihrab {{version}}",
+    "newBadge": "Nuevo",
+    "settingsHelp": "Todo lo que ha cambiado, versión a versión."
   }
 }

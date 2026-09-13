@@ -1799,14 +1799,8 @@
   },
   "whatsNew": {
     "title": "What’s new",
-    "skip": "Skip",
-    "next": "Next",
-    "done": "Continue",
-    "v2186": {
-      "setupTitle": "Setup, remade",
-      "setupBody": "First launch now asks the four things that decide whether the app is right for you — where you are, which school you follow, and whether it may notify you — and shows your own times as you answer.",
-      "alertsTitle": "Alerts that arrive",
-      "alertsBody": "Granting notification permission now actually turns alerts on, and you can pick an adhan while you are there."
-    }
+    "installed": "Mihrab {{version}}",
+    "newBadge": "New",
+    "settingsHelp": "Everything that has changed, release by release."
   }
 }

@@ -354,6 +354,15 @@ for loc in $LOCALES; do
   ok "release notes for $loc ($chars chars)"
 done
 
+# The same notes, joined to this version's name and date for the app's own
+# changelog sheet. Regenerated here rather than left to the test that
+# checks it: the notes for $CODE were written minutes ago and the table is
+# stale by definition, and failing the suite over a file this script can
+# write itself is a gate that teaches nothing.
+node "$ROOT/scripts/build-release-notes.js" >/dev/null \
+  || die "could not rebuild src/polish/releaseNotes.generated.ts"
+ok "in-app release notes rebuilt"
+
 # The cask is the only code that runs when a Mac replaces the app, and it
 # is what stops the widgets freezing on upgrade — and, since 2026-08-29,
 # what stops them being removed outright. See verify-release.sh 4a.

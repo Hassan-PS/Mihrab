@@ -1799,14 +1799,8 @@
   },
   "whatsNew": {
     "title": "Yang baru",
-    "skip": "Lewati",
-    "next": "Berikutnya",
-    "done": "Lanjutkan",
-    "v2186": {
-      "setupTitle": "Penyiapan, dirombak",
-      "setupBody": "Peluncuran pertama kini menanyakan empat hal yang menentukan apakah aplikasi ini cocok untuk Anda — di mana Anda berada, mazhab apa yang Anda ikuti, dan bolehkah ia memberi tahu Anda — sambil menampilkan waktu Anda sendiri.",
-      "alertsTitle": "Peringatan yang benar-benar datang",
-      "alertsBody": "Memberikan izin notifikasi kini benar-benar menyalakan peringatan, dan Anda bisa sekalian memilih azan."
-    }
+    "installed": "Mihrab {{version}}",
+    "newBadge": "Baru",
+    "settingsHelp": "Semua yang berubah, rilis demi rilis."
   }
 }
