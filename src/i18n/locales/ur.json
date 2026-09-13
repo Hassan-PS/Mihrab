@@ -372,7 +372,8 @@
     "accentPickerHex": "رنگ کا کوڈ",
     "accentPickerSave": "رنگ محفوظ کریں",
     "accentPickerUseOnce": "محفوظ کیے بغیر استعمال کریں",
-    "accentPickerAdjusted": "قریب ترین ایسے شیڈ پر منتقل کر دیا گیا جو اس پس منظر پر پڑھا جا سکے۔"
+    "accentPickerAdjusted": "قریب ترین ایسے شیڈ پر منتقل کر دیا گیا جو اس پس منظر پر پڑھا جا سکے۔",
+    "sectionAppearanceBlurbAndroid": "تھیم، رنگ، وقت کی شکل، زبان، ویجیٹ"
   },
   "locationSetup": {
     "headline": "اپنا مقام متعین کریں۔",

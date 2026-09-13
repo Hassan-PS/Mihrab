@@ -24,6 +24,10 @@ import { TYPE } from '../../theme/typography';
  * Widget settings card — Android background strength, and the widget's own
  * highlight colour in the one case the app accent cannot supply it.
  *
+ * It sits on the Appearance page. It had a section of its own until the
+ * unification below took its colour picker away and left one slider
+ * behind, which is not a destination.
+ *
  * The highlight used to live here as a separate swatch picker, but #127
  * unified it with the app accent in AppearanceCard so users pick a colour
  * once and both follow.
@@ -63,18 +67,17 @@ function WidgetCardImpl() {
     appearance.appearance === 'system' && appearance.useSystemDynamicTheme;
 
   return (
-    // No heading: the page is already called Home screen.
+    // Titled now. This used to be the whole of a page called Home screen
+    // and needed no heading of its own; on Appearance it is the third
+    // card down and an untitled group of controls under "Language" reads
+    // as more language settings.
     <SettingsGroup
-      footer={
-        needsOwnPicker
-          ? t('settings.widgetConfigureHint')
-          : // The widget follows the app accent, so the answer to "where
-            // do I change its colour" belongs where the question is asked.
-            `${t(
-              'settings.widgetColorFollowsAccentHelp',
-              'The widget uses the same accent color as the app. Pick it under Appearance.',
-            )} ${t('settings.widgetConfigureHint')}`
-      }>
+      title={t('settings.sectionWidgets')}
+      // The accent the widget follows is picked two cards up, on this
+      // same page, so the sentence that used to send people to Appearance
+      // would now be sending them here. What is left is the hint that
+      // there is a second way in, from the widget itself.
+      footer={t('settings.widgetConfigureHint')}>
       <SettingsBlock>
         <Text style={[styles.label, { color: palette.muted }]}>
           {t('settings.widgetBackgroundOpacity')}

@@ -372,7 +372,8 @@
     "accentPickerHex": "Kode warna",
     "accentPickerSave": "Simpan warna",
     "accentPickerUseOnce": "Pakai tanpa menyimpan",
-    "accentPickerAdjusted": "Dipindahkan ke corak terdekat yang tetap terbaca di latar ini."
+    "accentPickerAdjusted": "Dipindahkan ke corak terdekat yang tetap terbaca di latar ini.",
+    "sectionAppearanceBlurbAndroid": "Tema, warna, format waktu, bahasa, widget"
   },
   "locationSetup": {
     "headline": "Tetapkan lokasi Anda",

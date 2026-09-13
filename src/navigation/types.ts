@@ -76,7 +76,6 @@ export type RootStackParamList = {
   /** `highlight` flashes the saved-locations card after a deep link from Home. */
   SettingsLocation: { highlight?: 'savedLocations' } | undefined;
   SettingsNotifications: undefined;
-  SettingsWidgets: undefined;
   SettingsQuran: undefined;
   SettingsAbout: undefined;
   /**

@@ -372,7 +372,8 @@
     "accentPickerHex": "Código de color",
     "accentPickerSave": "Guardar color",
     "accentPickerUseOnce": "Usar sin guardar",
-    "accentPickerAdjusted": "Movido al tono más cercano que sigue siendo legible sobre este fondo."
+    "accentPickerAdjusted": "Movido al tono más cercano que sigue siendo legible sobre este fondo.",
+    "sectionAppearanceBlurbAndroid": "Tema, color, formato de hora, idioma, widget"
   },
   "locationSetup": {
     "headline": "Establece tu ubicación",

@@ -372,7 +372,8 @@
     "accentPickerHex": "Färgkod",
     "accentPickerSave": "Spara färgen",
     "accentPickerUseOnce": "Använd utan att spara",
-    "accentPickerAdjusted": "Flyttad till närmaste nyans som är läsbar mot den här bakgrunden."
+    "accentPickerAdjusted": "Flyttad till närmaste nyans som är läsbar mot den här bakgrunden.",
+    "sectionAppearanceBlurbAndroid": "Tema, accentfärg, tidsformat, språk, widget"
   },
   "locationSetup": {
     "headline": "Ange din plats",

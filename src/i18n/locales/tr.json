@@ -372,7 +372,8 @@
     "accentPickerHex": "Renk kodu",
     "accentPickerSave": "Rengi kaydet",
     "accentPickerUseOnce": "Kaydetmeden kullan",
-    "accentPickerAdjusted": "Bu arka planda okunabilir kalan en yakın tona taşındı."
+    "accentPickerAdjusted": "Bu arka planda okunabilir kalan en yakın tona taşındı.",
+    "sectionAppearanceBlurbAndroid": "Tema, vurgu rengi, saat biçimi, dil, widget"
   },
   "locationSetup": {
     "headline": "Konumunuzu ayarlayın",

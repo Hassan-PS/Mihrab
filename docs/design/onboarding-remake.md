@@ -500,7 +500,12 @@ each a deep link into the page that owns it:
 
 - **Calculation method** → `SettingsPrayerTimes`
 - **Per-prayer alerts** → `SettingsNotifications`
-- **Widgets** → `SettingsWidgets`
+- **Widgets** → `SettingsAppearance`, Android only. The widget had a
+  settings section of its own until its colour picker was unified with the
+  app accent (#127) and one slider was left on a page by itself; the
+  control moved to Appearance and the section went. The row is Android-only
+  now because `SettingsWidgets` had been Android-only for the same reason —
+  on an iPhone this link had nowhere to go.
 
 Then **Start**, which is where `onboardingComplete` and
 `locationOnboardingComplete` are written and the modal dismisses onto

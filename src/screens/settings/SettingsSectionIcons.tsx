@@ -1,14 +1,14 @@
 /**
  * One glyph per settings section.
  *
- * A list of seven rows is scanned by shape before it is read, and an
+ * A short list of rows is scanned by shape before it is read, and an
  * icon is what makes the second visit to a settings screen faster than
  * the first. They are drawn here rather than pulled from a font so they
  * share the app's stroke weight, and they take a colour so a row can
  * carry the accent when it is the one being pointed at.
  */
 import { memo } from 'react';
-import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 import type { ColorValue } from 'react-native';
 
 type P = { size?: number; color: ColorValue };
@@ -66,15 +66,6 @@ export const LocationIcon = memo(({ size = S, color }: P) => (
       fill="none"
     />
     <Circle cx="12" cy="10" r="2.5" stroke={color} strokeWidth={1.8} fill="none" />
-  </Svg>
-));
-
-/** Two panes — the home screen's own surfaces. */
-export const WidgetsIcon = memo(({ size = S, color }: P) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24">
-    <Rect x="3" y="3" width="8" height="8" rx="2" stroke={color} strokeWidth={1.8} fill="none" />
-    <Rect x="13" y="3" width="8" height="8" rx="2" stroke={color} strokeWidth={1.8} fill="none" />
-    <Rect x="3" y="13" width="18" height="8" rx="2" stroke={color} strokeWidth={1.8} fill="none" />
   </Svg>
 ));
 

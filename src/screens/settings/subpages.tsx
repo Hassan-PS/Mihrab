@@ -16,7 +16,6 @@ import {
   NotificationsIcon,
   PrayerTimesIcon,
   QuranIcon,
-  WidgetsIcon,
 } from './SettingsSectionIcons';
 import { AboutSettingsScreen } from './pages/AboutSettingsScreen';
 import { AppearanceSettingsScreen } from './pages/AppearanceSettingsScreen';
@@ -28,7 +27,6 @@ import { LocationSettingsScreen } from './pages/LocationSettingsScreen';
 import { NotificationSettingsScreen } from './pages/NotificationSettingsScreen';
 import { PrayerTimesSettingsScreen } from './pages/PrayerTimesSettingsScreen';
 import { QuranSettingsScreen } from './pages/QuranSettingsScreen';
-import { WidgetSettingsScreen } from './pages/WidgetSettingsScreen';
 
 export type SettingsSubpageRoute = Extract<
   keyof RootStackParamList,
@@ -119,21 +117,19 @@ const ALL_SUBPAGES: readonly SettingsSubpage[] = [
   {
     route: 'SettingsAppearance',
     titleKey: 'settings.sectionAppearance',
-    blurbKey: 'settings.sectionAppearanceBlurb',
+    /**
+     * The widget's one remaining control lives on this page, and only
+     * Android has it — so only Android's blurb says so. A section whose
+     * index line does not name what is inside it is a section people
+     * scroll past: "Home screen" used to be its own row, and the word is
+     * the only thing anyone hunting for the widget scans for.
+     */
+    blurbKey:
+      Platform.OS === 'android'
+        ? 'settings.sectionAppearanceBlurbAndroid'
+        : 'settings.sectionAppearanceBlurb',
     Icon: AppearanceIcon,
     component: AppearanceSettingsScreen,
-  },
-  {
-    route: 'SettingsWidgets',
-    titleKey: 'settings.sectionWidgets',
-    blurbKey: 'settings.sectionWidgetsBlurb',
-    Icon: WidgetsIcon,
-    component: WidgetSettingsScreen,
-    // Android only, now that the Live Activity has moved to
-    // Notifications where it belongs. `WidgetCard` renders nothing off
-    // Android, so everywhere else this was a section that opened onto an
-    // empty page — worse than not being there.
-    platforms: ['android'],
   },
   {
     route: 'SettingsQuran',

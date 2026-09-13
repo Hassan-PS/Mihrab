@@ -372,7 +372,8 @@
     "accentPickerHex": "Код цвета",
     "accentPickerSave": "Сохранить цвет",
     "accentPickerUseOnce": "Применить без сохранения",
-    "accentPickerAdjusted": "Сдвинут к ближайшему оттенку, который остаётся читаемым на этом фоне."
+    "accentPickerAdjusted": "Сдвинут к ближайшему оттенку, который остаётся читаемым на этом фоне.",
+    "sectionAppearanceBlurbAndroid": "Тема, акцент, формат времени, язык, виджет"
   },
   "locationSetup": {
     "headline": "Установите свое местоположение",

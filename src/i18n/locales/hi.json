@@ -372,7 +372,8 @@
     "accentPickerHex": "रंग कोड",
     "accentPickerSave": "रंग सहेजें",
     "accentPickerUseOnce": "बिना सहेजे इस्तेमाल करें",
-    "accentPickerAdjusted": "निकटतम ऐसे शेड पर ले जाया गया जो इस पृष्ठभूमि पर पढ़ने योग्य रहे।"
+    "accentPickerAdjusted": "निकटतम ऐसे शेड पर ले जाया गया जो इस पृष्ठभूमि पर पढ़ने योग्य रहे।",
+    "sectionAppearanceBlurbAndroid": "थीम, रंग, समय प्रारूप, भाषा, विजेट"
   },
   "locationSetup": {
     "headline": "अपना स्थान निर्धारित करें",

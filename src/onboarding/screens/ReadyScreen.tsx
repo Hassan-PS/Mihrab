@@ -30,7 +30,7 @@
  * What it is not is a second copy of Home's derivations.
  */
 import { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
@@ -105,7 +105,7 @@ export function ReadyScreen({
    * still waiting to pull them back into onboarding.
    */
   const goTo = (
-    route: 'SettingsPrayerTimes' | 'SettingsNotifications' | 'SettingsWidgets',
+    route: 'SettingsPrayerTimes' | 'SettingsNotifications' | 'SettingsAppearance',
   ) => {
     onFinish();
     navigation.navigate(route);
@@ -178,11 +178,18 @@ export function ReadyScreen({
           title={t('onboarding.ready.alerts', 'Per-prayer alerts')}
           onPress={() => goTo('SettingsNotifications')}
         />
-        <SettingsLinkRow
-          testID="onboarding-ready-widgets"
-          title={t('onboarding.ready.widgets', 'Widgets')}
-          onPress={() => goTo('SettingsWidgets')}
-        />
+        {/* Android only, and it always should have been: the widget's
+            settings are Android's alone, and the route this row opened
+            was registered on Android alone — so on an iPhone this was a
+            row that navigated nowhere. It now opens Appearance, where
+            the widget's control moved when its page was folded away. */}
+        {Platform.OS === 'android' ? (
+          <SettingsLinkRow
+            testID="onboarding-ready-widgets"
+            title={t('onboarding.ready.widgets', 'Widgets')}
+            onPress={() => goTo('SettingsAppearance')}
+          />
+        ) : null}
       </SettingsGroup>
     </OnboardingFrame>
   );

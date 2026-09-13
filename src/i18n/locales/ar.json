@@ -372,7 +372,8 @@
     "accentPickerHex": "رمز اللون",
     "accentPickerSave": "احفظ اللون",
     "accentPickerUseOnce": "استخدمه دون حفظ",
-    "accentPickerAdjusted": "نُقل إلى أقرب درجة تبقى مقروءة على هذه الخلفية."
+    "accentPickerAdjusted": "نُقل إلى أقرب درجة تبقى مقروءة على هذه الخلفية.",
+    "sectionAppearanceBlurbAndroid": "السمة واللون وصيغة الوقت واللغة والودجة"
   },
   "locationSetup": {
     "headline": "حدّد موقعك",
