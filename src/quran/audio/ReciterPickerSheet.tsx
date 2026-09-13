@@ -40,7 +40,8 @@ import { useTranslation } from 'react-i18next';
 import { useKeyboardInset } from '../../hooks/useKeyboardInset';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { setQuranPrefs, useQuranState } from '../quranState';
-import { searchReciters, type Reciter } from './reciters';
+import { reciterRiwayah, searchReciters, type Reciter } from './reciters';
+import { riwayahById, resolveRiwayah } from '../riwayat';
 import { MODAL_ORIENTATIONS } from '../../components/modalOrientations';
 import {
   deleteReciterAudio,
@@ -102,9 +103,8 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
   const { prefs } = useQuranState();
   const [query, setQuery] = useState('');
   const [onDisk, setOnDisk] = useState<Record<string, ReciterAudioStats>>({});
-  const [download, setDownload] = useState<QuranDownloadState>(
-    quranDownloadState,
-  );
+  const [download, setDownload] =
+    useState<QuranDownloadState>(quranDownloadState);
   /** The row whose delete has been asked for but not yet confirmed. */
   const [confirming, setConfirming] = useState<string | null>(null);
 
@@ -134,7 +134,19 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
   // reach أحمد العجمي. The old exact-substring filter returned nothing for
   // any spelling but the one stored, which reads as "that reciter isn't in
   // the app" — see `searchReciters`.
-  const data = useMemo(() => searchReciters(query), [query]);
+  /**
+   * The reader's own reading first — issue #46.
+   *
+   * Two Warsh recordings alphabetised into forty-two Ḥafṣ ones are two
+   * rows a Warsh reader has to already know the names of to find. Nothing
+   * is hidden either way: the rest of the list follows, in the alphabet
+   * it has always been in.
+   */
+  const readerRiwayah = resolveRiwayah(prefs.riwayah);
+  const data = useMemo(
+    () => searchReciters(query, undefined, readerRiwayah),
+    [query, readerRiwayah],
+  );
 
   const renderRow = ({ item }: { item: Reciter }) => {
     const selected = item.id === prefs.reciterId;
@@ -152,18 +164,18 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
           total: download.progress.total,
         })
       : stats?.complete
-        ? t('quran.listenDownloadComplete', {
-            defaultValue: 'Complete · {{size}}',
-            size: formatBytes(stats.bytes),
-          })
-        : stats
-          ? t('quran.listenDownloadPartial', {
-              defaultValue: '{{done}} of {{total}} ayahs here · {{size}}',
-              done: stats.files,
-              total: totalAyahCount(),
-              size: formatBytes(stats.bytes),
-            })
-          : null;
+      ? t('quran.listenDownloadComplete', {
+          defaultValue: 'Complete · {{size}}',
+          size: formatBytes(stats.bytes),
+        })
+      : stats
+      ? t('quran.listenDownloadPartial', {
+          defaultValue: '{{done}} of {{total}} ayahs here · {{size}}',
+          done: stats.files,
+          total: totalAyahCount(),
+          size: formatBytes(stats.bytes),
+        })
+      : null;
 
     return (
       <Pressable
@@ -176,7 +188,8 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
         style={[
           styles.row,
           { backgroundColor: selected ? palette.accentBg : 'transparent' },
-        ]}>
+        ]}
+      >
         <View style={{ flex: 1 }}>
           <Text style={[styles.name, { color: palette.text }]}>
             {item.name}
@@ -185,6 +198,39 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
             <Text style={[styles.arabic, { color: palette.muted }]}>
               {item.arabicName}
             </Text>
+            {/* Which reading this is, where it is not the reader's own.
+                Saying "Ḥafṣ" on forty-two rows out of forty-four says
+                nothing; saying "Warsh" on the two that are is the whole
+                message. It is drawn in the accent when it MATCHES the
+                muṣḥaf on screen, because then it is the answer to what
+                the reader came here for. */}
+            {reciterRiwayah(item) !== 'hafs' || readerRiwayah !== 'hafs' ? (
+              <View
+                style={[
+                  styles.badge,
+                  {
+                    borderColor:
+                      reciterRiwayah(item) === readerRiwayah
+                        ? palette.accent
+                        : palette.border,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.badgeText,
+                    {
+                      color:
+                        reciterRiwayah(item) === readerRiwayah
+                          ? palette.accent
+                          : palette.muted,
+                    },
+                  ]}
+                >
+                  {t(riwayahById(reciterRiwayah(item)).nameKey)}
+                </Text>
+              </View>
+            ) : null}
             {item.hasTimings ? (
               <View style={[styles.badge, { borderColor: palette.border }]}>
                 <Text style={[styles.badgeText, { color: palette.muted }]}>
@@ -200,7 +246,14 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
           ) : null}
         </View>
         {selected ? (
-          <Text style={{ color: palette.accentSolid, fontSize: TYPE.title3.fontSize }}>✓</Text>
+          <Text
+            style={{
+              color: palette.accentSolid,
+              fontSize: TYPE.title3.fontSize,
+            }}
+          >
+            ✓
+          </Text>
         ) : null}
         {/* The audio control. One row, one verb: fetch it, stop fetching
             it, or delete it — never two of the three at once. */}
@@ -210,7 +263,8 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
             accessibilityLabel={t('common.cancel', 'Cancel')}
             hitSlop={8}
             onPress={() => cancelQuranDownload()}
-            style={[styles.iconBtn, { borderColor: palette.border }]}>
+            style={[styles.iconBtn, { borderColor: palette.border }]}
+          >
             <Text style={[styles.icon, { color: palette.text }]}>✕</Text>
           </Pressable>
         ) : stats ? (
@@ -239,13 +293,10 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
                 borderColor: asking ? palette.danger : palette.border,
                 backgroundColor: asking ? palette.danger : 'transparent',
               },
-            ]}>
+            ]}
+          >
             {asking ? (
-              <Text
-                    style={[
-                      styles.confirmText,
-                      { color: palette.onAccent },
-                    ]}>
+              <Text style={[styles.confirmText, { color: palette.onAccent }]}>
                 {t('common.delete', { defaultValue: 'Delete' })}
               </Text>
             ) : (
@@ -266,12 +317,14 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
             style={[
               styles.iconBtn,
               { borderColor: busyElsewhere ? 'transparent' : palette.border },
-            ]}>
+            ]}
+          >
             <Text
               style={[
                 styles.icon,
                 { color: busyElsewhere ? palette.muted : palette.accentSolid },
-              ]}>
+              ]}
+            >
               ↓
             </Text>
           </Pressable>
@@ -288,7 +341,8 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
       // at all — see MODAL_ORIENTATIONS.
       supportedOrientations={MODAL_ORIENTATIONS}
       animationType="slide"
-      onRequestClose={onClose}>
+      onRequestClose={onClose}
+    >
       <Pressable
         style={[styles.backdrop, { backgroundColor: palette.overlay }]}
         accessibilityLabel={t('common.close', 'Close')}
@@ -298,7 +352,8 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
         style={[
           styles.sheet,
           { backgroundColor: palette.card, bottom: keyboardInset },
-        ]}>
+        ]}
+      >
         <Text style={[styles.title, { color: palette.text }]}>
           {t('quran.chooseReciter', 'Choose reciter')}
         </Text>
@@ -345,7 +400,11 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.lg,
     paddingBottom: SPACING.xl,
   },
-  title: { fontSize: TYPE.title3.fontSize, fontWeight: '700', marginBottom: SPACING.md },
+  title: {
+    fontSize: TYPE.title3.fontSize,
+    fontWeight: '700',
+    marginBottom: SPACING.md,
+  },
   search: {
     borderRadius: RADIUS.md,
     borderWidth: StyleSheet.hairlineWidth,

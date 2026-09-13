@@ -23,7 +23,21 @@
  *
  * Audio streams from everyayah.com on explicit user action, or plays
  * fully offline once a surah is downloaded (see `audioStore.ts`).
+ *
+ * ── A RECITATION BELONGS TO A READING ─────────────────────────────────
+ *
+ * The forty-two above are all Ḥafṣ, which went without saying while Ḥafṣ
+ * was the only muṣḥaf in the app. It is not: a reader on a Warsh page had
+ * no Warsh voice to hear it in (#46). `riwayah` names the reading a
+ * recording is of, absent meaning Ḥafṣ, and the picker offers the
+ * reader's own first.
+ *
+ * The ayah NUMBERING is the same in both, so nothing downstream changes —
+ * the same 002255.mp3 is the same ayah. What differs is the wording, which
+ * is the whole reason a Warsh reader wants a Warsh reciter.
  */
+
+import type { RiwayahId } from '../riwayat';
 
 export type Reciter = {
   /** Stable id used in settings + file paths. */
@@ -48,7 +62,52 @@ export type Reciter = {
    * article, so those never need to be listed.
    */
   aliases?: readonly string[];
+  /**
+   * The reading this recording is of. Absent means Ḥafṣ — every reciter
+   * in this file was one before Warsh audio existed here, and saying so
+   * forty-two times would say nothing.
+   */
+  riwayah?: RiwayahId;
 };
+
+/**
+ * Warsh ʿan Nāfiʿ — issue #46.
+ *
+ * EveryAyah keeps these under `warsh/`, which is why these two carry a
+ * slash where every other folder is a bare name. Both were probed the
+ * way the catalogue's own note requires, at 1:1, 2:286 and 114:6, plus
+ * 18:10 and 36:1 — all 206.
+ *
+ * A THIRD ONE IS NOT HERE. `warsh/warsh_Abdul_Basit_128kbps` answers 206
+ * at 1:1, 2:255, 2:285, 114:6 and 404 at 2:286 — the last ayah of
+ * al-Baqarah is simply missing from the set. A reciter who stops mid-surah
+ * once is a reciter who stops mid-surah, and the probe list exists exactly
+ * so a partial set cannot pass.
+ *
+ * Neither has word timings: quran-align's corpus is Ḥafṣ, and timings are
+ * per-recording. Ayah-level highlight is the honest ceiling, the same as
+ * for the thirty-three Ḥafṣ recordings without them.
+ */
+export const WARSH_RECITERS: ReadonlyArray<Reciter> = [
+  {
+    id: 'warsh-dosari',
+    name: 'Ibrahim Al-Dosari',
+    arabicName: 'إبراهيم الدوسري',
+    folder: 'warsh/warsh_ibrahim_aldosary_128kbps',
+    hasTimings: false,
+    riwayah: 'warsh',
+    aliases: ['dosary', 'dossari', 'aldosari', 'ibrahim'],
+  },
+  {
+    id: 'warsh-jazaery',
+    name: 'Yassin Al-Jazaery',
+    arabicName: 'ياسين الجزائري',
+    folder: 'warsh/warsh_yassin_al_jazaery_64kbps',
+    hasTimings: false,
+    riwayah: 'warsh',
+    aliases: ['jazairi', 'jazaeri', 'aljazaery', 'yasin', 'yassine'],
+  },
+];
 
 export const RECITERS: ReadonlyArray<Reciter> = [
   {
@@ -73,7 +132,13 @@ export const RECITERS: ReadonlyArray<Reciter> = [
     arabicName: 'عبد الباسط عبد الصمد',
     folder: 'Abdul_Basit_Murattal_64kbps',
     hasTimings: true,
-    aliases: ['abdel basset', 'abdulbasset', 'abd al basit', 'abdul baset', 'samad'],
+    aliases: [
+      'abdel basset',
+      'abdulbasset',
+      'abd al basit',
+      'abdul baset',
+      'samad',
+    ],
   },
   {
     id: 'minshawi',
@@ -145,7 +210,14 @@ export const RECITERS: ReadonlyArray<Reciter> = [
     arabicName: 'أحمد بن علي العجمي',
     folder: 'ahmed_ibn_ali_al_ajamy_128kbps',
     hasTimings: false,
-    aliases: ['ajami', 'ajamy', 'ajmy', 'ahmad al ajmi', 'ahmed alajami', 'ibn ali'],
+    aliases: [
+      'ajami',
+      'ajamy',
+      'ajmy',
+      'ahmad al ajmi',
+      'ahmed alajami',
+      'ibn ali',
+    ],
   },
   {
     id: 'ayyub',
@@ -401,6 +473,7 @@ export const RECITERS: ReadonlyArray<Reciter> = [
     hasTimings: false,
     aliases: ['suwaisy', 'sowesy', 'hajjaj', 'hajaj'],
   },
+  ...WARSH_RECITERS,
 ] as const;
 
 /**
@@ -411,28 +484,46 @@ export const RECITERS: ReadonlyArray<Reciter> = [
  * are one string. Arabic: strip the harakat, which nobody types.
  */
 export function foldForSearch(value: string): string {
-  return value
-    .toLowerCase()
-    .normalize('NFD')
-    // Latin combining accents, then Arabic harakat / superscript alef /
-    // Quranic marks / tatweel. Written as escapes on purpose: a combining
-    // mark pasted literally into a character class is invisible in a diff.
-    .replace(/[\u0300-\u036f\u064b-\u065f\u0670\u06d6-\u06ed\u0640]/g, '')
-    .replace(/[^\p{Letter}\p{Number}]+/gu, '')
-    .replace(/^(al|el)/, '');
+  return (
+    value
+      .toLowerCase()
+      .normalize('NFD')
+      // Latin combining accents, then Arabic harakat / superscript alef /
+      // Quranic marks / tatweel. Written as escapes on purpose: a combining
+      // mark pasted literally into a character class is invisible in a diff.
+      .replace(/[\u0300-\u036f\u064b-\u065f\u0670\u06d6-\u06ed\u0640]/g, '')
+      .replace(/[^\p{Letter}\p{Number}]+/gu, '')
+      .replace(/^(al|el)/, '')
+  );
+}
+
+/** The reading a recording is of. Absent in the data means Ḥafṣ. */
+export function reciterRiwayah(r: Reciter): RiwayahId {
+  return r.riwayah ?? 'hafs';
 }
 
 /**
  * Reciters in the order the picker shows them: alphabetical by display
  * name. The catalog itself stays in the order they were added — it is the
  * provenance record, and `RECITERS[0]` is the default reciter — so the
- * sort lives here, where it is about reading a list of forty-two names.
+ * sort lives here, where it is about reading a list of names.
+ *
+ * `prefer` puts the reader's own reading first — issue #46. Two Warsh
+ * recordings alphabetised into forty-two Ḥafṣ ones are two rows a Warsh
+ * reader has to already know the names of to find. Within each group the
+ * order is the alphabet, as it always was, and nothing is hidden: a
+ * Warsh reader who wants Ḥafṣ audio scrolls past, and a Ḥafṣ reader
+ * still sees both Warsh voices at the end of the list.
  */
 export function sortedReciters(
   list: ReadonlyArray<Reciter> = RECITERS,
+  prefer?: RiwayahId,
 ): Reciter[] {
-  return [...list].sort((a, b) =>
-    a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }),
+  const rank = (r: Reciter) => (prefer && reciterRiwayah(r) === prefer ? 0 : 1);
+  return [...list].sort(
+    (a, b) =>
+      rank(a) - rank(b) ||
+      a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }),
   );
 }
 
@@ -444,9 +535,10 @@ export function sortedReciters(
 export function searchReciters(
   query: string,
   list: ReadonlyArray<Reciter> = RECITERS,
+  prefer?: RiwayahId,
 ): Reciter[] {
   const q = foldForSearch(query);
-  const sorted = sortedReciters(list);
+  const sorted = sortedReciters(list, prefer);
   if (!q) return sorted;
   return sorted.filter(r =>
     [r.name, r.arabicName, r.id, ...(r.aliases ?? [])].some(field =>
@@ -475,7 +567,9 @@ export function ayahAudioUrl(
   surah: number,
   ayah: number,
 ): string {
-  return `https://everyayah.com/data/${reciter.folder}/${pad3(surah)}${pad3(ayah)}.mp3`;
+  return `https://everyayah.com/data/${reciter.folder}/${pad3(surah)}${pad3(
+    ayah,
+  )}.mp3`;
 }
 
 /** Local filename for one ayah's MP3 (relative to the reciter dir). */
@@ -489,5 +583,6 @@ export function reciterTimingsUrl(reciter: Reciter): string {
 }
 
 export const RECITATION_ATTRIBUTION =
-  'Recitation audio (42 reciters) courtesy of EveryAyah.com. Word ' +
-  'timings derived from the quran-align project (Colin Fair), CC BY 4.0.';
+  'Recitation audio (44 reciters, two of them Warsh) courtesy of ' +
+  'EveryAyah.com. Word timings derived from the quran-align project ' +
+  '(Colin Fair), CC BY 4.0.';

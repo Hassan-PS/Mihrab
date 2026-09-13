@@ -13,6 +13,7 @@ import {
   ayahAudioUrl,
   findReciter,
   foldForSearch,
+  reciterRiwayah,
   searchReciters,
   sortedReciters,
 } from '../src/quran/audio/reciters';
@@ -29,8 +30,49 @@ describe('reciter catalog', () => {
     for (const r of RECITERS) {
       expect(r.name.trim().length).toBeGreaterThan(0);
       expect(r.arabicName.trim().length).toBeGreaterThan(0);
-      expect(r.folder).toMatch(/^[A-Za-z0-9_-]+$/);
+      // One optional directory, for the riwayah sections EveryAyah keeps
+      // its non-Ḥafṣ recordings in (`warsh/…`). Still no scheme, no query,
+      // no traversal: this string is pasted into a URL and into nothing
+      // else, and `..` in it would be a path escape.
+      expect(r.folder).toMatch(/^[A-Za-z0-9_-]+(\/[A-Za-z0-9_-]+)?$/);
     }
+  });
+
+  it('knows which reading each recitation is', () => {
+    // Absent means Ḥafṣ — saying so forty-two times would say nothing.
+    const warsh = RECITERS.filter(r => reciterRiwayah(r) === 'warsh');
+    expect(warsh).toHaveLength(2);
+    expect(warsh.map(r => r.id).sort()).toEqual([
+      'warsh-dosari',
+      'warsh-jazaery',
+    ]);
+    for (const r of RECITERS) {
+      expect(['hafs', 'warsh']).toContain(reciterRiwayah(r));
+    }
+  });
+
+  it('claims no word timings for a recording quran-align never saw', () => {
+    // The corpus is Ḥafṣ, and timings are per-recording. A `true` here
+    // would send the reader's device after a timings file that does not
+    // exist — and the URL it would build has a slash in the middle of a
+    // filename, which is not a thing.
+    for (const r of RECITERS) {
+      if (r.folder.includes('/')) expect(r.hasTimings).toBe(false);
+    }
+  });
+
+  it('puts the reader’s own reading first, and hides nothing', () => {
+    const forWarsh = sortedReciters(RECITERS, 'warsh');
+    expect(forWarsh).toHaveLength(RECITERS.length);
+    expect(forWarsh.slice(0, 2).every(r => reciterRiwayah(r) === 'warsh')).toBe(
+      true,
+    );
+    // Within a group, the alphabet it has always been in.
+    const hafs = forWarsh.slice(2).map(r => r.name);
+    expect(hafs).toEqual([...hafs].sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' })));
+    // And with no preference, the plain alphabet across everybody.
+    const plain = sortedReciters(RECITERS).map(r => r.name);
+    expect(plain).toEqual([...plain].sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' })));
   });
 
   it('resolves the default reciter and falls back on an unknown id', () => {
@@ -87,6 +129,15 @@ describe('searchReciters', () => {
         'husary-mujawwad',
       ]),
     );
+  });
+
+  it('finds the Warsh readings by the reading', () => {
+    // Not by an alias: the ids are `warsh-dosari` and `warsh-jazaery`,
+    // and `foldForSearch` strips the hyphen — so "warsh" reaches them
+    // through the id, which is the word a reader looking for a Warsh
+    // voice actually types.
+    const hits = searchReciters('warsh').map(r => r.id);
+    expect(hits).toEqual(['warsh-dosari', 'warsh-jazaery']);
   });
 
   it('still returns nothing for a query that matches nobody', () => {

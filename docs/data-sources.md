@@ -430,3 +430,84 @@ Neither is a research task. Both are somebody's judgement, on the record.
 
 Nothing stops a reader saying the duʿāʾ from the muṣḥaf in front of them;
 this is about what the app puts its own name to.
+
+---
+
+## Warsh recitations — issue #46, SHIPPED 2026-09-13
+
+A reader on a Warsh page had no Warsh voice to hear it in: all
+forty-two recordings in `src/quran/audio/reciters.ts` were Ḥafṣ, which
+went without saying while Ḥafṣ was the only muṣḥaf in the app.
+
+### Where the bytes come from
+
+EveryAyah keeps its non-Ḥafṣ recordings under `data/warsh/`, the same
+host and the same per-ayah naming the other forty-two stream from, so
+this adds no new source and no new licence regime — it is the
+arrangement `docs/quran-reader-plan.md` records for recitation audio,
+applied to two more folders.
+
+| id | EveryAyah folder | probes |
+|---|---|---|
+| `warsh-dosari` | `warsh/warsh_ibrahim_aldosary_128kbps` | 1:1, 2:286, 114:6, 18:10, 36:1 — all 206 |
+| `warsh-jazaery` | `warsh/warsh_yassin_al_jazaery_64kbps` | 1:1, 2:286, 114:6, 18:10, 36:1 — all 206 |
+
+### The one that did not pass
+
+`warsh/warsh_Abdul_Basit_128kbps` answers 206 at 1:1, 2:255, 2:285 and
+114:6 — and **404 at 2:286**. The last ayah of al-Baqarah is missing from
+the set. The probe list in `reciters.ts` exists precisely so a partial
+set cannot pass, and a recitation that stops before the end of a surah is
+not one to hand somebody mid-reading. If the folder is ever completed,
+the entry is three lines.
+
+### Word timings
+
+Neither has them, and neither will soon: quran-align's corpus is Ḥafṣ and
+timings are per-recording, so ayah-level highlight is the ceiling — the
+same ceiling thirty-three of the Ḥafṣ recordings already sit at.
+
+---
+
+## The Clear Quran (Dr. Mustafa Khattab) — issue #46, BLOCKED 2026-09-13
+
+Requested alongside the Warsh work. **It is not shippable today**, and the
+reason is a licence rather than a missing file.
+
+### What the search found
+
+- **Not in the Tanzil corpus.** `api.alquran.cloud`'s English translation
+  list — the source all fourteen bundled editions came from — has
+  seventeen entries and Khattab's is not among them (checked
+  2026-09-13).
+- **Not in Quran.com's public API either.** `api.quran.com/api/v4/
+  resources/translations` returns 126 translations; none of them is
+  Khattab's, under that name or the author's.
+- **The rights sit with a publisher.** *The Clear Quran* is Dr. Mustafa
+  Khattab's translation, published by the Book of Signs Foundation. Where
+  it appears in other apps it appears by arrangement with them.
+
+### Why that settles it
+
+The first paragraph of this file is the bar: every dataset the app ships
+is free and permissively licensed, and the F-Droid build's "no
+proprietary content" constraint is honoured throughout. A translation
+whose licence cannot be named in this table does not go in the table. The
+same reasoning already keeps the QUL Warsh text and its QPC face out of
+the build (`docs/design/riwayat-plan.md` §1).
+
+### What would change the answer
+
+Written permission from the Book of Signs Foundation to redistribute the
+text inside a free, ad-free app, including the F-Droid build. That is a
+letter to write, not a dataset to find — the same shape as the Hisnul
+Muslim permission noted above.
+
+### The near-miss worth knowing about
+
+`en.itani` in the Tanzil corpus is **"Clear Qur'an" by Talal Itani** — a
+different translation with a confusingly similar name, which is what a
+search for "Clear Quran" usually turns up first. It is available on the
+terms the other fourteen editions already ship under. It is not what was
+asked for, so it is not in the app; it is written down here so the next
+person to look does not mistake one for the other.
