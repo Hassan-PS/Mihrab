@@ -930,8 +930,12 @@
     "shareDua": "Поделиться: {{title}}",
     "shareWhat": "Что отправить",
     "shareArabicOnly": "Только арабский",
+    "shareArabicOnlyHelp": "Дуа так, как она произносится",
     "shareTranslationOnly": "Только перевод",
+    "shareTranslationOnlyHelp": "Что она значит",
     "shareBoth": "Арабский и перевод",
+    "shareBothHelp": "С транскрипцией",
+    "shareSourceNote": "Источник отправляется в любом случае.",
     "lavatory_01_entering": {
       "title": "При входе в уборную"
     },

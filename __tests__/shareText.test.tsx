@@ -17,7 +17,7 @@
 import * as React from 'react';
 import { act } from 'react';
 import { create } from 'react-test-renderer';
-import { ActionSheetIOS, Share } from 'react-native';
+import { Share } from 'react-native';
 import fs from 'fs';
 import path from 'path';
 import {
@@ -175,9 +175,10 @@ import { DUAS } from '../src/duas/duas';
 
 describe('the dua card’s share control', () => {
   /**
-   * Opening the card's share now ASKS what to send — issue #47. So the
-   * control no longer hands the system sheet anything by itself; it puts
-   * the question up, and the answer is what builds a body.
+   * Opening the card's share now ASKS what to send — issue #47 — in the
+   * app's own sheet rather than a platform dialog, because on Android
+   * the dialog looked like another app had interrupted this one. So the
+   * control puts a question up, and the answer is what builds a body.
    */
   const openCategory = (tree: ReturnType<typeof create>) => {
     // The screen opens on the category index now (#33), so a dua card
@@ -210,13 +211,32 @@ describe('the dua card’s share control', () => {
     });
   };
 
-  it('asks what to send rather than sending everything', async () => {
+  /** Every string drawn anywhere in the tree. */
+  const texts = (tree: ReturnType<typeof create>) =>
+    tree.root
+      .findAll(n => typeof n.type === 'string')
+      .flatMap(n => {
+        const c = n.props?.children;
+        return typeof c === 'string' ? [c] : [];
+      });
+
+  /** The option row with this title, in the sheet the share opened. */
+  const rowNamed = (tree: ReturnType<typeof create>, title: string) => {
+    const label = tree.root
+      .findAll(n => typeof n.type === 'string')
+      .find(n => n.props?.children === title);
+    expect(label).toBeTruthy();
+    // The row is the nearest ancestor that takes the press.
+    for (let p = label!.parent; p; p = p.parent) {
+      if (typeof p.props?.onPress === 'function') return p;
+    }
+    throw new Error(`no pressable row around "${title}"`);
+  };
+
+  it('asks in the app’s own sheet, and sends nothing until answered', async () => {
     const spy = jest.spyOn(Share, 'share').mockResolvedValue({
       action: 'sharedAction',
     } as never);
-    const sheet = jest
-      .spyOn(ActionSheetIOS, 'showActionSheetWithOptions')
-      .mockImplementation(() => {});
     try {
       let tree!: ReturnType<typeof create>;
       act(() => {
@@ -224,13 +244,19 @@ describe('the dua card’s share control', () => {
       });
       openCategory(tree);
       openShare(tree);
-      // The question, and nothing sent until it is answered.
-      expect(sheet).toHaveBeenCalledTimes(1);
+      // The three ways to answer it, and no share yet.
+      for (const key of [
+        'duas.shareArabicOnly',
+        'duas.shareTranslationOnly',
+        'duas.shareBoth',
+      ]) {
+        expect(rowNamed(tree, key)).toBeTruthy();
+      }
       expect(spy).not.toHaveBeenCalled();
-      const options = (sheet.mock.calls[0][0] as { options: string[] }).options;
-      expect(options).toHaveLength(4);
+      // And it is a sheet of this app's, not a platform dialog: the
+      // question is in the tree, where a test can see it.
+      expect(texts(tree)).toContain('duas.shareWhat');
     } finally {
-      sheet.mockRestore();
       spy.mockRestore();
     }
   });
@@ -239,30 +265,24 @@ describe('the dua card’s share control', () => {
     const spy = jest.spyOn(Share, 'share').mockResolvedValue({
       action: 'sharedAction',
     } as never);
-    let answer: (index: number) => void = () => {};
-    const sheet = jest
-      .spyOn(ActionSheetIOS, 'showActionSheetWithOptions')
-      .mockImplementation((_opts, cb) => {
-        answer = cb as (index: number) => void;
-      });
     try {
       let tree!: ReturnType<typeof create>;
       act(() => {
         tree = create(<DuasScreen />);
       });
-
       openCategory(tree);
-      const bodyFor = async (index: number) => {
+
+      const bodyFor = async (title: string) => {
         spy.mockClear();
         openShare(tree);
         await act(async () => {
-          answer(index);
+          rowNamed(tree, title).props.onPress();
         });
         expect(spy).toHaveBeenCalledTimes(1);
         return (spy.mock.calls[0][0] as { message: string }).message;
       };
 
-      const both = await bodyFor(2);
+      const both = await bodyFor('duas.shareBoth');
       // Whichever dua the first card is, its own citation has to be in
       // there — the field the data model marks "NEVER omit".
       const dua = DUAS.find(d => both.includes(d.arabic));
@@ -270,19 +290,40 @@ describe('the dua card’s share control', () => {
       expect(both).toContain(dua!.source);
       expect(both).toContain(dua!.transliteration);
 
-      const arabicOnly = await bodyFor(0);
+      const arabicOnly = await bodyFor('duas.shareArabicOnly');
       expect(arabicOnly).toContain(dua!.arabic);
       expect(arabicOnly).toContain(dua!.source);
       // The point of the option: the meaning is not tacked on.
       expect(arabicOnly).not.toContain(dua!.translation);
       expect(arabicOnly).not.toContain(dua!.transliteration);
 
-      const translationOnly = await bodyFor(1);
+      const translationOnly = await bodyFor('duas.shareTranslationOnly');
       expect(translationOnly).toContain(dua!.translation);
       expect(translationOnly).toContain(dua!.source);
       expect(translationOnly).not.toContain(dua!.arabic);
     } finally {
-      sheet.mockRestore();
+      spy.mockRestore();
+    }
+  });
+
+  it('closes the question before the system sheet opens', async () => {
+    // Two sheets stacked is one too many — the same rule the Log's
+    // options sheet follows before it opens a confirmation.
+    const spy = jest.spyOn(Share, 'share').mockResolvedValue({
+      action: 'sharedAction',
+    } as never);
+    try {
+      let tree!: ReturnType<typeof create>;
+      act(() => {
+        tree = create(<DuasScreen />);
+      });
+      openCategory(tree);
+      openShare(tree);
+      await act(async () => {
+        rowNamed(tree, 'duas.shareArabicOnly').props.onPress();
+      });
+      expect(texts(tree)).not.toContain('duas.shareWhat');
+    } finally {
       spy.mockRestore();
     }
   });

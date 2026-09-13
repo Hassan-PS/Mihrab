@@ -930,8 +930,12 @@
     "shareDua": "{{title}} साझा करें",
     "shareWhat": "क्या भेजें",
     "shareArabicOnly": "केवल अरबी",
+    "shareArabicOnlyHelp": "दुआ जैसी पढ़ी जाती है",
     "shareTranslationOnly": "केवल अनुवाद",
+    "shareTranslationOnlyHelp": "इसका अर्थ",
     "shareBoth": "अरबी और अनुवाद",
+    "shareBothHelp": "उच्चारण सहित",
+    "shareSourceNote": "स्रोत हर हाल में भेजा जाता है।",
     "lavatory_01_entering": {
       "title": "शौचालय में प्रवेश करते समय"
     },

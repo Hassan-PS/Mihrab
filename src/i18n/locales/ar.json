@@ -930,8 +930,12 @@
     "shareDua": "مشاركة {{title}}",
     "shareWhat": "ماذا تُرسل",
     "shareArabicOnly": "العربية فقط",
+    "shareArabicOnlyHelp": "الدعاء كما يُقال",
     "shareTranslationOnly": "الترجمة فقط",
+    "shareTranslationOnlyHelp": "معناه",
     "shareBoth": "العربية والترجمة",
+    "shareBothHelp": "مع النطق",
+    "shareSourceNote": "المصدر يُرسل في كل الحالات.",
     "lavatory_01_entering": {
       "title": "دعاء دخول الخلاء"
     },

@@ -930,8 +930,12 @@
     "shareDua": "Bagikan {{title}}",
     "shareWhat": "Apa yang dikirim",
     "shareArabicOnly": "Hanya teks Arab",
+    "shareArabicOnlyHelp": "Doa sebagaimana dibaca",
     "shareTranslationOnly": "Hanya terjemahan",
+    "shareTranslationOnlyHelp": "Artinya",
     "shareBoth": "Arab dan terjemahan",
+    "shareBothHelp": "Dengan cara baca",
+    "shareSourceNote": "Sumbernya tetap ikut terkirim.",
     "lavatory_01_entering": {
       "title": "Ketika masuk kamar kecil"
     },

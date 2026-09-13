@@ -930,8 +930,12 @@
     "shareDua": "{{title}} paylaş",
     "shareWhat": "Ne gönderilsin",
     "shareArabicOnly": "Yalnızca Arapça",
+    "shareArabicOnlyHelp": "Duanın okunduğu hâli",
     "shareTranslationOnly": "Yalnızca çeviri",
+    "shareTranslationOnlyHelp": "Anlamı",
     "shareBoth": "Arapça ve çeviri",
+    "shareBothHelp": "Okunuşuyla birlikte",
+    "shareSourceNote": "Kaynak her hâlükârda gönderilir.",
     "lavatory_01_entering": {
       "title": "Tuvalete girerken"
     },

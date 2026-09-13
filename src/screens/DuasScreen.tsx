@@ -3,9 +3,6 @@
 // feedback (pressed opacity / ripple) is the right affordance here.
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
-  ActionSheetIOS,
-  Alert,
-  Platform,
   Pressable,
   ScrollView,
   Share,
@@ -38,6 +35,7 @@ import {
 } from '../components/ui';
 import { ShareIcon } from '../theme/icons';
 import { duaShareText, type DuaShareParts } from '../share/shareText';
+import { ShareDuaSheet } from '../duas/ShareDuaSheet';
 import { TYPE, arabicTextStyle } from '../theme/typography';
 import { READING_BASE, READING_BASE_UNLEADED } from '../theme/readingText';
 import { useReadingText } from '../hooks/useReadingText';
@@ -310,45 +308,12 @@ export function DuasScreen({ route, navigation }: DuasScreenProps = {}) {
    * gets sent to and the wrong one for the rest, and which it is depends
    * on the recipient — which is the one thing the app cannot know.
    *
-   * Both platforms' own idiom, the same pair the ayah share uses: an
-   * action sheet on iOS, an alert on Android (three buttons, which is all
-   * Android gives you, and all this needs). The source rides along in
-   * every case; see shareText.ts.
+   * The question is the app's own sheet rather than a platform dialog;
+   * ShareDuaSheet's header says why. The source rides along whatever the
+   * answer is — see shareText.ts.
    */
-  const onShare = useCallback(
-    (dua: Dua) => {
-      const arabicOnly = t('duas.shareArabicOnly', 'Arabic only');
-      const translationOnly = t('duas.shareTranslationOnly', 'Translation only');
-      const both = t('duas.shareBoth', 'Arabic and translation');
-      const title = t('duas.shareWhat', 'What to send');
-      if (Platform.OS === 'ios') {
-        ActionSheetIOS.showActionSheetWithOptions(
-          {
-            title,
-            options: [
-              arabicOnly,
-              translationOnly,
-              both,
-              t('common.cancel', 'Cancel'),
-            ],
-            cancelButtonIndex: 3,
-          },
-          index => {
-            if (index === 0) void send(dua, 'arabic');
-            if (index === 1) void send(dua, 'translation');
-            if (index === 2) void send(dua, 'both');
-          },
-        );
-        return;
-      }
-      Alert.alert(title, undefined, [
-        { text: arabicOnly, onPress: () => void send(dua, 'arabic') },
-        { text: translationOnly, onPress: () => void send(dua, 'translation') },
-        { text: both, onPress: () => void send(dua, 'both') },
-      ]);
-    },
-    [send, t],
-  );
+  const [sharing, setSharing] = useState<Dua | null>(null);
+  const onShare = useCallback((dua: Dua) => setSharing(dua), []);
 
   // No manual header offset (v2.8.5).
   //
@@ -730,6 +695,18 @@ export function DuasScreen({ route, navigation }: DuasScreenProps = {}) {
           bottom={insets.bottom + SPACING.lg}
         />
       ) : null}
+      <ShareDuaSheet
+        visible={sharing !== null}
+        duaTitle={
+          sharing
+            ? t(`duas.${sharing.id}.title`, { defaultValue: sharing.titleEn })
+            : ''
+        }
+        onPick={parts => {
+          if (sharing) void send(sharing, parts);
+        }}
+        onClose={() => setSharing(null)}
+      />
     </View>
   );
 }

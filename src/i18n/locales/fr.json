@@ -930,8 +930,12 @@
     "shareDua": "Partager {{title}}",
     "shareWhat": "Que partager",
     "shareArabicOnly": "Arabe uniquement",
+    "shareArabicOnlyHelp": "La douaa telle qu’elle se dit",
     "shareTranslationOnly": "Traduction uniquement",
+    "shareTranslationOnlyHelp": "Ce qu’elle signifie",
     "shareBoth": "Arabe et traduction",
+    "shareBothHelp": "Avec la prononciation",
+    "shareSourceNote": "La source est envoyée dans tous les cas.",
     "lavatory_01_entering": {
       "title": "En entrant aux toilettes"
     },

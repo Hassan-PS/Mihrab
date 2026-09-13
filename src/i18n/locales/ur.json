@@ -930,8 +930,12 @@
     "shareDua": "{{title}} شیئر کریں",
     "shareWhat": "کیا بھیجیں",
     "shareArabicOnly": "صرف عربی",
+    "shareArabicOnlyHelp": "دعا جیسے پڑھی جاتی ہے",
     "shareTranslationOnly": "صرف ترجمہ",
+    "shareTranslationOnlyHelp": "اس کا مطلب",
     "shareBoth": "عربی اور ترجمہ",
+    "shareBothHelp": "تلفظ کے ساتھ",
+    "shareSourceNote": "حوالہ ہر صورت میں بھیجا جاتا ہے۔",
     "lavatory_01_entering": {
       "title": "بیت الخلاء میں داخل ہوتے وقت"
     },

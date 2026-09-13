@@ -930,8 +930,12 @@
     "shareDua": "Compartir {{title}}",
     "shareWhat": "Qué enviar",
     "shareArabicOnly": "Solo árabe",
+    "shareArabicOnlyHelp": "La dua tal como se dice",
     "shareTranslationOnly": "Solo traducción",
+    "shareTranslationOnlyHelp": "Lo que significa",
     "shareBoth": "Árabe y traducción",
+    "shareBothHelp": "Con la pronunciación",
+    "shareSourceNote": "La fuente se envía en todos los casos.",
     "lavatory_01_entering": {
       "title": "Al entrar en el aseo"
     },

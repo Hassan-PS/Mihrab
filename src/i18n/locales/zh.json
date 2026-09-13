@@ -930,8 +930,12 @@
     "shareDua": "分享{{title}}",
     "shareWhat": "发送内容",
     "shareArabicOnly": "仅阿拉伯语原文",
+    "shareArabicOnlyHelp": "按诵读方式的原文",
     "shareTranslationOnly": "仅译文",
+    "shareTranslationOnlyHelp": "它的含义",
     "shareBoth": "阿拉伯语原文和译文",
+    "shareBothHelp": "含拼读",
+    "shareSourceNote": "出处在任何情况下都会一并发送。",
     "lavatory_01_entering": {
       "title": "进入厕所时"
     },

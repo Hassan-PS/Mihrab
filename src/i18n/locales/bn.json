@@ -930,8 +930,12 @@
     "shareDua": "{{title}} শেয়ার করুন",
     "shareWhat": "কী পাঠাবেন",
     "shareArabicOnly": "শুধু আরবি",
+    "shareArabicOnlyHelp": "দোয়াটি যেভাবে বলা হয়",
     "shareTranslationOnly": "শুধু অনুবাদ",
+    "shareTranslationOnlyHelp": "এর অর্থ",
     "shareBoth": "আরবি ও অনুবাদ",
+    "shareBothHelp": "উচ্চারণসহ",
+    "shareSourceNote": "উৎস সব ক্ষেত্রেই পাঠানো হয়।",
     "lavatory_01_entering": {
       "title": "শৌচাগারে প্রবেশের সময়"
     },

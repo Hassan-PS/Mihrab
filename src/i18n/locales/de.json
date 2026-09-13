@@ -930,8 +930,12 @@
     "shareDua": "{{title}} teilen",
     "shareWhat": "Was senden",
     "shareArabicOnly": "Nur Arabisch",
+    "shareArabicOnlyHelp": "Das Bittgebet, wie es gesprochen wird",
     "shareTranslationOnly": "Nur Übersetzung",
+    "shareTranslationOnlyHelp": "Was es bedeutet",
     "shareBoth": "Arabisch und Übersetzung",
+    "shareBothHelp": "Mit der Aussprache",
+    "shareSourceNote": "Die Quelle wird in jedem Fall mitgesendet.",
     "lavatory_01_entering": {
       "title": "Beim Betreten der Toilette"
     },

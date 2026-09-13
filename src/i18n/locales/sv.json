@@ -930,8 +930,12 @@
     "shareDua": "Dela {{title}}",
     "shareWhat": "Vad ska skickas",
     "shareArabicOnly": "Endast arabiska",
+    "shareArabicOnlyHelp": "Duan som den sägs",
     "shareTranslationOnly": "Endast översättning",
+    "shareTranslationOnlyHelp": "Vad den betyder",
     "shareBoth": "Arabiska och översättning",
+    "shareBothHelp": "Med uttalet",
+    "shareSourceNote": "Källan följer med i båda fallen.",
     "lavatory_01_entering": {
       "title": "När man går in på toaletten"
     },
