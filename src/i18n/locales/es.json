@@ -1347,7 +1347,8 @@
       "groupLook": "Aspecto",
       "adhkar": "Adhkār de la mañana y la tarde",
       "theme": "Tema",
-      "accent": "Acento"
+      "accent": "Acento",
+      "verseByVerseHelp": "Una segunda forma de leer una sura: cada versículo con su traducción debajo, junto a la página del mushaf."
     },
     "ready": {
       "title": "Todo listo",

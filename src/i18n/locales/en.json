@@ -1347,7 +1347,8 @@
       "groupLook": "Look",
       "adhkar": "Morning & evening adhkār",
       "theme": "Theme",
-      "accent": "Accent"
+      "accent": "Accent",
+      "verseByVerseHelp": "A second way to read a surah: each verse with its translation under it, beside the mushaf page."
     },
     "ready": {
       "title": "You’re ready",

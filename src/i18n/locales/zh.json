@@ -1347,7 +1347,8 @@
       "groupLook": "外观",
       "adhkar": "晨昏记主（adhkār）",
       "theme": "主题",
-      "accent": "强调色"
+      "accent": "强调色",
+      "verseByVerseHelp": "阅读一章的第二种方式：每节下方附有译文，与经文页面并存。"
     },
     "ready": {
       "title": "一切就绪",

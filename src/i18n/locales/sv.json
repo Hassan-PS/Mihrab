@@ -1347,7 +1347,8 @@
       "groupLook": "Utseende",
       "adhkar": "Morgonens och kvällens adhkār",
       "theme": "Tema",
-      "accent": "Accentfärg"
+      "accent": "Accentfärg",
+      "verseByVerseHelp": "Ett andra sätt att läsa en sura: varje vers med sin översättning under, vid sidan av mushaf-sidan."
     },
     "ready": {
       "title": "Du är redo",

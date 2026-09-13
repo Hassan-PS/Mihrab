@@ -1347,7 +1347,8 @@
       "groupLook": "Tampilan",
       "adhkar": "Zikir pagi dan petang",
       "theme": "Tema",
-      "accent": "Aksen"
+      "accent": "Aksen",
+      "verseByVerseHelp": "Cara kedua membaca surah: setiap ayat dengan terjemahannya di bawah, di samping halaman mushaf."
     },
     "ready": {
       "title": "Anda siap",

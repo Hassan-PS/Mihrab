@@ -1347,7 +1347,8 @@
       "groupLook": "Aussehen",
       "adhkar": "Morgen- und Abend-Adhkār",
       "theme": "Design",
-      "accent": "Akzent"
+      "accent": "Akzent",
+      "verseByVerseHelp": "Eine zweite Art, eine Sure zu lesen: jeder Vers mit seiner Übersetzung darunter, neben der Mushaf-Seite."
     },
     "ready": {
       "title": "Du bist bereit",

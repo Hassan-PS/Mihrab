@@ -269,6 +269,37 @@ describe('the personalisation shelf', () => {
     expect(skip).not.toMatch(/updateSettings/);
   });
 
+  it('asks about the second Qur’an reader, since nothing else will', () => {
+    // The muṣḥaf is the only reader a surah opens in, and the
+    // verse-by-verse list is off by default in Settings → Quran. Without
+    // this row, somebody can use the app for a year and conclude it has
+    // no translation view at all — which is the discoverability clause of
+    // the shelf's own three-part test (remake §2).
+    expect(src).toContain('personalise-verse-by-verse');
+    expect(src).toMatch(/updateSettings\(\{ quranVerseByVerseEnabled: v \}\)/);
+  });
+
+  it('describes that row rather than only naming it', () => {
+    // Every other row on the shelf names something the user has already
+    // met — sunrise, adhkār, a theme. This one names a reader they have
+    // not opened yet, so the label alone is not a decision anybody can
+    // make. The help line is what makes it one glance rather than a
+    // guess, which is the clause it passes least comfortably.
+    const row = src.slice(
+      src.indexOf('personalise-verse-by-verse'),
+      src.indexOf('groupLook'),
+    );
+    expect(row).toContain('onboarding.personalise.verseByVerseHelp');
+  });
+
+  it('borrows the names the rest of the app already uses', () => {
+    // A second translation of "Verse-by-verse view" is a second thing to
+    // keep in step with Settings → Quran, and a chance for the two to
+    // disagree in thirteen languages.
+    expect(src).toContain("t('quran.verseByVerse'");
+    expect(src).toContain("t('nav.quran'");
+  });
+
   it('offers nothing that needs a permission the user refused', () => {
     // The adhan list and the advance reminder are meaningless to
     // somebody who just declined notifications.

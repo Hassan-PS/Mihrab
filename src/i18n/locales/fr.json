@@ -1347,7 +1347,8 @@
       "groupLook": "Apparence",
       "adhkar": "Adhkār du matin et du soir",
       "theme": "Thème",
-      "accent": "Accent"
+      "accent": "Accent",
+      "verseByVerseHelp": "Une deuxième façon de lire une sourate : chaque verset avec sa traduction en dessous, à côté de la page du mushaf."
     },
     "ready": {
       "title": "Vous êtes prêt",

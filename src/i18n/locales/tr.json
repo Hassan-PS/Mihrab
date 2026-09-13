@@ -1347,7 +1347,8 @@
       "groupLook": "Görünüm",
       "adhkar": "Sabah ve akşam zikirleri",
       "theme": "Tema",
-      "accent": "Vurgu"
+      "accent": "Vurgu",
+      "verseByVerseHelp": "Bir sureyi okumanın ikinci yolu: her ayetin altında meali, mushaf sayfasının yanı sıra."
     },
     "ready": {
       "title": "Hazırsınız",

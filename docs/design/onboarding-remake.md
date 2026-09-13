@@ -78,10 +78,11 @@ A preference qualifies for the shelf only if all three hold:
    choice. Anything needing a modal, a time picker, or an explanation
    belongs in Settings.
 
-That is why the shelf holds seven rows and not seventy, and it is the
-sentence to quote the next time something wants to be added to first
-launch. The failure mode this guards against is not "too many screens" —
-it is a settings dump wearing a progress bar, where nothing is emphasised
+That is why the shelf holds a short list and not seventy — the list is
+the table below, which is the authority on it — and it is the sentence
+to quote the next time something wants to be added to first launch. The
+failure mode this guards against is not "too many screens" — it is a
+settings dump wearing a progress bar, where nothing is emphasised
 because everything is present.
 
 The consequence for design is structural, not decorative: **questions are
@@ -99,10 +100,11 @@ the important part is over.
 | Islamic midnight | `islamicMidnightEnabled` | `false` | Invisible until enabled; a user who wants it does not know the app has it |
 | Last third of the night | `lastThirdEnabled` | `false` | Same, and it is the one people ask for by name (qiyām) |
 | Morning & evening adhkār | `morningDuaReminderEnabled`, `eveningDuaReminderEnabled` | `false`, `false` | Window-derived, needs no time picker — one switch writes both |
+| Verse-by-verse view | `quranVerseByVerseEnabled` | `false` | The muṣḥaf is the only reader a surah opens in; without this row a reader can conclude the app has no translation view at all. Argued against the three-part test at §2 |
 | Theme | `appearance` | `'system'` | One segmented control, live |
 | Accent | `appAccentId` | `'green'` | Six swatches, live, and it is the one thing people change first |
 
-Seven rows, four of which are switches. `firstThirdEnabled` is
+Eight rows, five of which are switches. `firstThirdEnabled` is
 deliberately absent — it is the subtlest of the night marks and the one
 that needs the explanation Settings gives it. `clockFormat` is absent for
 the same reason it is absent from the questions: `'auto'` follows the
@@ -111,6 +113,33 @@ phone and is right.
 **Language is not on the shelf.** It is on screen 1, in the corner,
 because the shelf is at the *end* and a person who cannot read the flow
 cannot reach it. See §3.1.
+
+### Added since: `quranVerseByVerseEnabled` (2026-09)
+
+§14 says an addition gets argued against the three-part test in writing
+before the row exists. This is that argument.
+
+The muṣḥaf is now the only reader a surah opens in, and the
+verse-by-verse list — each ayah with its translation under it — is the
+setting that turns the second reader back on. It qualifies:
+
+1. **Off by default.** Skipping the shelf leaves the app exactly as it
+   ships: one reader, which is the intended experience rather than a
+   degraded one.
+2. **Discoverable nowhere obvious.** It lives in Settings → Quran. A
+   reader who assumed the app had no translation view would never find
+   out otherwise, and "this app doesn't show the translation" is the
+   wrong thing for somebody to conclude on their own.
+3. **One glance** — a switch. This is the clause it passes least
+   comfortably: at this point in the flow the user has not opened a
+   surah, so *verse-by-verse view* names a thing they have not seen. The
+   row answers that with a help line that describes rather than labels,
+   and that says what the second reader sits **beside**, so declining it
+   cannot read as declining the translation itself.
+
+What it must not become is a question. It stays a row, the shelf stays
+skippable in one tap, and skipping still writes nothing — the default is
+already an answer.
 
 ---
 
@@ -408,6 +437,9 @@ The new part, and the one that must not read as another question.
 │   Last third of the night   [○] │
 │  DAILY                          │
 │   Morning & evening adhkār  [○] │
+│  QURAN                          │
+│   Verse-by-verse view       [○] │
+│   A second way to read a surah… │
 │  LOOK                           │
 │   Theme    [System][Light][Dark]│
 │   Accent    ● ● ● ● ● ●         │
@@ -416,7 +448,7 @@ The new part, and the one that must not read as another question.
 └─────────────────────────────────┘
 ```
 
-**It is a list, not a sequence.** One scrolling screen with four small
+**It is a list, not a sequence.** One scrolling screen with five small
 section headers in `label` type, `palette.muted`, built from the existing
 `SettingsGroup` + `SettingsToggleRow` components in
 `src/screens/settings/SettingsGroup.tsx` — not a lookalike — so it *is*
@@ -502,12 +534,13 @@ touch it.
 | `lastThirdEnabled` | `boolean` | `false` | 5 | switch toggled | as set |
 | `morningDuaReminderEnabled` | `boolean` | `false` | 5 | adhkār switch | as set |
 | `eveningDuaReminderEnabled` | `boolean` | `false` | 5 | same switch, same write | as set |
+| `quranVerseByVerseEnabled` | `boolean` | `false` | 5 | switch toggled | as set |
 | `appearance` | `AppearancePreference` | `'system'` | 5 | segment tapped | chosen |
 | `appAccentId` | `AppAccentId` | `'green'` | 5 | swatch tapped | chosen |
 | `onboardingComplete` | `boolean` | `false` | 6 | **Start** | `true` |
 
-Eighteen keys, against today's two. Twelve of them are only written if the
-user actually chose something — a skipped shelf writes nothing at all,
+Nineteen keys, against today's two. Thirteen of them are only written if
+the user actually chose something — a skipped shelf writes nothing at all,
 and that is the contract that makes the shelf safe to offer.
 
 **No key is written on exit-without-answering.** Abandonment is not an
@@ -565,6 +598,10 @@ onboarding.personalise.groupLook    Look
 onboarding.personalise.adhkar       Morning & evening adhkār
 onboarding.personalise.theme        Theme
 onboarding.personalise.accent       Accent
+onboarding.personalise.verseByVerseHelp
+                                    A second way to read a surah: each
+                                    verse with its translation under it,
+                                    beside the mushaf page.
 
 onboarding.ready.title              You're ready
 onboarding.ready.body               Most people change one of these next.
@@ -587,6 +624,11 @@ Reused rather than re-translated — the exact keys, checked against
   `settings.lastThird`
 - appearance — `settings.appearance` and its option labels
 - the `PRE_PRAYER_REMINDER_OPTIONS` labels as Settings renders them
+- the verse-by-verse row — `quran.verseByVerse` for the title and
+  `nav.quran` for the group header, so the shelf, Settings → Quran and
+  the tab the reader lives in all call the same two things by the same
+  two names. Only the help line is new, because the shelf is the one
+  place the row is read by somebody who has not seen the reader yet
 
 A second translation of a string the app already has is a second thing to
 keep in sync and a chance for them to disagree. That is also why
