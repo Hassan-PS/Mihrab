@@ -1002,6 +1002,19 @@ export function recordKhatmahProgress(
 }
 
 /**
+ * How far ahead of the plan a page can be and still be the plan's trail.
+ *
+ * Ten pages is half a hizb. It has to be wide enough to absorb what the
+ * app itself loses — a flick that crosses several pages, a corrected
+ * settle, an arrival that lands one past the frontier — and narrow enough
+ * that it can never be mistaken for having gone somewhere else in the
+ * muṣḥaf, which is measured in juz, not pages. It is also the ceiling on
+ * how wrong the plan can be in the reader's favour: ten pages, once,
+ * visible on the card.
+ */
+export const KHATMAH_TRAIL_SLACK_PAGES = 10;
+
+/**
  * Is the reading in front of the reader the khatmah's own reading?
  *
  * A khatmah is a promise about ONE trail through the muṣḥaf, and the
@@ -1025,6 +1038,33 @@ export function recordKhatmahProgress(
  * the portion read (`finishKhatmahPortion` — the frontier moves to the
  * start of the next one). Reading is what has to prove it belongs; saying
  * so out loud does not.
+ *
+ * ── AND A FEW PAGES AHEAD IS STILL THE SAME TRAIL — #44, second round ─
+ *
+ * The test above was `page <= frontier` exactly, and that is a hair
+ * trigger: the plan's frontier sits ON the page the reader is turning
+ * from, every single turn, so there is no slack in it anywhere. Get one
+ * page ahead — by ANY means, and the ordinary ones are enough: open the
+ * reader at a page, follow a link, let a fast flick settle somewhere the
+ * pager corrected — and this said no to that turn, and then to every turn
+ * after it, because each one starts from a page further ahead than the
+ * last. The plan stopped moving for the rest of the session while the
+ * pages kept turning, with nothing on screen to say why. That is the
+ * second half of #44: the crossing was fixed and the hair trigger was
+ * not, and it was reported back as "works for about six swipes, then it
+ * blocks again".
+ *
+ * So the trail has a width. A page within `KHATMAH_TRAIL_SLACK_PAGES` of
+ * the frontier is the plan's own reading and the turn from it counts —
+ * which credits the pages in between, because a high-water mark is the
+ * only shape progress has here. That is the trade: skip five pages on
+ * purpose and read on, and the plan will count those five. A hizb is the
+ * most it can ever be wrong by, it is wrong in the direction the reader
+ * can see and correct, and it cannot be wrong silently for ever.
+ *
+ * Beyond that width nothing changes: juz 30 on a Friday is four hundred
+ * pages from a plan sitting at page 50, a bookmark across the muṣḥaf is
+ * hundreds, and both are still refused.
  */
 export function khatmahTracksPage(
   page: number,
@@ -1033,7 +1073,7 @@ export function khatmahTracksPage(
 ): boolean {
   const plan = activeKhatmah(s);
   if (!plan) return false;
-  return page <= khatmahCurrentPage(plan, riwayah);
+  return page <= khatmahCurrentPage(plan, riwayah) + KHATMAH_TRAIL_SLACK_PAGES;
 }
 
 /**

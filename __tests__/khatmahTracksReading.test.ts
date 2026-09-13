@@ -14,6 +14,7 @@ import {
   getQuranState,
   khatmahCurrentPage,
   khatmahCurrentPortion,
+  KHATMAH_TRAIL_SLACK_PAGES,
   khatmahTracksPage,
   recordKhatmahPageTurn,
   setKhatmahPosition,
@@ -114,6 +115,72 @@ describe('recordKhatmahPageTurn', () => {
     recordKhatmahPageTurn(1, 2);
     recordKhatmahPageTurn(2, 1);
     expect(plan().pagesRead).toBe(1);
+  });
+});
+
+/**
+ * The hair trigger, which is the second half of #44.
+ *
+ * Crediting the whole crossing fixed the flings and left the gate exactly
+ * as tight as it was: the frontier sits ON the page each turn starts
+ * from, so there is no slack in it anywhere. One page ahead — by any
+ * means at all — and every turn from then on starts further ahead than
+ * the last, so the plan stops for the session while the pages keep
+ * turning. Reported back as "works for about six swipes, then it blocks
+ * again", and reproducible by simply opening the reader one page past the
+ * frontier.
+ */
+describe('a few pages ahead is still the plan’s own trail', () => {
+  beforeEach(() => {
+    __resetQuranStateForTests();
+    startKhatmah(30, { page: 249 });
+  });
+
+  const frontier = () => khatmahCurrentPage(plan());
+
+  it('counts a turn that starts just ahead of the frontier', () => {
+    expect(frontier()).toBe(249);
+    expect(khatmahTracksPage(250)).toBe(true);
+    expect(khatmahTracksPage(249 + KHATMAH_TRAIL_SLACK_PAGES)).toBe(true);
+  });
+
+  it('still refuses a page past the width of the trail', () => {
+    expect(khatmahTracksPage(249 + KHATMAH_TRAIL_SLACK_PAGES + 1)).toBe(false);
+  });
+
+  it('catches up when the reader arrives one page past it and reads on', () => {
+    // The reproduction: open the reader at 250 with the plan at 249 — an
+    // arrival credits nothing, which is right — then turn a page. This
+    // used to be refused, and so was every turn after it.
+    recordKhatmahPageTurn(250, 250); // the arrival itself
+    recordKhatmahPageTurn(250, 251);
+    expect(frontier()).toBe(251);
+    recordKhatmahPageTurn(251, 252);
+    expect(frontier()).toBe(252);
+  });
+
+  it('keeps counting for the rest of the session, which is the whole bug', () => {
+    recordKhatmahPageTurn(252, 253); // three ahead of the frontier
+    for (let p = 253; p < 268; p++) recordKhatmahPageTurn(p, p + 1);
+    expect(frontier()).toBe(268);
+  });
+
+  it('credits the pages it stepped over, and no more than the trail’s width', () => {
+    // The trade this makes, stated: the gap becomes read. What bounds the
+    // damage is that the gap can never be wider than the trail.
+    const before = plan().pagesRead;
+    recordKhatmahPageTurn(249 + KHATMAH_TRAIL_SLACK_PAGES, 260);
+    expect(plan().pagesRead - before).toBeLessThanOrEqual(
+      KHATMAH_TRAIL_SLACK_PAGES + 1,
+    );
+  });
+
+  it('leaves a plan alone when the reader is genuinely elsewhere', () => {
+    // Juz 30 against a plan at 249 — the case the gate exists for, and
+    // the width does not reach a tenth of the way there.
+    recordKhatmahPageTurn(582, 583);
+    recordKhatmahPageTurn(583, 584);
+    expect(frontier()).toBe(249);
   });
 });
 
