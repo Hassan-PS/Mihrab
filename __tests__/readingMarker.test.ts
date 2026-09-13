@@ -208,15 +208,36 @@ describe('the readers', () => {
 
   it('land on the ayah asked for, and record only what the reader scrolls to — translation', () => {
     const t = src('src/screens/quran/TranslationSurahScreen.tsx');
-    // The landing is driven once the rows exist, and asked for again each
-    // time the list has not measured that far (#41)…
-    expect(t).toContain('landingIndex.current = scrollToAyah - 1;');
-    expect(t).toMatch(/onScrollToIndexFailed=\{info => \{[\s\S]*?highestMeasuredFrameIndex[\s\S]*?setTimeout\(tryLand/);
-    // …but only the LANDING is asked again — a failed scroll to the recited
-    // ayah must never be answered by scrolling back to the landing.
-    expect(t).toMatch(/onScrollToIndexFailed=\{info => \{[\s\S]*?if \(landed\.current \|\| landingIndex\.current == null\) return;[\s\S]*?setTimeout\(tryLand/);
-    // And it is re-asserted while the rows settle under the translations.
-    expect(t).toContain('onContentSizeChange={onContentSizeChange}');
+    // The landing is not a scroll. The list is handed a WINDOW of the
+    // surah that begins at the ayah, so it opens there with nothing
+    // measured, scrolled or retried (#41, and the walk that fix left).
+    expect(t).toContain('const windowStart =');
+    expect(t).toMatch(/landingIndex == null \? 0 : Math\.max\(0, landingIndex - leadRows\)/);
+    expect(t).toMatch(/windowStart > 0 \? rows\.slice\(windowStart\) : rows/);
+    expect(t).toContain('data={windowed ?? rows}');
+
+    // It cannot go back to being a scroll to an index. `initialScrollIndex`
+    // is the obvious-looking way to open a list partway down and it is a
+    // trap here: without `getItemLayout` the rows above are never mounted
+    // and have no height, so the reader lands on the ayah and then cannot
+    // scroll back to the one before it. Measured, not guessed.
+    expect(t).not.toContain('initialScrollIndex=');
+    // And no retry loop: a failed scroll goes as far as the list measured
+    // and stops. The loop that used to live here is what made opening a
+    // surah deep in cost three seconds of walking.
+    expect(t).not.toContain('setTimeout(tryLand');
+    expect(t).toMatch(/onScrollToIndexFailed=\{info => \{[\s\S]*?highestMeasuredFrameIndex[\s\S]*?\n\s*\}\}/);
+
+    // What a window costs is that everything above it has to be reachable
+    // and has to arrive without shoving the page down.
+    expect(t).toContain('onStartReached={readEarlier}');
+    expect(t).toContain('maintainVisibleContentPosition={{ minIndexForVisible: 1 }}');
+    // The surah header belongs at the surah's start, not above ayah 250.
+    expect(t).toContain('ListHeaderComponent={windowStart === 0 ? header : null}');
+    // Recitation scrolls by the list's index, which is not the ayah's when
+    // the list holds a window — off by `windowStart` is off by 249.
+    expect(t).toMatch(/const row = idx - windowStart;[\s\S]*?scrollToIndex\(\{\s*index: row,/);
+
     // Nothing is written until the READER scrolls: the mount, the landing
     // and the settling all move rows into view, and none of them is reading.
     expect(t).toMatch(/if \(!landed\.current\) \{[\s\S]*?landed\.current = true;[\s\S]*?return;/);
@@ -225,7 +246,15 @@ describe('the readers', () => {
     // A wheel on a Mac begins no drag: any scroll after the settle window is the reader's.
     expect(t).toMatch(/const onScroll = useCallback\(\(\) => \{[\s\S]*?Date\.now\(\) > landingUntil\.current\) takeOver\(\);/);
     expect(t).not.toContain('setLastRead(');
-    expect(t).not.toContain('initialScrollIndex=');
+  });
+
+  it('do not mount the list until it knows where it opens — translation', () => {
+    const t = src('src/screens/quran/TranslationSurahScreen.tsx');
+    // A list mounted against an empty array has already decided it opens
+    // at the top. The rows arrive asynchronously, so the list waits for
+    // them and the loading card stands in — which is what the empty state
+    // drew anyway, so this costs the reader nothing to look at.
+    expect(t).toMatch(/\{rows == null \? \([\s\S]*?quran\.loading[\s\S]*?\) : \(\s*<FlatList/);
   });
 
   it('offer the pin beside the khatmah’s, in the other colour', () => {

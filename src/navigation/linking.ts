@@ -94,9 +94,15 @@ export const linking: LinkingOptions<RootStackParamList> = {
         },
       },
       /**
-       * mihrab://read/2?page=3&ayah=5
+       * mihrab://read/2?initialPage=3&scrollToAyah=5
        *
-       * `page` drives the mushaf, `ayah` the translation reader, and the
+       * The query keys are the ROUTE PARAM names, spelled exactly as in
+       * `parse` below — React Navigation matches on those, so a link
+       * written with a friendlier `?ayah=5` parses to nothing at all and
+       * opens the surah at the top with no error anywhere. This comment
+       * said `?page=3&ayah=5` for a long time and cost an afternoon.
+       *
+       * `initialPage` drives the mushaf, `scrollToAyah` the translation reader, and the
        * screen already decides between them from what it is given — which is
        * why the widget sends whichever the user last had open rather than
        * this table trying to pick.

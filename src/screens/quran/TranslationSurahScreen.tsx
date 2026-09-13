@@ -15,7 +15,7 @@
  * share a route and a toggle; `QuranSurahScreen` is the route now, and this
  * is the translation reader on its own.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
@@ -309,88 +309,110 @@ export function TranslationSurahScreen({
   }, []);
   useOverlayDismissGuard(sheetVisible || editionPickerVisible, closeSheets);
 
-  // ── Landing on an ayah — issue #41 ───────────────────────────────────
+  // ── Landing on an ayah — issue #41, and the walk that fix left behind ─
   //
-  // "Continue" opened the surah and left the reader at the top, for any
-  // ayah past the first screen. Two faults, one symptom: the rows load
-  // after the list has mounted, so `initialScrollIndex` — honoured at
-  // mount only — was always undefined when it mattered; and the rows are
-  // dynamic in height, so the one retry the failure handler made scrolled
-  // as far as the list had measured (eight rows) and stopped there. And a
-  // third, quieter one: the viewability handler fired for ayah 1 before
-  // any scroll had happened and wrote it over the place being returned to.
+  // "Continue" opened the surah and left the reader at the top for any
+  // ayah past the first screen. The first fix reached for
+  // `initialScrollIndex`, found that it is honoured at mount only — and
+  // the rows arrive AFTER the list has mounted, so it was always
+  // undefined when it mattered — and fell back to asking `scrollToIndex`
+  // again each time the list reported it had not measured that far.
   //
-  // So the landing is driven from here once the rows exist, asked for
-  // again each time the list says it has not measured that far, and
-  // re-asserted for a moment as the rows settle — and the marker is not
-  // written until the READER scrolls. Not "until the ayah is on screen":
-  // a bookmark or a search result lands here too, and a landing is a
-  // jump, which moves nothing (see `recordReading`). Reading does.
+  // That walk is what this replaces. With dynamic row heights each round
+  // mounted another batch, measured it, scrolled to the end of what was
+  // measured and asked again, up to fourteen times — while the arriving
+  // translations grew every row and set the whole thing going once more,
+  // for four seconds. Deep in al-Baqarah it did not merely stutter:
+  // opening at ayah 250 on an emulator moved the list at every sample for
+  // three seconds and finished on BLANK SPACE, scrolled to an offset
+  // computed from half-measured frames with no rows rendered there.
+  //
+  // `initialScrollIndex` looks like the answer and is not, for a reason
+  // worth writing down so nobody spends the afternoon on it twice. It is
+  // honoured at mount only — so the list has to wait for the rows, which
+  // is fixable — but it also tells VirtualizedList to render its first
+  // batch AT that index and never mount the rows above it, and without
+  // `getItemLayout` there is nothing to give those unmounted rows a
+  // height. The leading space collapses to nothing. Measured: the reader
+  // lands on ayah 250 correctly and then cannot scroll back to 249,
+  // because as far as the list is concerned 249 occupies no space and the
+  // surah header is directly above. Trading a slow landing for 249
+  // unreachable ayahs is not a fix.
+  //
+  // So the landing is not a scroll at all. The list is handed a WINDOW of
+  // the surah that BEGINS at the ayah asked for, and opens at its top —
+  // which is the ayah, with no scrolling, no measuring and no retries.
+  // Reading backwards prepends the rows above a chunk at a time
+  // (`onStartReached`), and `maintainVisibleContentPosition` keeps the
+  // page still while they arrive, so scrolling up costs what scrolling
+  // down costs. Nothing is ever unreachable and nothing is ever walked.
+  //
+  // The marker is still not written until the READER scrolls. Not "until
+  // the ayah is on screen": a bookmark or a search result lands here too,
+  // and a landing is a jump, which moves nothing (see `recordReading`).
+  // Reading does.
   const listRef = useRef<FlatList<AyahRow>>(null);
-  const landingIndex = useRef<number | null>(null);
-  const landingTries = useRef(0);
-  /** The ayah asked for has been seen, or the list has been asked enough. */
-  const landed = useRef(true);
+  /** The absolute row index the reader asked for, or undefined for the top. */
+  const landingIndex =
+    rows && scrollToAyah && scrollToAyah > 1 && scrollToAyah <= rows.length
+      ? scrollToAyah - 1
+      : undefined;
+  /** The ayah asked for has been seen. */
+  const landed = useRef(landingIndex == null);
+  /** Same value, for the callbacks that are built once. */
+  const landingIndexRef = useRef<number | undefined>(landingIndex);
+  landingIndexRef.current = landingIndex;
   /**
    * The reader has taken the list. Set by a drag, or by any scroll once
    * the landing's settle window has closed — a wheel on a Mac begins no
-   * drag. From here on nothing re-asserts the landing, and the rows the
-   * reader passes are theirs to be recorded.
+   * drag. From here on the rows the reader passes are theirs to record.
    */
   const readerScrolled = useRef(false);
   /**
-   * How long the landing keeps re-asserting itself as the rows settle.
+   * How long a scroll still counts as the landing rather than as reading.
    *
-   * The translations arrive after the Arabic and make every row above the
-   * landing taller — each one, as it is measured — which pushes the ayah
-   * down the screen after it has been put at the top. So for a moment
-   * after the landing begins, every change in the list's content size is
-   * answered by landing again. Without a target the window is only the
-   * first layout, so the mount itself never counts as the reader reading.
+   * Two things move the list on their own: the single automatic scroll
+   * VirtualizedList performs once its content has laid out, and the
+   * translations arriving and growing the rows. Neither is somebody
+   * reading. Short, because there is no longer a walk to wait out — it
+   * used to be four seconds, which is how long the walk took.
    */
   const landingUntil = useRef(0);
-  const LANDING_SETTLE_MS = 4000;
+  const LANDING_SETTLE_MS = 1500;
   const MOUNT_SETTLE_MS = 600;
-  const tryLand = useCallback(() => {
-    const index = landingIndex.current;
-    if (index == null || readerScrolled.current) return;
-    listRef.current?.scrollToIndex({ index, animated: false, viewPosition: 0.06 });
-  }, []);
-  useEffect(() => {
-    landingTries.current = 0;
-    readerScrolled.current = false;
-    if (!rows) return undefined;
-    if (!scrollToAyah || scrollToAyah <= 1 || scrollToAyah > rows.length) {
-      landingIndex.current = null;
-      landed.current = true;
-      landingUntil.current = Date.now() + MOUNT_SETTLE_MS;
-      return undefined;
-    }
-    landed.current = false;
-    landingIndex.current = scrollToAyah - 1;
-    landingUntil.current = Date.now() + LANDING_SETTLE_MS;
-    // After the first batch has mounted, never in the same frame.
-    const id = setTimeout(tryLand, 0);
-    return () => clearTimeout(id);
-  }, [rows, scrollToAyah, tryLand]);
-  const settleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const onContentSizeChange = useCallback(() => {
-    if (landingIndex.current == null || readerScrolled.current) return;
-    if (Date.now() > landingUntil.current) return;
-    if (settleTimer.current) clearTimeout(settleTimer.current);
-    settleTimer.current = setTimeout(tryLand, 40);
-  }, [tryLand]);
-  useEffect(
-    () => () => {
-      if (settleTimer.current) clearTimeout(settleTimer.current);
-    },
-    [],
+
+  /**
+   * How many rows above the landing have been prepended so far, and how
+   * many to add each time the reader reaches the top of the window.
+   *
+   * Zero at a landing: the window begins AT the ayah, so it is on screen
+   * in the list's first batch without anything being scrolled. A surah
+   * opened normally has no landing and no window — `windowStart` is 0 and
+   * this is the whole surah, exactly as before.
+   */
+  const [leadRows, setLeadRows] = useState(0);
+  const LEAD_CHUNK = 40;
+  const windowStart =
+    landingIndex == null ? 0 : Math.max(0, landingIndex - leadRows);
+  const windowed = useMemo(
+    () => (rows == null ? null : windowStart > 0 ? rows.slice(windowStart) : rows),
+    [rows, windowStart],
   );
+  const readEarlier = useCallback(() => {
+    if (windowStart > 0) setLeadRows(n => n + LEAD_CHUNK);
+  }, [windowStart]);
+
+  useEffect(() => {
+    readerScrolled.current = false;
+    landed.current = landingIndex == null;
+    setLeadRows(0);
+    landingUntil.current =
+      Date.now() + (landingIndex == null ? MOUNT_SETTLE_MS : LANDING_SETTLE_MS);
+  }, [rows, landingIndex]);
   const takeOver = useCallback(() => {
     readerScrolled.current = true;
-    // Whatever the landing had left to do, the reader has taken over.
+    // Wherever the landing put them, the reader has taken over.
     landed.current = true;
-    landingIndex.current = null;
   }, []);
   const onScroll = useCallback(() => {
     if (readerScrolled.current) return;
@@ -407,7 +429,7 @@ export function TranslationSurahScreen({
       if (!landed.current) {
         // Still on the way to the ayah asked for: this is the list passing
         // rows on the way there, not the reader reading them.
-        const target = landingIndex.current;
+        const target = landingIndexRef.current;
         if (
           target != null &&
           visible.some(v => (v.item as AyahRow)?.ayah === target + 1)
@@ -439,13 +461,22 @@ export function TranslationSurahScreen({
     if (playback.active.surah !== surahNumber) return;
     const idx = playback.active.ayah - 1;
     if (idx === lastAutoScrolled.current) return;
+    // The list may hold a WINDOW of the surah rather than all of it (see
+    // the landing), so its indices are offset. An ayah above the window
+    // is not in the list at all — reciting from before where the reader
+    // came in pulls the earlier rows in first, and the next ayah scrolls.
+    const row = idx - windowStart;
+    if (row < 0) {
+      readEarlier();
+      return;
+    }
     lastAutoScrolled.current = idx;
     listRef.current?.scrollToIndex({
-      index: idx,
+      index: row,
       viewPosition: 0.3,
       animated: true,
     });
-  }, [playback.active, playback.playing, surahNumber]);
+  }, [playback.active, playback.playing, surahNumber, windowStart, readEarlier]);
 
   // ── Translation mode ────────────────────────────────────────────────
   const hideMode = quran.prefs.hideMode;
@@ -679,56 +710,80 @@ export function TranslationSurahScreen({
           top={Platform.OS === 'ios' ? headerHeight : 0}
         />
       ) : null}
-      <FlatList
-        ref={listRef}
-        data={rows ?? []}
-        keyExtractor={r => String(r.ayah)}
-        renderItem={renderAyah}
-        ListHeaderComponent={header}
-        ListEmptyComponent={
+      {rows == null ? (
+        // The list is NOT mounted yet, and that is the fix rather than an
+        // oversight: `initialScrollIndex` is read at mount and never
+        // again, so a list mounted against an empty array can only ever
+        // open at the top. The header and the same card the empty state
+        // used, so nothing about this moment looks different.
+        <View style={[styles.scroll, { paddingBottom: insets.bottom + 24 }]}>
+          {header}
           <View
             style={[
               styles.comingSoon,
               { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
             ]}>
             <Text style={[styles.comingSoonText, { color: palette.muted }]}>
-              {rows == null ? t('quran.loading', 'Loading…') : t('quran.comingSoon')}
+              {t('quran.loading', 'Loading…')}
             </Text>
           </View>
-        }
-        contentContainerStyle={[
-          styles.scroll,
-          { paddingBottom: insets.bottom + 24 },
-        ]}
-        contentInsetAdjustmentBehavior="automatic"
-        initialNumToRender={8}
-        maxToRenderPerBatch={10}
-        windowSize={9}
-        onScrollToIndexFailed={info => {
-          // Dynamic row heights: the list has not measured that far. Go as
-          // far as it has, let it mount the next window, and ask again —
-          // each round reaches further. A dozen rounds covers Al-Baqarah;
-          // after that the reader is left where the list got to, and the
-          // marker is theirs to move again. Only the LANDING is asked
-          // again: a failed scroll to the recited ayah, later, must not
-          // be answered by scrolling back to where the reader came in.
-          const reach = Math.min(info.index, info.highestMeasuredFrameIndex);
-          listRef.current?.scrollToIndex({ index: reach, animated: false });
-          if (landed.current || landingIndex.current == null) return;
-          landingTries.current += 1;
-          if (landingTries.current < 14) {
-            setTimeout(tryLand, 50);
-          } else {
-            landed.current = true;
+        </View>
+      ) : (
+        <FlatList
+          ref={listRef}
+          data={windowed ?? rows}
+          keyExtractor={r => String(r.ayah)}
+          renderItem={renderAyah}
+          // Only once the window reaches the top of the surah. Drawn above
+          // ayah 250 it would be a lie about where the reader is.
+          ListHeaderComponent={windowStart === 0 ? header : null}
+          // Reading backwards: the rows above arrive a chunk at a time and
+          // this is what stops them shoving the page down as they land.
+          maintainVisibleContentPosition={{ minIndexForVisible: 1 }}
+          onStartReached={readEarlier}
+          onStartReachedThreshold={0.6}
+          ListEmptyComponent={
+            <View
+              style={[
+                styles.comingSoon,
+                { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
+              ]}>
+              <Text style={[styles.comingSoonText, { color: palette.muted }]}>
+                {t('quran.comingSoon')}
+              </Text>
+            </View>
           }
-        }}
-        viewabilityConfig={viewabilityConfig.current}
-        onViewableItemsChanged={onViewableItemsChanged.current}
-        onContentSizeChange={onContentSizeChange}
-        onScrollBeginDrag={takeOver}
-        onScroll={onScroll}
-        scrollEventThrottle={200}
-      />
+          contentContainerStyle={[
+            styles.scroll,
+            { paddingBottom: insets.bottom + 24 },
+          ]}
+          contentInsetAdjustmentBehavior="automatic"
+          initialNumToRender={8}
+          maxToRenderPerBatch={10}
+          windowSize={9}
+          onScrollToIndexFailed={info => {
+            // Only recitation's auto-scroll can reach here — the landing
+            // does not scroll at all any more. Without `getItemLayout`,
+            // `scrollToIndex` refuses any index above the highest cell it
+            // has measured, so go as far as the list HAS measured and
+            // leave it: a listener whose ayah is off past unmeasured rows
+            // is better served by the list catching up on the next ayah
+            // than by a retry loop chasing this one. The loop that used
+            // to live here is what made opening a surah cost three
+            // seconds of walking.
+            const reach = Math.max(
+              0,
+              Math.min(info.index, info.highestMeasuredFrameIndex),
+            );
+            listRef.current?.scrollToIndex({ index: reach, animated: false });
+          }}
+          viewabilityConfig={viewabilityConfig.current}
+          onViewableItemsChanged={onViewableItemsChanged.current}
+          onScrollBeginDrag={takeOver}
+          onScroll={onScroll}
+          scrollEventThrottle={200}
+        />
+      )}
       <MiniPlayer />
 
       {selectedAyah != null ? (
