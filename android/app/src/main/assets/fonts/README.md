@@ -1,39 +1,52 @@
 # Bundled fonts (Android)
 
-Drop the following font files here. They will be auto-bundled by the
-React Native asset pipeline at build time, and become available to RN
-as `fontFamily: '<font-family-name>'` (the *family* name, not the
-filename).
+These files are picked up by the React Native asset pipeline at build
+time and become available to RN as `fontFamily: '<filename without
+extension>'`.
 
-Required files
---------------
+**Android resolves a custom font by its FILENAME, not by the font's
+internal family name.** iOS does the opposite. That asymmetry is the
+only reason this directory does not simply mirror
+`ios/PrayerApp/Resources/fonts/`, and it is worth reading twice before
+renaming anything here.
 
-- `Amiri-Regular.ttf`
-- `Amiri-Bold.ttf`
-- `ScheherazadeNew-Regular.ttf`
+Bundled files
+-------------
+
+| File | `fontFamily` | Used by |
+|---|---|---|
+| `Amiri.ttf` | `'Amiri'` | `FONTS.arabicBody` — dua text, surah names, general Arabic |
+| `AmiriQuran.ttf` | `'AmiriQuran'` | `FONTS.arabicQuran` — ayah text only |
+| `SurahNames.ttf` | `'SurahNames'` | `src/quran/surahHeaderGlyph.ts` — the 114 name glyphs |
+
+The same face is `Amiri-Regular.ttf` on iOS, where RN reads the
+PostScript family name ("Amiri") out of the file instead. Do not add a
+second copy here under the iOS filename: this directory carried a
+byte-identical `Amiri-Regular.ttf` for months — 431 KB on every Android
+download — because one screen hardcoded the iOS-shaped name behind a
+`Platform.select`. Ask for `FONTS.arabicBody` from
+`src/theme/typography.ts` and the question does not come up.
+`node scripts/font-check.js` fails if two files here are the same bytes.
 
 Sources
 -------
 
-- **Amiri** — https://github.com/aliftype/amiri  (SIL Open Font License 1.1).
-  Used for Quran ayahs. `FONTS.arabicQuran` in `src/theme/typography.ts`.
-- **Scheherazade New** — https://software.sil.org/scheherazade/  (SIL OFL 1.1).
-  Used for general Arabic body text. `FONTS.arabicBody` in the same module.
+- **Amiri** / **Amiri Quran** — https://github.com/aliftype/amiri (SIL
+  Open Font License 1.1).
+- **SurahNames** — KFGQPC surah-name calligraphy. Provenance and terms
+  in `docs/data-sources.md`.
 
-Both are permissively licensed for inclusion in a commercial app and
-must ship with their respective LICENSE files (SIL OFL 1.1) — place
-those next to the `.ttf` files in this directory and they will be
-copied alongside the fonts.
+All are permissively licensed for inclusion in a commercial and an
+F-Droid build. SIL OFL 1.1 asks that the license text ship with the
+fonts — place `OFL.txt` next to the `.ttf` files and it is copied
+along with them.
 
-Verifying the install
----------------------
-
-After adding the files, run an Android build and try setting:
+Verifying
+---------
 
 ```tsx
-<Text style={{ fontFamily: 'Amiri', fontSize: 24 }}>بِسْمِ ٱللَّٰهِ</Text>
+<Text style={{ fontFamily: FONTS.arabicBody, fontSize: 24 }}>بِسْمِ ٱللَّٰهِ</Text>
 ```
 
-The text should render in the Amiri Naskh face. If it falls back to
-the system face, double-check the *family name* (open the .ttf file in
-"Font Book" on macOS or `fc-query` on Linux to confirm).
+Should render in Amiri's Naskh face. A fall back to the system face
+means the filename here and the string in `FONTS` have drifted apart.

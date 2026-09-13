@@ -1,36 +1,44 @@
 # Bundled fonts (iOS)
 
-Drop the following font files here, then add them to the Xcode
-`PrayerApp` target's *Copy Bundle Resources* build phase. The names in
-`UIAppFonts` (Info.plist) must match the **filenames** here.
+These files are in the `PrayerApp` target's *Copy Bundle Resources*
+build phase and declared in `UIAppFonts` (`ios/PrayerApp/Info.plist`).
+`UIAppFonts` lists **filenames**; `fontFamily` at runtime uses the
+font's internal **PostScript family name**. The two are not the same
+string, and on Android neither of them is — Android resolves by
+filename. See `android/app/src/main/assets/fonts/README.md`.
 
-Required files
---------------
+Bundled files
+-------------
 
-- `Amiri-Regular.ttf`
-- `Amiri-Bold.ttf`
-- `ScheherazadeNew-Regular.ttf`
+| File | `fontFamily` | Used by |
+|---|---|---|
+| `Amiri-Regular.ttf` | `'Amiri'` | `FONTS.arabicBody` — dua text, surah names, general Arabic |
+| `AmiriQuran.ttf` | `'Amiri Quran'` | `FONTS.arabicQuran` — ayah text only |
+| `SurahNames.ttf` | `'SurahNames'` | `src/quran/surahHeaderGlyph.ts` — the 114 name glyphs |
+
+Take these strings from `FONTS` in `src/theme/typography.ts` rather
+than spelling them at the call site — that module is where the
+per-platform difference is resolved once.
 
 Sources
 -------
 
-- **Amiri** — https://github.com/aliftype/amiri (SIL OFL 1.1)
-- **Scheherazade New** — https://software.sil.org/scheherazade/ (SIL OFL 1.1)
+- **Amiri** / **Amiri Quran** — https://github.com/aliftype/amiri (SIL
+  Open Font License 1.1).
+- **SurahNames** — KFGQPC surah-name calligraphy. Provenance and terms
+  in `docs/data-sources.md`.
 
-License files (`OFL.txt`) must accompany the .ttf files in this
-directory — they ship with the app per the OFL terms.
+SIL OFL 1.1 asks that the license text ship with the fonts — place
+`OFL.txt` in this directory and add it to the target.
 
-After adding to Xcode
----------------------
-
-The Info.plist already declares the `UIAppFonts` entries (see
-`ios/PrayerApp/Info.plist`). Once the files are in this directory and
-added to the target, RN can address them via:
+Verifying
+---------
 
 ```tsx
-<Text style={{ fontFamily: 'Amiri' }}>بِسْمِ ٱللَّٰهِ</Text>
+<Text style={{ fontFamily: FONTS.arabicBody, fontSize: 24 }}>بِسْمِ ٱللَّٰهِ</Text>
 ```
 
-`fontFamily` here uses the font's PostScript family name, NOT the
-filename. Verify by opening the `.ttf` in macOS Font Book and checking
-the "Family" attribute.
+A fall back to the system face usually means the *family* name is wrong
+rather than the file: open the `.ttf` in Font Book and check the
+"Family" attribute. `node scripts/font-check.js` cross-checks the
+filenames here against `UIAppFonts`.

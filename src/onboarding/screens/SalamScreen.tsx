@@ -21,14 +21,14 @@
  * before anyone "fixes" this with a reload.
  */
 import { useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { usePrayerSettings } from '../../context/PrayerSettingsContext';
 import { APP_LANGUAGES } from '../../i18n/languages';
 import { LanguageModal } from '../../screens/settings/LanguageModal';
 import { RADIUS, SPACING } from '../../theme/tokens';
-import { TYPE, typeStyle } from '../../theme/typography';
+import { FONTS, TYPE, typeStyle } from '../../theme/typography';
 import type { AppLanguage } from '../../settings/types';
 import { MihrabLogoIcon, TranslationIcon } from '../../theme/icons';
 import { OnboardingFrame, PrimaryAction } from '../OnboardingChrome';
@@ -71,11 +71,13 @@ function SalamHero({
             // The bundled Amiri font ships via task #69 — a calligraphic
             // Naskh that's elegant at large sizes. Falls back to the
             // system default if the .ttf hasn't been registered yet.
-            fontFamily: Platform.select({
-              ios: 'Amiri',
-              android: 'Amiri-Regular',
-              default: undefined,
-            }),
+            //
+            // Take the name from `FONTS`, do not spell it here. This used
+            // to select 'Amiri-Regular' on Android, which meant Android
+            // had to carry a SECOND copy of the same 431 KB file under
+            // that filename purely so this one greeting resolved — the
+            // rest of the app asks for `FONTS.arabicBody` ('Amiri').
+            fontFamily: FONTS.arabicBody,
           },
         ]}>
         السلام عليكم ورحمة الله تعالى وبركاته
