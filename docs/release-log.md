@@ -750,4 +750,30 @@ Changed the release cycle itself:
   - `docs/DISTRIBUTION.md`
   - `scripts/release.sh`
 
-**Lesson:** _(unfilled)_
+**Lesson:** the fix 2.19.0's entry describes was proved by this release
+rather than by a test.
+
+`$RELEASE_SHA` — the variable nothing assigned — meant every release since
+that line was written took the local iOS route while reporting that Xcode
+Cloud had no run for it. This one printed `run 730 is building b8e22cb5
+(RUNNING)` and did not upload from this Mac at all, which is the first time
+the intended path has been taken since the check was written. 2.19.0 put two
+builds of itself in App Store Connect; 2.20.0 put one.
+
+Worth recording because of what the evidence had to be. The unit test added
+last release pins that every variable these scripts READ is one they set —
+it would have caught the typo class — but it cannot tell you which branch a
+release actually takes, because that depends on Apple answering. Only a real
+cut can say. Two kinds of check, and the cheap one does not replace the
+expensive one; it just means the expensive one is now confirming rather than
+discovering.
+
+The other change here is smaller and in the same family: `SKIP_APP_STORE=1`
+pauses the workflow BEFORE the push now. It was written when the workflow
+was paused between releases, where skipping meant not arming it; with the
+workflow left enabled, a skip decided after the push would have skipped this
+script's own upload while Apple built the pushed commit and uploaded it
+anyway — a flag that did the opposite of its name, discoverable only by
+someone holding a build back and finding it in App Store Connect. Nobody hit
+it. It was found by reading the branch next to the one that was broken,
+which is the cheapest time to find anything.
