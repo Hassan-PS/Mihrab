@@ -238,7 +238,7 @@ export function WhatsNewModal({ visible, slides, onClose }: Props) {
             else goTo(page + 1);
           }}
           style={[styles.cta, { backgroundColor: palette.accentSolid }]}>
-          <Text style={styles.ctaLabel}>
+          <Text style={[styles.ctaLabel, { color: palette.onAccent }]}>
             {isLast ? t('whatsNew.done', 'Continue') : t('whatsNew.next', 'Next')}
           </Text>
         </Pressable>
@@ -302,5 +302,5 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.lg,
     alignItems: 'center',
   },
-  ctaLabel: { color: '#ffffff', fontSize: TYPE.body.fontSize, fontWeight: '700' },
+  ctaLabel: { fontSize: TYPE.body.fontSize, fontWeight: '700' },
 });

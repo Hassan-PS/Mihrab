@@ -207,7 +207,9 @@ export function MiniPlayer({
           style={[styles.playBtn, { backgroundColor: palette.accentSolid }]}>
           {/* U+275A pair for pause — U+23F8 renders as a colored emoji on
               Android even with the FE0E variation selector. */}
-          <Text style={styles.playGlyph}>{playing ? '❚❚' : '▶︎'}</Text>
+          <Text style={[styles.playGlyph, { color: palette.onAccent }]}>
+            {playing ? '❚❚' : '▶︎'}
+          </Text>
         </Pressable>
         {sideBtn('⏭︎', t('quran.nextAyah', 'Next ayah'), () => {
           void skipToNextAyah();
@@ -303,7 +305,6 @@ const styles = StyleSheet.create({
     marginHorizontal: SPACING.xs,
   },
   playGlyph: {
-    color: '#ffffff',
     fontSize: TYPE.callout.fontSize,
     fontWeight: '700',
     letterSpacing: 1,

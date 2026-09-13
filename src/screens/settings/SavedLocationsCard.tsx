@@ -469,7 +469,9 @@ function SavedLocationsCardImpl({
                         : palette.accent,
                   },
                 ]}>
-                <Text style={styles.addSaveLabel}>{t('locations.save')}</Text>
+                <Text style={[styles.addSaveLabel, { color: palette.onAccent }]}>
+                  {t('locations.save')}
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -576,7 +578,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   addSaveLabel: {
-    color: '#fff',
     fontSize: TYPE.callout.fontSize,
     fontWeight: '700',
   },

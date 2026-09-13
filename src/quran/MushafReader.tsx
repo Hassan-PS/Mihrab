@@ -268,7 +268,7 @@ export function MushafReader(props: Props) {
           accessibilityLabel={cta}
           onPress={startDownload}
           style={[styles.cta, { backgroundColor: palette.accentSolid }]}>
-          <Text style={styles.ctaLabel}>{cta}</Text>
+          <Text style={[styles.ctaLabel, { color: palette.onAccent }]}>{cta}</Text>
         </Pressable>
       </View>
     );
@@ -335,6 +335,6 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
     borderRadius: RADIUS.md,
   },
-  ctaLabel: { color: '#ffffff', fontSize: TYPE.body.fontSize, fontWeight: '700' },
+  ctaLabel: { fontSize: TYPE.body.fontSize, fontWeight: '700' },
   withStrip: { flex: 1 },
 });

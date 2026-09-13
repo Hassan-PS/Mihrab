@@ -260,7 +260,12 @@ const HeroToday = memo(function HeroToday({
    */
   bleed?: { horizontal: number; top: number; bottom: number };
   /** The top row: location chip leading, Qibla chip trailing. */
-  topRow?: { renderLocation?: (ink: SkyInkColors) => ReactNode; qibla?: ReactNode };
+  topRow?: {
+    renderLocation?: (ink: SkyInkColors) => ReactNode;
+    /** A render function, not a node: it takes the sky's ink like the
+        location beside it — see QiblaChip's `ink`. */
+    renderQibla?: (ink: SkyInkColors) => ReactNode;
+  };
   /** The status bar's glyphs follow the sky while this hero is on screen. */
   ownsStatusBar?: boolean;
   /** The status bar's height, which the sky's bodies keep out of. */
@@ -478,7 +483,7 @@ const HeroToday = memo(function HeroToday({
       {topRow ? (
         <View style={styles.heroTopRow} onLayout={fill ? onTopRowLayout : undefined}>
           <View style={styles.heroTopLeading}>{topRow.renderLocation?.(inkTop)}</View>
-          {topRow.qibla}
+          {topRow.renderQibla?.(inkTop)}
         </View>
       ) : null}
       {/* The room the sky's bodies move in. */}
@@ -1008,9 +1013,9 @@ function TodayCardImpl({
     ? Math.round(Math.min(Math.max(windowHeight * 0.34, 300), 460))
     : undefined;
   const Outer = fullBleed ? View : GlassSurface;
-  const qiblaChip =
+  const renderQibla = (ink: SkyInkColors) =>
     fullBleed && qiblaBearing != null ? (
-      <QiblaChip bearing={qiblaBearing} onPress={onOpenQibla} />
+      <QiblaChip bearing={qiblaBearing} onPress={onOpenQibla} ink={ink} />
     ) : null;
 
   /**
@@ -1162,7 +1167,7 @@ function TodayCardImpl({
             bleed={{ horizontal: SPACING.xl, top: heroTop, bottom: SPACING.lg }}
             statusBarInset={underStatusBar ? insets.top : 0}
             fill={fullBleed}
-            topRow={fullBleed ? { renderLocation, qibla: qiblaChip } : undefined}
+            topRow={fullBleed ? { renderLocation, renderQibla } : undefined}
             // Not on a roomy page: the hero is not under the status bar
             // there, so the bar takes the page's ink like every other tab.
             ownsStatusBar={underStatusBar}
@@ -1176,6 +1181,12 @@ function TodayCardImpl({
             no compass screen to open and `onOpenQibla` is undefined, but
             the bearing is trigonometry on two coordinates and is just as
             true there. The chip becomes a readout. */}
+        {/* No ink here: the corner variant is only used on the roomy
+            layouts, where the hero is a card on the page rather than the
+            page itself, and the chip reads against that card. The ink
+            belongs to the full-bleed top row, where the sky IS the
+            background — and it is computed inside the hero, which this
+            sits outside of on purpose (see the note above). */}
         {fullBleed ? null : (
           <QiblaChipCorner
             bearing={qiblaBearing ?? null}

@@ -154,6 +154,7 @@ export function LocationScreen({
               accent: palette.accent,
               accentBg: palette.accentBg,
               accentSolid: palette.accentSolid,
+              onAccent: palette.onAccent,
               card: palette.card,
               danger: palette.danger,
               flatChrome: palette.flatChrome,

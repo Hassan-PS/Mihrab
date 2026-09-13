@@ -47,9 +47,16 @@ describe('anything that colours a drawn icon gets a hex', () => {
 
   // The same trap, one screen over: both of these paint SVG.
   it('and so do the other drawn marks', () => {
-    expect(read('src/screens/home/QiblaChip.tsx')).toContain(
-      'color={palette.accentSolid}',
-    );
+    // The Qibla chip has two grounds now — the theme's surface and the
+    // hero's sky — so its compass takes the sky's ink where there is
+    // one. Both sources are plain hexes: `ink.text` comes from skyModel,
+    // which is all literals, and `accentSolid` is the palette's own hex
+    // form. What must never appear is a stringified PlatformColor, which
+    // is the trap this file is about.
+    const qibla = read('src/screens/home/QiblaChip.tsx');
+    expect(qibla).toContain('ink ? ink.text : palette.accentSolid');
+    expect(qibla).not.toMatch(/color=\{String\(/);
+    expect(qibla).not.toContain('palette.accent}');
     // The salām hero moved with the screen it belongs to when first
     // launch was rebuilt; it still paints text the SVG trap applies to.
     expect(read('src/onboarding/screens/SalamScreen.tsx')).toContain(

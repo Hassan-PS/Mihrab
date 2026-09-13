@@ -411,7 +411,7 @@ export function FastingScreen() {
           // thumb was set to the same accent colour, which made the
           // whole switch look like a solid pill rather than a toggle
           // (reported on iOS in v2.0.17).
-          thumbColor={'#ffffff'}
+          thumbColor={'#ffffff'} // tokens-ok-line: a fixed light thumb, see above
         />
       </View>
 

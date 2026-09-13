@@ -579,7 +579,9 @@ export function QuranScreen() {
                 })}
                 onPress={finishKhatmahPortion}
                 style={[styles.khatmahBtn, { backgroundColor: palette.accentSolid }]}>
-                <Text style={styles.khatmahBtnLabel} numberOfLines={1}>
+                <Text
+                style={[styles.khatmahBtnLabel, { color: palette.onAccent }]}
+                numberOfLines={1}>
                   {/* The strings carry a leading "✓" from when this was the
                       only filled button on the card; a secondary button
                       does not need to shout it, and the glyph was what
@@ -1860,7 +1862,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  khatmahBtnLabel: { color: '#ffffff', fontWeight: '700', fontSize: TYPE.footnote.fontSize },
+  khatmahBtnLabel: { fontWeight: '700', fontSize: TYPE.footnote.fontSize },
   menuBackdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   menuCard: {
     position: 'absolute',

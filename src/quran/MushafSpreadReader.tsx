@@ -245,7 +245,6 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
     playback,
     riwayah,
     totalPages,
-    nightMode,
     tone,
     pageBg,
     ornament,
@@ -619,7 +618,12 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
                 styles.chevron,
                 styles.chevronLeft,
                 {
-                  backgroundColor: nightMode ? '#1d1d1d' : '#f4efe4',
+                  // TONE_CHROME, like everything else on this page. These
+                  // two were the only chrome in the file painted from a
+                  // night/not-night pair, which has no answer for sepia:
+                  // it took the PAPER control colour onto a sepia page and
+                  // sat there as a pale grey smudge.
+                  backgroundColor: TONE_CHROME[tone].control,
                   opacity: hovered ? 0.95 : 0.4,
                 },
               ]}>
@@ -636,7 +640,7 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
                 styles.chevron,
                 styles.chevronRight,
                 {
-                  backgroundColor: nightMode ? '#1d1d1d' : '#f4efe4',
+                  backgroundColor: TONE_CHROME[tone].control,
                   opacity: hovered ? 0.95 : 0.4,
                 },
               ]}>

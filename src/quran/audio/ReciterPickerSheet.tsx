@@ -241,7 +241,11 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
               },
             ]}>
             {asking ? (
-              <Text style={[styles.confirmText, styles.confirmOnDanger]}>
+              <Text
+                    style={[
+                      styles.confirmText,
+                      { color: palette.onAccent },
+                    ]}>
                 {t('common.delete', { defaultValue: 'Delete' })}
               </Text>
             ) : (
@@ -380,7 +384,6 @@ const styles = StyleSheet.create({
   },
   icon: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
   confirmText: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
-  confirmOnDanger: { color: '#fff' },
   // The trash: a handle, a lid, and a tapered body. 16×16 all told, which
   // is the optical weight of the ↓ and the ✕ it stands beside.
   trash: { width: 16, alignItems: 'center' },

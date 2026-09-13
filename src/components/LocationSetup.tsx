@@ -30,6 +30,8 @@ type Palette = {
   accentBg: ColorValue;
   /** Plain "#RRGGBB" accent for SVG icon fills (task #104). */
   accentSolid: string;
+  /** The ink that reads on an accent fill — the palette's own answer. */
+  onAccent: string;
   card: ColorValue;
   danger: ColorValue;
   flatChrome: boolean;
@@ -192,11 +194,11 @@ export function LocationSetup({ palette, hideIntro }: Props) {
             gpsBusy && styles.primaryBtnBusy,
           ]}>
           {gpsBusy ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={String(palette.onAccent)} />
           ) : (
             <View style={styles.btnContent}>
-              <MapPinIcon size={20} color="#fff" />
-              <Text style={styles.primaryBtnLabel}>
+              <MapPinIcon size={20} color={String(palette.onAccent)} />
+              <Text style={[styles.primaryBtnLabel, { color: palette.onAccent }]}>
                 {t('locationSetup.useAutomatic')}
               </Text>
             </View>
@@ -300,7 +302,7 @@ export function LocationSetup({ palette, hideIntro }: Props) {
         accessibilityLabel={t('common.continue')}
         onPress={completeManual}
         style={[styles.primaryBtn, { backgroundColor: palette.accent }]}>
-        <Text style={styles.primaryBtnLabel}>{t('common.continue')}</Text>
+        <Text style={[styles.primaryBtnLabel, { color: palette.onAccent }]}>{t('common.continue')}</Text>
       </Pressable>
     </ScrollView>
   );
@@ -344,7 +346,6 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   primaryBtnLabel: {
-    color: '#fff',
     fontSize: 17, // tokens-ok-line: TYPE.headline target
     fontWeight: '600',
   },

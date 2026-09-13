@@ -372,9 +372,9 @@ function RiwayahCard({
               { backgroundColor: palette.accentSolid, opacity: busy ? 0.5 : 1 },
             ]}>
             {busy ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color={String(palette.onAccent)} />
             ) : (
-              <Text style={styles.ctaLabel}>
+              <Text style={[styles.ctaLabel, { color: palette.onAccent }]}>
                 {t('downloads.riwayahDownload', 'Download')}
               </Text>
             )}
@@ -535,6 +535,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 44,
   },
-  ctaLabel: { color: '#fff', fontWeight: '700', fontSize: TYPE.callout.fontSize },
+  ctaLabel: { fontWeight: '700', fontSize: TYPE.callout.fontSize },
   footnote: { fontSize: TYPE.caption.fontSize, lineHeight: 16, marginHorizontal: SPACING.xs, marginTop: 2 },
 });

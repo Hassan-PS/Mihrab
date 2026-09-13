@@ -29,7 +29,18 @@ import * as React from 'react';
 import type { ColorValue } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
-type IconProps = { size?: number; color?: string };
+/**
+ * `color` is REQUIRED, and that is the whole point.
+ *
+ * Every icon here used to default it to '#000'. A default that is a
+ * colour is a default that is wrong half the time: an icon whose colour
+ * nobody passed painted itself black, which is invisible on a night
+ * ground and was never what anyone meant — it was what they got for
+ * forgetting. Nothing in the app was relying on it (checked: no call
+ * site omits the prop), so the default is gone and the type asks for the
+ * one thing an icon cannot decide for itself.
+ */
+type IconProps = { size?: number; color: string };
 
 /**
  * Settings gear — the ONE gear in the app (v2.8.5).
@@ -45,7 +56,7 @@ type IconProps = { size?: number; color?: string };
  */
 export function SettingsGearIcon({
   size = 24,
-  color = '#000',
+  color,
   strokeWidth = 2,
 }: IconProps & { strokeWidth?: number }) {
   return (
@@ -79,7 +90,7 @@ export function SettingsGearIcon({
  *  with soft text-line hints on each page and a rehl-style base notch so
  *  it reads as a mushaf, not a generic book. Stroked, single-color, per
  *  the style guide. */
-export function QuranBookIcon({ size = 24, color = '#000' }: IconProps) {
+export function QuranBookIcon({ size = 24, color }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       {/* Open covers, drawn as one mirrored outline. */}
@@ -113,7 +124,7 @@ export function QuranBookIcon({ size = 24, color = '#000' }: IconProps) {
 
 /** Crescent moon — used for Ramadan banner, dynamic icon variant.
  *  Geometric, never decorative wallpaper (principle 2: reverent, not heavy). */
-export function CrescentIcon({ size = 24, color = '#000' }: IconProps) {
+export function CrescentIcon({ size = 24, color }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       <Path
@@ -125,7 +136,7 @@ export function CrescentIcon({ size = 24, color = '#000' }: IconProps) {
 }
 
 /** Mihrab arch — used as a quiet header accent. */
-export function MihrabArchIcon({ size = 24, color = '#000' }: IconProps) {
+export function MihrabArchIcon({ size = 24, color }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       <Path
@@ -158,7 +169,7 @@ export function MihrabArchIcon({ size = 24, color = '#000' }: IconProps) {
  *
  * Use when the full brand mark is needed — e.g. the home screen header title.
  */
-export function MihrabLogoIcon({ size = 24, color = '#000' }: IconProps) {
+export function MihrabLogoIcon({ size = 24, color }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       {/* Arch frame: outer arch - inner cutout (evenodd → centre is transparent) */}
@@ -185,7 +196,7 @@ export function MihrabLogoIcon({ size = 24, color = '#000' }: IconProps) {
 
 /** 8-pointed star — Islamic geometric motif used as Eid flourish.
  *  Reverent accent only — never tiled, never used as background. */
-export function EightPointStarIcon({ size = 24, color = '#000' }: IconProps) {
+export function EightPointStarIcon({ size = 24, color }: IconProps) {
   // Two overlaid squares rotated 45° → 8-point star.
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
@@ -198,7 +209,7 @@ export function EightPointStarIcon({ size = 24, color = '#000' }: IconProps) {
 }
 
 /** Tasbih beads — small line of 5 dots used for the Tasbih nav button. */
-export function TasbihIcon({ size = 24, color = '#000' }: IconProps) {
+export function TasbihIcon({ size = 24, color }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       {[4, 8, 12, 16, 20].map((cx, i) => (
@@ -217,7 +228,7 @@ export function TasbihIcon({ size = 24, color = '#000' }: IconProps) {
 }
 
 /** Open book — used for Quran nav button and reading-streak badge. */
-export function BookIcon({ size = 24, color = '#000' }: IconProps) {
+export function BookIcon({ size = 24, color }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       <Path
@@ -244,7 +255,7 @@ export function BookIcon({ size = 24, color = '#000' }: IconProps) {
  * translation view, where a word ("Tafsir", "Translation") in the header
  * was one more label competing with the page (redesign plan §4).
  */
-export function TranslationIcon({ size = 24, color = '#000' }: IconProps) {
+export function TranslationIcon({ size = 24, color }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path
@@ -273,7 +284,7 @@ export function TranslationIcon({ size = 24, color = '#000' }: IconProps) {
 /** Two cupped hands raised in dua — used for the duas/supplications nav
  *  tile. Stylised as two slightly-opened palms meeting at the base, the
  *  classic Islamic dua gesture. */
-export function DuaHandsIcon({ size = 24, color = '#000' }: IconProps) {
+export function DuaHandsIcon({ size = 24, color }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       {/* Left palm */}
@@ -307,7 +318,7 @@ export function DuaHandsIcon({ size = 24, color = '#000' }: IconProps) {
 
 /** Pen — used for the journal nav tile (writing entries). Classic
  *  pen-tilted-up silhouette. */
-export function PenIcon({ size = 24, color = '#000' }: IconProps) {
+export function PenIcon({ size = 24, color }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       {/* Pen body */}
@@ -332,7 +343,7 @@ export function PenIcon({ size = 24, color = '#000' }: IconProps) {
 
 /** Map pin / location marker — used for the "Use device location" CTA on
  *  the welcome / location-setup screen. */
-export function MapPinIcon({ size = 24, color = '#000' }: IconProps) {
+export function MapPinIcon({ size = 24, color }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       <Path
@@ -356,7 +367,7 @@ export function MapPinIcon({ size = 24, color = '#000' }: IconProps) {
 }
 
 /** Magnifying glass — used for the "Search city or coords" CTA. */
-export function SearchIcon({ size = 24, color = '#000' }: IconProps) {
+export function SearchIcon({ size = 24, color }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       <Circle
@@ -379,7 +390,7 @@ export function SearchIcon({ size = 24, color = '#000' }: IconProps) {
 
 /** Mosque silhouette — used for the mosque-finder nav button and as the
  *  empty-state illustration for "no mosques found nearby." */
-export function MosqueIcon({ size = 24, color = '#000' }: IconProps) {
+export function MosqueIcon({ size = 24, color }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       {/* dome */}
@@ -427,7 +438,7 @@ export function MosqueIcon({ size = 24, color = '#000' }: IconProps) {
  */
 export function ShareIcon({
   size = 24,
-  color = '#000',
+  color,
 }: {
   size?: number;
   // Wider than the shared `IconProps`, which types colour as a string.

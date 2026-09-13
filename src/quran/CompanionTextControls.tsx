@@ -294,7 +294,9 @@ export function CompanionTextSheet({
           accessibilityLabel={t('common.done', 'Done')}
           onPress={onClose}
           style={[styles.doneBtn, { backgroundColor: palette.accentSolid }]}>
-          <Text style={styles.doneLabel}>{t('common.done', 'Done')}</Text>
+          <Text style={[styles.doneLabel, { color: palette.onAccent }]}>
+            {t('common.done', 'Done')}
+          </Text>
         </Pressable>
       </View>
     </Modal>
@@ -356,5 +358,5 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.md,
     alignItems: 'center',
   },
-  doneLabel: { color: '#ffffff', fontSize: TYPE.callout.fontSize, fontWeight: '700' },
+  doneLabel: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
 });

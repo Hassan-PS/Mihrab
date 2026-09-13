@@ -39,9 +39,22 @@ export type QiblaChipProps = {
   bearing: number | null;
   /** Omitted where there is no compass screen to open — see above. */
   onPress?: () => void;
+  /**
+   * Colours for when the chip sits on the hero's SKY rather than on the
+   * theme's surface: the sky's own ink (skyModel.ts), the same prop and
+   * the same reason as `LocationChip`, which shares the top row with it.
+   *
+   * Without this the chip painted itself from the palette while its
+   * neighbour took the sky's ink, so on a night sky in a light app the
+   * location read as sky and the Qibla read as a small bright card
+   * dropped on top of it. Given the ink it loses its container too, the
+   * way the location chip has none: two labels on the sky, not one label
+   * and one card.
+   */
+  ink?: { text: string; muted: string };
 };
 
-function QiblaChipImpl({ bearing, onPress }: QiblaChipProps) {
+function QiblaChipImpl({ bearing, onPress, ink }: QiblaChipProps) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
 
@@ -54,7 +67,7 @@ function QiblaChipImpl({ bearing, onPress }: QiblaChipProps) {
 
   const face = (
     <>
-      <CompassIcon color={palette.accentSolid} size={14} />
+      <CompassIcon color={ink ? ink.text : palette.accentSolid} size={14} />
       {/* THE WORD, then the number.
 
           A compass rose and "116°" is a puzzle: the icon is small, the
@@ -67,12 +80,20 @@ function QiblaChipImpl({ bearing, onPress }: QiblaChipProps) {
           all thirteen languages, which makes it the word this app has
           settled on for the thing this chip opens. */}
       <Text
-        style={[typeStyle('caption'), styles.label, { color: palette.accent }]}
+        style={[
+          typeStyle('caption'),
+          styles.label,
+          { color: ink ? ink.text : palette.accent },
+        ]}
         numberOfLines={1}>
         {t('nav.compass', 'Qibla')}
       </Text>
       <Text
-        style={[typeStyle('caption'), styles.degrees, { color: palette.accent }]}
+        style={[
+          typeStyle('caption'),
+          styles.degrees,
+          { color: ink ? ink.muted : palette.accent },
+        ]}
         numberOfLines={1}
         // A degree run is Latin left-to-right whatever the app language;
         // without this it collapses in Arabic, the same way the countdown
@@ -83,10 +104,11 @@ function QiblaChipImpl({ bearing, onPress }: QiblaChipProps) {
     </>
   );
 
-  const skin = {
-    backgroundColor: palette.card,
-    borderColor: palette.border,
-  };
+  // On the sky the chip is its content and nothing else; on a surface it
+  // needs the card and the hairline to separate it from what is behind.
+  const skin = ink
+    ? { backgroundColor: 'transparent', borderColor: 'transparent' }
+    : { backgroundColor: palette.card, borderColor: palette.border };
 
   if (!onPress) {
     return (

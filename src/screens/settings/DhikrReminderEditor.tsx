@@ -334,7 +334,7 @@ export function DhikrReminderEditor({
                       : palette.border,
                   },
                 ]}>
-                <Text style={styles.primaryLabel}>
+                <Text style={[styles.primaryLabel, { color: palette.onAccent }]}>
                   {t('common.done', 'Done')}
                 </Text>
               </Pressable>
@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
   soundHelp: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.sm },
   actions: { padding: SPACING.lg, gap: SPACING.md },
   primaryBtn: { paddingVertical: SPACING.md, borderRadius: RADIUS.md, alignItems: 'center' },
-  primaryLabel: { color: '#ffffff', fontSize: TYPE.callout.fontSize, fontWeight: '700' },
+  primaryLabel: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
   deleteBtn: { paddingVertical: SPACING.md, alignItems: 'center' },
   deleteLabel: { fontSize: TYPE.callout.fontSize, fontWeight: '600' },
 });

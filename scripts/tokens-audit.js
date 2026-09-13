@@ -26,7 +26,7 @@ function walk(dir, results = []) {
   return results;
 }
 
-const findings = { hex: [], spacing: [], fontSize: [] };
+const findings = { hex: [], universal: [], spacing: [], fontSize: [] };
 const files = walk(SRC);
 
 for (const f of files) {
@@ -61,6 +61,34 @@ for (const f of files) {
       if (v === '#fff' || v === '#ffffff' || v === '#000' || v === '#000000') continue;
       if (/\/\/\s*tokens-ok-line/i.test(line)) continue;
       findings.hex.push({ file: rel, line: i + 1, value: m[0], context: line.trim().slice(0, 80) });
+    }
+
+    /**
+     * Pure black and white are exempt above, on the grounds that they
+     * look the same in every palette. They do — and that is exactly the
+     * problem when one is PAINTED: a white spinner is the same white on
+     * a night sky and on warm paper, and invisible on the second. Under
+     * Material You or a light custom accent, a white label on a filled
+     * button is unreadable; `#F87171`, the dark themes' danger colour,
+     * read 2.80:1 under white until this rule found it.
+     *
+     * So the exemption stands for a value that is merely a value — a
+     * comparison, a gradient stop, a shadow, which really is black — and
+     * stops at a paint prop. The palette has an answer for every one of
+     * these: `onAccent` for a filled control, `text`/`muted` on a
+     * surface, and `readableOn` for anything else with a measurable
+     * ground.
+     */
+    const paintRe =
+      /\b(color|backgroundColor|borderColor|tintColor|thumbColor|fill|stroke)\s*[:=]\s*\{?\s*['"`]#(?:fff|ffffff|000|000000)['"`]/gi;
+    while ((m = paintRe.exec(line)) !== null) {
+      if (/\/\/\s*tokens-ok-line/i.test(line)) continue;
+      findings.universal.push({
+        file: rel,
+        line: i + 1,
+        prop: m[1],
+        context: line.trim().slice(0, 80),
+      });
     }
 
     // Magic spacing/radius/font numbers. Universal small values (≤2 px)
@@ -117,7 +145,11 @@ function burnDown() {
   };
 }
 
-const total = findings.hex.length + findings.spacing.length + findings.fontSize.length;
+const total =
+  findings.hex.length +
+  findings.universal.length +
+  findings.spacing.length +
+  findings.fontSize.length;
 const bd = burnDown();
 console.log(
   `Burn-down: fontSize literals ${bd.fontSizeLiterals} (${bd.distinctFontSizes} distinct) · ` +
@@ -140,6 +172,17 @@ if (findings.hex.length) {
     console.log(`  ${f.file}:${f.line} — ${f.value}`);
   });
   if (findings.hex.length > 30) console.log(`  … and ${findings.hex.length - 30} more`);
+  console.log('');
+}
+if (findings.universal.length) {
+  console.log(`Painted black or white (${findings.universal.length}):`);
+  findings.universal.slice(0, 30).forEach(f => {
+    console.log(`  ${f.file}:${f.line} — ${f.prop}: ${f.context}`);
+  });
+  if (findings.universal.length > 30)
+    console.log(`  … and ${findings.universal.length - 30} more`);
+  console.log('  Use palette.onAccent on a filled control, palette.text/muted on a');
+  console.log('  surface, or readableOn(ground) — or mark the line tokens-ok-line.');
   console.log('');
 }
 if (findings.spacing.length) {

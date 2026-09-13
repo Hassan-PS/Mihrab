@@ -75,7 +75,12 @@ function IshaExtrasImpl({
           <Text
             style={[
               styles.toggleLabel,
-              { color: witr ? (palette.isDark ? '#211A06' : '#FFFFFF') : palette.muted },
+              // `sunnahMark` returns the accent, so the ink on it is the
+              // palette's own answer for an accent fill. The hand-picked
+              // pair this replaces asked the APP's theme which ink to use
+              // when the ground is the same colour either way — and gave
+              // white on a light amber or a pale custom accent.
+              { color: witr ? palette.onAccent : palette.muted },
             ]}
             numberOfLines={1}
           >

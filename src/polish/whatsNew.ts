@@ -31,7 +31,7 @@ import { CrescentIcon, MihrabLogoIcon } from '../theme/icons';
 
 export type WhatsNewSlide = {
   key: string;
-  Icon: ComponentType<{ size?: number; color?: string }>;
+  Icon: ComponentType<{ size?: number; color: string }>;
   titleKey: string;
   bodyKey: string;
 };

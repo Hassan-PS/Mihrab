@@ -91,7 +91,9 @@ function PhaseScreenImpl(props: PhaseScreenProps) {
         accessibilityLabel={props.retryLabel}
         onPress={props.onRetry}
         style={[styles.button, { backgroundColor: palette.accent }]}>
-        <Text style={styles.buttonLabel}>{props.retryLabel}</Text>
+        <Text style={[styles.buttonLabel, { color: palette.onAccent }]}>
+          {props.retryLabel}
+        </Text>
       </Pressable>
     </View>
   );
@@ -107,7 +109,7 @@ const styles = StyleSheet.create({
   body: { fontSize: TYPE.callout.fontSize, lineHeight: 22, marginBottom: SPACING.xl },
   bodyCenter: { textAlign: 'center' },
   button: { paddingHorizontal: SPACING.xl, paddingVertical: SPACING.md, borderRadius: RADIUS.md },
-  buttonLabel: { color: '#ffffff', fontSize: TYPE.body.fontSize, fontWeight: '600' },
+  buttonLabel: { fontSize: TYPE.body.fontSize, fontWeight: '600' },
   skeletonScreen: { flex: 1, padding: SPACING.lg, gap: SPACING.md },
   skelRow: {
     flexDirection: 'row',

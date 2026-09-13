@@ -155,7 +155,7 @@ export function SettingsToggleRow({
         disabled={disabled}
         onValueChange={onValueChange}
         trackColor={{ true: palette.accentSolid, false: String(palette.border) }}
-        thumbColor="#ffffff"
+        thumbColor="#ffffff" // tokens-ok-line: a Switch thumb stays light in both states so it reads against an accent track
       />
     </View>
   );

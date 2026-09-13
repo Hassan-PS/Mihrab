@@ -460,7 +460,9 @@ export function ColorPickerModal({
                     styles.thumb,
                     {
                       backgroundColor: hex,
-                      borderColor: '#FFFFFF', // rtl-safe: a ring on the drag thumb, not a layout edge
+                      // A white ring on a spectrum, not chrome: it has to
+                      // read against every colour underneath it.
+                      borderColor: '#FFFFFF', // tokens-ok-line + rtl-safe: a ring on the drag thumb, not a layout edge
                       transform: [
                         { translateX: hsv.s * svW - THUMB / 2 },
                         { translateY: (1 - hsv.v) * SV_HEIGHT - THUMB / 2 },
@@ -502,7 +504,9 @@ export function ColorPickerModal({
                     styles.hueThumb,
                     {
                       backgroundColor: hueHex,
-                      borderColor: '#FFFFFF', // rtl-safe: a ring on the drag thumb, not a layout edge
+                      // A white ring on a spectrum, not chrome: it has to
+                      // read against every colour underneath it.
+                      borderColor: '#FFFFFF', // tokens-ok-line + rtl-safe: a ring on the drag thumb, not a layout edge
                       transform: [
                         { translateX: (hsv.h / 360) * hueW - THUMB / 2 },
                       ],

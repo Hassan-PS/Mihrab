@@ -4,6 +4,7 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import { cardEdgeStyle } from '../theme/chrome';
 import { RADIUS, SPACING } from '../theme/tokens';
 import { TYPE } from '../theme/typography';
+import { readableOn } from '../theme/appPalette';
 
 /**
  * ConfirmModal — a themed two-button confirmation dialog.
@@ -51,6 +52,20 @@ export function ConfirmModal({
 }: ConfirmModalProps) {
   const { palette } = useAppPalette();
   const confirmBg = destructive ? palette.danger : palette.accent;
+  /**
+   * The label's colour is decided BY the button's colour, not assumed.
+   *
+   * It was a flat white, which is right on the accent and wrong on
+   * danger: the dark themes state danger as #F87171, a light red, and
+   * white on it reads 2.80:1 — under the floor for text, on the button
+   * that deletes things. `readableOn` is the same black-or-white rule
+   * the palette already applies to `onAccent`.
+   *
+   * A PlatformColor cannot be measured, so under dynamic colours it
+   * keeps the platform's own convention of white on a system fill.
+   */
+  const confirmInk =
+    typeof confirmBg === 'string' ? readableOn(confirmBg) : '#FFFFFF'; // tokens-ok-line: the platform's ink on a system fill, unmeasurable
 
   return (
     <Modal
@@ -125,7 +140,9 @@ export function ConfirmModal({
                 pressed && { opacity: 0.85 },
               ]}
             >
-              <Text style={styles.confirmLabel}>{confirmLabel}</Text>
+              <Text style={[styles.confirmLabel, { color: confirmInk }]}>
+                {confirmLabel}
+              </Text>
             </Pressable>
           </View>
         </Pressable>
@@ -186,6 +203,5 @@ const styles = StyleSheet.create({
   confirmLabel: {
     fontSize: TYPE.callout.fontSize,
     fontWeight: '700',
-    color: '#ffffff',
   },
 });
