@@ -53,7 +53,7 @@ which comfortably fits the 8-hour window.
   itself, and a "self-hosted" relay would still go out through Apple. There is
   no offline/loopback variant.
 - It would add a server dependency that contradicts the local-first principle
-  and the F-Droid/no-network posture (CLAUDE.md §4).
+  and the F-Droid/no-network posture (see CONTRIBUTING.md → Hard rules).
 - Given the 8–12h cap, push buys only background rollover of the highlighted
   prayer for a few hours — which `BGTaskScheduler` + foreground refresh already
   approximate locally.

@@ -188,7 +188,7 @@ started:
 
   Fixed by asking for nothing: the entitlements file is empty, the capability
   is off the App ID, and there is nothing left for automatic signing to
-  reconcile. Two rules fall out of it, both in CLAUDE.md §10 — **an extension
+  reconcile. Two rules fall out of it — **an extension
   target's entitlements are a signing contract, not boilerplate to copy**, and
   `xcode-cloud.py why` will not tell you any of this: the real message only
   exists inside the run's LOG_BUNDLE artifact.

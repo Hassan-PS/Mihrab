@@ -114,7 +114,7 @@ Fixes the stale-completion-flag / evicted-cache blank-page bug for good.
 ### 2.4 State
 
 New `QuranContext` slice (same pattern as the other domain slices), backed
-by its own AsyncStorage keys (additive schema, per §12 of CLAUDE.md):
+by its own AsyncStorage keys (additive schema, per ARCHITECTURE.md → Patterns & rules):
 last-read position `(surah, ayah, page, mode)`, bookmarks
 `[{surah, ayah, color, createdAt}]`, starred ayahs, khatmah plans, reciter +
 playback prefs, memorization loop settings.

@@ -6,9 +6,9 @@ Thanks for your interest. Mihrab is a privacy-respecting, FOSS-friendly prayer-t
 
 Read these in order. Later items assume earlier.
 
-1. **[CLAUDE.md](CLAUDE.md)** — the canonical project guide (architecture, stack, source layout, native modules, patterns). Both human contributors and Claude Code agents read it first.
+1. **[ARCHITECTURE.md](ARCHITECTURE.md)** — the technical reference: architecture, stack, source layout, native modules, and the patterns that keep prayer data correct. Read it first.
 2. **[docs/design/principles.md](docs/design/principles.md)** — the five design principles. Every visual decision routes through these.
-3. **[docs/DISTRIBUTION.md](docs/DISTRIBUTION.md)** — how releases reach the App Store, Play Store, and F-Droid. Skip if you're not touching the release pipeline.
+3. **[docs/DISTRIBUTION.md](docs/DISTRIBUTION.md)** — how releases reach the App Store, Play Store, F-Droid, GitHub Releases (the APK source Obtainium and OpenAPK pull from), and Homebrew (macOS). Skip if you're not touching the release pipeline.
 4. **[IMPROVEMENT_ROADMAP.md](IMPROVEMENT_ROADMAP.md)** — the numbered task list every commit references. If your change overlaps with a planned task, mention the number in your PR description.
 
 ## Hard rules
@@ -33,13 +33,13 @@ These are **non-negotiable**. The `reviewer` subagent in `.claude/agents/reviewe
 - **All 13 must stay in parity.** Adding a translation key requires editing all 13 files in `src/i18n/locales/`. The `PreToolUse` hook reminds you. The `/locale-add KEY EN_VALUE` slash command scaffolds the new key in all 13 at once.
 - Religious terminology follows the canonical table in `.claude/agents/locale-translator.md`.
 
-### Design system (after task #34 lands)
+### Design system
 
 - **No raw hex codes** outside `src/theme/tokens.ts`.
 - **No magic spacing/radius numbers** — every padding/margin/radius is a token.
 - **Every `Text` uses a type token** — no raw `fontSize` in `StyleSheet.create`.
 - **Every animation uses motion tokens AND has a Reduce Motion fallback.**
-- **No raw `<Pressable>` / `<Modal>` in screens** (after task #39) — use the wrappers in `src/components/ui/`.
+- **No raw `<Pressable>` / `<Modal>` in screens** — use the wrappers in `src/components/ui/`.
 
 ### Accessibility
 
