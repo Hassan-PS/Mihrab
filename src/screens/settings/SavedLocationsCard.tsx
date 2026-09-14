@@ -100,6 +100,27 @@ function SavedLocationsCardImpl({
   const presets = settings.locationPresets ?? [];
   const limitReached = presets.length >= MAX_LOCATION_PRESETS;
 
+  /**
+   * The name is optional now. A searched place, a typed coordinate pair,
+   * or the live GPS fix on automatic is a location on its own — so the
+   * button enables on having a place to save, not on the name field, and
+   * an empty name falls back to the place's own name (see `onSaveCurrent`).
+   *
+   * The reported bug: you search a city, the row appears, you press
+   * Save — and nothing happens, because Save was greyed out waiting for a
+   * name you did not know you had to invent. The city already has a name.
+   */
+  const canSave =
+    draftPlace != null ||
+    (draftLatStr.trim().length > 0 && draftLngStr.trim().length > 0) ||
+    (isAuto &&
+      settings.lastFetchedLatitude != null &&
+      settings.lastFetchedLongitude != null &&
+      !(
+        settings.lastFetchedLatitude === 0 &&
+        settings.lastFetchedLongitude === 0
+      ));
+
   const onUse = (id: string) => {
     const preset = presets.find(p => p.id === id);
     if (!preset) return;
@@ -133,7 +154,6 @@ function SavedLocationsCardImpl({
 
   const onSaveCurrent = () => {
     const name = draftName.trim();
-    if (!name) return;
 
     // Resolve the coords to save:
     //   1) Place picked from search → its lat/lng + display label
@@ -248,8 +268,17 @@ function SavedLocationsCardImpl({
       });
     }
 
+    // An empty name takes the place's own name — the first part of its
+    // label ("Stockholm" out of "Stockholm, Södermanland, Sweden"), or,
+    // for a bare coordinate pair with no label, the coordinates. So a
+    // searched city saves with one tap and no typing.
+    const finalName =
+      name ||
+      (label?.split(',')[0].trim() || '') ||
+      `${(lat as number).toFixed(2)}°, ${(lng as number).toFixed(2)}°`;
+
     const next = addPreset(workingPresets, {
-      name,
+      name: finalName,
       latitude: lat,
       longitude: lng,
       label,
@@ -457,16 +486,13 @@ function SavedLocationsCardImpl({
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t('locations.save')}
-                accessibilityState={{ disabled: draftName.trim().length === 0 }}
-                disabled={draftName.trim().length === 0}
+                accessibilityState={{ disabled: !canSave }}
+                disabled={!canSave}
                 onPress={onSaveCurrent}
                 style={[
                   styles.addSaveBtn,
                   {
-                    backgroundColor:
-                      draftName.trim().length === 0
-                        ? palette.muted
-                        : palette.accent,
+                    backgroundColor: canSave ? palette.accent : palette.muted,
                   },
                 ]}>
                 <Text style={[styles.addSaveLabel, { color: palette.onAccent }]}>
