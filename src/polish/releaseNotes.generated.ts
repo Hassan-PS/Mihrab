@@ -19,6 +19,16 @@ export type ReleaseNote = {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    code: 272,
+    version: '2.21.0',
+    date: '2026-09-14',
+    notes: {
+      en: '• The muṣḥaf is the reader now. The verse-by-verse list is a setting — already on if you were using it, and first launch asks.\n• Today turns to tomorrow once the last time of the day has passed.\n• A − A + for the translation and tafsīr sits in the bar, not at the top of the surah.\n• The back arrow points the right way in Arabic and Urdu.\n• A khatmah keeps counting instead of quietly stopping.\n• Tab labels stay clear of rounded screen corners.\n• A faster start, and a smaller download.',
+      ar: '• المصحف هو القارئ الآن. وقائمة الآيات صارت إعدادًا — مفعّلة إن كنت تستعملها، وأول تشغيل يسأل.\n• اليوم يصير غدًا متى انقضى آخر وقت في اليوم.\n• أزرار A − A + للترجمة والتفسير في الشريط، لا أعلى السورة.\n• سهم الرجوع يشير إلى الجهة الصحيحة في العربية والأردية.\n• الختمة تواصل العدّ بدل أن تتوقف بصمت.\n• عناوين التبويبات تبتعد عن زوايا الشاشة المستديرة.\n• بدء أسرع، وتنزيل أصغر.',
+      sv: '• Mushafen är läsaren nu. Vers-för-vers-listan är en inställning — redan på om du använde den, och första starten frågar.\n• I dag blir till i morgon när dagens sista tid har passerat.\n• A − A + för översättning och tafsir sitter i verktygsfältet, inte överst i suran.\n• Bakåtpilen pekar åt rätt håll på arabiska och urdu.\n• En khatma fortsätter räkna i stället för att tyst sluta.\n• Fliketiketterna håller sig undan skärmens rundade hörn.\n• Snabbare start, och mindre nedladdning.',
+    },
+  },
+  {
     code: 271,
     version: '2.20.0',
     date: '2026-09-13',

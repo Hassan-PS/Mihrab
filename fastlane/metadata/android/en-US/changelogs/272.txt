@@ -1,0 +1,7 @@
+• The muṣḥaf is the reader now. The verse-by-verse list is a setting — already on if you were using it, and first launch asks.
+• Today turns to tomorrow once the last time of the day has passed.
+• A − A + for the translation and tafsīr sits in the bar, not at the top of the surah.
+• The back arrow points the right way in Arabic and Urdu.
+• A khatmah keeps counting instead of quietly stopping.
+• Tab labels stay clear of rounded screen corners.
+• A faster start, and a smaller download.

@@ -777,3 +777,12 @@ anyway — a flag that did the opposite of its name, discoverable only by
 someone holding a build back and finding it in App Store Connect. Nobody hit
 it. It was found by reading the branch next to the one that was broken,
 which is the cheapest time to find anything.
+
+## 2.21.0 (272) — 2026-09-14
+
+Took 2 aborted attempt(s) before it ran clean:
+
+  - 1 origin/main has commits main does not — pull first
+  - 1 working tree has tracked changes — commit or stash them first
+
+**Lesson:** _(unfilled)_
