@@ -196,20 +196,16 @@ export function PrayerSettingsProvider({
 
   const updateSettings = useCallback((patch: Partial<PrayerAppSettings>) => {
     setSettings(prev => {
-      let next = { ...prev, ...patch };
-      // When switching location mode, drop the cached GPS coordinates so
-      // screens never briefly display times for the old location.
-      if (
-        patch.locationMode !== undefined &&
-        patch.locationMode !== prev.locationMode
-      ) {
-        next = {
-          ...next,
-          lastFetchedLatitude: undefined,
-          lastFetchedLongitude: undefined,
-          autoLocationLabel: undefined,
-        };
-      }
+      const next = { ...prev, ...patch };
+      // The last GPS fix (`lastFetched*`, `autoLocationLabel`) survives a
+      // mode switch on purpose. It used to be wiped here so automatic
+      // never briefly showed a saved city's times — but the only reason it
+      // could have was that Home wrote the MANUAL coordinates into these
+      // fields; it no longer does (see the persist effect in HomeScreen).
+      // Now they are always the last place the phone was, and keeping them
+      // is what lets "My location" show that place at once, while a fresh
+      // fix lands, instead of a blank screen for the whole GPS round trip —
+      // the same last-known-first behaviour a cold start has always had.
       saveSettings(next).catch(e => console.error('Failed to save settings', e));
       return next;
     });

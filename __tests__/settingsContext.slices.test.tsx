@@ -191,7 +191,7 @@ describe('PrayerSettingsContext slice isolation', () => {
     root.unmount();
   });
 
-  test('changing locationMode clears lastFetched coords (preserved behavior)', async () => {
+  test('changing locationMode KEEPS the last GPS fix (it is what makes the return instant)', async () => {
     let observed: {
       locationMode?: string;
       lastFetchedLatitude?: number;
@@ -215,10 +215,16 @@ describe('PrayerSettingsContext slice isolation', () => {
     });
     await flush();
 
-    // Default locationMode is 'manual'. Switch to 'automatic' first so the
-    // mode change actually fires in the next step. Then seed last-fetched
-    // coords. Then switch BACK to 'manual' — that's the change that must
-    // clear them.
+    // Default locationMode is 'manual'. Switch to 'automatic', seed the GPS
+    // fix, then switch BACK to 'manual' and back to 'automatic' again.
+    //
+    // The context used to wipe `lastFetched*` on every mode change, so that
+    // automatic never briefly showed a saved city's times. That was only
+    // needed because Home wrote the MANUAL coordinates into these fields;
+    // it no longer does, so they are always the last place the phone was.
+    // Keeping them across the switch is what lets "My location" render that
+    // place at once while a fresh fix lands — instead of a blank screen for
+    // the whole GPS round trip (the reported "laggy" return).
     await act(async () => {
       harness.update({ locationMode: 'automatic' });
     });
@@ -233,8 +239,16 @@ describe('PrayerSettingsContext slice isolation', () => {
     await act(async () => {
       harness.update({ locationMode: 'manual' });
     });
-    expect(observed!.lastFetchedLatitude).toBeUndefined();
-    expect(observed!.lastFetchedLongitude).toBeUndefined();
+    // Survives the stint on a saved location…
+    expect(observed!.lastFetchedLatitude).toBeCloseTo(59.33);
+    expect(observed!.lastFetchedLongitude).toBeCloseTo(18.07);
+
+    await act(async () => {
+      harness.update({ locationMode: 'automatic' });
+    });
+    // …and is still there for the instant render on the way back.
+    expect(observed!.lastFetchedLatitude).toBeCloseTo(59.33);
+    expect(observed!.lastFetchedLongitude).toBeCloseTo(18.07);
 
     root.unmount();
   });

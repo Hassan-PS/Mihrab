@@ -514,7 +514,11 @@ export function HomeScreen() {
   }, [state, retry, view, homeActive]);
 
   useEffect(() => {
-    if (!hydrated || state.phase !== 'ready' || !view) return;
+    // Not on the on-device times that fill the moment after a location
+    // change (`provisional`): writing those out would gate the provider's
+    // times a beat later as "already done". Only a settled answer syncs.
+    if (!hydrated || state.phase !== 'ready' || !view || state.provisional)
+      return;
     // After the card is on screen, not in the same breath as drawing it.
     if (!afterFirstPaint) return;
     syncPrayerNotifications({
@@ -643,7 +647,11 @@ export function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      if (!hydrated || state.phase !== 'ready' || !view) return;
+      // Not on the on-device times that fill the moment after a location
+      // change (`provisional`): writing those out would gate the provider's
+      // times a beat later as "already done". Only a settled answer syncs.
+      if (!hydrated || state.phase !== 'ready' || !view || state.provisional)
+        return;
       if (!afterFirstPaint) return;
       // Every focus of the Today tab used to tear down and rewrite the whole
       // ~48-alarm set, plus a `getDisplayedNotifications` round-trip and a
@@ -825,7 +833,11 @@ export function HomeScreen() {
   // include `now` in the deps any more — the widget doesn't need a tick-by-tick
   // refresh; it updates when the underlying data does.
   useEffect(() => {
-    if (!hydrated || state.phase !== 'ready' || !view) return;
+    // Not on the on-device times that fill the moment after a location
+    // change (`provisional`): writing those out would gate the provider's
+    // times a beat later as "already done". Only a settled answer syncs.
+    if (!hydrated || state.phase !== 'ready' || !view || state.provisional)
+      return;
     if (!afterFirstPaint) return;
     const seasonal = computeSeasonalTreatment(
       view.table.today,
@@ -878,7 +890,11 @@ export function HomeScreen() {
   // Dhuhr, this effect re-fires with `now: new Date()`, so syncLiveActivity
   // recomputes the correct next prayer and pushes updated content.
   useEffect(() => {
-    if (!hydrated || state.phase !== 'ready' || !view) return;
+    // Not on the on-device times that fill the moment after a location
+    // change (`provisional`): writing those out would gate the provider's
+    // times a beat later as "already done". Only a settled answer syncs.
+    if (!hydrated || state.phase !== 'ready' || !view || state.provisional)
+      return;
     if (!afterFirstPaint) return;
     const seasonal = computeSeasonalTreatment(
       view.table.today,
@@ -950,15 +966,19 @@ export function HomeScreen() {
   const readyLng = state.phase === 'ready' ? state.longitude : undefined;
   const readyCity = state.phase === 'ready' ? state.cityName : undefined;
   useEffect(() => {
+    // Only the GPS fix. `lastFetched*` is the last place the phone was,
+    // kept across a stint on a saved location so that coming back to
+    // "My location" can show it at once while a fresh fix lands. Writing
+    // the MANUAL coordinates here — as this used to — is what forced the
+    // mode switch to wipe them (or automatic would have shown the saved
+    // city), and that wipe is what left "My location" on a blank screen
+    // until GPS, geocoding and a fetch had all finished.
+    if (settings.locationMode !== 'automatic') return;
     if (readyLat == null || readyLng == null) return;
     const coordsSame =
       settings.lastFetchedLatitude === readyLat &&
       settings.lastFetchedLongitude === readyLng;
-    // Only track the auto city name in automatic mode; manual mode uses
-    // manualLocationLabel instead.
-    const nextCity =
-      settings.locationMode === 'automatic' ? readyCity : undefined;
-    const citySame = settings.autoLocationLabel === nextCity;
+    const citySame = settings.autoLocationLabel === readyCity;
     if (coordsSame && citySame) return;
     const patch: {
       lastFetchedLatitude: number;
@@ -968,7 +988,7 @@ export function HomeScreen() {
       lastFetchedLatitude: readyLat,
       lastFetchedLongitude: readyLng,
     };
-    if (!citySame) patch.autoLocationLabel = nextCity;
+    if (!citySame) patch.autoLocationLabel = readyCity;
     updateSettings(patch);
   }, [
     readyLat,

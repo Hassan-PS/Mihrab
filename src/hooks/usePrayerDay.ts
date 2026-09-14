@@ -33,10 +33,11 @@ import {
 const WEEK_DAYS = 7;
 
 /**
- * How long a location change is left to settle before the times are
- * (re)loaded — long enough to swallow a rapid burst of switches, short
- * enough to feel immediate on a single deliberate one. See the reload
- * effect: the first load is never delayed, only the ones after it.
+ * The settle window that collapses a rapid burst of location switches.
+ * A switch that arrives with nothing fired inside this window fires at
+ * once (so a single deliberate switch is never delayed); the follow-ups of
+ * a burst are held and collapse into one trailing load once the switching
+ * stops. See the reload effect.
  */
 const LOCATION_SETTLE_MS = 300;
 
@@ -110,6 +111,16 @@ export type PrayerDayState =
        * loading indicator so the user knows a refresh is happening.
        */
       backgroundRefreshing?: boolean;
+      /**
+       * True while the times on screen were computed on the device to fill
+       * the moment between a location change and the provider's answer.
+       * They are a valid display but NOT a settled answer: nothing that
+       * writes them out — the alarm schedule, the widget, the Live Activity,
+       * the reminder gates — may run on them, or the provider's times a
+       * beat later would be gated out as "already done". Cleared by the
+       * state the provider (or the offline fallback) publishes.
+       */
+      provisional?: boolean;
     };
 
 // `coordsChangedSignificantly` extracted to `src/utils/coords.ts` (task #17)
@@ -134,6 +145,49 @@ function applyOffsetsToWeek(
 ): TimingsMap[] {
   if (!offsets || Object.keys(offsets).length === 0) return week;
   return week.map(t => applyOffsets(t, offsets));
+}
+
+/**
+ * The week, computed on the device, for the moment between a location
+ * change and the provider's answer.
+ *
+ * Switching to a saved place used to blank the screen until all seven
+ * days had come back from the cache or the network — visibly laggy, and
+ * for a city not yet cached, a spinner for as long as the round trip took.
+ * But the app has always been able to compute the times itself
+ * (`computeLocalAdhanTimes`, the offline fallback); it just never used that
+ * until the network had FAILED. Now a switch paints these at once and the
+ * provider's times replace them a moment later. Same offsets and night
+ * times as the real pipeline, so the swap is at most a minute here or
+ * there. Returns null if the coordinates cannot be computed against, in
+ * which case the caller falls back to the loading state.
+ */
+export function buildProvisionalWeek(params: {
+  latitude: number;
+  longitude: number;
+  calculationMethod: PrayerAppSettings['calculationMethod'];
+  school: PrayerAppSettings['school'];
+  prayerOffsets: PrayerAppSettings['prayerOffsets'];
+  now: Date;
+}): TimingsMap[] | null {
+  const week: TimingsMap[] = [];
+  for (let i = 0; i < WEEK_DAYS; i++) {
+    try {
+      week.push(
+        computeLocalAdhanTimes({
+          latitude: params.latitude,
+          longitude: params.longitude,
+          date: addDays(params.now, i),
+          calculationMethod: params.calculationMethod,
+          school: params.school,
+        }).timings,
+      );
+    } catch {
+      break;
+    }
+  }
+  if (week.length === 0) return null;
+  return injectNightTimes(applyOffsetsToWeek(week, params.prayerOffsets));
 }
 
 /** Gate key for the foreground refresh. */
@@ -169,12 +223,14 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
    */
   const loadedCoordsRef = useRef<{ lat: number; lng: number } | null>(null);
   /**
-   * Debounce for the reload effect at the bottom. The first load fires at
-   * once; every reload after it — a location switch, a method change — waits
-   * `LOCATION_SETTLE_MS` so a rapid burst of switches collapses into one.
+   * Burst collapse for the reload effect at the bottom. A switch fires at
+   * once when nothing has fired inside `LOCATION_SETTLE_MS`; the rest of a
+   * rapid burst is held and collapses into one trailing load.
    */
   const loadDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const didInitialLoadRef = useRef(false);
+  /** When a load last fired, for the leading edge of the burst collapse. */
+  const lastFireRef = useRef(0);
   // Latest auto-mode load OUTPUTS (last-fetched coords + resolved city name).
   // Read through a ref — NOT the requestAndLoad dependency array — so that a
   // completed load persisting these back into settings does NOT re-trigger the
@@ -209,7 +265,40 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
       );
 
       if (!isBackgroundRefresh) {
-        setState({ phase: 'loading' });
+        // Paint the on-device week at once rather than blanking. The
+        // provider's answer replaces it below; `backgroundRefreshing` keeps
+        // the footer's subtle indicator on until it does. Deliberately NOT
+        // `usingLocalFallback` — that flag raises the offline banner, and
+        // nothing has failed here. Only if the device cannot compute these
+        // coordinates does the screen fall back to the loading state.
+        const provisionalNow = new Date();
+        const provisional = buildProvisionalWeek({
+          latitude,
+          longitude,
+          calculationMethod: settings.calculationMethod,
+          school: settings.school,
+          prayerOffsets: settings.prayerOffsets,
+          now: provisionalNow,
+        });
+        if (provisional) {
+          setState(prev => ({
+            phase: 'ready',
+            latitude,
+            longitude,
+            cityName:
+              label ?? (prev.phase === 'ready' ? prev.cityName : undefined),
+            baseDate: startOfLocalDay(provisionalNow),
+            today: provisional[0],
+            tomorrow: provisional[1],
+            week: provisional,
+            widgetWeek: provisional,
+            past: [],
+            backgroundRefreshing: true,
+            provisional: true,
+          }));
+        } else {
+          setState({ phase: 'loading' });
+        }
       } else {
         // Mark current ready state as actively refreshing so the UI can show
         // a subtle indicator without blanking the displayed times.
@@ -561,9 +650,9 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
           }
           return;
         }
-        if (!isBackgroundRefresh) {
-          setState({ phase: 'loading' });
-        }
+        // No blank here: `loadTimes` paints the on-device week for these
+        // coordinates at once, so a switch to a saved place shows its times
+        // immediately and the provider's answer replaces them.
         loadTimes(
           settings.manualLatitude,
           settings.manualLongitude,
@@ -824,17 +913,28 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
     // switching locations back to back more than twice drops onto a blank
     // loading screen for a long time, until it crashes or finally lands.
     //
-    // The FIRST load is never delayed — cold start must not wait — so only
-    // reloads are debounced. The effect cleanup clears the pending timer, so
-    // a rapid burst leaves exactly one timer standing, which fires once the
-    // switching stops.
-    if (!didInitialLoadRef.current) {
+    // Leading edge, then collapse. A deliberate single switch must not
+    // wait: if nothing has fired inside the settle window, fire NOW — that
+    // is what makes switching feel instant. Only the follow-ups of a rapid
+    // burst are held, and they collapse into one trailing fire once the
+    // switching stops, so a burst costs at most two loads (the first and
+    // the last) instead of one per tap. The cleanup clears the pending
+    // trailing timer, so re-runs never stack them.
+    const now = Date.now();
+    const quietFor = now - lastFireRef.current;
+    if (!didInitialLoadRef.current || quietFor >= LOCATION_SETTLE_MS) {
       didInitialLoadRef.current = true;
+      lastFireRef.current = now;
+      if (loadDebounceRef.current) {
+        clearTimeout(loadDebounceRef.current);
+        loadDebounceRef.current = null;
+      }
       requestAndLoad();
     } else {
       if (loadDebounceRef.current) clearTimeout(loadDebounceRef.current);
       loadDebounceRef.current = setTimeout(() => {
         loadDebounceRef.current = null;
+        lastFireRef.current = Date.now();
         requestAndLoad();
       }, LOCATION_SETTLE_MS);
     }
