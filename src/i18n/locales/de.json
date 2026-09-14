@@ -490,6 +490,7 @@
     "placeholder": "z.B. Kairo, London, Postleitzahl…",
     "hint": "Ergebnisse von OpenStreetMap (Nominatim). Verwenden Sie es mit Respekt – nicht für die Massengeokodierung.",
     "appliedTitle": "Standort angewendet",
+    "selectedTitle": "Standort ausgewählt",
     "searchFailed": "Die Suche ist fehlgeschlagen",
     "applied": "Angewendet: {{label}}",
     "noResults": "Keine Ergebnisse",

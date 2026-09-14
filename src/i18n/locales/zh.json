@@ -490,6 +490,7 @@
     "placeholder": "例如开罗、伦敦、邮政编码……",
     "hint": "OpenStreetMap（Nominatim）的结果。尊重地使用 - 不适用于批量地理编码。",
     "appliedTitle": "申请地点",
+    "selectedTitle": "已选择地点",
     "searchFailed": "搜索失败",
     "applied": "应用：{{label}}",
     "noResults": "没有结果",

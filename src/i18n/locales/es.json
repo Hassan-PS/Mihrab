@@ -490,6 +490,7 @@
     "placeholder": "p.ej. El Cairo, Londres, código postal…",
     "hint": "Resultados de OpenStreetMap (Nominatim). Úselo con respeto, no para codificación geográfica masiva.",
     "appliedTitle": "Ubicación aplicada",
+    "selectedTitle": "Ubicación seleccionada",
     "searchFailed": "La búsqueda falló",
     "applied": "Aplicado: {{label}}",
     "noResults": "Sin resultados",

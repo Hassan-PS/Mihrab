@@ -490,6 +490,7 @@
     "placeholder": "e.g. Cairo, London, postal code…",
     "hint": "Results from OpenStreetMap (Nominatim). Use respectfully — not for bulk geocoding.",
     "appliedTitle": "Location applied",
+    "selectedTitle": "Location selected",
     "searchFailed": "Search failed",
     "applied": "Applied: {{label}}",
     "noResults": "No results",

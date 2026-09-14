@@ -490,6 +490,7 @@
     "placeholder": "جیسے قاہرہ، لندن، پوسٹل کوڈ…",
     "hint": "OpenStreetMap (Nominatim) کے نتائج۔ احترام کے ساتھ استعمال کریں — بلک جیو کوڈنگ کے لیے نہیں۔",
     "appliedTitle": "مقام لاگو کر دیا گیا۔",
+    "selectedTitle": "مقام منتخب کر لیا گیا",
     "searchFailed": "تلاش ناکام ہوگئی",
     "applied": "لاگو: {{label}}",
     "noResults": "کوئی نتیجہ نہیں۔",

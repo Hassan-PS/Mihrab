@@ -34,11 +34,24 @@ type Palette = {
 type Props = {
   palette: Palette;
   onSelectPlace: (place: GeocodedPlace) => void;
+  /**
+   * What tapping a result means for the host. In an 'applied' host the tap
+   * commits the location straight away (LocationCard, LocationSetup), so the
+   * banner rightly says "Location applied". In a 'selected' host the tap only
+   * fills a draft the user still has to name and save (SavedLocationsCard) —
+   * where claiming "applied" was a lie that sent people back to a home screen
+   * that had not changed. Default 'applied'.
+   */
+  confirmVariant?: 'applied' | 'selected';
 };
 
 const DEBOUNCE_MS = 350;
 
-export function PlaceSearchSection({ palette, onSelectPlace }: Props) {
+export function PlaceSearchSection({
+  palette,
+  onSelectPlace,
+  confirmVariant = 'applied',
+}: Props) {
   const { t, i18n } = useTranslation();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GeocodedPlace[]>([]);
@@ -144,13 +157,19 @@ export function PlaceSearchSection({ palette, onSelectPlace }: Props) {
           ]}
           accessible
           accessibilityLiveRegion="polite"
-          accessibilityLabel={`Location applied: ${appliedLabel}`}>
+          accessibilityLabel={`${
+            confirmVariant === 'selected'
+              ? t('placeSearch.selectedTitle')
+              : t('placeSearch.appliedTitle')
+          }: ${appliedLabel}`}>
           <Text style={[styles.appliedCheck, { color: palette.accent }]}>
             ✓
           </Text>
           <View style={styles.appliedTextWrap}>
             <Text style={[styles.appliedTitle, { color: palette.text }]}>
-              {t('placeSearch.appliedTitle')}
+              {confirmVariant === 'selected'
+                ? t('placeSearch.selectedTitle')
+                : t('placeSearch.appliedTitle')}
             </Text>
             <Text style={[styles.appliedSubtitle, { color: palette.muted }]}>
               {appliedLabel}

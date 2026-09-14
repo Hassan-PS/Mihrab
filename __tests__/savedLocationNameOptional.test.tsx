@@ -27,10 +27,17 @@ jest.mock('../src/hooks/useAppPalette', () => ({
 // The real search reaches a geocoder. This mock captures the card's
 // onSelectPlace so the test can hand it a picked place, the way the search
 // list would.
-const mockSearch: { onSelect: ((p: unknown) => void) | null } = { onSelect: null };
+const mockSearch: {
+  onSelect: ((p: unknown) => void) | null;
+  confirmVariant: string | undefined;
+} = { onSelect: null, confirmVariant: undefined };
 jest.mock('../src/components/PlaceSearchSection', () => ({
-  PlaceSearchSection: (props: { onSelectPlace: (p: unknown) => void }) => {
+  PlaceSearchSection: (props: {
+    onSelectPlace: (p: unknown) => void;
+    confirmVariant?: string;
+  }) => {
     mockSearch.onSelect = props.onSelectPlace;
+    mockSearch.confirmVariant = props.confirmVariant;
     return null;
   },
 }));
@@ -63,6 +70,7 @@ const GOTHENBURG = {
 beforeEach(() => {
   mockUpdate.mockClear();
   mockSearch.onSelect = null;
+  mockSearch.confirmVariant = undefined;
   // Manual mode, empty list, no current location — so nothing is rescued
   // and the only preset produced is the one under test.
   mockSlice = {
@@ -94,6 +102,19 @@ describe('saving a searched location with no name', () => {
     expect(press(tree, 'locations.save').props.accessibilityState).toEqual({
       disabled: false,
     });
+  });
+
+  it('applies nothing on select — it only stages a draft to be saved', () => {
+    const tree = render();
+    act(() => press(tree, 'locations.add').props.onPress());
+    mockUpdate.mockClear();
+    act(() => mockSearch.onSelect?.(GOTHENBURG));
+    // The reported bug: the search banner said "Location applied", so the
+    // user went home expecting a change — but selecting only fills the draft
+    // below, and nothing reaches the live location until Save.
+    expect(mockUpdate).not.toHaveBeenCalled();
+    // So the card must tell the search to confirm "selected", not "applied".
+    expect(mockSearch.confirmVariant).toBe('selected');
   });
 
   it('saves it under the place’s own name', () => {

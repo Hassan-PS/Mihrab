@@ -490,6 +490,7 @@
     "placeholder": "مثل: القاهرة، لندن، الرمز البريدي…",
     "hint": "نتائج من OpenStreetMap (Nominatim). استخدمها باعتدال — لا للترميز الجماعي.",
     "appliedTitle": "تم تطبيق الموقع",
+    "selectedTitle": "تم اختيار الموقع",
     "searchFailed": "فشل البحث",
     "applied": "تم التطبيق: {{label}}",
     "noResults": "لا نتائج",

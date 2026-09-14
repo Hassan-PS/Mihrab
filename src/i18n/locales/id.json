@@ -490,6 +490,7 @@
     "placeholder": "misalnya Kairo, London, kode pos…",
     "hint": "Hasil dari OpenStreetMap (Nominatim). Gunakan dengan hormat — bukan untuk geocoding massal.",
     "appliedTitle": "Lokasi diterapkan",
+    "selectedTitle": "Lokasi dipilih",
     "searchFailed": "Pencarian gagal",
     "applied": "Diterapkan: {{label}}",
     "noResults": "Tidak ada hasil",

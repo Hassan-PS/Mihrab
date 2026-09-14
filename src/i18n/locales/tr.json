@@ -490,6 +490,7 @@
     "placeholder": "örneğin Kahire, Londra, posta kodu…",
     "hint": "OpenStreetMap'ten (Nominatim) sonuçlar. Toplu coğrafi kodlama için değil, saygılı bir şekilde kullanın.",
     "appliedTitle": "Konum uygulandı",
+    "selectedTitle": "Konum seçildi",
     "searchFailed": "Arama başarısız oldu",
     "applied": "Uygulanan: {{label}}",
     "noResults": "Sonuç yok",

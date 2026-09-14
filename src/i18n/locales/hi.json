@@ -490,6 +490,7 @@
     "placeholder": "जैसे काहिरा, लंदन, डाक कोड...",
     "hint": "OpenStreetMap (Nominatim) से परिणाम। सम्मानपूर्वक उपयोग करें - थोक जियोकोडिंग के लिए नहीं।",
     "appliedTitle": "स्थान लागू किया गया",
+    "selectedTitle": "स्थान चुना गया",
     "searchFailed": "खोज विफल रही",
     "applied": "लागू: {{label}}",
     "noResults": "कोई परिणाम नहीं",

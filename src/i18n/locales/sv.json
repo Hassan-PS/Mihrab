@@ -490,6 +490,7 @@
     "placeholder": "t.ex. Stockholm, postnummer…",
     "hint": "Resultat från OpenStreetMap (Nominatim). Använd ansvarsfullt — inte för massgeokodning.",
     "appliedTitle": "Plats tillämpad",
+    "selectedTitle": "Plats vald",
     "searchFailed": "Sökningen misslyckades",
     "applied": "Tillämpat: {{label}}",
     "noResults": "Inga resultat",

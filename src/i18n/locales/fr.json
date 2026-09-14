@@ -490,6 +490,7 @@
     "placeholder": "par ex. Le Caire, Londres, code postal…",
     "hint": "Résultats d'OpenStreetMap (Nominatim). À utiliser avec respect – pas pour le géocodage en masse.",
     "appliedTitle": "Emplacement appliqué",
+    "selectedTitle": "Emplacement sélectionné",
     "searchFailed": "La recherche a échoué",
     "applied": "Appliqué : {{label}}",
     "noResults": "Aucun résultat",

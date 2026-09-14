@@ -411,6 +411,10 @@ function SavedLocationsCardImpl({
             {/* Place search: pick a real city by name (geocoded). Selecting
                 a result populates draftPlace and we use those coords. */}
             <PlaceSearchSection
+              // A tap here only fills the draft below — the user still names
+              // (optional) and saves it. So the confirmation must not claim
+              // the location is "applied"; it is merely selected.
+              confirmVariant="selected"
               palette={{
                 bg: palette.bg,
                 text: palette.text,
