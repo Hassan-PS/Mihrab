@@ -32,6 +32,14 @@ import {
 /** How many consecutive days (today + N-1 more) to fetch and expose. */
 const WEEK_DAYS = 7;
 
+/**
+ * How long a location change is left to settle before the times are
+ * (re)loaded — long enough to swallow a rapid burst of switches, short
+ * enough to feel immediate on a single deliberate one. See the reload
+ * effect: the first load is never delayed, only the ones after it.
+ */
+const LOCATION_SETTLE_MS = 300;
+
 
 export type PrayerDayState =
   | { phase: 'idle' }
@@ -160,6 +168,13 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
    * "the anchor equals what is loaded" is the exact test for "same city".
    */
   const loadedCoordsRef = useRef<{ lat: number; lng: number } | null>(null);
+  /**
+   * Debounce for the reload effect at the bottom. The first load fires at
+   * once; every reload after it — a location switch, a method change — waits
+   * `LOCATION_SETTLE_MS` so a rapid burst of switches collapses into one.
+   */
+  const loadDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didInitialLoadRef = useRef(false);
   // Latest auto-mode load OUTPUTS (last-fetched coords + resolved city name).
   // Read through a ref — NOT the requestAndLoad dependency array — so that a
   // completed load persisting these back into settings does NOT re-trigger the
@@ -798,7 +813,31 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
       setState(prev => (prev.phase === 'idle' ? prev : { phase: 'idle' }));
       return;
     }
-    requestAndLoad();
+
+    // Collapse a burst of location switches into ONE load. Every switch
+    // changes `requestAndLoad`'s identity and re-runs this effect. The
+    // generation guard inside `loadTimes` keeps the STATE correct — only the
+    // last result is shown — but each superseded load still ran its whole
+    // seven-day fetch and its cache reads, so three fast switches queued the
+    // place you landed on behind a pile of I/O it did not need, and the
+    // provider or the storage bridge choked on the herd. Reported as:
+    // switching locations back to back more than twice drops onto a blank
+    // loading screen for a long time, until it crashes or finally lands.
+    //
+    // The FIRST load is never delayed — cold start must not wait — so only
+    // reloads are debounced. The effect cleanup clears the pending timer, so
+    // a rapid burst leaves exactly one timer standing, which fires once the
+    // switching stops.
+    if (!didInitialLoadRef.current) {
+      didInitialLoadRef.current = true;
+      requestAndLoad();
+    } else {
+      if (loadDebounceRef.current) clearTimeout(loadDebounceRef.current);
+      loadDebounceRef.current = setTimeout(() => {
+        loadDebounceRef.current = null;
+        requestAndLoad();
+      }, LOCATION_SETTLE_MS);
+    }
 
     const sub = AppState.addEventListener('change', nextState => {
       if (nextState !== 'active') return;
@@ -827,6 +866,10 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
     });
 
     return () => {
+      if (loadDebounceRef.current) {
+        clearTimeout(loadDebounceRef.current);
+        loadDebounceRef.current = null;
+      }
       sub.remove();
     };
   }, [
