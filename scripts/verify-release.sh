@@ -100,7 +100,14 @@ if [ -f "$TAP" ]; then
     #
     # So this is a release gate, not a nicety. Without it every Mac user's
     # widgets stop at the version they upgraded FROM.
-    if grep -q "postflight" "$TAP" && grep -q "chronod" "$TAP"; then
+    # `postflight_steps` (Homebrew 7) runs its `run` step in the install
+    # sandbox, where `pluginkit -a` fails and the extension is never
+    # registered — so it must be rejected even though it satisfies a bare
+    # "postflight" grep. Only the legacy, unsandboxed `postflight do` block
+    # works. Measured live 2026-09-14; see docs/release/catalyst-widgets.md.
+    if grep -qE '^[[:space:]]*postflight_steps' "$TAP"; then
+      fail "cask uses postflight_steps — its sandboxed run step cannot register the widget extension (pluginkit -a fails); every Mac upgrading to $TAG loses its widgets. Keep the legacy 'postflight do' block."
+    elif grep -qE '^[[:space:]]*postflight do' "$TAP" && grep -q "chronod" "$TAP"; then
       pass "cask restarts chronod after install"
     else
       fail "cask has no chronod postflight — every Mac upgrading to $TAG freezes its widgets"

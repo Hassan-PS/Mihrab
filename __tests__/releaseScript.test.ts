@@ -37,6 +37,11 @@ describe('everything that can fail happens before anything irreversible', () => 
     ['the Play release-notes limit', "Play's limit is 500"],
     ['the tag being free', 'already exists on origin'],
     ['the cask postflight', 'no chronod postflight'],
+    // Homebrew 7's `postflight_steps` sandboxes its `run` step, where
+    // `pluginkit -a` fails and the widget extension is never registered
+    // (measured live 2026-09-14). A bare "postflight" grep passed the
+    // broken migration; this rejects it before the first push.
+    ['the sandboxed postflight_steps trap', 'uses postflight_steps'],
     ['the Xcode Cloud in-flight guard', 'already in flight'],
     ['the published zip being Developer ID signed', 'TeamIdentifier=GAW23HT439'],
     ['the App Group entitlement', 'no App Group entitlement'],

@@ -434,3 +434,53 @@ doing. But an empty minute now buys a visible relaunch and a second minute
 before the build is failed. The distinction is the point: if the visible
 launch is also empty, the app really cannot compute times and the failure is
 earned. A sleeping Mac costs one window; it used to cost the release.
+
+## The deprecated `postflight` cannot be migrated (2026-09-14)
+
+Homebrew 7 deprecated the cask `postflight do … end` block in favour of
+`postflight_steps`, and prints a warning on every `brew` command that
+touches the cask:
+
+```
+Warning: Calling `postflight` is deprecated! Use `postflight_steps` instead.
+  …/Casks/mihrab.rb:91
+```
+
+The obvious fix — rename the stanza and translate its two `system_command`
+calls into the new DSL (`run` for the `pluginkit` loop, the native
+`terminate_process "chronod"` for the daemon) — passes `brew style` and
+`brew audit`, and is a **trap**. The steps DSL runs each `run` step inside
+Homebrew's install sandbox (`Sandbox.available?` is true on macOS), and
+`pluginkit -a` needs unsandboxed IPC to `pkd` to register an extension.
+Under the sandbox it just fails.
+
+**Measured live on 2026-09-14**, with a diagnostic `postflight_steps` that
+printed what it resolved and what `pluginkit` returned:
+
+```
+DIAG appdir=[/Applications]          ← the {{appdir}} template expanded fine
+DIAG appex=exists                    ← the path was correct
+DIAG add_exit=1                      ← pluginkit -a FAILED under the sandbox
+DIAG registered=no                   ← the extension was dropped
+```
+
+The same `pluginkit -a`, run by hand in a normal shell, registered the
+extension on the first pass. So it is not the path, not the template, not
+the command — it is the sandbox, and there is no `run` option to opt out of
+it. `terminate_process` (chronod) is a native step and works; only the
+registration is blocked. A `postflight_steps` cask therefore installs
+cleanly, satisfies a bare "postflight" grep, and silently loses every
+upgrading Mac its widgets — the exact 2026-08-29 failure, re-introduced by
+the migration meant to be routine.
+
+**Decision:** keep the legacy `postflight do` block. It runs unsandboxed,
+`pluginkit -a` works, and the deprecation warning is cosmetic — the block
+still executes. The warning stays until Homebrew either gives `run` an
+unsandboxed escape hatch or removes `postflight` outright, at which point
+the registration needs a different mechanism (a launch, a login item, or an
+upstream fix), not a mechanical rename.
+
+**The gate.** `release.sh` and `verify-release.sh` no longer accept a bare
+"postflight": they reject a `postflight_steps` stanza by name and require
+the literal `postflight do` block, so the migration cannot be shipped by
+anyone who silences the warning without knowing what it costs.

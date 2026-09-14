@@ -359,9 +359,23 @@ done
 # what stops them being removed outright. See verify-release.sh 4a.
 if [ -f "$TAP" ]; then
   CASK_SRC="$(cat "$TAP")"
-  { has "$CASK_SRC" "postflight" && has "$CASK_SRC" "chronod"; } \
+  # The widget re-registration MUST run UNSANDBOXED. Homebrew 7's
+  # `postflight_steps` DSL runs its `run` step inside the install sandbox,
+  # where `pluginkit -a` fails (exit 1) and the extension is never
+  # registered — measured live 2026-09-14: `brew reinstall` dropped the
+  # extension every time and every upgrading Mac lost its widgets. A bare
+  # "postflight" grep passed `postflight_steps` while the widgets these two
+  # checks exist to save were silently lost, so the deprecated legacy
+  # `postflight do` block is REQUIRED by name and the steps form is
+  # rejected. The deprecation warning it prints is expected and accepted;
+  # see docs/release/catalyst-widgets.md. `^` anchors keep a comment that
+  # merely mentions the words from tripping either grep.
+  if printf '%s' "$CASK_SRC" | grep -qE '^[[:space:]]*postflight_steps'; then
+    die "cask uses postflight_steps — its sandboxed run step cannot register the widget extension (pluginkit -a fails), so every Mac upgrading to $TAG LOSES its widgets. Keep the legacy 'postflight do' block. See docs/release/catalyst-widgets.md."
+  fi
+  { printf '%s' "$CASK_SRC" | grep -qE '^[[:space:]]*postflight do' && has "$CASK_SRC" "chronod"; } \
     || die "cask has no chronod postflight — Macs upgrading to $TAG would freeze their widgets"
-  ok "cask restarts chronod after install"
+  ok "cask restarts chronod after install (legacy, unsandboxed postflight)"
   has "$CASK_SRC" "pluginkit" \
     || die "cask does not re-register the widget extension — Macs upgrading to $TAG would LOSE their widgets"
   ok "cask re-registers the widget extension"
