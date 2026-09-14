@@ -1,6 +1,7 @@
 package com.prayer_times
 
 import android.os.Build
+import android.view.RoundedCorner
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
@@ -79,6 +80,61 @@ class DisplayCutoutModule(reactContext: ReactApplicationContext) :
       }
     }
   }
+
+  /**
+   * How round the four corners of this display are, in dp.
+   *
+   * The insets do not say. A rounded corner is not a cutout and does not
+   * appear in `displayCutout`, and it is not in the safe-area insets
+   * either — the window really does extend into it, and the display simply
+   * does not light those pixels. So content welded to an edge is clipped
+   * by a curve nothing told the app about: the tab bar's outermost labels,
+   * "Today" and "Settings", ran into the bottom corners of a Huawei Nova
+   * 11i (#42), and no screenshot could show it, because a screenshot is
+   * the framebuffer and the mask is physical.
+   *
+   * Android has been able to answer since 12 (API 31). Below that, and on
+   * a display with square corners, every radius is zero and nothing
+   * reserves anything — which is exactly what the app did everywhere
+   * before this.
+   *
+   * Positions are the WINDOW's, not the device's: the platform rotates
+   * them with the display, so "bottom left" is the bottom left of what the
+   * reader is looking at, in portrait and in landscape.
+   */
+  @ReactMethod
+  fun getRoundedCorners(promise: Promise) {
+    val activity = reactApplicationContext.currentActivity
+    if (activity == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+      promise.resolve(squareCorners())
+      return
+    }
+    UiThreadUtil.runOnUiThread {
+      try {
+        val density = activity.resources.displayMetrics.density
+        val insets = activity.window.decorView.rootWindowInsets
+        val radius = { position: Int ->
+          (insets?.getRoundedCorner(position)?.radius ?: 0) / density.toDouble()
+        }
+        val result = Arguments.createMap()
+        result.putDouble("topLeft", radius(RoundedCorner.POSITION_TOP_LEFT))
+        result.putDouble("topRight", radius(RoundedCorner.POSITION_TOP_RIGHT))
+        result.putDouble("bottomLeft", radius(RoundedCorner.POSITION_BOTTOM_LEFT))
+        result.putDouble("bottomRight", radius(RoundedCorner.POSITION_BOTTOM_RIGHT))
+        promise.resolve(result)
+      } catch (e: Exception) {
+        promise.resolve(squareCorners())
+      }
+    }
+  }
+
+  private fun squareCorners() =
+    Arguments.createMap().apply {
+      putDouble("topLeft", 0.0)
+      putDouble("topRight", 0.0)
+      putDouble("bottomLeft", 0.0)
+      putDouble("bottomRight", 0.0)
+    }
 
   private fun empty() =
     Arguments.createMap().apply {

@@ -21,7 +21,22 @@ export type DisplayCutoutInfo = {
   windowWidth: number;
 };
 
-type DisplayCutoutNative = { getCutout(): Promise<DisplayCutoutInfo> };
+/**
+ * How round the four corners of the display are, in dp. All zero on a
+ * square-cornered display, below Android 12, and on iOS — where the
+ * safe-area insets already account for the curve.
+ */
+export type RoundedCorners = {
+  topLeft: number;
+  topRight: number;
+  bottomLeft: number;
+  bottomRight: number;
+};
+
+type DisplayCutoutNative = {
+  getCutout(): Promise<DisplayCutoutInfo>;
+  getRoundedCorners?: () => Promise<RoundedCorners>;
+};
 
 const native = NativeModules.DisplayCutout as DisplayCutoutNative | undefined;
 
@@ -41,6 +56,65 @@ export async function getDisplayCutout(): Promise<DisplayCutoutInfo> {
   } catch {
     return NO_CUTOUT;
   }
+}
+
+export const SQUARE_CORNERS: RoundedCorners = {
+  topLeft: 0,
+  topRight: 0,
+  bottomLeft: 0,
+  bottomRight: 0,
+};
+
+export async function getRoundedCorners(): Promise<RoundedCorners> {
+  if (Platform.OS !== 'android' || !native?.getRoundedCorners) {
+    return SQUARE_CORNERS;
+  }
+  try {
+    return await native.getRoundedCorners();
+  } catch {
+    return SQUARE_CORNERS;
+  }
+}
+
+/**
+ * How far a rounded corner eats into the window at a given height above
+ * the edge it belongs to — the number a thing welded to that edge has to
+ * move inward not to be clipped.
+ *
+ * A corner is a quarter circle of `radius`, centred `radius` in from both
+ * edges. At `height` above the edge the lit area begins at
+ * `radius − √(radius² − (radius − height)²)`, and at or above the radius
+ * the edge is straight again and this is zero.
+ *
+ * Pure, and it is the whole of the geometry: the tab bar's labels sit a
+ * navigation strip's height above the bottom of the window, which is
+ * usually most of the way up the curve — which is why the bite is a few
+ * dp rather than the whole radius, and why reserving the radius itself
+ * would push the outer tabs visibly off-centre for nothing.
+ */
+export function cornerInsetAt(radius: number, height: number): number {
+  if (!(radius > 0) || height >= radius) return 0;
+  const h = Math.max(0, height);
+  return radius - Math.sqrt(Math.max(0, radius * radius - (radius - h) ** 2));
+}
+
+/**
+ * The corners, re-read when the window changes shape — a rotation moves
+ * them, and on a foldable the whole display changes.
+ */
+export function useRoundedCorners(): RoundedCorners {
+  const { width, height } = useWindowDimensions();
+  const [corners, setCorners] = useState<RoundedCorners>(SQUARE_CORNERS);
+  useEffect(() => {
+    let live = true;
+    void getRoundedCorners().then(next => {
+      if (live) setCorners(next);
+    });
+    return () => {
+      live = false;
+    };
+  }, [width, height]);
+  return corners;
 }
 
 /** Which side of the status band the camera sits on. */

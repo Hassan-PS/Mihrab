@@ -41,6 +41,7 @@ import {
   TAB_BAR_HEIGHT,
   TAB_BAR_SIDE_INSET,
   useTabBarBottom,
+  useTabBarCornerInset,
 } from './tabBarInset';
 import { TabBarScrim } from './TabBarScrim';
 import { StatusBarBand } from './StatusBarBand';
@@ -77,6 +78,8 @@ export function MainTabs() {
   // Today's header survives only on the wide dashboard; see its options.
   const todayHeader = !isMacCatalyst && isDashboardWidth;
   const barBottom = useTabBarBottom();
+  /** What the display's rounded bottom corners eat — #42. */
+  const cornerInset = useTabBarCornerInset();
 
   /**
    * Out of the way while reading, back on the way up.
@@ -276,6 +279,18 @@ export function MainTabs() {
               // tab that asks for the whole screen (a dua category) puts
               // it away, and the page takes its height.
               display: hidden ? 'none' : 'flex',
+              /**
+               * Clear of the display's bottom corners — #42.
+               *
+               * Padding, not margin: the band itself should still run the
+               * full width and bleed into the corners, because a surface
+               * that stops short of the glass looks like a mistake. It is
+               * the six labels inside it that have to come in, and the
+               * outer two are the only things in the app that sit that
+               * close to a corner. Zero on a square display, below Android
+               * 12, and on iOS — see `useTabBarCornerInset`.
+               */
+              paddingHorizontal: cornerInset,
               // The page's own colour, not the card's: the bar is part of
               // the page it sits under, and a hairline is the only edge.
               backgroundColor: palette.bg,

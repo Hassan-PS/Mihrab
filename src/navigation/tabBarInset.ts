@@ -16,6 +16,7 @@
 import { useEffect, useState } from 'react';
 import { AppState, Dimensions, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { cornerInsetAt, useRoundedCorners } from '../native/DisplayCutout';
 import {
   buttonNavigationHeight,
   isButtonNavigation,
@@ -218,6 +219,38 @@ export function useSystemNavigationReserve(): number {
   const { buttons, barHeight } = useButtonNavigation();
   const inset = useSafeAreaInsets().bottom;
   return Math.max(inset, systemNavigationBand(inset, buttons, barHeight));
+}
+
+/**
+ * What the bar has to keep clear of the display's bottom corners — #42.
+ *
+ * The bar is welded to the bottom edge and divides the window into six
+ * equal slots, so the outermost labels — "Today" and "Settings" — sit
+ * nearer the window's bottom corners than anything else in the app. On a
+ * display with a rounded mask those corners are not lit, and nothing in
+ * the insets says so: a rounded corner is not a cutout and the window
+ * genuinely extends into it. Reported against a Huawei Nova 11i, and
+ * invisible in a screenshot, because the framebuffer has the pixels the
+ * glass does not show.
+ *
+ * SYMMETRIC, taking the wider of the two corners. They are the same
+ * radius on every phone I can find, and a bar whose left and right
+ * padding differed by a dp would be a lopsided row of six for no reason a
+ * reader could see.
+ *
+ * The height the bite is measured at is what the bar already keeps clear
+ * of the bottom — a gesture strip, or a button bar — because that is
+ * where the label's own bottom edge sits. On a tall button bar the
+ * content is above the curve entirely and this is zero, which is correct
+ * and is why it is not a constant.
+ */
+export function useTabBarCornerInset(): number {
+  const corners = useRoundedCorners();
+  const above = useSystemNavigationReserve();
+  return Math.max(
+    cornerInsetAt(corners.bottomLeft, above),
+    cornerInsetAt(corners.bottomRight, above),
+  );
 }
 
 /**
