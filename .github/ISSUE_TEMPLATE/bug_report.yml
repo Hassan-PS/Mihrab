@@ -1,0 +1,107 @@
+name: Bug report
+description: Something isn't working right in Mihrab
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. The more you fill in, the faster it can be fixed.
+
+        **Security issue?** Don't file it here — use the private reporting option on the previous screen, or see [SECURITY.md](../blob/main/SECURITY.md).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, and what you expected instead.
+      placeholder: When I…, the app…
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to…
+        2. Tap…
+        3. See…
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      multiple: true
+      options:
+        - Android (phone)
+        - iPhone (iOS)
+        - iPad (iPadOS)
+        - Mac (macOS)
+    validations:
+      required: true
+  - type: dropdown
+    id: install-source
+    attributes:
+      label: Where did you install it from?
+      options:
+        - Google Play
+        - F-Droid
+        - Obtainium (GitHub Releases)
+        - GitHub Releases APK (manual)
+        - Homebrew (Mac)
+        - App Store (iOS)
+        - TestFlight beta (iOS)
+        - Android beta (com.prayer_times.beta)
+        - Other / not sure
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version / build
+      description: In the app — About → Build.
+      placeholder: e.g. 2.21.1 (273)
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and OS version
+      placeholder: e.g. Pixel 8, Android 15 — or iPhone 15, iOS 18.1
+    validations:
+      required: true
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Prayer-time data source (if relevant)
+      description: Settings → Data source. Helpful for wrong-times bugs.
+      options:
+        - Not sure / not relevant
+        - On-device (offline calculation)
+        - Aladhan
+        - PrayerTimes.dev
+        - Islamiska Förbundet (Sweden)
+    validations:
+      required: false
+  - type: input
+    id: locale
+    attributes:
+      label: App language
+      placeholder: e.g. English, or العربية (RTL)
+    validations:
+      required: false
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or logs
+      description: Drag images in. Any error text helps.
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and this isn't a duplicate.
+          required: true
+        - label: This is not a security vulnerability (those go through SECURITY.md).
+          required: true

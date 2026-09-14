@@ -1,0 +1,55 @@
+name: Translation or wording
+description: Report a translation error or suggest better wording
+labels: ["localization"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Corrections to translations and religious terminology are very welcome. All 13 locales stay in parity, so a change may touch the same key across languages.
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language
+      options:
+        - Arabic (ar)
+        - Bengali (bn)
+        - German (de)
+        - English (en)
+        - Spanish (es)
+        - French (fr)
+        - Hindi (hi)
+        - Indonesian (id)
+        - Russian (ru)
+        - Swedish (sv)
+        - Turkish (tr)
+        - Urdu (ur)
+        - Chinese (zh)
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where does it appear?
+      description: The screen, or the i18n key if you know it.
+      placeholder: e.g. Settings → Notifications, or notifications.preReminderTitle
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: Current wording
+    validations:
+      required: true
+  - type: textarea
+    id: suggested
+    attributes:
+      label: Suggested wording
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: Grammar, a mistranslation, religious-terminology accuracy, RTL, tone…
+    validations:
+      required: false
