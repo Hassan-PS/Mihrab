@@ -2,6 +2,8 @@
 
 Thanks for your interest. Mihrab is a privacy-respecting, FOSS-friendly prayer-times app. Contributions are welcome but the bar is high — the app is opened in moments of intention and should reward that with calm, not noise.
 
+By taking part you agree to uphold our [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## Before you start
 
 Read these in order. Later items assume earlier.
