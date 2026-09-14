@@ -262,7 +262,19 @@ function SavedLocationsCardImpl({
       presets.some(
         p => sameCoord(p.latitude, currentLat) && sameCoord(p.longitude, currentLng),
       );
-    if (hasCurrent && !newCoordsAreCurrent && !currentAlreadyPreset) {
+    if (
+      hasCurrent &&
+      !newCoordsAreCurrent &&
+      !currentAlreadyPreset &&
+      // …and only when there is room for BOTH the rescue and the new
+      // location. `addPreset` silently returns the list unchanged at the
+      // cap, so at exactly MAX-1 presets the rescue would take the last
+      // slot and the new location — the one the user actually asked for —
+      // would be dropped, leaving the switch below pointing at the rescued
+      // preset while the coordinates were the new one's. The explicit add
+      // wins; the previous location is only rescued when it costs nothing.
+      presets.length + 2 <= MAX_LOCATION_PRESETS
+    ) {
       // Best-effort name for the auto-saved preset: the user's stored
       // place label, otherwise a generic localized fallback.
       const autoName =
