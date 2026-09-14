@@ -142,3 +142,4 @@ __pycache__/
 
 # Screenshot scratch: raw captures live in branding/, never here.
 .tmp-shots/
+Claude outputs/
