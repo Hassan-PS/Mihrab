@@ -795,3 +795,11 @@ the bump has to be reverted (the revert set the script prints on exit)
 before a real cut, or the next attempt trips on it. One `git fetch` and one
 `git status` before starting shows both in the second before the script is
 even run; the preflight is the backstop, not the routine.
+
+## 2.21.1 (273) — 2026-09-14
+
+Took 1 aborted attempt(s) before it ran clean:
+
+  - 1 the last release left its lesson unwritten — fill in that '**Lesson:**' line in docs/release-log.md, commit it, and rerun
+
+**Lesson:** _(unfilled)_

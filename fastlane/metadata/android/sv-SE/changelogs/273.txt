@@ -1,0 +1,4 @@
+• Spara en plats utan att namnge den — lämna namnet tomt så tar den stadens eget namn.
+• Att växla mellan sparade platser går direkt nu, och att snabbt växla fram och tillbaka fastnar inte längre på en tom skärm.
+• "Lägg till ny plats" från platsknappen växlar till platsen du lägger till — även i automatiskt läge, inte bara manuellt.
+• Att söka en stad för att lägga till den säger nu "Plats vald", så det är tydligt att platsen sparas först när du trycker Spara.

@@ -1,0 +1,4 @@
+• Save a location without naming it — leave the name blank and it takes the city's own name.
+• Switching between saved locations is instant now, and flipping quickly back and forth no longer stalls on a blank screen.
+• "Add new location" from the home chip switches to the place you add — on automatic location too, not just manual.
+• Searching for a city to add it now says "Location selected", so it's clear the place is only saved when you tap Save.

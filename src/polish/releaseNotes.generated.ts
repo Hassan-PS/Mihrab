@@ -19,6 +19,16 @@ export type ReleaseNote = {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    code: 273,
+    version: '2.21.1',
+    date: '2026-09-14',
+    notes: {
+      en: '• Save a location without naming it — leave the name blank and it takes the city\'s own name.\n• Switching between saved locations is instant now, and flipping quickly back and forth no longer stalls on a blank screen.\n• "Add new location" from the home chip switches to the place you add — on automatic location too, not just manual.\n• Searching for a city to add it now says "Location selected", so it\'s clear the place is only saved when you tap Save.',
+      ar: '• احفظ موقعًا دون تسميته — اترك الاسم فارغًا فيأخذ اسم المدينة نفسها.\n• التبديل بين المواقع المحفوظة صار فوريًا، والتبديل السريع ذهابًا وإيابًا لم يعد يتوقف عند شاشة فارغة.\n• "إضافة موقع جديد" من شارة الموقع تنتقل إلى المكان الذي تضيفه — في الوضع التلقائي أيضًا، لا اليدوي فقط.\n• البحث عن مدينة لإضافتها يقول الآن "تم اختيار الموقع"، ليتضح أن المكان يُحفظ فقط عند الضغط على حفظ.',
+      sv: '• Spara en plats utan att namnge den — lämna namnet tomt så tar den stadens eget namn.\n• Att växla mellan sparade platser går direkt nu, och att snabbt växla fram och tillbaka fastnar inte längre på en tom skärm.\n• "Lägg till ny plats" från platsknappen växlar till platsen du lägger till — även i automatiskt läge, inte bara manuellt.\n• Att söka en stad för att lägga till den säger nu "Plats vald", så det är tydligt att platsen sparas först när du trycker Spara.',
+    },
+  },
+  {
     code: 272,
     version: '2.21.0',
     date: '2026-09-14',
