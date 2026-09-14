@@ -965,15 +965,21 @@ export function HomeScreen() {
   const readyLat = state.phase === 'ready' ? state.latitude : undefined;
   const readyLng = state.phase === 'ready' ? state.longitude : undefined;
   const readyCity = state.phase === 'ready' ? state.cityName : undefined;
+  // The load's OWN source, not the live mode. On a manual->automatic switch
+  // the mode flips a render before this state catches up; trusting the mode
+  // there wrote the manual city into the last-GPS-fix slot for one frame.
+  const readyFromAuto = state.phase === 'ready' ? state.fromAuto === true : false;
   useEffect(() => {
-    // Only the GPS fix. `lastFetched*` is the last place the phone was,
-    // kept across a stint on a saved location so that coming back to
-    // "My location" can show it at once while a fresh fix lands. Writing
-    // the MANUAL coordinates here — as this used to — is what forced the
-    // mode switch to wipe them (or automatic would have shown the saved
-    // city), and that wipe is what left "My location" on a blank screen
-    // until GPS, geocoding and a fetch had all finished.
-    if (settings.locationMode !== 'automatic') return;
+    // Only a GPS-resolved load. `lastFetched*` is the last place the phone
+    // was, kept across a stint on a saved location so that coming back to
+    // "My location" can show it at once while a fresh fix lands. Gated on
+    // the LOAD's source (`readyFromAuto`), not the live mode: the mode
+    // flips a render before the ready state catches up, and gating on it
+    // wrote the manual city into this slot for that one frame. Writing the
+    // MANUAL coordinates here — as this used to — is what forced the mode
+    // switch to wipe them, and that wipe is what left "My location" on a
+    // blank screen until GPS, geocoding and a fetch had all finished.
+    if (!readyFromAuto) return;
     if (readyLat == null || readyLng == null) return;
     const coordsSame =
       settings.lastFetchedLatitude === readyLat &&
@@ -994,7 +1000,7 @@ export function HomeScreen() {
     readyLat,
     readyLng,
     readyCity,
-    settings.locationMode,
+    readyFromAuto,
     settings.lastFetchedLatitude,
     settings.lastFetchedLongitude,
     settings.autoLocationLabel,

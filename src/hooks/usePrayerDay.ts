@@ -121,6 +121,15 @@ export type PrayerDayState =
        * state the provider (or the offline fallback) publishes.
        */
       provisional?: boolean;
+      /**
+       * True when this load is a GPS-resolved (automatic-mode) location, as
+       * opposed to a manual one. The one thing that reads it — HomeScreen's
+       * persist-last-fix effect — must trust the LOAD's own source, not the
+       * live `locationMode`: on a manual→automatic switch the mode flips a
+       * render before this state catches up, and keying off the mode wrote
+       * the manual city into the last-GPS-fix slot for that one frame.
+       */
+      fromAuto?: boolean;
     };
 
 // `coordsChangedSignificantly` extracted to `src/utils/coords.ts` (task #17)
@@ -167,7 +176,7 @@ export function buildProvisionalWeek(params: {
   longitude: number;
   calculationMethod: PrayerAppSettings['calculationMethod'];
   school: PrayerAppSettings['school'];
-  prayerOffsets: PrayerAppSettings['prayerOffsets'];
+  prayerOffsets: PrayerOffsetMinutes | undefined;
   now: Date;
 }): TimingsMap[] | null {
   const week: TimingsMap[] = [];
@@ -254,6 +263,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
       longitude: number,
       isBackgroundRefresh: boolean = false,
       label?: string,
+      fromAuto: boolean = false,
     ) => {
       const gen = ++loadGenerationRef.current;
       loadedCoordsRef.current = { lat: latitude, lng: longitude };
@@ -295,6 +305,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
             past: [],
             backgroundRefreshing: true,
             provisional: true,
+            fromAuto,
           }));
         } else {
           setState({ phase: 'loading' });
@@ -493,6 +504,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
           widgetWeek: offsettedWeek,
           past: offsettedPast,
           backgroundRefreshing: needsCacheFill,
+          fromAuto,
         }));
 
         // Off the critical path, deliberately. Not awaited: nothing below
@@ -604,6 +616,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
             past: offsettedLocalPast,
             usingLocalFallback: true,
             backgroundRefreshing: false,
+            fromAuto,
           }));
         } catch {
           // Local calculation also failed (invalid coordinates?)
@@ -657,6 +670,8 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
           settings.manualLatitude,
           settings.manualLongitude,
           isBackgroundRefresh,
+          undefined,
+          false, // manual: never the last-known GPS fix
         ).catch(() => {});
         return;
       }
@@ -681,7 +696,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
         // Instantly render last-known times while GPS resolves in background.
         // isBackgroundRefresh=true prevents the 'loading' flash. Seed the chip
         // with the previously-resolved city name so it doesn't flash coords.
-        loadTimes(cachedLat, cachedLng, true, cachedLabel).catch(() => {});
+        loadTimes(cachedLat, cachedLng, true, cachedLabel, true).catch(() => {});
       } else if (!isBackgroundRefresh) {
         setState({ phase: 'loading' });
       }
@@ -790,6 +805,7 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
             summary.anchorLng,
             true,
             summary.displayName,
+            true, // GPS-resolved fix
           ).catch(() => {});
         } else if (summary.displayName) {
           // Same city, but we may now have a nicer name than the seed — patch
