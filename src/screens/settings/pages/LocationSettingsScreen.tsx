@@ -27,7 +27,12 @@ export function LocationSettingsScreen() {
   return (
     <SettingsPage>
       <LocationCard />
-      <SavedLocationsCard highlightSignal={highlightSignal} />
+      <SavedLocationsCard
+        highlightSignal={highlightSignal}
+        // Only the home chip's "Add new location" sets this, so a place
+        // saved from that flow is switched to at once — even on automatic.
+        activateOnAdd={route.params?.activateOnAdd === true}
+      />
     </SettingsPage>
   );
 }

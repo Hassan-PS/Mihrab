@@ -1239,6 +1239,7 @@ export function HomeScreen() {
                       onAddLocation={() =>
                         navigation.navigate('SettingsLocation', {
                           highlight: 'savedLocations',
+                          activateOnAdd: true,
                         })
                       }
                     />

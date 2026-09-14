@@ -74,7 +74,16 @@ export type RootStackParamList = {
   SettingsAppearance: undefined;
   SettingsPrayerTimes: undefined;
   /** `highlight` flashes the saved-locations card after a deep link from Home. */
-  SettingsLocation: { highlight?: 'savedLocations' } | undefined;
+  SettingsLocation:
+    | {
+        highlight?: 'savedLocations';
+        // Set only by the home chip's "Add new location": the user came
+        // here to change where the app is, so a location saved in this
+        // visit is switched to immediately, even on automatic. Browsing
+        // Settings→Location does not set it, and keeps add-⁠without-switch.
+        activateOnAdd?: boolean;
+      }
+    | undefined;
   SettingsNotifications: undefined;
   SettingsQuran: undefined;
   SettingsAbout: undefined;

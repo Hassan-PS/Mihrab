@@ -67,10 +67,18 @@ function sameCoord(a: number, b: number): boolean {
  */
 function SavedLocationsCardImpl({
   highlightSignal = 0,
+  activateOnAdd = false,
 }: {
   /** Bumped by the parent to trigger a brief attention flash (deep-link
    *  from the home location selector's "Add new location"). */
   highlightSignal?: number;
+  /**
+   * True when the user reached this card from the home chip's "Add new
+   * location". They came to change where the app is, so a location saved in
+   * this visit is switched to at once — even on automatic, where a save
+   * would otherwise only add a row. False when just browsing Settings.
+   */
+  activateOnAdd?: boolean;
 }) {
   const { t } = useTranslation();
   const { slice: settings, update: updateSettings } = useLocationSettings();
@@ -284,22 +292,30 @@ function SavedLocationsCardImpl({
       label,
     });
     const newPreset = next[next.length - 1];
+    // Switch to the just-saved place, or only add it to the list?
+    //   • Manual mode: always switch — the user is choosing where they are.
+    //   • Automatic + came from the chip's "Add new location" (activateOnAdd):
+    //     switch. They opened the switcher to change where the app is, so
+    //     "add" means "add and use"; going back to GPS is one tap on the
+    //     chip's "My location".
+    //   • Automatic + just browsing Settings: only add. Someone on GPS who
+    //     saves a city they are visiting next week has not asked to leave the
+    //     city they are in; the list gains a row and the app carries on. Use
+    //     it when you want it — the row's button, or the chip.
+    const switchToNew = !isAuto || activateOnAdd;
     updateSettings(
-      isAuto
-        ? // Saving is not switching. Someone on automatic who adds the city
-          // they are visiting next week has not asked to leave the city
-          // they are in; the list gains a row and the app carries on where
-          // it is. Use it when you want it — the row's button, or the chip.
-          { locationPresets: next }
-        : {
+      switchToNew
+        ? {
             locationPresets: next,
+            // Explicit: switching from automatic must leave automatic, and in
+            // manual mode this is a harmless no-op.
+            locationMode: 'manual',
             activeLocationPresetId: newPreset?.id,
-            // Switch the manual location to the just-saved preset so the
-            // rest of the app immediately reflects the user's choice.
             manualLatitude: lat,
             manualLongitude: lng,
             manualLocationLabel: label,
-          },
+          }
+        : { locationPresets: next },
     );
     setDraftName('');
     setDraftPlace(null);

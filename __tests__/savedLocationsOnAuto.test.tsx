@@ -28,8 +28,13 @@ jest.mock('../src/hooks/useAppPalette', () => ({
   }),
 }));
 // The place search reaches a geocoder; this test is about the card around it.
+// Capture the card's onSelectPlace so a test can hand it a picked city.
+const search: { onSelect: ((p: unknown) => void) | null } = { onSelect: null };
 jest.mock('../src/components/PlaceSearchSection', () => ({
-  PlaceSearchSection: () => null,
+  PlaceSearchSection: (props: { onSelectPlace?: (p: unknown) => void }) => {
+    search.onSelect = props.onSelectPlace ?? null;
+    return null;
+  },
 }));
 
 import { SavedLocationsCard } from '../src/screens/settings/SavedLocationsCard';
@@ -78,6 +83,7 @@ const byLabel = (tree: ReactTestRenderer, label: string) =>
 beforeEach(() => {
   mockUpdate.mockClear();
   mockSlice = { ...onAuto };
+  search.onSelect = null;
 });
 
 describe('the saved-locations card on automatic', () => {
@@ -136,6 +142,51 @@ describe('the home chip can bring you back', () => {
     act(() => byLabel(tree, 'Cairo')[0].props.onPress());
     expect(mockUpdate).toHaveBeenCalledWith(
       expect.objectContaining({ locationMode: 'manual', manualLatitude: 30 }),
+    );
+  });
+});
+
+
+describe('adding a searched city while on automatic', () => {
+  // A city not already in the list, and not the GPS fix, so the only preset
+  // produced is the one under test.
+  const KHARTOUM = {
+    latitude: 12.5,
+    longitude: 34.5,
+    displayName: 'Khartoum, Khartoum State, Sudan',
+  };
+
+  const addAndPick = (tree: ReactTestRenderer) => {
+    act(() => byLabel(tree, 'locations.add')[0].props.onPress());
+    act(() => search.onSelect?.(KHARTOUM));
+  };
+
+  it('from Settings browsing: adds the row but stays on GPS', () => {
+    const tree = render(<SavedLocationsCard />);
+    addAndPick(tree);
+    act(() => byLabel(tree, 'locations.save')[0].props.onPress());
+    const arg = mockUpdate.mock.calls.at(-1)?.[0] as Record<string, unknown>;
+    expect(arg).toHaveProperty('locationPresets');
+    // The app is still following the phone: no mode change, nothing activated.
+    expect(arg).not.toHaveProperty('locationMode');
+    expect(arg).not.toHaveProperty('activeLocationPresetId');
+  });
+
+  it('from the chip\'s "Add new location": switches to it, leaving GPS', () => {
+    // activateOnAdd is set only by the home chip's Add flow. The reported bug:
+    // add a city there and it never became the location — the app stayed on
+    // GPS. Now the save switches to the new place.
+    const tree = render(<SavedLocationsCard activateOnAdd />);
+    addAndPick(tree);
+    act(() => byLabel(tree, 'locations.save')[0].props.onPress());
+    expect(mockUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        locationMode: 'manual',
+        manualLatitude: 12.5,
+        manualLongitude: 34.5,
+        manualLocationLabel: 'Khartoum, Khartoum State, Sudan',
+        activeLocationPresetId: expect.any(String),
+      }),
     );
   });
 });

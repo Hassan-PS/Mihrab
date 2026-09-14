@@ -53,6 +53,7 @@ export function HomeHeaderControls() {
         onAddLocation={() =>
           navigation.navigate('SettingsLocation', {
             highlight: 'savedLocations',
+            activateOnAdd: true,
           })
         }
       />
