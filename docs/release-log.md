@@ -785,4 +785,13 @@ Took 2 aborted attempt(s) before it ran clean:
   - 1 origin/main has commits main does not — pull first
   - 1 working tree has tracked changes — commit or stash them first
 
-**Lesson:** _(unfilled)_
+**Lesson:** both aborts were a release begun from a checkout that had
+drifted, and neither was the script's fault. Origin was ahead because the
+dataset bot commits on its own schedule — a release has to rebase onto that
+first, and meeting it at the push rather than at the start costs a full
+rerun of the phase before it. The tracked-change abort was a `--dry-run`'s
+own version stamp left behind: a dry run bumps `build.gradle` and stops, so
+the bump has to be reverted (the revert set the script prints on exit)
+before a real cut, or the next attempt trips on it. One `git fetch` and one
+`git status` before starting shows both in the second before the script is
+even run; the preflight is the backstop, not the routine.
