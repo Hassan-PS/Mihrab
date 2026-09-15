@@ -1642,6 +1642,8 @@
     "a11yAll": "вся сунна"
   },
   "sync": {
+    "importChooseFileCta": "Выбрать файл резервной копии",
+    "importTooLarge": "Этот файл слишком велик для резервной копии.",
     "saveToFilesCta": "Сохранить в Файлы",
     "savedTitle": "Сохранено",
     "exportSection": "Экспорт",

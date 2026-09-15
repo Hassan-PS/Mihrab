@@ -1642,6 +1642,8 @@
     "a11yAll": "全部圣行拜"
   },
   "sync": {
+    "importChooseFileCta": "选择备份文件",
+    "importTooLarge": "该文件太大，不像是备份。",
     "saveToFilesCta": "保存到文件",
     "savedTitle": "已保存",
     "exportSection": "导出",

@@ -1642,6 +1642,8 @@
     "a11yAll": "alla sunnah"
   },
   "sync": {
+    "importChooseFileCta": "Välj en säkerhetskopia",
+    "importTooLarge": "Filen är alldeles för stor för att vara en säkerhetskopia.",
     "saveToFilesCta": "Spara till Filer",
     "savedTitle": "Sparat",
     "exportSection": "Exportera",

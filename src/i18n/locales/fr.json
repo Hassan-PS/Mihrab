@@ -1642,6 +1642,8 @@
     "a11yAll": "toute la sunnah"
   },
   "sync": {
+    "importChooseFileCta": "Choisir un fichier de sauvegarde",
+    "importTooLarge": "Ce fichier est bien trop volumineux pour être une sauvegarde.",
     "saveToFilesCta": "Enregistrer dans Fichiers",
     "savedTitle": "Enregistré",
     "exportSection": "Exporter",

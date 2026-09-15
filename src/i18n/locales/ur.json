@@ -1642,6 +1642,8 @@
     "a11yAll": "تمام سنن"
   },
   "sync": {
+    "importChooseFileCta": "بیک اپ فائل منتخب کریں",
+    "importTooLarge": "یہ فائل بیک اپ ہونے کے لیے بہت بڑی ہے۔",
     "saveToFilesCta": "فائلوں میں محفوظ کریں",
     "savedTitle": "محفوظ ہو گیا",
     "exportSection": "برآمد",

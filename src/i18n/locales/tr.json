@@ -1642,6 +1642,8 @@
     "a11yAll": "tüm sünnetler"
   },
   "sync": {
+    "importChooseFileCta": "Bir yedek dosyası seç",
+    "importTooLarge": "Bu dosya bir yedek olamayacak kadar büyük.",
     "saveToFilesCta": "Dosyalar'a Kaydet",
     "savedTitle": "Kaydedildi",
     "exportSection": "Dışa aktar",

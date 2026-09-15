@@ -1642,6 +1642,8 @@
     "a11yAll": "সব সুন্নত"
   },
   "sync": {
+    "importChooseFileCta": "একটি ব্যাকআপ ফাইল বেছে নিন",
+    "importTooLarge": "এই ফাইলটি ব্যাকআপ হওয়ার জন্য অনেক বড়।",
     "saveToFilesCta": "ফাইলে সংরক্ষণ করুন",
     "savedTitle": "সংরক্ষিত হয়েছে",
     "exportSection": "রপ্তানি",

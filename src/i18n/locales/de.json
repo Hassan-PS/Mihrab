@@ -1642,6 +1642,8 @@
     "a11yAll": "alle Sunnah"
   },
   "sync": {
+    "importChooseFileCta": "Sicherungsdatei auswählen",
+    "importTooLarge": "Diese Datei ist viel zu groß für eine Sicherung.",
     "saveToFilesCta": "In Dateien speichern",
     "savedTitle": "Gespeichert",
     "exportSection": "Exportieren",

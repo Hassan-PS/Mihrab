@@ -1642,6 +1642,8 @@
     "a11yAll": "كل السنن"
   },
   "sync": {
+    "importChooseFileCta": "اختر ملف نسخة احتياطية",
+    "importTooLarge": "هذا الملف أكبر بكثير من أن يكون نسخة احتياطية.",
     "saveToFilesCta": "حفظ في الملفات",
     "savedTitle": "تم الحفظ",
     "exportSection": "تصدير",

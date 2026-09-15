@@ -1642,6 +1642,8 @@
     "a11yAll": "semua sunnah"
   },
   "sync": {
+    "importChooseFileCta": "Pilih berkas cadangan",
+    "importTooLarge": "Berkas itu terlalu besar untuk menjadi cadangan.",
     "saveToFilesCta": "Simpan ke File",
     "savedTitle": "Tersimpan",
     "exportSection": "Ekspor",

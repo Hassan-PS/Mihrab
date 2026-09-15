@@ -59,6 +59,8 @@ import {
   shareExportFile,
   writeExportFile,
 } from '../sync/exportFile';
+import { hasFilePicker, pickFile } from '../native/FilePicker';
+import { utf8Decode } from '../sync/secureRandom';
 
 /** Rows in the order someone thinks about their own data. */
 const ROWS: SyncCategory[] = [
@@ -127,6 +129,7 @@ export function BackupScreen() {
   // Read once: the answer is the platform (always true off Android) plus,
   // on Android, whether this native side carries the create-document call.
   const canSaveToFiles = hasFileSaver();
+  const canPickFile = hasFilePicker();
 
   const onExport = useCallback(async () => {
     if (busy || nothingSelected) return;
@@ -167,6 +170,72 @@ export function BackupScreen() {
     }
   }, [busy, nothingSelected, selection, t]);
 
+  // Take a read snapshot and hand it to the user to confirm. Shared by the
+  // two ways one arrives: chosen as a file, or pasted/handed a path. The
+  // acceptance defaults to exactly what the file carries — they already
+  // chose once, on the device that made it.
+  const presentSnapshot = useCallback(
+    (snapshot: Snapshot) => {
+      const present = categoriesIn(snapshot);
+      if (present.length === 0) {
+        Alert.alert(t('sync.importEmptyTitle', 'Nothing to import'));
+        return;
+      }
+      setAccept(prev => {
+        const next = { ...prev };
+        for (const c of SYNC_CATEGORIES) next[c] = present.includes(c);
+        return next;
+      });
+      setPending(snapshot);
+    },
+    [t],
+  );
+
+  const reportUnreadable = useCallback(
+    (e: unknown) => {
+      Alert.alert(
+        t('sync.importUnreadableTitle', 'Couldn’t read that'),
+        `${t('sync.importUnreadableBody', {
+          defaultValue:
+            'That doesn’t look like a Mihrab backup. Choose the .json file, or paste its whole contents.',
+        })}\n\n${String(e)}`,
+      );
+    },
+    [t],
+  );
+
+  // Choose a backup file through the system picker — the direct way, and
+  // the one that does not ask a year of notes to fit through a text box.
+  // The native side hands back bytes (a cancel is `null`, not an error);
+  // `utf8Decode` because Hermes has no `TextDecoder`.
+  const onChooseFile = useCallback(async () => {
+    if (busy) return;
+    let picked;
+    try {
+      picked = await pickFile();
+    } catch (e) {
+      if ((e as { code?: string })?.code === 'too_large') {
+        Alert.alert(
+          t('sync.importUnreadableTitle', 'Couldn’t read that'),
+          t('sync.importTooLarge', 'That file is far too large to be a backup.'),
+        );
+        return;
+      }
+      reportUnreadable(e);
+      return;
+    }
+    if (!picked) return;
+    setBusy(true);
+    try {
+      const snapshot = readSnapshot(JSON.parse(utf8Decode(picked.bytes)));
+      presentSnapshot(snapshot);
+    } catch (e) {
+      reportUnreadable(e);
+    } finally {
+      setBusy(false);
+    }
+  }, [busy, presentSnapshot, reportUnreadable, t]);
+
   const onPreview = useCallback(async () => {
     if (busy || !pasted.trim()) return;
     setBusy(true);
@@ -180,29 +249,13 @@ export function BackupScreen() {
       const snapshot = input.startsWith('{')
         ? readSnapshot(JSON.parse(input))
         : await readSnapshotFile(input);
-      const present = categoriesIn(snapshot);
-      if (present.length === 0) {
-        Alert.alert(t('sync.importEmptyTitle', 'Nothing to import'));
-        return;
-      }
-      // Default to accepting exactly what the file carries — the user
-      // already chose once, on the device that made it.
-      const next = { ...accept };
-      for (const c of SYNC_CATEGORIES) next[c] = present.includes(c);
-      setAccept(next);
-      setPending(snapshot);
+      presentSnapshot(snapshot);
     } catch (e) {
-      Alert.alert(
-        t('sync.importUnreadableTitle', 'Couldn’t read that'),
-        `${t('sync.importUnreadableBody', {
-          defaultValue:
-            'That doesn’t look like a Mihrab backup. Paste the whole contents of the .json file.',
-        })}\n\n${String(e)}`,
-      );
+      reportUnreadable(e);
     } finally {
       setBusy(false);
     }
-  }, [accept, busy, pasted, t]);
+  }, [busy, pasted, presentSnapshot, reportUnreadable]);
 
   const onApply = useCallback(async () => {
     if (busy || !pending) return;
@@ -347,6 +400,28 @@ export function BackupScreen() {
                 'Open the backup file, copy all of it, and paste it here. Nothing already on this device is deleted — the two records are merged.',
             })}
           </Text>
+          {canPickFile ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('sync.importChooseFileCta', 'Choose a backup file')}
+              accessibilityState={{ disabled: busy }}
+              testID="sync-choose-file"
+              onPress={() => void onChooseFile()}
+              disabled={busy}
+              style={({ pressed }) => [
+                styles.secondary,
+                { borderColor: palette.accentSolid, borderRadius: RADIUS.sm },
+                pressed && styles.pressed,
+                busy && styles.disabled,
+              ]}
+            >
+              <Text
+                style={[typeStyle('headline'), { color: palette.accentSolid }]}
+              >
+                {t('sync.importChooseFileCta', 'Choose a backup file')}
+              </Text>
+            </Pressable>
+          ) : null}
           <TextInput
             accessibilityLabel={t(
               'sync.importPastePlaceholder',
@@ -402,15 +477,15 @@ export function BackupScreen() {
                 ? t('sync.importApplyCta', 'Import into this device')
                 : t('sync.importPreviewCta', 'Check the file')
             }
-            accessibilityState={{ disabled: busy || !pasted.trim() }}
+            accessibilityState={{ disabled: busy || (!pending && !pasted.trim()) }}
             testID="sync-import"
             onPress={() => void (pending ? onApply() : onPreview())}
-            disabled={busy || !pasted.trim()}
+            disabled={busy || (!pending && !pasted.trim())}
             style={({ pressed }) => [
               styles.primary,
               { backgroundColor: palette.accent, borderRadius: RADIUS.sm },
               pressed && styles.pressed,
-              (busy || !pasted.trim()) && styles.disabled,
+              (busy || (!pending && !pasted.trim())) && styles.disabled,
             ]}
           >
             {busy ? (

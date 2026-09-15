@@ -1642,6 +1642,8 @@
     "a11yAll": "सारी सुन्नत"
   },
   "sync": {
+    "importChooseFileCta": "बैकअप फ़ाइल चुनें",
+    "importTooLarge": "यह फ़ाइल बैकअप होने के लिए बहुत बड़ी है।",
     "saveToFilesCta": "फ़ाइलों में सहेजें",
     "savedTitle": "सहेजा गया",
     "exportSection": "निर्यात",
