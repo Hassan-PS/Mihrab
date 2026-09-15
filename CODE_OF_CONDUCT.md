@@ -1,132 +1,73 @@
-# Contributor Covenant Code of Conduct
+# Code of Conduct
 
-## Our Pledge
+Mihrab is built by Muslims, and its community holds to the Islamic manners of
+good conduct — *ḥusn al-khuluq*. The Prophet ﷺ said, "I was sent only to
+perfect good character" (al-Bukhārī, *al-Adab al-Mufrad*). These manners are the
+standard here, for everyone who takes part, whatever their background.
 
-We as members, contributors, and leaders pledge to make participation in our
-community a harassment-free experience for everyone, regardless of age, body
-size, visible or invisible disability, ethnicity, sex characteristics, gender
-identity and expression, level of experience, education, socio-economic status,
-nationality, personal appearance, race, caste, color, religion, or sexual
-identity and orientation.
+This is about **how we treat one another**, not about anyone's private beliefs.
+Contributions are welcome from all, and all are owed the same courtesy and
+justice.
 
-We pledge to act and interact in ways that contribute to an open, welcoming,
-diverse, inclusive, and healthy community.
+## Our standards
 
-## Our Standards
+We ask everyone taking part to:
 
-Examples of behavior that contributes to a positive environment for our
-community include:
+- **Speak and act with good character and gentleness.** "The believer is not one
+  who slanders, curses, or is foul and obscene" (al-Tirmidhī). Disagree without
+  insult or mockery — "let not one people ridicule another… nor insult one
+  another by nicknames" (Qur'an 49:11).
+- **Be just and fair, even toward those you disagree with.** "…and let not the
+  hatred of a people lead you to injustice. Be just — that is nearer to
+  righteousness" (Qur'an 5:8).
+- **Honor others.** Every person is owed dignity: "We have certainly honored the
+  children of Adam" (Qur'an 17:70). Want for others what you want for yourself
+  (al-Bukhārī & Muslim).
+- **Be truthful and sincere.** Represent your own work and others' honestly, give
+  credit where it is due, and do not deceive or mislead.
+- **Guard trust (amānah).** Keep confidences and private information private, and
+  keep the commitments you make.
+- **Think well of others and avoid backbiting.** "Avoid much suspicion… and do
+  not backbite one another" (Qur'an 49:12). Raise concerns directly and kindly,
+  not behind someone's back.
+- **Give and receive advice (naṣīḥah) with humility.** Offer correction gently,
+  accept it graciously, and forgive mistakes.
+- **Work with excellence (iḥsān)** for the benefit of the people this app serves.
 
-* Demonstrating empathy and kindness toward other people
-* Being respectful of differing opinions, viewpoints, and experiences
-* Giving and gracefully accepting constructive feedback
-* Accepting responsibility and apologizing to those affected by our mistakes,
-  and learning from the experience
-* Focusing on what is best not just for us as individuals, but for the overall
-  community
+## Unacceptable conduct
 
-Examples of unacceptable behavior include:
+The following harm the community and are not permitted:
 
-* The use of sexualized language or imagery, and sexual attention or advances of
-  any kind
-* Trolling, insulting or derogatory comments, and personal or political attacks
-* Public or private harassment
-* Publishing others' private information, such as a physical or email address,
-  without their explicit permission
-* Other conduct which could reasonably be considered inappropriate in a
-  professional setting
-
-## Enforcement Responsibilities
-
-Community leaders are responsible for clarifying and enforcing our standards of
-acceptable behavior and will take appropriate and fair corrective action in
-response to any behavior that they deem inappropriate, threatening, offensive,
-or harmful.
-
-Community leaders have the right and responsibility to remove, edit, or reject
-comments, commits, code, wiki edits, issues, and other contributions that are
-not aligned to this Code of Conduct, and will communicate reasons for moderation
-decisions when appropriate.
+- Insults, mockery, demeaning remarks, or personal attacks.
+- Harassment or intimidation of any kind, in public or in private.
+- Backbiting, slander, spreading rumors, or baseless accusations.
+- Publishing someone's private information without their clear permission.
+- Sexualized language or imagery, or unwelcome advances.
+- Dishonesty — deception, plagiarism, or claiming others' work as your own.
+- Any conduct that wrongs or is unjust to another person.
 
 ## Scope
 
-This Code of Conduct applies within all community spaces, and also applies when
-an individual is officially representing the community in public spaces.
-Examples of representing our community include using an official e-mail address,
-posting via an official social media account, or acting as an appointed
-representative at an online or offline event.
+This applies in all project spaces — the repository, issues, pull requests, and
+any channel where you are taking part in or representing the Mihrab community.
 
-## Enforcement
+## Reporting and enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-**mihrab@elghamri.se**.
-All complaints will be reviewed and investigated promptly and fairly.
+If you experience or witness conduct that breaks these standards, report it
+privately to **mihrab@elghamri.se**. Reports are handled with fairness and
+justice (*ʿadl*), and the privacy of whoever reports is protected as a trust.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+The aim is to correct, not to humiliate — responses are proportionate and, where
+possible, give a person the chance to put things right:
 
-## Enforcement Guidelines
+1. **A private word of advice** — a quiet *naṣīḥah* explaining what was wrong and
+   what is expected.
+2. **A warning** — a clear warning that continued conduct will have consequences,
+   with a period of no interaction with those involved.
+3. **Temporary removal** — a temporary ban from interaction in the community's
+   spaces.
+4. **Permanent removal** — for sustained or serious violations, a permanent ban
+   from the community.
 
-Community leaders will follow these Community Impact Guidelines in determining
-the consequences for any action they deem in violation of this Code of Conduct:
-
-### 1. Correction
-
-**Community Impact**: Use of inappropriate language or other behavior deemed
-unprofessional or unwelcome in the community.
-
-**Consequence**: A private, written warning from community leaders, providing
-clarity around the nature of the violation and an explanation of why the
-behavior was inappropriate. A public apology may be requested.
-
-### 2. Warning
-
-**Community Impact**: A violation through a single incident or series of
-actions.
-
-**Consequence**: A warning with consequences for continued behavior. No
-interaction with the people involved, including unsolicited interaction with
-those enforcing the Code of Conduct, for a specified period of time. This
-includes avoiding interactions in community spaces as well as external channels
-like social media. Violating these terms may lead to a temporary or permanent
-ban.
-
-### 3. Temporary Ban
-
-**Community Impact**: A serious violation of community standards, including
-sustained inappropriate behavior.
-
-**Consequence**: A temporary ban from any sort of interaction or public
-communication with the community for a specified period of time. No public or
-private interaction with the people involved, including unsolicited interaction
-with those enforcing the Code of Conduct, is allowed during this period.
-Violating these terms may lead to a permanent ban.
-
-### 4. Permanent Ban
-
-**Community Impact**: Demonstrating a pattern of violation of community
-standards, including sustained inappropriate behavior, harassment of an
-individual, or aggression toward or disparagement of classes of individuals.
-
-**Consequence**: A permanent ban from any sort of public interaction within the
-community.
-
-## Attribution
-
-This Code of Conduct is adapted from the [Contributor Covenant][homepage],
-version 2.1, available at
-[https://www.contributor-covenant.org/version/2/1/code_of_conduct.html][v2.1].
-
-Community Impact Guidelines were inspired by
-[Mozilla's code of conduct enforcement ladder][Mozilla CoC].
-
-For answers to common questions about this code of conduct, see the FAQ at
-[https://www.contributor-covenant.org/faq][FAQ]. Translations are available at
-[https://www.contributor-covenant.org/translations][translations].
-
-[homepage]: https://www.contributor-covenant.org
-[v2.1]: https://www.contributor-covenant.org/version/2/1/code_of_conduct.html
-[Mozilla CoC]: https://github.com/mozilla/diversity
-[FAQ]: https://www.contributor-covenant.org/faq
-[translations]: https://www.contributor-covenant.org/translations
+Maintainers are responsible for upholding these standards and will act with
+fairness and without favoritism.
