@@ -22,7 +22,7 @@
  */
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import RNShare from 'react-native-share';
-import { Platform } from 'react-native';
+import { NativeModules, Platform } from 'react-native';
 import { buildSnapshot, readSnapshot, type Snapshot, type SyncSelection } from './snapshot';
 import { collectData } from './snapshotStore';
 
@@ -55,6 +55,8 @@ export type ExportResult = {
   fileName: string;
   bytes: number;
   snapshot: Snapshot;
+  /** The exact JSON written, so a "Save to Files" need not read it back. */
+  text: string;
 };
 
 /**
@@ -88,7 +90,7 @@ export async function writeExportFile(
     await ReactNativeBlobUtil.fs.unlink(path);
   }
   await ReactNativeBlobUtil.fs.writeFile(path, text, 'utf8');
-  return { path, fileName, bytes: text.length, snapshot };
+  return { path, fileName, bytes: text.length, snapshot, text };
 }
 
 /** Hand a written export to the share sheet. Resolves false if cancelled. */
@@ -100,6 +102,65 @@ export async function shareExportFile(result: ExportResult): Promise<boolean> {
         : `file://${result.path}`,
       type: 'application/json',
       filename: result.fileName,
+      failOnCancel: false,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** The Android SyncFolder native module, for its create-document save. */
+const SyncFolderNative = NativeModules.SyncFolder as
+  | {
+      /** Added 2.22. Absent on an older native side — see `hasFileSaver`. */
+      saveFile?(
+        fileName: string,
+        contents: string,
+        mime: string,
+      ): Promise<{ name: string } | null>;
+    }
+  | undefined;
+
+/**
+ * Whether this build can save straight to the Files app / a chosen folder.
+ *
+ * On iOS, iPadOS and Mac the share sheet's own "Save to Files" is always
+ * there, and `RNShare`'s `saveToFiles` opens it in one tap — so the answer
+ * is always yes. On Android it needs the native `saveFile` above, which is
+ * absent on an older native side against a newer bundle (a real state
+ * during a staged rollout), and the screen hides the button rather than
+ * offering one that cannot work.
+ */
+export function hasFileSaver(): boolean {
+  return Platform.OS !== 'android' || Boolean(SyncFolderNative?.saveFile);
+}
+
+/**
+ * Save a written export straight to the Files app, no share sheet in
+ * between. Resolves false when the user backs out.
+ *
+ * Two roads to the same place, because "the Files app" is a different
+ * mechanism on each side. Apple platforms have a system "Save to Files"
+ * flow that `RNShare` reaches with `saveToFiles`; Android has the
+ * create-document dialog, which the native module drives. Both end with a
+ * file the user named, sitting where they put it.
+ */
+export async function saveExportToFiles(result: ExportResult): Promise<boolean> {
+  if (Platform.OS === 'android') {
+    const saveFile = SyncFolderNative?.saveFile;
+    if (!saveFile) return false;
+    const saved = await saveFile(result.fileName, result.text, 'application/json');
+    return Boolean(saved);
+  }
+  try {
+    await RNShare.open({
+      url: result.path.startsWith('file://')
+        ? result.path
+        : `file://${result.path}`,
+      type: 'application/json',
+      filename: result.fileName,
+      saveToFiles: true,
       failOnCancel: false,
     });
     return true;

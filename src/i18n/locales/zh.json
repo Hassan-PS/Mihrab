@@ -1642,6 +1642,8 @@
     "a11yAll": "全部圣行拜"
   },
   "sync": {
+    "saveToFilesCta": "保存到文件",
+    "savedTitle": "已保存",
     "exportSection": "导出",
     "importSection": "导入",
     "exportHelp": "把你记录下来的一切保存为一个由你自己保管的文件——用来换新手机，或者只是让它在别处也有一份。",

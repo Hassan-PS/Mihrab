@@ -1642,6 +1642,8 @@
     "a11yAll": "alla sunnah"
   },
   "sync": {
+    "saveToFilesCta": "Spara till Filer",
+    "savedTitle": "Sparat",
     "exportSection": "Exportera",
     "importSection": "Importera",
     "exportHelp": "Spara allt du har registrerat till en fil som du behåller — för att flytta till en ny telefon, eller bara för att det ska finnas någon annanstans.",

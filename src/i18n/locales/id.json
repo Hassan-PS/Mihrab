@@ -1642,6 +1642,8 @@
     "a11yAll": "semua sunnah"
   },
   "sync": {
+    "saveToFilesCta": "Simpan ke File",
+    "savedTitle": "Tersimpan",
     "exportSection": "Ekspor",
     "importSection": "Impor",
     "exportHelp": "Simpan semua yang sudah Anda catat ke sebuah berkas milik Anda — untuk pindah ke ponsel baru, atau sekadar agar salinannya ada di tempat lain.",

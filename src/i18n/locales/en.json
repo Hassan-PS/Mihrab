@@ -1642,6 +1642,8 @@
     "a11yAll": "all sunnah"
   },
   "sync": {
+    "saveToFilesCta": "Save to Files",
+    "savedTitle": "Saved",
     "exportSection": "Export",
     "importSection": "Import",
     "exportHelp": "Save everything you have recorded to a file you keep — to move to a new phone, or just so it exists somewhere else.",

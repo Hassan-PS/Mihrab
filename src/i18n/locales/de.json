@@ -1642,6 +1642,8 @@
     "a11yAll": "alle Sunnah"
   },
   "sync": {
+    "saveToFilesCta": "In Dateien speichern",
+    "savedTitle": "Gespeichert",
     "exportSection": "Exportieren",
     "importSection": "Importieren",
     "exportHelp": "Speichere alles, was du aufgezeichnet hast, in einer Datei, die du behältst — für den Umzug auf ein neues Telefon oder einfach, damit es auch woanders existiert.",

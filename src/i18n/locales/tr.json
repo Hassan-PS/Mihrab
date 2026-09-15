@@ -1642,6 +1642,8 @@
     "a11yAll": "tüm sünnetler"
   },
   "sync": {
+    "saveToFilesCta": "Dosyalar'a Kaydet",
+    "savedTitle": "Kaydedildi",
     "exportSection": "Dışa aktar",
     "importSection": "İçe aktar",
     "exportHelp": "Kaydettiğiniz her şeyi kendinizde duracak bir dosyaya alın — yeni bir telefona geçmek için ya da sadece başka bir yerde de dursun diye.",

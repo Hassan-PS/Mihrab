@@ -1642,6 +1642,8 @@
     "a11yAll": "toda la sunnah"
   },
   "sync": {
+    "saveToFilesCta": "Guardar en Archivos",
+    "savedTitle": "Guardado",
     "exportSection": "Exportar",
     "importSection": "Importar",
     "exportHelp": "Guarda todo lo que has registrado en un archivo tuyo — para pasarlo a un teléfono nuevo, o simplemente para que exista en otro sitio.",

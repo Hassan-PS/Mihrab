@@ -74,6 +74,14 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
   /** Held between launching the picker and the activity result. */
   private var pending: Promise? = null
 
+  /**
+   * The bytes a `saveFile` call is waiting to write, held between launching
+   * the create-document dialog and its result. The dialog gives back a
+   * destination, not a place to put anything, so what to write has to
+   * survive the round trip beside the promise that is waiting on it.
+   */
+  private var pendingSaveBytes: ByteArray? = null
+
   init {
     reactContext.addActivityEventListener(this)
   }
@@ -199,6 +207,53 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
     }
   }
 
+  /**
+   * Save bytes to a file the user names and places — the system
+   * "create document" dialog, which on every Android build is the Files /
+   * Documents "save" UI.
+   *
+   * This is the export half of what `pickFile` is to import: it exists so
+   * the backup screen can offer a real "Save to Files" that lands wherever
+   * the user chooses, rather than only a share sheet that on Android does
+   * not reliably offer a save-to-storage target. No persistable permission
+   * is taken — this writes once, now, to the place they pick.
+   *
+   * Resolves `{name}` with the display name the provider gave the file, or
+   * `null` if the user backs out. A cancel is a decision, not a failure.
+   */
+  @ReactMethod
+  fun saveFile(fileName: String, contents: String, mime: String, promise: Promise) {
+    val activity = reactContext.currentActivity
+    if (activity == null) {
+      promise.reject("no_activity", "there is no activity to show the dialog over")
+      return
+    }
+    if (pending != null) {
+      promise.reject("busy", "something is already being chosen")
+      return
+    }
+    val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+      addCategory(Intent.CATEGORY_OPENABLE)
+      type = if (mime.isNotEmpty()) mime else MIME
+      putExtra(Intent.EXTRA_TITLE, fileName)
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        putExtra(
+          DocumentsContract.EXTRA_INITIAL_URI,
+          DocumentsContract.buildDocumentUri(EXTERNAL_STORAGE_AUTHORITY, "primary:Download"),
+        )
+      }
+    }
+    pending = promise
+    pendingSaveBytes = contents.toByteArray(Charsets.UTF_8)
+    try {
+      activity.startActivityForResult(intent, SAVE_REQUEST_CODE)
+    } catch (t: Throwable) {
+      pending = null
+      pendingSaveBytes = null
+      promise.reject("no_picker", "this device has no document provider", t)
+    }
+  }
+
   override fun onActivityResult(
     activity: Activity,
     requestCode: Int,
@@ -211,6 +266,7 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
     when (requestCode) {
       REQUEST_CODE -> onFolderPicked(resultCode, data)
       FILE_REQUEST_CODE -> onFilePicked(resultCode, data)
+      SAVE_REQUEST_CODE -> onFileSaved(resultCode, data)
     }
   }
 
@@ -248,6 +304,39 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
       promise.resolve(out)
     } catch (t: Throwable) {
       promise.reject("unreadable", "could not read that file", t)
+    }
+  }
+
+  /**
+   * Write the stashed bytes to the destination the user chose, and resolve
+   * `{name}`.
+   *
+   * The create-document dialog returns a URI for a file it has already
+   * made; `tryWrite` truncates and fills it, the same call the sync writer
+   * uses. A cancel arrives as a non-OK result with no data and resolves
+   * `null`, so the screen can tell "saved" from "changed my mind".
+   */
+  private fun onFileSaved(resultCode: Int, data: Intent?) {
+    val promise = pending ?: return
+    pending = null
+    val bytes = pendingSaveBytes
+    pendingSaveBytes = null
+
+    val uri = if (resultCode == Activity.RESULT_OK) data?.data else null
+    if (uri == null || bytes == null) {
+      promise.resolve(null)
+      return
+    }
+    try {
+      if (!tryWrite(uri, bytes)) {
+        promise.reject("unwritable", "could not write to the chosen file")
+        return
+      }
+      val out = Arguments.createMap()
+      out.putString("name", displayNameOf(uri))
+      promise.resolve(out)
+    } catch (t: Throwable) {
+      promise.reject("unwritable", "could not write to the chosen file", t)
     }
   }
 
@@ -773,6 +862,9 @@ class SyncFolderModule(private val reactContext: ReactApplicationContext) :
 
     /** The same, for the file picker — different so results can be told apart. */
     private const val FILE_REQUEST_CODE = 0x5947
+
+    /** And for the create-document (save) dialog — different again. */
+    private const val SAVE_REQUEST_CODE = 0x5948
 
     /**
      * A ceiling, not a validation. The muṣḥaf files this is for are a few

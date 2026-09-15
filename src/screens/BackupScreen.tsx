@@ -53,7 +53,9 @@ import {
 import { applySnapshot } from '../sync/snapshotStore';
 import {
   discardExportFile,
+  hasFileSaver,
   readSnapshotFile,
+  saveExportToFiles,
   shareExportFile,
   writeExportFile,
 } from '../sync/exportFile';
@@ -122,6 +124,10 @@ export function BackupScreen() {
     [selection],
   );
 
+  // Read once: the answer is the platform (always true off Android) plus,
+  // on Android, whether this native side carries the create-document call.
+  const canSaveToFiles = hasFileSaver();
+
   const onExport = useCallback(async () => {
     if (busy || nothingSelected) return;
     setBusy(true);
@@ -136,6 +142,26 @@ export function BackupScreen() {
       // The share sheet has copied wherever the user chose by now, so the
       // working copy has done its job. Leaving it would keep their whole
       // record in a cache directory they never picked.
+      if (path) void discardExportFile(path);
+      setBusy(false);
+    }
+  }, [busy, nothingSelected, selection, t]);
+
+  const onSaveToFiles = useCallback(async () => {
+    if (busy || nothingSelected) return;
+    setBusy(true);
+    let path: string | null = null;
+    try {
+      const written = await writeExportFile(selection);
+      path = written.path;
+      const saved = await saveExportToFiles(written);
+      // A cancel resolves false and says nothing — the user changed their
+      // mind, which is not a thing to announce. A real save gets a quiet
+      // confirmation, because the Files dialog closes without one.
+      if (saved) Alert.alert(t('sync.savedTitle', 'Saved'));
+    } catch (e) {
+      Alert.alert(t('sync.exportFailedTitle', 'Export failed'), String(e));
+    } finally {
       if (path) void discardExportFile(path);
       setBusy(false);
     }
@@ -281,6 +307,28 @@ export function BackupScreen() {
               </Text>
             )}
           </Pressable>
+          {canSaveToFiles ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('sync.saveToFilesCta', 'Save to Files')}
+              accessibilityState={{ disabled: busy || nothingSelected }}
+              testID="sync-save-to-files"
+              onPress={() => void onSaveToFiles()}
+              disabled={busy || nothingSelected}
+              style={({ pressed }) => [
+                styles.secondary,
+                { borderColor: palette.accentSolid, borderRadius: RADIUS.sm },
+                pressed && styles.pressed,
+                (busy || nothingSelected) && styles.disabled,
+              ]}
+            >
+              <Text
+                style={[typeStyle('headline'), { color: palette.accentSolid }]}
+              >
+                {t('sync.saveToFilesCta', 'Save to Files')}
+              </Text>
+            </Pressable>
+          ) : null}
         </View>
 
         <Text
@@ -413,6 +461,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     alignItems: 'center',
     marginTop: SPACING.xs,
+  },
+  secondary: {
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    alignItems: 'center',
+    marginTop: SPACING.xs,
+    borderWidth: 1,
   },
   pressed: { opacity: 0.85 },
   disabled: { opacity: 0.45 },
