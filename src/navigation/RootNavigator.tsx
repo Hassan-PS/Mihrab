@@ -282,11 +282,17 @@ export function RootNavigator() {
 
       {/* The settings subpages.
        *
-       * `headerLargeTitle: false` and `headerBackTitle` matching every
-       * other pushed screen in this stack: the title sits small at the
-       * top with the system back control beside it, which is the styled
-       * back button — drawing our own would put a second title under the
-       * real one on iOS and lose the swipe-back gesture on both. */}
+       * Native header is hidden: SettingsPage draws the same pinned bar as
+       * the Duas category view (opaque `palette.bg`, TabBackButton, bold
+       * title) so the bar is the page colour rather than Material/UIKit
+       * chrome that drifts from it. Swipe-back still works on the stack.
+       *
+       * `paddingBottom: 0` — the stack's default reserves `insets.bottom`
+       * and paints it as a dead stripe behind the gesture handle / under
+       * the three-button bar. Duas (a tab) never gets that stripe because
+       * the Home route overrides contentStyle the same way; SettingsPage
+       * owns the bottom reserve itself and publishes the page colour to
+       * SystemNavigationScrim so three-button nav matches Verdant. */}
       {SETTINGS_STACK_PAGES.map(page => (
         <Stack.Screen
           key={page.route}
@@ -294,10 +300,12 @@ export function RootNavigator() {
           component={page.component}
           options={{
             title: t(page.titleKey),
-            headerLargeTitle: false,
-            // "Settings" for a section, the section's own name for a page
-            // nested under it — back says where back goes.
+            headerShown: false,
             headerBackTitle: t(page.backTitleKey),
+            contentStyle: {
+              backgroundColor: theme.colors.background,
+              paddingBottom: 0,
+            },
           }}
         />
       ))}

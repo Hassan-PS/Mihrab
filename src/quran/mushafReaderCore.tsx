@@ -27,6 +27,7 @@ import { useTranslation } from 'react-i18next';
 import { useKeepAwake } from './keepAwakeLock';
 import { useKeyboardInset } from '../hooks/useKeyboardInset';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { usePagePalette } from './useScrubberChrome';
 import {
   easternNumerals,
   findPageForAyah,
@@ -57,8 +58,8 @@ import {
   mushafTone,
   mushafToneChoice,
   nextMushafTone,
+  pageOrnament,
   prefsForTone,
-  TONE_ORNAMENT,
   TONE_PAGE_BG,
   toneIsDark,
   type MushafTone,
@@ -281,7 +282,11 @@ export function useMushafReaderCore({
   // 5K on a Mac, which is where guessing wrong is impossible to miss.
   const hydrated = useQuranHydrated();
   const pageBg = !hydrated ? 'transparent' : TONE_PAGE_BG[tone];
-  const ornament = TONE_ORNAMENT[tone];
+  // The page's own gold — or, on a dark page painted by a colour theme,
+  // that theme's dark accent, so the beginning of a surah and the page
+  // bar's knob are the colour the reader chose (see `pageOrnament`).
+  const pagePalette = usePagePalette(tone);
+  const ornament = pageOrnament(tone, pagePalette);
 
   const initial = useMemo(
     () => initialPage ?? findPageForAyah(surahNumber, 1, riwayah),

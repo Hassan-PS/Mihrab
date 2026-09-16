@@ -144,6 +144,9 @@
     "pitch": "Gratis dan tanpa iklan. Waktu salat, kiblat, Al-Qur’an dengan tilawah dan terjemahan, serta pelacak khatam."
   },
   "settings": {
+    "colourTheme": "Tema warna",
+    "classicTheme": "Klasik",
+    "colourThemeHelp": "Klasik mempertahankan kertas dan tinta bawaan aplikasi. Pilih warna untuk menata mode gelap dengannya — mode terang tetap klasik.",
     "laDesignLabel": "Gaya",
     "laDesignTimeline": "Lini masa",
     "laDesignCountdown": "Hitung mundur",
@@ -273,6 +276,11 @@
     "accent_custom": "Kustom",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "Digunakan di seluruh aplikasi dan widget layar utama.",
+    "tintedSurfaces": "Permukaan bertinta",
+    "tintedSurfacesHelp": "Gunakan warna aksen sebagai warna utama aplikasi — di setiap layar, widget layar utama, Live Activity, dan notifikasi salat. Nonaktif menjaga aksen sebagai sorotan halus.",
+    "verdantTheme": "Zamrud",
+    "verdantThemeHelp": "Mewarnai setiap permukaan dengan aksen yang Anda pilih. Hex kustom tidak tersedia — pilih dari enam preset.",
+    "verdantThemeSystemDisabled": "Tema warna sedang aktif — pilih Klasik untuk memakai warna sistem.",
     "widgetColorFollowsAccentHelp": "Widget memakai warna aksen yang sama dengan aplikasi. Pilih warnanya di Tampilan.",
     "widgetColorOwnHelp": "Aplikasi mengikuti warna sistem Anda, widget tidak. Pilih warna sorotan widget di sini.",
     "additionalTimes": "Waktu tambahan",
@@ -373,7 +381,8 @@
     "accentPickerSave": "Simpan warna",
     "accentPickerUseOnce": "Pakai tanpa menyimpan",
     "accentPickerAdjusted": "Dipindahkan ke corak terdekat yang tetap terbaca di latar ini.",
-    "sectionAppearanceBlurbAndroid": "Tema, warna, format waktu, bahasa, widget"
+    "sectionAppearanceBlurbAndroid": "Tema, warna, format waktu, bahasa, widget",
+    "verdantAccentHelp": "Zamrud mewarnai setiap permukaan dengan aksen ini."
   },
   "locationSetup": {
     "headline": "Tetapkan lokasi Anda",

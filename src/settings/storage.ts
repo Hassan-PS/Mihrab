@@ -303,6 +303,13 @@ async function loadSettingsUncached(): Promise<PrayerAppSettings> {
   ) {
     merged.appAccentCustomHex = DEFAULT_SETTINGS.appAccentCustomHex;
   }
+  // Colour theme: new installs get DEFAULT_SETTINGS (true → green theme).
+  // A blob that never wrote the key must stay Classic — checking `parsed`,
+  // not `merged`, because the spread already filled DEFAULT's `true`.
+  // Non-boolean garbage also collapses to Classic.
+  if (typeof parsed.tintedSurfaces !== 'boolean') {
+    merged.tintedSurfaces = false;
+  }
   // Reconcile coords with the active location preset — task #137. The
   // user's coordinates live in two places: `manualLatitude/Longitude`
   // (mirrored for the app's read path) and the entry inside

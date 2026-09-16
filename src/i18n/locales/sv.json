@@ -144,6 +144,9 @@
     "pitch": "Gratis och utan reklam. Bönetider, qibla, Koranen med recitation och översättning, och en khatma-räknare."
   },
   "settings": {
+    "colourTheme": "Färgtema",
+    "classicTheme": "Klassisk",
+    "colourThemeHelp": "Klassisk behåller appens eget papper och bläck. Välj en färg för att färga mörkt läge i den — ljust läge förblir klassiskt.",
     "laDesignLabel": "Stil",
     "laDesignTimeline": "Tidslinje",
     "laDesignCountdown": "Nedräkning",
@@ -273,6 +276,11 @@
     "accent_custom": "Egen",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "Används i hela appen och i hemskärmens widget.",
+    "tintedSurfaces": "Tonade ytor",
+    "tintedSurfacesHelp": "Använd din accentfärg som appens huvudfärg — på alla skärmar, i hemskärmens widgets, Live Activity och bönenotifikationer. Av behåller accenten som en diskret markering.",
+    "verdantTheme": "Grönskande",
+    "verdantThemeHelp": "Färgar varje yta i den accent du valt. Egen hex är otillgänglig — välj bland de sex förinställningarna.",
+    "verdantThemeSystemDisabled": "Ett färgtema är aktivt — välj Klassisk för att använda systemfärger.",
     "widgetColorFollowsAccentHelp": "Widgeten använder samma accentfärg som appen. Välj den under Utseende.",
     "widgetColorOwnHelp": "Appen följer dina systemfärger, vilket widgeten inte gör. Välj widgetens markeringsfärg här.",
     "additionalTimes": "Ytterligare tider",
@@ -373,7 +381,8 @@
     "accentPickerSave": "Spara färgen",
     "accentPickerUseOnce": "Använd utan att spara",
     "accentPickerAdjusted": "Flyttad till närmaste nyans som är läsbar mot den här bakgrunden.",
-    "sectionAppearanceBlurbAndroid": "Tema, accentfärg, tidsformat, språk, widget"
+    "sectionAppearanceBlurbAndroid": "Tema, accentfärg, tidsformat, språk, widget",
+    "verdantAccentHelp": "Grönskande färgar varje yta i den här accenten."
   },
   "locationSetup": {
     "headline": "Ange din plats",

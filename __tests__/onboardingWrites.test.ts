@@ -306,12 +306,16 @@ describe('the personalisation shelf', () => {
     expect(src).toMatch(/const alertsOn = settings\.notificationsEnabled/);
   });
 
-  it('offers the same accent control Settings does, custom colours and all', () => {
-    // It used to draw its own six swatches and stop there, so the one
-    // person most likely to want a colour of their own — somebody
-    // setting the app up — was the one person who could not have one.
+  it('offers the same colour-theme control Settings does', () => {
+    // Classic + presets that theme dark mode — not a bare accent row.
+    // Two copies is how the walkthrough fell behind before.
     expect(src).toContain('<AccentShelf');
+    expect(src).toContain('classic={{');
+    expect(src).toContain("tintedSurfaces: id !== 'custom'");
+    expect(src).toContain("t('settings.colourTheme'");
     expect(read(APPEARANCE)).toContain('<AccentShelf');
+    expect(read(APPEARANCE)).toContain('classic={{');
+    expect(read(APPEARANCE)).toContain("tintedSurfaces: id !== 'custom'");
   });
 
   it('does not keep a private copy of the swatch row', () => {

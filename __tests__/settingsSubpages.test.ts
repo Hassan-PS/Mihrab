@@ -125,15 +125,23 @@ describe('the index itself', () => {
 
 describe('every subpage', () => {
   /**
-   * The header — title plus the system's back control beside it — is the
-   * native stack's. `headerLargeTitle: false` is what puts the title in
-   * the small header where that control lives, and it is what every
-   * other pushed screen in this stack already does.
+   * The header used to be the native stack's, compacted with
+   * `headerLargeTitle: false`. It is the PAGE's now: the native one is
+   * hidden and SettingsPage draws the same pinned bar the Duas category
+   * view draws — opaque `palette.bg`, a `TabBackButton`, bold title — so
+   * the bar is the page's own colour rather than UIKit/Material chrome
+   * that drifts from it under a themed palette. `headerBackTitle` stays
+   * set: it is the value the drawn button is labelled from.
    */
-  it('gets the platform header, with a back title that says where back is', () => {
+  it('draws its own bar, with a back title that says where back is', () => {
     expect(NAV).toMatch(
-      /headerLargeTitle: false,[\s\S]{0,200}headerBackTitle: t\(page\.backTitleKey\)/,
+      /headerShown: false,[\s\S]{0,200}headerBackTitle: t\(page\.backTitleKey\)/,
     );
+    const settingsPage = read('src/screens/settings/SettingsPage.tsx');
+    expect(settingsPage).toMatch(
+      /const backLabel = t\(page\?\.backTitleKey \?\? 'nav\.settings'\)/,
+    );
+    expect(settingsPage).toMatch(/<TabBackButton[\s\S]{0,160}label=\{backLabel\}/);
     // "Settings" for a section; the section's own name for a page nested
     // under it — "‹ Settings" from two levels down points past where back
     // actually goes.

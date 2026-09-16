@@ -133,7 +133,7 @@ describe('the day bar', () => {
   const card = read('src/screens/home/TodayCard.tsx');
   const home = read('src/screens/HomeScreen.tsx');
   const bar = card.slice(
-    card.indexOf('<View style={styles.dayBar}>'),
+    card.indexOf('<View style={[styles.dayBar'),
     card.indexOf('onLayout={onTableLayout}'),
   );
 

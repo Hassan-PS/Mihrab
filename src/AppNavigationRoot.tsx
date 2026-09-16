@@ -434,6 +434,11 @@ export function AppNavigationRoot() {
         pureBlackDark: settings.pureBlackDark,
         appAccentId: settings.appAccentId,
         appAccentCustomHex: settings.appAccentCustomHex,
+        // Without this the root palette stays on parchment while every
+        // screen via useAppPalette goes Verdant — SystemNavigationScrim
+        // then paints a warm band under three-button nav (measured
+        // #FAF7F2 under #D0E1CE content on the Pixel).
+        tintedSurfaces: settings.tintedSurfaces,
       }),
     [
       settings.appearance,
@@ -441,6 +446,7 @@ export function AppNavigationRoot() {
       settings.pureBlackDark,
       settings.appAccentId,
       settings.appAccentCustomHex,
+      settings.tintedSurfaces,
       systemScheme,
     ],
   );
@@ -475,7 +481,15 @@ export function AppNavigationRoot() {
   const layoutDir = layoutDirectionFor(settings.language);
 
   return (
-    <View style={{ flex: 1, direction: layoutDir }}>
+    <View
+      style={{
+        flex: 1,
+        direction: layoutDir,
+        // Same surface the scrim paints — so a gap never flashes the
+        // Material3 / window parchment behind Verdant (or any theme).
+        backgroundColor: palette.bg,
+      }}
+    >
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <NavigationContainer theme={navTheme} linking={linking}>
         <RootNavigator />

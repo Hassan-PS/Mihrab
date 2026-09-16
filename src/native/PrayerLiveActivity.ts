@@ -56,6 +56,11 @@ export type PrayerLiveActivityContent = {
    *  ignores `accentHex` and uses the dynamic iOS system tint so it matches
    *  the in-app system theme and adapts to light/dark on its own. */
   systemTinted: boolean;
+  /** "Tinted surfaces" — when on, the Live Activity's Lock Screen + Dynamic
+   *  Island surfaces are washed toward the accent so they match the app's
+   *  tinted chrome. Off keeps the neutral material with the accent only as a
+   *  keyline / countdown tint. */
+  tinted: boolean;
   /** Display knobs — the widget reads these to decide what to show. */
   compactMode: boolean;
   showSunrise: boolean;

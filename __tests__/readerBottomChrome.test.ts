@@ -141,7 +141,7 @@ describe('the Android navigation bar takes the page colour', () => {
   it('a claimed surface is published, and handed back on release', () => {
     const release = setSystemBarSurface({ color: '#F3EBDB', isDark: false });
     const scrim = read('src/navigation/SystemNavigationScrim.tsx');
-    expect(scrim).toContain('surface.color');
+    expect(scrim).toMatch(/surface\??\.color/);
     release();
   });
 

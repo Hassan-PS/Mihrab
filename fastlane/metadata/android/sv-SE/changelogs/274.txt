@@ -1,0 +1,3 @@
+• Ett färgtema finns nu i Utseende — grönt, turkost, blått, bärnsten, rosa eller violett färgar mörkt läge, och Klassisk ger appen dess eget papper och bläck tillbaka. Det ersätter systemfärgerna i stället för att ligga bredvid dem.
+• Sidlisten i mushafen och ornamentet vid varje suras början tar temats färg i stället för att tappa den på en mörk sida.
+• Säkerhetskopiera till en fil: Spara till Filer på alla plattformar, och importera genom att välja filen i stället för att klistra in text.

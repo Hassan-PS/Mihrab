@@ -91,19 +91,55 @@ describe('the immersive reader', () => {
     );
   });
 
-  it('colours the page bar from the page tone, not the app palette', () => {
-    // A dark app theme on a paper page put near-black boxes on white.
+  it('colours the page bar from the page tone, themed by the app accent', () => {
+    // A dark app theme on a paper page put near-black boxes on white —
+    // chrome still arrives as a prop so the reader can keep page ink when
+    // themes disagree, and scrubberChrome only lifts Verdant surfaces when
+    // light/dark agree.
     expect(scrubber).toMatch(/const c: ToneChrome = chrome \?\? \{/);
     expect(scrubber).not.toMatch(/backgroundColor: palette\./);
     expect(scrubber).not.toMatch(/color: palette\./);
     for (const f of ['src/quran/MushafPhoneReader.tsx', 'src/quran/MushafSpreadReader.tsx']) {
-      expect(read(f)).toMatch(/chrome=\{TONE_CHROME\[tone\]\}/);
+      expect(read(f)).toMatch(/chrome=\{railChrome\}/);
+      expect(read(f)).toMatch(/(?:useScrubberChrome|scrubberChrome)\(/);
     }
     // Ink on ground, in every tone: the night chrome is light on dark.
-    const { TONE_CHROME, TONE_PAGE_BG } = require('../src/quran/mushafTone');
+    const {
+      TONE_CHROME,
+      TONE_PAGE_BG,
+      scrubberChrome,
+    } = require('../src/quran/mushafTone');
     expect(TONE_CHROME.night.ink).toMatch(/^#f/i);
     expect(TONE_CHROME.paper.ink).toMatch(/^#1/i);
     expect(TONE_CHROME.paper.card).toBe(TONE_PAGE_BG.paper);
+    // Accent always follows the selected theme; paper stays paper when the
+    // app is dark (no near-black controls on white). Only a dark page under
+    // a themed dark palette takes the theme's surfaces.
+    const paperOnDarkApp = scrubberChrome('paper', {
+      accentSolid: '#46A081',
+      tintedSurfaces: true,
+      isDark: true,
+      text: '#E8E5DE',
+      muted: '#95918A',
+      controlBg: '#1A2B19',
+      card: '#1C2D1B',
+    });
+    expect(paperOnDarkApp.accent).toBe('#46A081');
+    expect(paperOnDarkApp.control).toBe(TONE_CHROME.paper.control);
+    const paperOnLightVerdant = scrubberChrome('paper', {
+      accentSolid: '#1F5F4A',
+      tintedSurfaces: true,
+      isDark: false,
+      text: '#1A1814',
+      muted: '#6B6660',
+      controlBg: '#D8EBD6',
+      card: '#E0EFE0',
+    });
+    // Light surfaces are never tinted any more (light = the classic look),
+    // so a paper page keeps its own chrome under a light Verdant theme too;
+    // only the accent follows the theme.
+    expect(paperOnLightVerdant.control).toBe(TONE_CHROME.paper.control);
+    expect(paperOnLightVerdant.accent).toBe('#1F5F4A');
   });
 
   it('hands the row’s height back to the page out of fullscreen', () => {

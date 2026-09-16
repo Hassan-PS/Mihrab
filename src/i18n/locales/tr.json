@@ -144,6 +144,9 @@
     "pitch": "Ücretsiz ve reklamsız. Namaz vakitleri, kıble, tilavet ve mealli Kur’an, ve hatim takibi."
   },
   "settings": {
+    "colourTheme": "Renk teması",
+    "classicTheme": "Klasik",
+    "colourThemeHelp": "Klasik, uygulamanın kendi kâğıdını ve mürekkebini korur. Karanlık modu o renge boyamak için bir renk seç — açık mod klasik kalır.",
     "laDesignLabel": "Stil",
     "laDesignTimeline": "Zaman çizelgesi",
     "laDesignCountdown": "Geri sayım",
@@ -273,6 +276,11 @@
     "accent_custom": "Özel",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "Uygulama genelinde ve ana ekran widget’ında kullanılır.",
+    "tintedSurfaces": "Tonlu yüzeyler",
+    "tintedSurfacesHelp": "Vurgu rengini uygulamanın ana rengi olarak kullan — her ekranda, ana ekran widget'larında, Live Activity'de ve namaz bildirimlerinde. Kapalıyken vurgu rengi yalnızca ince bir vurgu olarak kalır.",
+    "verdantTheme": "Zümrüt",
+    "verdantThemeHelp": "Her yüzeyi seçtiğiniz vurgu renginde boyar. Özel hex kullanılamaz — altı hazır renkten birini seçin.",
+    "verdantThemeSystemDisabled": "Bir renk teması etkin — sistem renklerini kullanmak için Klasik'i seç.",
     "widgetColorFollowsAccentHelp": "Widget, uygulamayla aynı vurgu rengini kullanır. Rengi Görünüm bölümünden seçebilirsiniz.",
     "widgetColorOwnHelp": "Uygulama sistem renklerinizi izliyor, widget izlemiyor. Widget’ın vurgu rengini buradan seçin.",
     "additionalTimes": "Ek vakitler",
@@ -373,7 +381,8 @@
     "accentPickerSave": "Rengi kaydet",
     "accentPickerUseOnce": "Kaydetmeden kullan",
     "accentPickerAdjusted": "Bu arka planda okunabilir kalan en yakın tona taşındı.",
-    "sectionAppearanceBlurbAndroid": "Tema, vurgu rengi, saat biçimi, dil, widget"
+    "sectionAppearanceBlurbAndroid": "Tema, vurgu rengi, saat biçimi, dil, widget",
+    "verdantAccentHelp": "Zümrüt her yüzeyi bu vurgu renginde boyar."
   },
   "locationSetup": {
     "headline": "Konumunuzu ayarlayın",

@@ -561,6 +561,13 @@ export async function syncPrayerNotifications(params: {
    * accent counts: the shade should match the app the reader opens.
    */
   accentColor?: string;
+  /**
+   * "Tinted surfaces" — when on, the prayer notifications are colourised
+   * (Android) so the whole notification takes the accent as its background,
+   * matching the app's tinted chrome. Off keeps the neutral notification
+   * with the accent only as the small-icon / header tint.
+   */
+  tinted?: boolean;
 }): Promise<SyncPrayerNotificationsResult> {
   if (!params.enabled) {
     await cancelOwnedPrayerNotifications([]);
@@ -578,6 +585,8 @@ export async function syncPrayerNotifications(params: {
     params.accentColor && /^#[0-9a-fA-F]{6}$/.test(params.accentColor)
       ? params.accentColor
       : DEFAULT_NOTIFICATION_ACCENT;
+  // Tinted surfaces: colourise the whole notification with the accent.
+  const colorized = params.tinted === true;
   const clock = makeClockFormatter(params.hour12 === true, i18n.language);
   await ensureChannel(params.notificationSound, useAlarmStream);
   const prayerTimeSound = getNotificationSoundOption(params.notificationSound);
@@ -849,6 +858,7 @@ export async function syncPrayerNotifications(params: {
           channelId: eventTargets.androidChannelId,
           smallIcon: 'ic_stat_prayer',
           color: accent,
+          colorized,
           // The prayer's own instant in the header, not the moment the
           // alarm happened to fire — a delayed alarm still says 03:37.
           showTimestamp: true,
@@ -910,6 +920,7 @@ export async function syncPrayerNotifications(params: {
           channelId: reminderSound.androidChannelId,
           smallIcon: 'ic_stat_prayer',
           color: accent,
+          colorized,
           visibility: AndroidVisibility.PUBLIC,
           category: AndroidCategory.REMINDER,
           pressAction: { id: 'default' },
@@ -959,6 +970,7 @@ export async function syncPrayerNotifications(params: {
           channelId: reminderSound.androidChannelId,
           smallIcon: 'ic_stat_prayer',
           color: accent,
+          colorized,
           pressAction: { id: 'default' },
           // Gone by the time the window it is warning about has closed —
           // a banner still saying "ends in 15 min" an hour later is worse
@@ -995,6 +1007,7 @@ export async function syncPrayerNotifications(params: {
           channelId: reminderSound.androidChannelId,
           smallIcon: 'ic_stat_prayer',
           color: accent,
+          colorized,
           pressAction: { id: 'default' },
           // A statement about a state that does not change back, so it
           // keeps the ordinary floor rather than a lead-shaped timeout.

@@ -144,6 +144,9 @@
     "pitch": "免费、无广告。礼拜时间、朝向、带诵读与翻译的《古兰经》，以及诵读进度追踪。"
   },
   "settings": {
+    "colourTheme": "颜色主题",
+    "classicTheme": "经典",
+    "colourThemeHelp": "经典保留应用自身的纸张与墨色。选择一种颜色为深色模式着色——浅色模式保持经典。",
     "laDesignLabel": "样式",
     "laDesignTimeline": "时间轴",
     "laDesignCountdown": "倒计时",
@@ -273,6 +276,11 @@
     "accent_custom": "自定义",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "用于整个应用程序和主屏幕小部件。",
+    "tintedSurfaces": "色调化界面",
+    "tintedSurfacesHelp": "将强调色作为应用的主色调——覆盖每个页面、主屏幕小组件、Live Activity 及礼拜通知。关闭后，强调色仅作为低调的点缀。",
+    "verdantTheme": "翠绿",
+    "verdantThemeHelp": "用你选择的强调色铺满每个表面。不可用自定义十六进制色——请从六个预设中选择。",
+    "verdantThemeSystemDisabled": "颜色主题已启用——选择“经典”以使用系统颜色。",
     "widgetColorFollowsAccentHelp": "小组件使用与应用相同的强调色。可在「外观」中选择。",
     "widgetColorOwnHelp": "应用会跟随系统颜色，而小组件不会。请在此选择小组件的高亮颜色。",
     "additionalTimes": "其他时间",
@@ -373,7 +381,8 @@
     "accentPickerSave": "保存颜色",
     "accentPickerUseOnce": "不保存直接使用",
     "accentPickerAdjusted": "已调整为在此背景上仍然清晰可读的最接近色调。",
-    "sectionAppearanceBlurbAndroid": "主题、强调色、时间格式、语言、小部件"
+    "sectionAppearanceBlurbAndroid": "主题、强调色、时间格式、语言、小部件",
+    "verdantAccentHelp": "翠绿用此强调色铺满每个表面。"
   },
   "locationSetup": {
     "headline": "设置您的位置",

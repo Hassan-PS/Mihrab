@@ -126,8 +126,10 @@ type Props = {
    */
   trailing?: ReactNode;
   /**
-   * The page's own chrome colours. Given, the bar is part of the print —
-   * see `TONE_CHROME`. Absent, it falls back to the app palette.
+   * The page bar's colours. Prefer `scrubberChrome(tone, palette)` from
+   * the reader — accent follows the selected theme; surfaces follow the
+   * page unless Verdant matches the page's light/dark. Absent, falls
+   * back to the app palette.
    */
   chrome?: ToneChrome;
 };

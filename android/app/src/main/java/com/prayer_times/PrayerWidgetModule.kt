@@ -25,6 +25,7 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
       map.putString("highlightId", prefs.getString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_ID, "green"))
       map.putString("highlightHex", prefs.getString(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_HEX, ""))
       map.putBoolean("highlightDynamic", prefs.getBoolean(PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_DYNAMIC, false))
+      map.putBoolean("tinted", prefs.getBoolean(PrayerWidgetProvider.PREFS_WIDGET_TINTED, false))
       promise.resolve(map)
     } catch (e: Exception) {
       promise.reject("E_WIDGET_APPEARANCE_GET", e.message, e)
@@ -164,6 +165,7 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
     highlightId: String,
     highlightHex: String?,
     highlightDynamic: Boolean,
+    tinted: Boolean,
     promise: Promise,
   ) {
     try {
@@ -184,6 +186,7 @@ class PrayerWidgetModule(private val reactContext: ReactApplicationContext) :
           PrayerWidgetProvider.PREFS_WIDGET_HIGHLIGHT_DYNAMIC,
           highlightDynamic,
         )
+        .putBoolean(PrayerWidgetProvider.PREFS_WIDGET_TINTED, tinted)
         .apply()
       PrayerWidgetProvider.requestUpdate(reactContext)
       promise.resolve(null)

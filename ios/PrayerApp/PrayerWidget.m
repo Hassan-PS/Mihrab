@@ -145,6 +145,7 @@ RCT_EXPORT_METHOD(setWidgetHighlightDynamic:(BOOL)enabled
 RCT_EXPORT_METHOD(setIosWidgetHighlightAppearance:(NSString *)highlightId
                   hex:(NSString *)hex
                   dynamic:(BOOL)dynamic
+                  tinted:(BOOL)tinted
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
@@ -160,6 +161,9 @@ RCT_EXPORT_METHOD(setIosWidgetHighlightAppearance:(NSString *)highlightId
     [target removeObjectForKey:@"widget_highlight_hex"];
   }
   [target setBool:dynamic forKey:@"widget_highlight_dynamic"];
+  // "Tinted surfaces" — wash the widget card toward the accent so it matches
+  // the app's tinted chrome. Off (default) keeps the neutral card.
+  [target setBool:tinted forKey:@"widget_tinted_surfaces"];
   [target synchronize];
   [WidgetTimelineReloader reloadAllTimelinesIfAvailable];
   resolve(nil);

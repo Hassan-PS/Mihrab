@@ -16,12 +16,15 @@ export interface PrayerWidgetInterface {
     highlightId: string,
     highlightHex: string | null,
     highlightDynamic: boolean,
+    /** "Tinted surfaces": wash the widget card toward the accent. */
+    tinted: boolean,
   ): Promise<void>;
   getAndroidWidgetAppearance?(): Promise<{
     opacity: number;
     highlightId: string;
     highlightHex: string;
     highlightDynamic: boolean;
+    tinted?: boolean;
   } | null>;
 
   // ── iOS appearance ────────────────────────────────────────────────────────
@@ -29,6 +32,8 @@ export interface PrayerWidgetInterface {
     highlightId: string,
     highlightHex: string | null,
     highlightDynamic: boolean,
+    /** "Tinted surfaces": wash the widget card toward the accent. */
+    tinted: boolean,
   ): Promise<void>;
   /** Legacy iOS API — prefer setIosWidgetHighlightAppearance when available. */
   setWidgetHighlightDynamic?(enabled: boolean): Promise<void>;

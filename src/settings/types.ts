@@ -362,6 +362,26 @@ export type PrayerAppSettings = {
   /** When `appAccentId` is 'custom', the user-picked #RRGGBB hex. */
   appAccentCustomHex: string;
   /**
+   * Colour theme (storage key kept as `tintedSurfaces` for additive
+   * migration). Curated theme: dark-mode surfaces take a profile built
+   * from the chosen preset accent; light stays classic. Custom hex is
+   * barred from surfaces; the six presets remain.
+   *
+   * ON by default for new installs (brand green colour theme). Existing
+   * blobs that lack the key stay off — see `storage.ts` — so an upgrade
+   * never surprises someone with a themed dark mode. Mutually exclusive
+   * with `useSystemDynamicTheme`: turning system colours on clears this;
+   * the Appearance card also disables the system-colours toggle while a
+   * colour theme is on.
+   *
+   * The drawn time-of-day hero is exempt: it is a clock, not a theme.
+   *
+   * Reaches native (widget / Live Activity / notifications) because those
+   * render outside React — see `syncWidgetUiHints.ts`, the Live Activity
+   * payload, and the prayer-notification builder.
+   */
+  tintedSurfaces: boolean;
+  /**
    * Custom colours the user has kept, newest first — see
    * `src/settings/accentColors.ts` for the shape and the cap.
    *
@@ -638,6 +658,9 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   // upgrade).
   appAccentId: 'green',
   appAccentCustomHex: '#22c55e',
+  // New installs open on the green colour theme (walkthrough + Settings).
+  // Upgrades without this key stay Classic — see storage.ts.
+  tintedSurfaces: true,
   // Nobody starts with a colour they did not pick.
   savedAccentColors: [],
   // Live Activity defaults: OFF; when enabled, the detail-rich layout

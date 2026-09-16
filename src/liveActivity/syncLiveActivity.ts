@@ -185,6 +185,10 @@ async function syncLiveActivityImpl(args: {
   systemAccent?: boolean;
   /** Android only: which enhanced Live Activity visual style to render. */
   design?: 'timeline' | 'countdown' | 'markers';
+  /** "Tinted surfaces" — promote the accent to the card's background on both
+   *  platforms. Android reads it from settings inside its renderer; iOS needs
+   *  it threaded here into the ActivityKit content. */
+  tinted?: boolean;
 }): Promise<void> {
   // Mac Catalyst has no ActivityKit Live Activity surface (no Lock Screen /
   // Dynamic Island), so the whole feature no-ops there. Gated here rather than
@@ -323,6 +327,7 @@ async function syncLiveActivityImpl(args: {
       locationLabel: '',
       accentHex,
       systemTinted: !!args.systemTinted,
+      tinted: !!args.tinted,
       compactMode: true,
       showSunrise: true,
       showHijri: false,

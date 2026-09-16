@@ -802,4 +802,12 @@ Took 1 aborted attempt(s) before it ran clean:
 
   - 1 the last release left its lesson unwritten — fill in that '**Lesson:**' line in docs/release-log.md, commit it, and rerun
 
-**Lesson:** _(unfilled)_
+**Lesson:** the gate works, but it bills the wrong release. A lesson is
+owed at the end of a cut, when the artifacts are published and the
+attention that was on it has already gone somewhere else; nothing stops
+you walking away, so the debt is collected at the start of the NEXT
+release, which did nothing wrong and now pays a full preflight to find
+out. The fix is not a better gate — it is writing the line while the cut
+is still in your hands, in the same sitting that published it, because
+that is also the only moment the answer is actually known. A lesson
+written a fortnight later is a guess about what went wrong.

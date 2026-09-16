@@ -51,6 +51,9 @@ export type AppearanceSlice = Pick<
   | 'language'
   | 'appAccentId'
   | 'appAccentCustomHex'
+  // Promotes the accent to the app's main colour; rendered by
+  // AppearanceCard right under the accent picker, so it rides this slice.
+  | 'tintedSurfaces'
   // The shelf of kept custom colours, drawn by the same swatch row as
   // the presets — so the card that renders one renders the other.
   | 'savedAccentColors'
@@ -224,6 +227,7 @@ export function PrayerSettingsProvider({
       clockFormat: settings.clockFormat,
       appAccentId: settings.appAccentId,
       appAccentCustomHex: settings.appAccentCustomHex,
+      tintedSurfaces: settings.tintedSurfaces,
       savedAccentColors: settings.savedAccentColors,
       showPracticeOnHome: settings.showPracticeOnHome,
     }),
@@ -235,6 +239,7 @@ export function PrayerSettingsProvider({
       settings.clockFormat,
       settings.appAccentId,
       settings.appAccentCustomHex,
+      settings.tintedSurfaces,
       settings.savedAccentColors,
       settings.showPracticeOnHome,
     ],

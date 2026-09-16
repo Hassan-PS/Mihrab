@@ -49,6 +49,7 @@ import {
   SettingsGroup,
   SettingsToggleRow,
 } from '../../screens/settings/SettingsGroup';
+import { sharedSettingsStyles as s } from '../../screens/settings/sharedStyles';
 import { SegmentedControl } from '../../components/ui';
 import { AccentShelf } from '../../components/AccentShelf';
 import type { AppearancePreference } from '../../settings/types';
@@ -220,15 +221,30 @@ export function PersonaliseScreen({
           <SettingsBlock>
             <Text
               style={[typeStyle('label'), styles.label, { color: palette.muted }]}>
-              {t('onboarding.personalise.accent', 'Accent')}
+              {t('settings.colourTheme', 'Colour theme')}
             </Text>
-            {/* The same control Settings has, custom colours and all:
-                somebody setting the app up for the first time is exactly
-                who is most likely to want a colour of their own, and for
-                a while they were the one person who could not have it.
-                Smaller here — this is one row in a shelf of preferences,
-                not a card about accents. */}
-            <AccentShelf size={36} testIDPrefix="personalise-accent" />
+            {/* Same colour-theme control as Settings → Appearance: Classic
+                (paper and ink) or a preset that themes dark mode. Custom
+                hex stays an accent only. Smaller here — one row in a shelf
+                of preferences, not a card about this alone. */}
+            <AccentShelf
+              size={36}
+              testIDPrefix="personalise-accent"
+              classic={{
+                selected: !settings.tintedSurfaces,
+                label: t('settings.classicTheme', 'Classic'),
+                onPress: () => updateSettings({ tintedSurfaces: false }),
+              }}
+              onPick={id =>
+                updateSettings({ tintedSurfaces: id !== 'custom' })
+              }
+            />
+            <Text style={[s.help, { color: palette.muted, marginTop: SPACING.sm }]}>
+              {t(
+                'settings.colourThemeHelp',
+                'Classic keeps the app’s own paper and ink. Pick a colour to theme dark mode in it — light mode stays classic.',
+              )}
+            </Text>
           </SettingsBlock>
         )}
       </SettingsGroup>

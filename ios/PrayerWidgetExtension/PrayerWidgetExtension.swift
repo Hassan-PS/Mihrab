@@ -215,6 +215,7 @@ func payloadHasExpired(_ p: WidgetPayload, now: Date = Date(), calendar: Calenda
 private let kHighlightDynamicKey = "widget_highlight_dynamic"
 private let kHighlightIdKey = "widget_highlight_id"
 private let kHighlightHexKey = "widget_highlight_hex"
+private let kWidgetTintedKey = "widget_tinted_surfaces"
 
 // The extension's palette. Module-internal for the same reason as the App
 // Group keys above — every widget kind in here has to look like the same app.
@@ -254,6 +255,55 @@ func resolvedWidgetHighlightColor() -> Color {
     return Color(hexRGB: hex) ?? widgetHighlightDefault
   }
   return presetHighlightColor(id)
+}
+
+/// The accent as raw sRGB components — the tint needs numbers to mix, which
+/// a `Color` does not hand back. Mirrors `resolvedWidgetHighlightColor`.
+private func rgbFromHex(_ hex: String) -> (Double, Double, Double)? {
+  var s = hex.trimmingCharacters(in: .whitespaces)
+  guard s.hasPrefix("#") else { return nil }
+  s.removeFirst()
+  guard s.count == 6, let n = UInt32(s, radix: 16) else { return nil }
+  return (
+    Double((n >> 16) & 0xFF) / 255,
+    Double((n >> 8) & 0xFF) / 255,
+    Double(n & 0xFF) / 255
+  )
+}
+
+private func resolvedHighlightRGB() -> (Double, Double, Double) {
+  let fallback = (107.0 / 255, 201.0 / 255, 138.0 / 255) // widgetHighlightDefault
+  let def = UserDefaults(suiteName: kSuite)
+  if def?.bool(forKey: kHighlightDynamicKey) == true { return fallback }
+  let id = (def?.string(forKey: kHighlightIdKey) ?? "green").lowercased()
+  if id == "custom" {
+    let hex = def?.string(forKey: kHighlightHexKey) ?? "#6BC98A"
+    return rgbFromHex(hex) ?? fallback
+  }
+  switch id {
+  case "teal": return (78.0 / 255, 201.0 / 255, 176.0 / 255)
+  case "blue": return (107.0 / 255, 163.0 / 255, 245.0 / 255)
+  case "amber": return (229.0 / 255, 192.0 / 255, 123.0 / 255)
+  default: return fallback
+  }
+}
+
+/// The widget card's background — neutral by default, washed toward the
+/// accent when "Tinted surfaces" is on, so the widget matches the app's
+/// tinted chrome. The card carries light text, so the wash is modest and the
+/// card stays dark enough to hold it. Called at render time, so a change to
+/// the setting takes effect on the next timeline reload.
+func resolvedWidgetBackground() -> Color {
+  let def = UserDefaults(suiteName: kSuite)
+  guard def?.bool(forKey: kWidgetTintedKey) == true else { return widgetBg }
+  let (hr, hg, hb) = resolvedHighlightRGB()
+  let t = 0.24
+  let br = 28.0 / 255, bg = 28.0 / 255, bb = 30.0 / 255
+  return Color(
+    red: br + (hr - br) * t,
+    green: bg + (hg - bg) * t,
+    blue: bb + (hb - bb) * t
+  ).opacity(0.88)
 }
 
 /// Minutes since midnight for an "HH:MM" string, or nil.
@@ -1785,9 +1835,9 @@ struct WidgetBackgroundCompatModifier: ViewModifier {
   @ViewBuilder
   func body(content: Content) -> some View {
     if #available(iOSApplicationExtension 17.0, *) {
-      content.containerBackground(for: .widget) { widgetBg }
+      content.containerBackground(for: .widget) { resolvedWidgetBackground() }
     } else {
-      content.background(widgetBg)
+      content.background(resolvedWidgetBackground())
     }
   }
 }

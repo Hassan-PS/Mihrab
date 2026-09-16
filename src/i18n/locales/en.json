@@ -144,6 +144,9 @@
     "pitch": "Free and ad-free. Prayer times, qibla, the Qur’an with recitation and translation, and a khatmah tracker."
   },
   "settings": {
+    "colourTheme": "Colour theme",
+    "classicTheme": "Classic",
+    "colourThemeHelp": "Classic keeps the app’s own paper and ink. Pick a colour to theme dark mode in it — light mode stays classic.",
     "laDesignLabel": "Style",
     "laDesignTimeline": "Timeline",
     "laDesignCountdown": "Countdown",
@@ -273,6 +276,11 @@
     "accent_custom": "Custom",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "Used across the app and the home-screen widget.",
+    "tintedSurfaces": "Tinted surfaces",
+    "tintedSurfacesHelp": "Use your accent color as the app's main color — across every screen, and on the home-screen widgets, Live Activity and prayer notifications. Off keeps the accent as a quiet highlight.",
+    "verdantTheme": "Verdant",
+    "verdantThemeHelp": "Colors every surface in your chosen accent. Custom hex is unavailable — pick from the six presets.",
+    "verdantThemeSystemDisabled": "A colour theme is active — choose Classic to use system colours.",
     "widgetColorFollowsAccentHelp": "The widget uses the same accent color as the app. Pick it under Appearance.",
     "widgetColorOwnHelp": "The app is following your system colors, which the widget does not. Pick the widget’s highlight here.",
     "additionalTimes": "Additional times",
@@ -373,7 +381,8 @@
     "accentPickerSave": "Save colour",
     "accentPickerUseOnce": "Use without saving",
     "accentPickerAdjusted": "Moved to the nearest shade that stays readable on this background.",
-    "sectionAppearanceBlurbAndroid": "Theme, accent, time format, language, widget"
+    "sectionAppearanceBlurbAndroid": "Theme, accent, time format, language, widget",
+    "verdantAccentHelp": "Verdant colors every surface in this accent."
   },
   "locationSetup": {
     "headline": "Set your location",

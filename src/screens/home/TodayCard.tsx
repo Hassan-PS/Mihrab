@@ -1303,7 +1303,7 @@ function TodayCardImpl({
             is in a box — the chevrons are ink with a hit slop, and "back
             to today" is a word in the accent rather than a tinted pill,
             because every other control on this page reads that way. */}
-        <View style={styles.dayBar}>
+        <View style={[styles.dayBar, { backgroundColor: palette.bg }]}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('log.previousDay', 'Previous day')}
@@ -1482,12 +1482,12 @@ export const TodayCard = memo(TodayCardImpl);
 
 const styles = StyleSheet.create({
   card: { overflow: 'hidden' },
-  // Full-bleed: no radius at the top (it meets the screen edge), the
-  // page's radius at the foot where the hero becomes the page.
-  // Grow to fill the page; never shrink under the content. `flex: 1`
-  // would set flexBasis 0 and let a long table (extra times, the Mālikī
-  // boundaries) squash the hero to nothing; with basis auto the hero keeps
-  // its own height and the page scrolls the little it then has to.
+  // Full-bleed: no radius — the sky meets the day bar as one plane, not
+  // a card foot over the page. Grow to fill the page; never shrink under
+  // the content. `flex: 1` would set flexBasis 0 and let a long table
+  // (extra times, the Mālikī boundaries) squash the hero to nothing;
+  // with basis auto the hero keeps its own height and the page scrolls
+  // the little it then has to.
   cardBleed: { overflow: 'hidden', flexGrow: 1, flexShrink: 0, flexBasis: 'auto' },
   // Roomy: natural height, and the page centres it — see `roomy`.
   cardRoomy: { overflow: 'hidden' },
@@ -1496,8 +1496,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     flexShrink: 0,
     flexBasis: 'auto',
-    borderBottomStartRadius: HOME_TABLE_RADIUS,
-    borderBottomEndRadius: HOME_TABLE_RADIUS,
     overflow: 'hidden',
   },
   // No side padding: the rows are the page's now, edge to edge, and they
@@ -1516,10 +1514,8 @@ const styles = StyleSheet.create({
   tableBleed: {},
   /**
    * The day bar: a chevron at each edge and the day between them.
-   *
-   * It sits on the same inset as the hero's text and the rows' names, so
-   * the three read as one column, and it carries no rule of its own —
-   * the first row's divider is the rule.
+   * Same solid ground as the prayer table — sky and page are two surfaces;
+   * they meet with a clean cut, not a blend.
    */
   dayBar: {
     flexDirection: 'row',

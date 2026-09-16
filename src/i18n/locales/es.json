@@ -144,6 +144,9 @@
     "pitch": "Gratis y sin anuncios. Horarios de oración, alquibla, el Corán con recitación y traducción, y un seguimiento del jatma."
   },
   "settings": {
+    "colourTheme": "Tema de color",
+    "classicTheme": "Clásico",
+    "colourThemeHelp": "Clásico mantiene el papel y la tinta propios de la app. Elige un color para tematizar el modo oscuro — el modo claro sigue siendo clásico.",
     "laDesignLabel": "Estilo",
     "laDesignTimeline": "Cronología",
     "laDesignCountdown": "Cuenta atrás",
@@ -273,6 +276,11 @@
     "accent_custom": "Personalizado",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "Se usa en toda la app y en el widget de la pantalla de inicio.",
+    "tintedSurfaces": "Superficies teñidas",
+    "tintedSurfacesHelp": "Usa tu color de acento como color principal de la app — en todas las pantallas, los widgets de inicio, la Live Activity y las notificaciones de oración. Desactivado, el acento actúa como un toque sutil.",
+    "verdantTheme": "Verdor",
+    "verdantThemeHelp": "Colorea cada superficie con el acento que elijas. El hex personalizado no está disponible: elige entre los seis preajustes.",
+    "verdantThemeSystemDisabled": "Hay un tema de color activo — elige Clásico para usar los colores del sistema.",
     "widgetColorFollowsAccentHelp": "El widget usa el mismo color de acento que la app. Elígelo en Apariencia.",
     "widgetColorOwnHelp": "La aplicación sigue los colores del sistema, pero el widget no. Elige aquí el color de resaltado del widget.",
     "additionalTimes": "Horarios adicionales",
@@ -373,7 +381,8 @@
     "accentPickerSave": "Guardar color",
     "accentPickerUseOnce": "Usar sin guardar",
     "accentPickerAdjusted": "Movido al tono más cercano que sigue siendo legible sobre este fondo.",
-    "sectionAppearanceBlurbAndroid": "Tema, color, formato de hora, idioma, widget"
+    "sectionAppearanceBlurbAndroid": "Tema, color, formato de hora, idioma, widget",
+    "verdantAccentHelp": "Verdor colorea cada superficie con este acento."
   },
   "locationSetup": {
     "headline": "Establece tu ubicación",

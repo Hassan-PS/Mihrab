@@ -62,7 +62,8 @@ import { useMushafPager } from './useMushafPager';
 import { warmAround } from './useMushafPageFont';
 import { findPageForAyah } from './pages';
 import { riwayahById, type RiwayahId } from './riwayat';
-import { TONE_CHROME, toneIsDark, type MushafTone } from './mushafTone';
+import { toneIsDark, type MushafTone } from './mushafTone';
+import { useScrubberChrome } from './useScrubberChrome';
 import {
   spreadColumn,
   spreadGeometry,
@@ -407,6 +408,7 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
 
   const { marks, finish, selected, openSelection, openJump } = core;
   const accent = palette.accentSolid;
+  const railChrome = useScrubberChrome(tone);
   /**
    * The recited ayah, as far as the PAGE is concerned — null while nobody
    * is looking.
@@ -618,12 +620,9 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
                 styles.chevron,
                 styles.chevronLeft,
                 {
-                  // TONE_CHROME, like everything else on this page. These
-                  // two were the only chrome in the file painted from a
-                  // night/not-night pair, which has no answer for sepia:
-                  // it took the PAPER control colour onto a sepia page and
-                  // sat there as a pale grey smudge.
-                  backgroundColor: TONE_CHROME[tone].control,
+                  // Same ladder as the scrubber — page tone, or Verdant
+                  // when the app theme matches the page's light/dark.
+                  backgroundColor: railChrome.control,
                   opacity: hovered ? 0.95 : 0.4,
                 },
               ]}>
@@ -640,7 +639,7 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
                 styles.chevron,
                 styles.chevronRight,
                 {
-                  backgroundColor: TONE_CHROME[tone].control,
+                  backgroundColor: railChrome.control,
                   opacity: hovered ? 0.95 : 0.4,
                 },
               ]}>
@@ -659,7 +658,7 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
           onSelectPage={core.jumpToPage}
           onPeekPage={core.peekPage}
           onOpenJump={core.openJump}
-          chrome={TONE_CHROME[tone]}
+          chrome={railChrome}
         />
       ) : null}
       </View>

@@ -140,3 +140,75 @@ export const TONE_CHROME: Record<MushafTone, ToneChrome> = {
 export function toneIsDark(tone: MushafTone): boolean {
   return tone === 'night';
 }
+
+/**
+ * Scrubber / tone-pill colours that follow the app's selected accent
+ * (and Verdant surfaces when the app theme and the page agree on light/dark).
+ *
+ * The rail used to be print-only gold on paper grey — which was right when
+ * the bar was "part of the print", and wrong the moment the app had a
+ * chosen colour theme the rest of the chrome already wore. Accent always
+ * comes from the palette. Ink, muted, control and card stay on the page
+ * tone UNLESS Verdant is on and the app is as dark as the page: then the
+ * whole bar can take the themed ladder without dropping dark controls on
+ * a paper page (or light ones on night).
+ */
+/**
+ * Whether this page is a DARK page painted by an active colour theme —
+ * the one case where the page takes the theme's colours rather than its
+ * own print. `palette` must be the theme rendered for the page's mode.
+ */
+export function isThemedDarkPage(
+  tone: MushafTone,
+  palette: { tintedSurfaces: boolean; isDark: boolean },
+): boolean {
+  return palette.tintedSurfaces && palette.isDark && toneIsDark(tone);
+}
+
+/**
+ * The ornament ink for a page: the surah bands, the basmalah, the page
+ * number, the header labels.
+ *
+ * The page's own gold (`TONE_ORNAMENT`) — the print's colour, not a second
+ * accent — except on a themed dark page, where the ornaments take the
+ * theme's dark accent so the beginning of a surah is the colour the
+ * reader chose, the same colour the page bar's knob is. One rule with
+ * `scrubberChrome`, so the two can never disagree.
+ */
+export function pageOrnament(
+  tone: MushafTone,
+  palette: { accentSolid: string; tintedSurfaces: boolean; isDark: boolean },
+): string {
+  return isThemedDarkPage(tone, palette) ? palette.accentSolid : TONE_ORNAMENT[tone];
+}
+
+export function scrubberChrome(
+  tone: MushafTone,
+  palette: {
+    accentSolid: string;
+    tintedSurfaces: boolean;
+    isDark: boolean;
+    text: string | { toString(): string };
+    muted: string | { toString(): string };
+    controlBg: string | { toString(): string };
+    card: string | { toString(): string };
+  },
+): ToneChrome {
+  const base = TONE_CHROME[tone];
+  const accent = palette.accentSolid;
+  // Pass the theme rendered FOR THE PAGE'S MODE (`usePagePalette`), not
+  // the app's current palette: `accent` is then the variant that reads on
+  // this page. Themed surfaces are taken only on a themed dark page; light
+  // themes keep neutral surfaces, so on paper and sepia the tone's own
+  // chrome is the right ground under the accent.
+  if (!isThemedDarkPage(tone, palette)) {
+    return { ...base, accent };
+  }
+  return {
+    ink: String(palette.text),
+    muted: String(palette.muted),
+    control: String(palette.controlBg),
+    accent,
+    card: String(palette.card),
+  };
+}

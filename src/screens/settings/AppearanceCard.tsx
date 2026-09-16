@@ -34,10 +34,13 @@ import { sharedSettingsStyles as s } from './sharedStyles';
 import { SPACING } from '../../theme/tokens';
 
 /**
- * Appearance card: theme picker (System / Light / Dark), Android system
- * dynamic-colors switch (Material You), and Pure-Black OLED toggle when in
- * dark mode. Subscribes only to the appearance slice (task #11) — toggling a
- * widget color or notifications setting will not re-render this card.
+ * Appearance card: theme picker (System / Light / Dark), the colour theme
+ * (Classic, or one of the accent presets — picking a preset themes dark
+ * mode in it, `tintedSurfaces`), the system dynamic-colours switch
+ * (Material You / Liquid Glass) as the alternative to a chosen colour, and
+ * the Pure-Black OLED toggle when in dark mode. Subscribes only to the appearance slice
+ * (task #11) — toggling a widget color or notifications setting will not
+ * re-render this card.
  */
 // The swatches and the app-accent → widget-highlight mapping moved to
 // src/settings/widgetAccent.ts when the Widget card gained a picker of
@@ -62,14 +65,24 @@ function AppearanceCardImpl() {
   // dynamic refs re-resolve. Persist DIRECTLY (not via the async
   // updateSettings save) because the imminent Process.exit can kill an
   // in-flight write, leaving the next launch reading the old value (#114).
+  // Turning system colours ON clears Verdant — the two themes cannot share
+  // a palette.
   const applyDynamicAndRestart = (v: boolean) => {
     void (async () => {
+      const next = {
+        ...fullSettings,
+        useSystemDynamicTheme: v,
+        ...(v ? { tintedSurfaces: false } : {}),
+      };
       try {
-        await saveSettings({ ...fullSettings, useSystemDynamicTheme: v });
+        await saveSettings(next);
       } catch (e) {
         console.warn('Failed to persist toggle before restart:', e);
       }
-      updateSettings({ useSystemDynamicTheme: v });
+      updateSettings({
+        useSystemDynamicTheme: v,
+        ...(v ? { tintedSurfaces: false } : {}),
+      });
       const tryReload = () => {
         try {
           const dev = (
@@ -106,7 +119,7 @@ function AppearanceCardImpl() {
     settings.appearance === 'system' &&
     settings.useSystemDynamicTheme &&
     (Platform.OS === 'android' || Platform.OS === 'ios');
-
+  const verdantActive = settings.tintedSurfaces && !dynamicColorsActive;
 
   return (
     <>
@@ -129,6 +142,39 @@ function AppearanceCardImpl() {
             onChange={appearance => updateSettings({ appearance })}
           />
         </SettingsBlock>
+
+        {/* Colour theme — the alternative to system colours. Classic is the
+            app's own paper and ink; a preset themes dark mode in that colour
+            (light stays classic). Custom colours are an accent only, since
+            free-form washes are barred from the surfaces. Hidden under
+            system colours, which own the palette. */}
+        {!dynamicColorsActive && (
+          <SettingsBlock>
+            <Text style={[s.label, { color: palette.muted }]}>
+              {t('settings.colourTheme', 'Colour theme')}
+            </Text>
+            <View style={styles.shelf}>
+              <AccentShelf
+                testIDPrefix="appearance"
+                classic={{
+                  selected: !settings.tintedSurfaces,
+                  label: t('settings.classicTheme', 'Classic'),
+                  onPress: () => updateSettings({ tintedSurfaces: false }),
+                }}
+                onPick={id =>
+                  // A preset is the theme; a custom colour is an accent only.
+                  updateSettings({ tintedSurfaces: id !== 'custom' })
+                }
+              />
+            </View>
+            <Text style={[s.help, { color: palette.muted, marginTop: SPACING.sm }]}>
+              {t(
+                'settings.colourThemeHelp',
+                'Classic keeps the app’s own paper and ink. Pick a colour to theme dark mode in it — light mode stays classic.',
+              )}
+            </Text>
+          </SettingsBlock>
+        )}
         {Platform.OS === 'android' || Platform.OS === 'ios' ? (
           <SettingsToggleRow
             title={
@@ -137,17 +183,23 @@ function AppearanceCardImpl() {
                 : t('settings.systemDynamicColors')
             }
             help={
-              Platform.OS === 'ios'
+              verdantActive
                 ? t(
-                    'settings.liquidGlassHelp',
-                    'Adopt iOS system colours and translucent glass chrome. Follows Light/Dark automatically.',
+                    'settings.verdantThemeSystemDisabled',
+                    'A colour theme is active — choose Classic to use system colours.',
                   )
-                : t('settings.systemDynamicColorsHelp')
+                : Platform.OS === 'ios'
+                  ? t(
+                      'settings.liquidGlassHelp',
+                      'Adopt iOS system colours and translucent glass chrome. Follows Light/Dark automatically.',
+                    )
+                  : t('settings.systemDynamicColorsHelp')
             }
             value={settings.useSystemDynamicTheme}
             // Only answerable while the theme follows the system: there is
             // nothing dynamic to follow once Light or Dark is pinned.
-            disabled={settings.appearance !== 'system'}
+            // Verdant owns the palette when on — system colours wait.
+            disabled={settings.appearance !== 'system' || verdantActive}
             // Material You / iOS dynamic colors are resolved at view-attach
             // time, so flipping them mid-session leaves stale tints on
             // already-mounted surfaces (#110). Defer the actual change to a
@@ -200,25 +252,6 @@ function AppearanceCardImpl() {
           </Text>
         </SettingsBlock>
       </SettingsGroup>
-
-      {!dynamicColorsActive && (
-        <SettingsGroup
-          footer={t(
-            'settings.accentColorHelp',
-            'Used across the app and the home-screen widget.',
-          )}
-        >
-          <SettingsBlock>
-            <Text style={[s.label, { color: palette.muted }]}>
-              {t('settings.accentColor', 'Accent color')}
-            </Text>
-            <View style={styles.shelf}>
-              <AccentShelf />
-            </View>
-          </SettingsBlock>
-        </SettingsGroup>
-      )}
-
 
       <ConfirmModal
         visible={pendingDynamic !== null}

@@ -84,6 +84,18 @@ public struct PrayerLiveActivityAttributes: ActivityAttributes {
     /// Defaults to false so older JS payloads still decode.
     public var systemTinted: Bool = false
 
+    /// "Tinted surfaces" — when true, the Lock Screen + Dynamic Island
+    /// surfaces are washed toward the accent so the card matches the app's
+    /// tinted chrome. Off keeps the neutral material with the accent only as a
+    /// keyline / countdown tint.
+    ///
+    /// Optional, NOT `Bool = false`, for the reason spelled out on `extraRows`
+    /// above: an activity started by the pre-upgrade binary is decoded by this
+    /// build against this type, its archive has no `tinted` key, and
+    /// synthesized `Decodable` throws on a missing key unless the property is
+    /// Optional. Read it as `tinted ?? false`.
+    public var tinted: Bool?
+
     /// Display knobs from the user's Settings → Live activity card.
     public var compactMode: Bool
     public var showSunrise: Bool

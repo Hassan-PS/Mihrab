@@ -1,0 +1,3 @@
+• A colour theme now sits inside Appearance — green, teal, blue, amber, rose or violet themes dark mode, and Classic puts the app's own paper and ink back. It takes the place of system colours rather than sitting beside them.
+• The mushaf page bar and the ornament at the start of each surah take the theme's colour instead of losing it on a night page.
+• Back up to a file: Save to Files on every platform, and import by picking the file rather than pasting the text.

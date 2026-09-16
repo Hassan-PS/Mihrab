@@ -66,9 +66,35 @@ type Props = {
   size?: number;
   /** Prefix for per-swatch testIDs, where a host's tests want them. */
   testIDPrefix?: string;
+  /**
+   * Verdant theme: show the six presets only — no saved customs, no hex
+   * picker. Custom washes are barred so the surface theme stays intentional.
+   */
+  presetsOnly?: boolean;
+  /**
+   * Told which accent was just chosen, after it has been applied. The
+   * Appearance card uses this to make a preset the colour THEME (Verdant
+   * on) and a custom colour an accent only (Verdant off, since custom
+   * washes are barred).
+   */
+  onPick?: (id: AppAccentId) => void;
+  /**
+   * A leading "Classic" choice: a half-paper, half-ink circle with its
+   * label beneath, and a divider between it and the colours. It is the
+   * reset — the app's own surfaces, no colour theme — drawn in the same
+   * ring language as the swatches so it reads as one more option, not a
+   * button off to the side.
+   */
+  classic?: { selected: boolean; onPress: () => void; label: string };
 };
 
-export function AccentShelf({ size = 44, testIDPrefix }: Props) {
+export function AccentShelf({
+  size = 44,
+  testIDPrefix,
+  presetsOnly = false,
+  onPick,
+  classic,
+}: Props) {
   const { t } = useTranslation();
   const { palette, isDark } = useAppPalette();
   const { slice: settings, update: updateSettings } = useAppearanceSettings();
@@ -102,6 +128,7 @@ export function AccentShelf({ size = 44, testIDPrefix }: Props) {
       ...(customHex ? { appAccentCustomHex: customHex } : {}),
     });
     updateWidget(widgetPatchForAccent(id, customHex));
+    onPick?.(id);
   };
 
   const testID = (suffix: string) =>
@@ -112,6 +139,58 @@ export function AccentShelf({ size = 44, testIDPrefix }: Props) {
   return (
     <>
       <View style={styles.row}>
+        {classic ? (
+          <>
+            <View style={styles.classicCol}>
+              <Pressable
+                testID={testID('classic')}
+                accessibilityRole="radio"
+                accessibilityLabel={classic.label}
+                accessibilityState={{
+                  checked: classic.selected,
+                  selected: classic.selected,
+                }}
+                onPress={() => {
+                  setPendingRemove(null);
+                  // Classic is the reset: brand green accent, no colour
+                  // theme. Do not go through `setAccent` — that fires
+                  // `onPick`, which would turn theming back on for green.
+                  updateSettings({
+                    appAccentId: 'green',
+                    tintedSurfaces: false,
+                  });
+                  updateWidget(widgetPatchForAccent('green'));
+                  classic.onPress();
+                }}
+                style={[
+                  swatchSize,
+                  styles.classic,
+                  {
+                    borderColor: classic.selected ? palette.accent : palette.border,
+                    borderWidth: classic.selected ? 3 : 2,
+                  },
+                ]}
+              >
+                {/* Paper on one side, ink on the other — the app's own two
+                    colours, whichever mode is on. */}
+                <View style={[styles.half, { backgroundColor: palette.card }]} />
+                <View
+                  style={[styles.half, { backgroundColor: palette.textSolid }]}
+                />
+              </Pressable>
+              <Text
+                style={[styles.classicLabel, { color: palette.muted }]}
+                numberOfLines={1}
+              >
+                {classic.label}
+              </Text>
+            </View>
+            {/* A dot on the circle line, between Classic and the colours. */}
+            <View style={[styles.dotWell, { height: size }]}>
+              <View style={[styles.dot, { backgroundColor: palette.muted }]} />
+            </View>
+          </>
+        ) : null}
         {APP_ACCENT_SWATCHES.map(sw => {
           const selected = settings.appAccentId === sw.id;
           return (
@@ -138,8 +217,10 @@ export function AccentShelf({ size = 44, testIDPrefix }: Props) {
         })}
 
         {/* The shelf: colours this person kept, newest first. Tapping one
-            applies it; tapping the active one arms its removal. */}
-        {settings.savedAccentColors.map(hex => {
+            applies it; tapping the active one arms its removal. Hidden
+            under Verdant — custom washes are barred there. */}
+        {!presetsOnly &&
+          settings.savedAccentColors.map(hex => {
           const selected =
             customActive && settings.appAccentCustomHex.toUpperCase() === hex;
           const arming = pendingRemove === hex;
@@ -191,7 +272,9 @@ export function AccentShelf({ size = 44, testIDPrefix }: Props) {
 
         {/* Add — opens the picker. It keeps its place once the shelf is
             full and says "Hex" instead: the oldest colour falls off on
-            save, so the button never becomes one that can only fail. */}
+            save, so the button never becomes one that can only fail.
+            Hidden under Verdant. */}
+        {!presetsOnly && (
         <Pressable
           testID={testID('custom')}
           accessibilityRole="radio"
@@ -215,8 +298,10 @@ export function AccentShelf({ size = 44, testIDPrefix }: Props) {
               : '+'}
           </Text>
         </Pressable>
+        )}
       </View>
 
+      {!presetsOnly && (
       <ColorPickerModal
         visible={pickerOpen}
         initial={settings.appAccentCustomHex}
@@ -240,6 +325,7 @@ export function AccentShelf({ size = 44, testIDPrefix }: Props) {
         }}
         onClose={() => setPickerOpen(false)}
       />
+      )}
     </>
   );
 }
@@ -249,7 +335,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: SPACING.md,
-    alignItems: 'center',
+    // Tops, not centres: every circle then sits on one line, and the
+    // Classic caption hangs under its own circle without lowering the rest.
+    alignItems: 'flex-start',
   },
   custom: {
     alignItems: 'center',
@@ -259,5 +347,30 @@ const styles = StyleSheet.create({
   customLabel: {
     fontSize: TYPE.label.fontSize,
     fontWeight: '700',
+  },
+  // The Classic column is taller than a swatch (it carries a caption), so
+  // it pins to the row's top edge: circle tops line up, the caption hangs.
+  classicCol: {
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  classic: {
+    flexDirection: 'row',
+    overflow: 'hidden',
+  },
+  half: { flex: 1 },
+  classicLabel: {
+    fontSize: TYPE.footnote.fontSize,
+  },
+  // The dot is centred on the circle line: its well is as tall as a
+  // swatch, so the dot lands at the circles' midline.
+  dotWell: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dot: {
+    width: SPACING.xs,
+    height: SPACING.xs,
+    borderRadius: RADIUS.full,
   },
 });

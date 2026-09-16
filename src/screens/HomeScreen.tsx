@@ -548,6 +548,8 @@ export function HomeScreen() {
       hour12: clockHour12,
       // The shade's tint follows the app's accent, Material You included.
       accentColor: palette.accentSolid,
+      // Tinted surfaces: colourise the whole notification with the accent.
+      tinted: settings.tintedSurfaces,
     }).catch(e => console.warn('syncPrayerNotifications (effect):', e));
     // The end-of-day prompt is scheduled from the same data and the same
     // moment as the prayer alerts: it needs Isha for every day it covers,
@@ -604,6 +606,8 @@ export function HomeScreen() {
     settings.adhanUsesAlarmStream,
     clockHour12,
     palette.accentSolid,
+    // Tinted surfaces recolours the shade, so re-schedule when it flips.
+    settings.tintedSurfaces,
     settings.malikiSecondTimesEnabled,
     settings.malikiSecondTimeAlerts,
     settings.malikiSecondTimeAlertMinutes,
@@ -712,6 +716,8 @@ export function HomeScreen() {
           week: view.alertWeek,
           hour12: clockHour12,
           accentColor: palette.accentSolid,
+          // Tinted surfaces: colourise the whole notification with the accent.
+          tinted: settings.tintedSurfaces,
           daruriAlerts: settings.malikiSecondTimesEnabled
             ? settings.malikiSecondTimeAlerts
             : [],
@@ -774,6 +780,8 @@ export function HomeScreen() {
             settings.appearance === 'system' &&
             settings.useSystemDynamicTheme,
           design: settings.liveActivityDesign,
+          // Tinted surfaces: colourise the Live Activity card with the accent.
+          tinted: settings.tintedSurfaces,
         }).catch(e => console.warn('syncLiveActivity (focus):', e));
       }
 
@@ -823,6 +831,8 @@ export function HomeScreen() {
       // said the same thing three times, and hid the linter's real
       // complaints about this hook behind an "unnecessary dependency" one.
       palette.accentSolid,
+      // Tinted surfaces recolours both the shade and the Live Activity.
+      settings.tintedSurfaces,
       settings.appearance,
       settings.useSystemDynamicTheme,
       settings.liveActivityDesign,
@@ -928,6 +938,8 @@ export function HomeScreen() {
         settings.appearance === 'system' &&
         settings.useSystemDynamicTheme,
       design: settings.liveActivityDesign,
+      // Tinted surfaces: colourise the Live Activity card with the accent.
+      tinted: settings.tintedSurfaces,
     }).catch(e => console.warn('syncLiveActivity (effect):', e));
   }, [
     afterFirstPaint,
@@ -946,6 +958,8 @@ export function HomeScreen() {
     settings.appearance,
     settings.useSystemDynamicTheme,
     settings.liveActivityDesign,
+    // Re-push the moment Tinted surfaces is toggled so the card recolours.
+    settings.tintedSurfaces,
     // Re-push the Live Activity the instant the user changes its options
     // (HomeScreen stays mounted, so this fires even from the Settings screen).
     settings.liveActivityLockButton,

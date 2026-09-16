@@ -187,6 +187,19 @@ describe('graceful fallback when encrypted storage is empty / first launch', () 
     expect(loaded.appearance).toBe(DEFAULT_SETTINGS.appearance);
     expect(loaded.language).toBe(DEFAULT_SETTINGS.language);
     expect(loaded.manualLatitude).toBe(DEFAULT_SETTINGS.manualLatitude);
+    // New installs open on the green colour theme.
+    expect(loaded.tintedSurfaces).toBe(true);
+    expect(loaded.appAccentId).toBe('green');
+  });
+
+  test('upgrade without tintedSurfaces stays Classic', async () => {
+    // DEFAULT is now true for new installs; an older blob that never
+    // wrote the key must not inherit that and suddenly theme dark mode.
+    const legacy: Record<string, unknown> = { ...DEFAULT_SETTINGS };
+    delete legacy.tintedSurfaces;
+    await AsyncStorage.setItem(KEY, JSON.stringify(legacy));
+    const loaded = await loadSettings();
+    expect(loaded.tintedSurfaces).toBe(false);
   });
 
   test('post-migration empty plaintext + populated encrypted reads from encrypted', async () => {

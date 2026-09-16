@@ -483,6 +483,10 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         val builder = Notification.Builder(ctx, CHANNEL_ID)
           .setSmallIcon(R.drawable.ic_stat_prayer)
           .setColor(accentInt)
+          // NEVER colorize. A colorized notification is not eligible for the
+          // status-bar chip or the always-on display — Verdant tints the app
+          // and the shade accent via setColor above; the Live Activity card
+          // itself stays a promotable template.
           .setColorized(false)
           .setOngoing(true)
           .setOnlyAlertOnce(true)
@@ -555,7 +559,9 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         return builder.build()
       } catch (t: Throwable) {
         Log.w(NAME, "Android 16 path failed, falling back to legacy", t)
-        return buildLegacy(ctx, nextEpochMs, accentInt, progressPct, title, contentIntent, null)
+        return buildLegacy(
+          ctx, nextEpochMs, accentInt, progressPct, title, contentIntent, null,
+        )
       }
     }
 
@@ -633,6 +639,9 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
         val builder = Notification.Builder(ctx, CHANNEL_ID)
           .setSmallIcon(R.drawable.ic_stat_prayer)
           .setColor(effectiveAccent)
+          // NEVER colorize — same rule as Android 16: colorized cards lose
+          // the chip, the AOD, and (on some shells) the action buttons.
+          // Verdant reaches this surface only as setColor (accent tint).
           .setColorized(false)
           .setOngoing(true)
           .setOnlyAlertOnce(true)
@@ -1122,6 +1131,7 @@ class MihrabLiveActivityModule(private val reactContext: ReactApplicationContext
       val builder = NotificationCompat.Builder(ctx, CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_stat_prayer)
         .setColor(accentInt)
+        // Never colorize the Live Activity card — see buildAndroid16.
         .setColorized(false)
         .setOngoing(true)
         .setOnlyAlertOnce(true)

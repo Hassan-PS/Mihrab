@@ -79,7 +79,8 @@ import { warmAround } from './useMushafPageFont';
 import { findPageForAyah } from './pages';
 import { ayahLineBox, followOffset } from './mushafFollowScroll';
 import { riwayahById, type RiwayahId } from './riwayat';
-import { TONE_CHROME, toneIsDark, type MushafTone } from './mushafTone';
+import { toneIsDark, type MushafTone } from './mushafTone';
+import { useScrubberChrome } from './useScrubberChrome';
 import {
   FOOTER_GAP,
   FOOTER_RESERVE,
@@ -590,6 +591,7 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
 
   const { marks, finish, selected, openSelection, openJump } = core;
   const accent = palette.accentSolid;
+  const railChrome = useScrubberChrome(tone);
   /**
    * The recited ayah, as far as the PAGE is concerned — null while nobody
    * is looking.
@@ -764,12 +766,12 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
                 }
               : null
           }
-          chrome={TONE_CHROME[tone]}
+          chrome={railChrome}
           trailing={
             <MushafToneButton
               tone={tone}
-              color={TONE_CHROME[tone].accent}
-              backgroundColor={TONE_CHROME[tone].control}
+              color={railChrome.accent}
+              backgroundColor={railChrome.control}
             />
           }
         />

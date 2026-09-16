@@ -307,6 +307,12 @@ export async function startOrUpdateLiveActivity(
   if (Platform.OS !== 'android') return;
   await ensureChannel();
 
+  // "Tinted surfaces" — colourise the whole card toward the accent. Read
+  // once here (headless-safe) so both the native path and the notifee
+  // fallback below can see it; the native branch refreshes it from the same
+  // settings load it already does.
+  let tinted = false;
+
   // ── Text ────────────────────────────────────────────────────────
   const nextTime = input.nextPrayerTimestamp
     ? formatHHMM(input.nextPrayerTimestamp)
@@ -382,6 +388,7 @@ export async function startOrUpdateLiveActivity(
     try {
       const s = await loadSettings();
       lockButton = s.liveActivityLockButton !== false;
+      tinted = s.tintedSurfaces === true;
       const soundOpt = getNotificationSoundOption(s.notificationSound);
       // Resolved rather than read off the table: the user's own recording has
       // no fixed channel, and if its file has gone this lands on the default
@@ -505,6 +512,7 @@ export async function startOrUpdateLiveActivity(
       locationLabel: input.locationLabel,
       accentHex: input.accentHex,
       systemAccent: input.systemAccent === true,
+      tinted,
       design: input.design ?? 'timeline',
       compactMode: input.compactMode,
       showSunrise: input.showSunrise,
@@ -560,6 +568,8 @@ export async function startOrUpdateLiveActivity(
         // App accent tints the small icon on Android 8+ and the
         // chronometer text colour on Android 12+ Material You shells.
         color: input.accentHex || undefined,
+        // Tinted surfaces: colourise the whole notification with the accent.
+        colorized: tinted,
         ongoing: true,
         autoCancel: false,
         // No Wear OS mirror — info-only surface, the wrist would

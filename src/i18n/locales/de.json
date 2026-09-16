@@ -144,6 +144,9 @@
     "pitch": "Kostenlos und werbefrei. Gebetszeiten, Qibla, der Koran mit Rezitation und Übersetzung, und ein Khatma-Tracker."
   },
   "settings": {
+    "colourTheme": "Farbthema",
+    "classicTheme": "Klassisch",
+    "colourThemeHelp": "Klassisch behält Papier und Tinte der App bei. Wähle eine Farbe, um den Dunkelmodus darin zu gestalten — der Hellmodus bleibt klassisch.",
     "laDesignLabel": "Stil",
     "laDesignTimeline": "Zeitleiste",
     "laDesignCountdown": "Countdown",
@@ -273,6 +276,11 @@
     "accent_custom": "Eigene",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "Wird in der gesamten App und im Homescreen-Widget verwendet.",
+    "tintedSurfaces": "Eingefärbte Flächen",
+    "tintedSurfacesHelp": "Verwende deine Akzentfarbe als Hauptfarbe der App — auf allen Bildschirmen, in den Homescreen-Widgets, der Live Activity und den Gebetsbenachrichtigungen. Deaktiviert bleibt die Akzentfarbe ein dezentes Highlight.",
+    "verdantTheme": "Smaragd",
+    "verdantThemeHelp": "Färbt jede Fläche in der gewählten Akzentfarbe. Eigenes Hex ist nicht verfügbar — wählen Sie aus den sechs Voreinstellungen.",
+    "verdantThemeSystemDisabled": "Ein Farbthema ist aktiv — wähle Klassisch, um Systemfarben zu verwenden.",
     "widgetColorFollowsAccentHelp": "Das Widget verwendet die gleiche Akzentfarbe wie die App. Wähle sie unter Darstellung.",
     "widgetColorOwnHelp": "Die App folgt deinen Systemfarben, das Widget nicht. Wähle hier die Akzentfarbe des Widgets.",
     "additionalTimes": "Weitere Zeiten",
@@ -373,7 +381,8 @@
     "accentPickerSave": "Farbe speichern",
     "accentPickerUseOnce": "Ohne Speichern verwenden",
     "accentPickerAdjusted": "Auf den nächsten Ton verschoben, der auf diesem Hintergrund lesbar bleibt.",
-    "sectionAppearanceBlurbAndroid": "Thema, Akzent, Zeitformat, Sprache, Widget"
+    "sectionAppearanceBlurbAndroid": "Thema, Akzent, Zeitformat, Sprache, Widget",
+    "verdantAccentHelp": "Smaragd färbt jede Fläche in diesem Akzent."
   },
   "locationSetup": {
     "headline": "Legen Sie Ihren Standort fest",

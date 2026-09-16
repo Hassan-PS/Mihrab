@@ -218,7 +218,11 @@ export function MainTabs() {
          */
         tabBarStyle: FLOATS_OVER_CONTENT
           ? {
-              backgroundColor: translucentSurface(palette.card),
+              // `accentSurfaceStrong` is `palette.card` verbatim unless the
+              // user turned on Tinted surfaces, in which case the pill takes
+              // a deeper wash of the accent than the page — an anchor at the
+              // same lightness, so bar and page still read as one surface.
+              backgroundColor: translucentSurface(palette.accentSurfaceStrong),
               position: 'absolute',
               /**
                * ABSOLUTE AGAIN — and this time the tabs still work.
@@ -293,7 +297,10 @@ export function MainTabs() {
               paddingHorizontal: cornerInset,
               // The page's own colour, not the card's: the bar is part of
               // the page it sits under, and a hairline is the only edge.
-              backgroundColor: palette.bg,
+              // `accentSurface` is `palette.bg` verbatim until Tinted
+              // surfaces is on, when it becomes a gentle accent anchor at
+              // the page's own lightness.
+              backgroundColor: palette.accentSurface,
               borderTopColor: palette.border ?? palette.muted,
               borderTopWidth: StyleSheet.hairlineWidth,
               // iPad gets NOTHING else — the original bar, exactly.

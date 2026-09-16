@@ -27,10 +27,24 @@ private data class WidgetStyle(
   val bgOpacityPercent: Int,
   val highlightId: String,
   val highlightHex: String,
+  /**
+   * "Tinted surfaces" — the app-wide opt-in that promotes the accent to the
+   * main colour (Appearance → Tinted surfaces). When on, the widget card is
+   * no longer a neutral dark slab: its background is washed toward the
+   * chosen accent, so the widget matches the app's tinted chrome. Off (the
+   * default) keeps the neutral #1C1C1E exactly.
+   */
+  val tinted: Boolean,
 ) {
   fun backgroundArgb(): Int {
     val a = (bgOpacityPercent.coerceIn(0, 100) * 255 / 100f).toInt().coerceIn(0, 255)
-    return Color.argb(a, BASE_BG_R, BASE_BG_G, BASE_BG_B)
+    if (!tinted) return Color.argb(a, BASE_BG_R, BASE_BG_G, BASE_BG_B)
+    // Wash the neutral card toward the accent. A modest fraction: the widget
+    // draws light text on this dark card, so the card stays dark enough to
+    // hold it — the accent reads as the card's temperament, not its value.
+    val base = Color.rgb(BASE_BG_R, BASE_BG_G, BASE_BG_B)
+    val mixed = mixRgb(base, highlightInt(), 0.24f)
+    return Color.argb(a, Color.red(mixed), Color.green(mixed), Color.blue(mixed))
   }
 
   /**
@@ -41,7 +55,10 @@ private data class WidgetStyle(
    */
   fun highlightColorInt(
     @Suppress("UNUSED_PARAMETER") context: Context,
-  ): Int {
+  ): Int = highlightInt()
+
+  /** Context-free accent resolution, shared by the highlight and the tint. */
+  private fun highlightInt(): Int {
     if (highlightId.equals("custom", ignoreCase = true)) {
       val h = highlightHex.trim()
       if (h.matches(Regex("^#([0-9A-Fa-f]{6})$"))) {
@@ -66,6 +83,14 @@ private data class WidgetStyle(
     } catch (_: Exception) {
       Color.parseColor("#46A081")
     }
+  }
+
+  private fun mixRgb(base: Int, other: Int, t: Float): Int {
+    val k = t.coerceIn(0f, 1f)
+    val r = (Color.red(base) + (Color.red(other) - Color.red(base)) * k).toInt()
+    val g = (Color.green(base) + (Color.green(other) - Color.green(base)) * k).toInt()
+    val b = (Color.blue(base) + (Color.blue(other) - Color.blue(base)) * k).toInt()
+    return Color.rgb(r.coerceIn(0, 255), g.coerceIn(0, 255), b.coerceIn(0, 255))
   }
 }
 
@@ -103,10 +128,13 @@ private fun readWidgetStyle(prefs: SharedPreferences): WidgetStyle {
   //
   // `hid` of "dynamic" is a value only older builds could have stored; it
   // resolves to green like any other unknown id.
+  val tinted =
+    prefs.getBoolean(PrayerWidgetProvider.PREFS_WIDGET_TINTED, false)
   return WidgetStyle(
     opacity.coerceIn(0, 100),
     hid.ifEmpty { "green" },
     hex,
+    tinted,
   )
 }
 
@@ -208,6 +236,8 @@ open class PrayerWidgetProvider : AppWidgetProvider() {
     const val PREFS_WIDGET_HIGHLIGHT_ID = "widget_highlight_id"
     const val PREFS_WIDGET_HIGHLIGHT_HEX = "widget_highlight_hex"
     const val PREFS_WIDGET_HIGHLIGHT_DYNAMIC = "widget_highlight_dynamic"
+    /** "Tinted surfaces": wash the widget card toward the accent. */
+    const val PREFS_WIDGET_TINTED = "widget_tinted_surfaces"
     /**
      * The language tag Mihrab itself is running in, copied out of the payload
      * when JS saves it. See `localized`.

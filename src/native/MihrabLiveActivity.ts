@@ -113,6 +113,11 @@ export type MihrabLiveActivityPayload = {
    *  colours on), so the tint matches the app and auto-updates on wallpaper
    *  colour changes without reopening. */
   systemAccent?: boolean;
+  /** "Tinted surfaces" — when on, the notification is colourised so the whole
+   *  card takes the accent as its background, matching the app's tinted
+   *  chrome. Off keeps the neutral system notification with only the accent
+   *  as the small-icon / progress tint. */
+  tinted?: boolean;
   /** Android Live Activity visual style (both keep the chip + AOD):
    *   'timeline'  — full prayer-day ProgressStyle timeline + inline countdown.
    *   'countdown' — countdown-focused: big countdown title + prayer name/time. */

@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { getResolvedAccentHex } from '../native/SystemTheme';
 import { legibleAccent } from '../settings/accentColors';
+import { hexToOklch, oklchToHex } from './oklch';
 import type { AppAccentId, AppearancePreference } from '../settings/types';
 
 export type AppPalette = {
@@ -79,6 +80,37 @@ export type AppPalette = {
    * caller threading `isDark` through separately.
    */
   isDark: boolean;
+  /**
+   * Verdant theme mode (storage key `tintedSurfaces`) — Appearance →
+   * "Verdant". A curated theme built from the chosen preset accent, with
+   * distinct light / dark surface profiles (not a faint wash of parchment).
+   * Custom hex is barred; the six presets remain. Mutually exclusive with
+   * system dynamic colours. When OFF, every accent-surface token collapses
+   * to its neutral counterpart.
+   *
+   * The drawn time-of-day hero (`HeroSky`) is deliberately NOT driven by
+   * this — it is a clock, not a theme — so its own colours never route
+   * through these tokens.
+   */
+  tintedSurfaces: boolean;
+  /**
+   * A calm accent wash for a chrome band (per-tab header strip, grouped
+   * surface). Equals `bg` when `tintedSurfaces` is off.
+   */
+  accentSurface: ColorValue;
+  /**
+   * A stronger accent wash for the app's structural chrome (tab bar band).
+   * Equals `card` when `tintedSurfaces` is off.
+   */
+  accentSurfaceStrong: ColorValue;
+  /**
+   * Text/glyph colour that reads on `accentSurface` / `accentSurfaceStrong`.
+   * The washes stay close to `bg`, so this is `text` — exposed as a token so
+   * a caller does not have to know that. `textSolid`-safe (a plain hex).
+   */
+  onAccentSurface: string;
+  /** A divider on a tinted surface. Equals `border` when the mode is off. */
+  accentHairline: ColorValue;
 };
 
 export function resolveEffectiveDark(
@@ -126,6 +158,14 @@ type PaletteBase = Omit<
   | 'textSolid'
   | 'isDark'
   | 'onAccent'
+  // Layered on by withBrandAccents / the dynamic palettes (from the accent
+  // and the tintedSurfaces flag), so the base surface objects don't state
+  // them.
+  | 'tintedSurfaces'
+  | 'accentSurface'
+  | 'accentSurfaceStrong'
+  | 'onAccentSurface'
+  | 'accentHairline'
 >;
 
 /**
@@ -182,6 +222,149 @@ function shiftHex(hex: string, amount: number): string {
     g.toString(16).padStart(2, '0') +
     b.toString(16).padStart(2, '0')
   );
+}
+
+/**
+ * Verdant — a tonal theme for DARK mode; light mode is the release look.
+ *
+ * ── WHY LIGHT IS LEFT ALONE ─────────────────────────────────────────────
+ *
+ * Every light version of a tinted page was tried — a whisper, pronounced,
+ * tinted paper, vibrant — and none of them was the app. A light page that
+ * carries the accent reads as pastel, mint or a slab; the app's light
+ * identity is warm parchment with the accent as ink and as a few soft
+ * highlights (`accentBg`), which is exactly what the shipped release does.
+ * So under Verdant, light surfaces collapse to their neutral counterparts
+ * and the accent keeps doing what it always did. The toggle still holds
+ * (the flag is true, native hints still route), it simply has no surface
+ * work to do until the sun goes down.
+ *
+ * ── DARK: A TONAL LADDER IN OKLCH ───────────────────────────────────────
+ *
+ * A deep tinted ground reads as coloured night ink, which IS in character.
+ * The ladder lifts toward light — bg → chrome → card → controlBg → strong
+ * → border — one hue (the accent's own, held by OKLCH so RGB mixing cannot
+ * drift it), chroma rising with lift, the accent the most saturated thing
+ * on screen, and `controlBg` under the AA ceiling for muted ink (#95918A
+ * needs ≲ L 0.29). One formula for all six presets, no per-accent table.
+ * `__tests__/tintedSurfaces.test.ts` pins the ladder, the hierarchy, the
+ * contrast floors and the light collapse.
+ */
+type Tone = { L: number; C: number };
+type SurfaceTones = {
+  bg: Tone;
+  card: Tone;
+  controlBg: Tone;
+  border: Tone;
+  accentSurface: Tone;
+  accentSurfaceStrong: Tone;
+  accentHairline: Tone;
+};
+
+const DARK_TONES: SurfaceTones = {
+  bg: { L: 0.19, C: 0.035 },
+  accentSurface: { L: 0.225, C: 0.045 },
+  card: { L: 0.235, C: 0.04 },
+  controlBg: { L: 0.265, C: 0.045 },
+  accentSurfaceStrong: { L: 0.3, C: 0.065 },
+  border: { L: 0.34, C: 0.05 },
+  accentHairline: { L: 0.46, C: 0.09 },
+};
+
+/**
+ * The OKLCH hue Verdant paints its dark surfaces in: the accent's own, as
+ * shown in dark. Exported so the test pins it rather than guessing.
+ */
+export function verdantTintHue(accentId: AppAccentId, isDark: boolean): number {
+  const sw =
+    ACCENT_SWATCHES[accentId === 'custom' ? 'green' : accentId] ??
+    ACCENT_SWATCHES.green;
+  return hexToOklch(isDark ? sw.dark : sw.light).h;
+}
+
+/**
+ * How far OLED elevates sink toward black, as a lightness factor. On a
+ * pure-black page a card at the mid-dark tone floats like a lit slab;
+ * scaling its lightness keeps the hue and the lift while sitting it back
+ * on the page.
+ */
+const OLED_SINK = 0.78;
+
+/**
+ * The surface fields + the four accent-surface tokens for Verdant
+ * (`tintedSurfaces`). Dark: the tone ladder above. Light, mode off, or a
+ * non-hex base (iOS Liquid Glass `PlatformColor`s): every token collapses
+ * to its neutral counterpart, so callers can reference the accent-surface
+ * tokens unconditionally. Custom hex never reaches here (coerced to green
+ * upstream); the guard is belt and braces.
+ */
+function tintedSurfaceFields(
+  base: PaletteBase,
+  tintedSurfaces: boolean,
+  accentId: AppAccentId,
+  isDark: boolean,
+): {
+  bg: ColorValue;
+  card: ColorValue;
+  controlBg: ColorValue;
+  border: ColorValue;
+  accentSurface: ColorValue;
+  accentSurfaceStrong: ColorValue;
+  accentHairline: ColorValue;
+} {
+  const bgHex = typeof base.bg === 'string' ? base.bg : null;
+
+  if (!tintedSurfaces || bgHex == null || !isDark) {
+    return {
+      bg: base.bg,
+      card: base.card,
+      controlBg: base.controlBg,
+      border: base.border,
+      accentSurface: base.bg,
+      accentSurfaceStrong: base.card,
+      accentHairline: base.border,
+    };
+  }
+
+  return darkTonalSurfaces(base, verdantTintHue(accentId, true));
+}
+
+/** The seven surface tokens the dark ladder produces. */
+type DarkSurfaces = {
+  bg: ColorValue;
+  card: ColorValue;
+  controlBg: ColorValue;
+  border: ColorValue;
+  accentSurface: ColorValue;
+  accentSurfaceStrong: ColorValue;
+  accentHairline: ColorValue;
+};
+
+/**
+ * The dark tonal ladder, painted in one OKLCH hue.
+ *
+ * Shared by the two things that theme dark mode: Verdant (hue from the
+ * chosen preset) and system colours (hue from the live Material You
+ * accent), so a wallpaper colour is pronounced on every surface exactly
+ * the way a chosen accent is. `base` supplies the OLED decision: a
+ * pure-black base keeps `bg` at absolute black and sinks every elevate.
+ */
+export function darkTonalSurfaces(base: PaletteBase, h: number): DarkSurfaces {
+  const bgHex = typeof base.bg === 'string' ? base.bg : '#000000';
+  const pureBlack = bgHex.toLowerCase() === '#000000';
+  const tone = (t: Tone, sinks: boolean): string =>
+    oklchToHex({ L: pureBlack && sinks ? t.L * OLED_SINK : t.L, C: t.C, h });
+
+  return {
+    // OLED keeps absolute black for the page; every elevate sinks one step.
+    bg: pureBlack ? '#000000' : tone(DARK_TONES.bg, false),
+    card: tone(DARK_TONES.card, true),
+    controlBg: tone(DARK_TONES.controlBg, true),
+    border: tone(DARK_TONES.border, true),
+    accentSurface: tone(DARK_TONES.accentSurface, true),
+    accentSurfaceStrong: tone(DARK_TONES.accentSurfaceStrong, true),
+    accentHairline: tone(DARK_TONES.accentHairline, true),
+  };
 }
 
 /**
@@ -246,10 +429,14 @@ function withBrandAccents(
   isDark: boolean,
   accentId: AppAccentId,
   customHex: string,
+  tintedSurfaces: boolean,
 ): AppPalette {
+  // Verdant bars custom hex (absurd free-form washes); the six presets stay.
+  const effectiveAccentId: AppAccentId =
+    tintedSurfaces && accentId === 'custom' ? 'green' : accentId;
   const { accent, accentBg, accentSolid } = brandAccents(
     isDark,
-    accentId,
+    effectiveAccentId,
     customHex,
     // The ground the accent will be read against. Every base on this path
     // states it as a hex; the one that does not is the dynamic-colour
@@ -257,8 +444,15 @@ function withBrandAccents(
     // to anything.
     typeof base.bg === 'string' ? base.bg : isDark ? '#141210' : '#FAF7F2',
   );
+  const surfaces = tintedSurfaceFields(
+    base,
+    tintedSurfaces,
+    effectiveAccentId,
+    isDark,
+  );
   return {
     ...base,
+    ...surfaces,
     accent,
     accentBg,
     accentSolid,
@@ -268,6 +462,8 @@ function withBrandAccents(
     textSolid: String(base.text),
     isDark,
     onAccent: readableOn(accentSolid),
+    tintedSurfaces,
+    onAccentSurface: String(base.text),
   };
 }
 
@@ -392,6 +588,16 @@ function iosDynamicPalette(isDark: boolean, pureBlackDark: boolean): AppPalette 
     flatChrome: true,
     glass: true,
     isDark,
+    // Tinted surfaces is a brand-theme choice; under Liquid Glass the base
+    // surfaces are live `PlatformColor`s that cannot be mixed, so the mode
+    // is a no-op here and every accent-surface token is its neutral twin.
+    tintedSurfaces: false,
+    accentSurface: oled ? '#000000' : PlatformColor('systemGroupedBackground'),
+    accentSurfaceStrong: oled
+      ? '#0d0d0d'
+      : PlatformColor('secondarySystemGroupedBackground'),
+    accentHairline: 'transparent',
+    onAccentSurface: isDark ? '#FFFFFF' : '#000000',
     // Filled controls follow the system's grouped-surface hierarchy here,
     // so they still read as controls under Liquid Glass.
     controlBg: PlatformColor('tertiarySystemGroupedBackground'),
@@ -414,6 +620,7 @@ function iosDynamicPalette(isDark: boolean, pureBlackDark: boolean): AppPalette 
 function androidDynamicPalette(
   isDark: boolean,
   pureBlackDark: boolean,
+  tintedSurfaces: boolean,
 ): AppPalette {
   // System colours on Android keep the STANDARD theme's design (surfaces,
   // text, dividers, bordered chrome) and ONLY recolour the accent to the
@@ -432,8 +639,16 @@ function androidDynamicPalette(
   // Soft tinted accent background, matching how the standard 'custom' accent
   // derives its highlight (light: mix toward white, dark: toward black).
   const accentBg = isDark ? shiftHex(hex, -0.7) : shiftHex(hex, 0.82);
+  // Dark mode takes the same tonal ladder Verdant paints, in the live
+  // wallpaper hue — so system colours are pronounced on every surface, not
+  // only on the accent. Light stays the standard theme's surfaces (the
+  // release look), exactly as Verdant does in light.
+  const surfaces = isDark
+    ? darkTonalSurfaces(base, hexToOklch(hex).h)
+    : tintedSurfaceFields(base, false, 'green', false);
   return {
     ...base,
+    ...surfaces,
     accent: hex,
     accentBg,
     accentSolid: hex,
@@ -443,20 +658,25 @@ function androidDynamicPalette(
     textSolid: String(base.text),
     isDark,
     onAccent: readableOn(hex),
+    // Truthful: dark surfaces ARE tinted here, and `mushafTone` reads this
+    // to follow them.
+    tintedSurfaces: tintedSurfaces || isDark,
+    onAccentSurface: String(base.text),
   };
 }
 
 function buildDynamicSystemPalette(
   isDark: boolean,
   pureBlackDark: boolean,
+  tintedSurfaces: boolean,
 ): AppPalette {
   if (Platform.OS === 'ios') {
     return iosDynamicPalette(isDark, pureBlackDark);
   }
   if (Platform.OS === 'android') {
-    return androidDynamicPalette(isDark, pureBlackDark);
+    return androidDynamicPalette(isDark, pureBlackDark, tintedSurfaces);
   }
-  return buildAppPalette(isDark, pureBlackDark, 'green', '#22c55e');
+  return buildAppPalette(isDark, pureBlackDark, 'green', '#22c55e', tintedSurfaces);
 }
 
 export function buildAppPalette(
@@ -464,15 +684,58 @@ export function buildAppPalette(
   pureBlackDark: boolean,
   accentId: AppAccentId,
   accentCustomHex: string,
+  tintedSurfaces: boolean = false,
 ): AppPalette {
   if (!isDark) {
-    return withBrandAccents(LIGHT_BASE, false, accentId, accentCustomHex);
+    return withBrandAccents(
+      LIGHT_BASE,
+      false,
+      accentId,
+      accentCustomHex,
+      tintedSurfaces,
+    );
   }
   return withBrandAccents(
     pureBlackDark ? DARK_PURE_BLACK_BASE : DARK_BASE,
     true,
     accentId,
     accentCustomHex,
+    tintedSurfaces,
+  );
+}
+
+/**
+ * The selected theme — Verdant, system colours, or classic with its accent
+ * — rendered for a GIVEN mode, whatever mode the app itself is in.
+ *
+ * For chrome that belongs to something with its own light and dark: the
+ * mushaf page. Its night tone is dark while the app may be in light, and
+ * chrome drawn on it must take the theme's DARK colours — the lifted
+ * accent, the dark tonal surfaces — not the app's current ones, or a deep
+ * light-mode accent lands on a dark page and vanishes. Everything else
+ * about which theme is in use is decided exactly as `resolveAppPalette`
+ * decides it.
+ */
+export function resolveThemePaletteForMode(
+  input: {
+    appearance: AppearancePreference;
+    useSystemDynamicTheme: boolean;
+    pureBlackDark: boolean;
+    appAccentId: AppAccentId;
+    appAccentCustomHex: string;
+    tintedSurfaces?: boolean;
+  },
+  isDark: boolean,
+): AppPalette {
+  if (shouldUseDynamicSystemColors(input.appearance, input.useSystemDynamicTheme)) {
+    return buildDynamicSystemPalette(isDark, input.pureBlackDark, false);
+  }
+  return buildAppPalette(
+    isDark,
+    input.pureBlackDark,
+    input.appAccentId,
+    input.appAccentCustomHex,
+    input.tintedSurfaces ?? false,
   );
 }
 
@@ -483,15 +746,22 @@ export function resolveAppPalette(input: {
   pureBlackDark: boolean;
   appAccentId: AppAccentId;
   appAccentCustomHex: string;
+  tintedSurfaces?: boolean;
 }): AppPalette {
   const isDark = resolveEffectiveDark(input.appearance, input.systemScheme);
+  // System colours win: Verdant is a brand theme and cannot share the
+  // palette with Material You / Liquid Glass. The Appearance card also
+  // clears the flag when dynamic colours turn on; this gate covers a
+  // storage state that somehow still holds both.
   if (shouldUseDynamicSystemColors(input.appearance, input.useSystemDynamicTheme)) {
-    return buildDynamicSystemPalette(isDark, input.pureBlackDark);
+    return buildDynamicSystemPalette(isDark, input.pureBlackDark, false);
   }
+  const tintedSurfaces = input.tintedSurfaces ?? false;
   return buildAppPalette(
     isDark,
     input.pureBlackDark,
     input.appAccentId,
     input.appAccentCustomHex,
+    tintedSurfaces,
   );
 }

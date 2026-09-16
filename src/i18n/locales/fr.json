@@ -144,6 +144,9 @@
     "pitch": "Gratuite et sans publicité. Horaires de prière, qibla, le Coran avec récitation et traduction, et un suivi de khatma."
   },
   "settings": {
+    "colourTheme": "Thème de couleur",
+    "classicTheme": "Classique",
+    "colourThemeHelp": "Classique conserve le papier et l’encre de l’app. Choisissez une couleur pour en habiller le mode sombre — le mode clair reste classique.",
     "laDesignLabel": "Style",
     "laDesignTimeline": "Chronologie",
     "laDesignCountdown": "Compte à rebours",
@@ -273,6 +276,11 @@
     "accent_custom": "Personnalisé",
     "accent_customAbbr": "Hex",
     "accentColorHelp": "Utilisé dans toute l’application et dans le widget de l’écran d’accueil.",
+    "tintedSurfaces": "Surfaces teintées",
+    "tintedSurfacesHelp": "Utilise ta couleur d’accent comme couleur principale de l’application — sur tous les écrans, les widgets de l’écran d’accueil, la Live Activity et les notifications de prière. Désactivé, l’accent reste un discret reflet.",
+    "verdantTheme": "Verdure",
+    "verdantThemeHelp": "Colorie chaque surface avec l’accent choisi. L’hex personnalisé n’est pas disponible — choisissez parmi les six préréglages.",
+    "verdantThemeSystemDisabled": "Un thème de couleur est actif — choisissez Classique pour utiliser les couleurs du système.",
     "widgetColorFollowsAccentHelp": "Le widget utilise la même couleur d’accentuation que l’application. Choisissez-la dans Apparence.",
     "widgetColorOwnHelp": "L’application suit les couleurs de votre système, mais pas le widget. Choisissez ici la couleur de surbrillance du widget.",
     "additionalTimes": "Horaires supplémentaires",
@@ -373,7 +381,8 @@
     "accentPickerSave": "Enregistrer la couleur",
     "accentPickerUseOnce": "Utiliser sans enregistrer",
     "accentPickerAdjusted": "Déplacée vers la nuance la plus proche qui reste lisible sur ce fond.",
-    "sectionAppearanceBlurbAndroid": "Thème, couleur, format de l'heure, langue, widget"
+    "sectionAppearanceBlurbAndroid": "Thème, couleur, format de l'heure, langue, widget",
+    "verdantAccentHelp": "Verdure colorie chaque surface avec cet accent."
   },
   "locationSetup": {
     "headline": "Définissez votre emplacement",

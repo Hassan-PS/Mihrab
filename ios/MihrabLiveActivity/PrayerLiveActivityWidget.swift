@@ -35,7 +35,7 @@ struct PrayerLiveActivityWidget: Widget {
   var body: some WidgetConfiguration {
     ActivityConfiguration(for: PrayerLiveActivityAttributes.self) { context in
       LockScreenLiveActivityView(state: context.state)
-        .activityBackgroundTint(Color.black.opacity(0.45))
+        .activityBackgroundTint(liveActivityBackgroundTint(state: context.state))
         .activitySystemActionForegroundColor(Color.white)
     } dynamicIsland: { context in
       DynamicIsland {
@@ -361,6 +361,24 @@ private func liveActivityAccent(
     return Color(uiColor: .systemBlue)
   }
   return Color(hex: state.accentHex) ?? Color(red: 0.13, green: 0.77, blue: 0.37) // green-500
+}
+
+/// The Lock Screen card's background tint.
+///
+/// Neutral (a dark scrim) by default. When "Tinted surfaces" is on, the scrim
+/// is washed toward the accent so the card matches the app's tinted chrome —
+/// modest, because the card draws light text on it, and darkened so it stays a
+/// backdrop rather than a fill. `tinted` is Optional (see the attributes
+/// file); a running activity from before the upgrade reads as `false`.
+@available(iOS 16.1, *)
+private func liveActivityBackgroundTint(
+  state: PrayerLiveActivityAttributes.ContentState
+) -> Color {
+  guard state.tinted == true else { return Color.black.opacity(0.45) }
+  let accent = liveActivityAccent(state: state)
+  // Accent at low opacity over the same dark scrim: a coloured backdrop that
+  // still holds white text.
+  return accent.opacity(0.38)
 }
 
 extension Color {

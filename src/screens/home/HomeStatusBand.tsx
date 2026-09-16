@@ -23,7 +23,7 @@ import { SPACING } from '../../theme/tokens';
  * the screen, where nothing can be compared to it.
  *
  * Past the hero there is no sky left to match, so it hands over to the
- * page's own colour across a short crossfade — the hero's rounded foot is
+ * page's own colour across a short crossfade — the hero's foot is
  * sliding past the strip exactly then, and the two read as one movement.
  * The status bar's glyphs go with it: they take their ink from the sky
  * while the sky is up there (the hero sets that, from the same model), and

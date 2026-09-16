@@ -67,6 +67,7 @@ export function useAppPalette(): {
         pureBlackDark: settings.pureBlackDark,
         appAccentId: settings.appAccentId,
         appAccentCustomHex: settings.appAccentCustomHex,
+        tintedSurfaces: settings.tintedSurfaces,
       }),
     // `bump` is included so a manual Appearance event re-runs this even
     // when systemScheme appears unchanged from React's perspective.
@@ -77,6 +78,7 @@ export function useAppPalette(): {
       settings.pureBlackDark,
       settings.appAccentId,
       settings.appAccentCustomHex,
+      settings.tintedSurfaces,
       systemScheme,
       bump,
     ],

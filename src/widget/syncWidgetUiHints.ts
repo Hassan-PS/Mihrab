@@ -50,6 +50,7 @@ function syncNativeWidgetAppearance(
       settings.widgetHighlightId,
       hex,
       dynamicHl,
+      settings.tintedSurfaces,
     );
     return;
   }
@@ -59,6 +60,7 @@ function syncNativeWidgetAppearance(
       settings.widgetHighlightId,
       hex,
       dynamicHl,
+      settings.tintedSurfaces,
     );
   } else if (Platform.OS === 'ios' && mod?.setWidgetHighlightDynamic) {
     void mod.setWidgetHighlightDynamic(dynamicHl);
