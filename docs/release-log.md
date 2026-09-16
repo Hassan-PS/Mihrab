@@ -811,3 +811,16 @@ out. The fix is not a better gate — it is writing the line while the cut
 is still in your hands, in the same sitting that published it, because
 that is also the only moment the answer is actually known. A lesson
 written a fortnight later is a guess about what went wrong.
+
+## 2.22.0 (274) — 2026-09-16
+
+Took 1 aborted attempt(s) before it ran clean:
+
+  - 1 catalyst build failed — /tmp/release-catalyst.log
+
+Changed the release cycle itself:
+
+  - `scripts/release.sh`
+  - `scripts/verify-release.sh`
+
+**Lesson:** _(unfilled)_

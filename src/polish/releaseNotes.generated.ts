@@ -19,6 +19,16 @@ export type ReleaseNote = {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    code: 274,
+    version: '2.22.0',
+    date: '2026-09-16',
+    notes: {
+      en: '• A colour theme now sits inside Appearance — green, teal, blue, amber, rose or violet themes dark mode, and Classic puts the app\'s own paper and ink back. It takes the place of system colours rather than sitting beside them.\n• The mushaf page bar and the ornament at the start of each surah take the theme\'s colour instead of losing it on a night page.\n• Back up to a file: Save to Files on every platform, and import by picking the file rather than pasting the text.',
+      ar: '• صارت سمة الألوان داخل المظهر — أخضر أو فيروزي أو أزرق أو كهرماني أو وردي أو بنفسجي تُلوّن الوضع الداكن، و«كلاسيكي» يعيد ورق التطبيق وحبره كما كانا. تحلّ محلّ ألوان النظام بدل أن تكون إلى جانبها.\n• شريط الصفحة في المصحف وزخرفة بداية كل سورة يأخذان لون السمة بدل أن يفقداه في الصفحة الليلية.\n• نسخة احتياطية في ملف: «حفظ في الملفات» على كل الأنظمة، والاستيراد باختيار الملف بدل لصق النص.',
+      sv: '• Ett färgtema finns nu i Utseende — grönt, turkost, blått, bärnsten, rosa eller violett färgar mörkt läge, och Klassisk ger appen dess eget papper och bläck tillbaka. Det ersätter systemfärgerna i stället för att ligga bredvid dem.\n• Sidlisten i mushafen och ornamentet vid varje suras början tar temats färg i stället för att tappa den på en mörk sida.\n• Säkerhetskopiera till en fil: Spara till Filer på alla plattformar, och importera genom att välja filen i stället för att klistra in text.',
+    },
+  },
+  {
     code: 273,
     version: '2.21.1',
     date: '2026-09-14',
