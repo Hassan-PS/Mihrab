@@ -823,4 +823,35 @@ Changed the release cycle itself:
   - `scripts/release.sh`
   - `scripts/verify-release.sh`
 
-**Lesson:** _(unfilled)_
+**Lesson:** the Mac is the only platform whose build runs nowhere but a
+release. Android and iOS are compiled every day and again by CI, so a
+toolchain change that breaks them is found by whoever caused it, within
+hours. Catalyst is built once per version, by this script, at the moment
+the tag is about to go out — so when Xcode 27 made a macOS deployment
+target under 12.0 an error, the first thing to notice was the release
+itself, with everything else green and ready. That is the worst possible
+place to learn it, and it was avoidable: a scheduled Catalyst build, even
+a weekly one that only has to compile, would have moved that discovery to
+the day the Xcode upgrade landed, when it is a morning's work rather than
+a release in the balance.
+
+The second half, once it had happened: shipping nothing was not obviously
+better than shipping the two platforms that worked, but nothing in the
+script could express that, so the choice was between holding the release
+and improvising a bypass under pressure — which is how every incident in
+this file's header began. SKIP_CATALYST exists so the decision is a typed
+env var with a documented blast radius instead. Note what it deliberately
+does NOT do: the cask is left pointing at 2.21.1, because a cask naming a
+version whose release has no zip 404s on every `brew install`, and
+verify-release.sh is left to fail its five Mac checks honestly rather than
+being taught to keep quiet.
+
+For whoever picks up the Catalyst break: do not spend the afternoon on
+build settings. The 10.15 it reports is not one. Every pod target, the app
+target and both projects were set to 12.0 at target AND project level, and
+`MACOSX_DEPLOYMENT_TARGET=12.0` was passed on the xcodebuild command line,
+which outranks every scope there is — the error did not move, on the same
+105 targets, every time. It is coming from platform metadata, most likely
+the podspecs (hermes-engine's prebuilt macOS framework declares 10.15 in
+its own Info.plist), which makes it an upstream React Native problem. The
+fast way back to a shipping Mac is Xcode 26 and `DEVELOPER_DIR`.
