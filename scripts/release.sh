@@ -7,6 +7,34 @@
 #   ./scripts/release.sh --unreleased        # what is on main and has never
 #                                            #   shipped
 #
+#   SKIP_CATALYST=1 ./scripts/release.sh 2.13.2
+#                                            # ship Android + iOS WITHOUT
+#                                            #   the Mac; Mac stays on
+#                                            #   whatever shipped last
+#
+# ── SKIP_CATALYST, AND WHY IT IS AN ENV VAR AND NOT A FLAG ────────────
+#
+# Xcode 27 made a macOS deployment target below 12.0 a build error, and
+# this project's Catalyst build reports 10.15 from somewhere no build
+# setting reaches: every pod target, the app target and both projects set
+# to 12.0 at target AND project level did not move it, and neither did
+# `MACOSX_DEPLOYMENT_TARGET=12.0` passed on the xcodebuild command line,
+# which outranks all of them. So the Mac could not be built at all on
+# 2026-09-16, with Android and iOS both ready and gated green.
+#
+# The honest options were to hold the whole release for the Mac or to
+# ship the two platforms that work. This is the second, made explicit:
+# it is an environment variable rather than a flag because it must be
+# typed deliberately every time and can never be a default, and it prints
+# what it is giving up rather than going quiet about it.
+#
+# WHAT IT SKIPS, all of it together — the Catalyst build, the signing and
+# notarization gates that read the zip, the zip as a release asset, and
+# the Homebrew tap bump. The cask is NOT touched: it keeps pointing at
+# the last version that actually has a Mac zip, which is what keeps
+# `brew install mihrab` working. verify-release.sh WILL report the Mac as
+# behind, and that is correct rather than a failure to explain away.
+#
 # ── WHY THIS EXISTS ───────────────────────────────────────────────────
 #
 # It replaces a thirteen-step checklist in docs/DISTRIBUTION.md that was
@@ -357,7 +385,10 @@ done
 # The cask is the only code that runs when a Mac replaces the app, and it
 # is what stops the widgets freezing on upgrade — and, since 2026-08-29,
 # what stops them being removed outright. See verify-release.sh 4a.
-if [ -f "$TAP" ]; then
+if [ "${SKIP_CATALYST:-0}" = "1" ]; then
+  warn "SKIP_CATALYST=1 — no Mac build, no Mac asset, no cask bump"
+  warn "  Mac users stay on whatever the cask says today; only Android and iOS move"
+elif [ -f "$TAP" ]; then
   CASK_SRC="$(cat "$TAP")"
   # The widget re-registration MUST run UNSANDBOXED. Homebrew 7's
   # `postflight_steps` DSL runs its `run` step inside the install sandbox,
@@ -541,6 +572,11 @@ if [ -n "$AAPT" ]; then
   ok "APK badging confirms $VERSION ($CODE)"
 fi
 
+if [ "${SKIP_CATALYST:-0}" = "1" ]; then
+  ZIP=""
+  step "macOS (Catalyst)"
+  warn "skipped: SKIP_CATALYST=1 — nothing built, nothing to sign, nothing to notarize"
+else
 step "macOS (Catalyst)"
 "$ROOT/scripts/build-catalyst.sh" >/tmp/release-catalyst.log 2>&1 \
   || { tail -20 /tmp/release-catalyst.log; die "catalyst build failed — /tmp/release-catalyst.log"; }
@@ -607,6 +643,7 @@ rm -rf "$UNZIP"
 # keep_installed_widget_registered. Without this the release blanks the
 # widgets on the machine cutting it.
 keep_installed_widget_registered
+fi
 
 if [ "$DRY_RUN" = "1" ]; then
   cleanup_workbench
@@ -615,7 +652,7 @@ if [ "$DRY_RUN" = "1" ]; then
   echo "  Artifacts:"
   echo "    $APK"
   echo "    $AAB"
-  echo "    $ZIP"
+  [ -n "$ZIP" ] && echo "    $ZIP"
   echo
   echo "  The version bump is in your working tree. Undo it with:"
   echo "    $REVERT"
@@ -737,18 +774,22 @@ ok "$TAG pushed"
 # Copy to the published name and upload that.
 STAGE=$(mktemp -d)
 cp "$APK" "$STAGE/Mihrab-v$VERSION-fdroid.apk" || die "cannot stage the APK"
-cp "$ZIP" "$STAGE/" || die "cannot stage the zip"
+ASSETS="$STAGE/Mihrab-v$VERSION-fdroid.apk"
+if [ -n "$ZIP" ]; then
+  cp "$ZIP" "$STAGE/" || die "cannot stage the zip"
+  ASSETS="$ASSETS $STAGE/Mihrab-macOS-$VERSION.zip"
+fi
 
 NOTES="${RELEASE_NOTES:-}"
 if [ -n "$NOTES" ] && [ -f "$NOTES" ]; then
   gh release create "$TAG" -R "$REPO" --title "Mihrab $VERSION" \
      --notes-file "$NOTES" --latest \
-     "$STAGE/Mihrab-v$VERSION-fdroid.apk" "$STAGE/Mihrab-macOS-$VERSION.zip" \
+     $ASSETS \
      >/dev/null || die "gh release failed"
 else
   gh release create "$TAG" -R "$REPO" --title "Mihrab $VERSION" \
      --generate-notes --latest \
-     "$STAGE/Mihrab-v$VERSION-fdroid.apk" "$STAGE/Mihrab-macOS-$VERSION.zip" \
+     $ASSETS \
      >/dev/null || die "gh release failed"
   echo "  (generated notes — set RELEASE_NOTES=/path/to/notes.md to write your own)"
 fi
@@ -759,14 +800,26 @@ rm -rf "$STAGE"
 PUBLISHED=$(gh release view "$TAG" -R "$REPO" --json assets --jq '.assets[].name' 2>/dev/null)
 has "$PUBLISHED" "Mihrab-v$VERSION-fdroid.apk" \
   || die "the APK published under the wrong name: $PUBLISHED"
-has "$PUBLISHED" "Mihrab-macOS-$VERSION.zip" \
-  || die "the macOS zip published under the wrong name: $PUBLISHED"
-ok "GitHub release published, both assets named correctly"
+if [ -n "$ZIP" ]; then
+  has "$PUBLISHED" "Mihrab-macOS-$VERSION.zip" \
+    || die "the macOS zip published under the wrong name: $PUBLISHED"
+  ok "GitHub release published, both assets named correctly"
+else
+  ok "GitHub release published (APK only — SKIP_CATALYST=1)"
+fi
 
 # The cask is bumped against the sha of the zip AS PUBLISHED, downloaded
 # back from the release, not against the local file. They came apart once
 # and `brew install` served a zip whose checksum the cask rejected.
 step "Homebrew tap"
+if [ -z "$ZIP" ]; then
+  # NOT bumped, deliberately. A cask that names $VERSION while the release
+  # carries no Mihrab-macOS-$VERSION.zip would 404 on every `brew install`
+  # and `brew upgrade` — worse than a Mac one version behind, which is
+  # merely out of date and still installs.
+  warn "skipped: SKIP_CATALYST=1 — cask left at its current version, which still has a zip"
+  warn "  bump it by hand once a Mac build exists, or cut a Mac-only release then"
+else
 TMPZIP=$(mktemp)
 curl -sL -o "$TMPZIP" \
   "https://github.com/$REPO/releases/download/$TAG/Mihrab-macOS-$VERSION.zip" \
@@ -791,6 +844,7 @@ has "$NEW_CASK" "sha256 \"$SHA\"" \
   && git commit -q -m "mihrab $VERSION" \
   && git push -q origin HEAD ) || die "tap push failed — run verify-release.sh and fix the cask by hand"
 ok "cask at $VERSION, sha matches the published zip"
+fi
 
 # ── THE APP STORE BUILD ───────────────────────────────────────────────
 #
