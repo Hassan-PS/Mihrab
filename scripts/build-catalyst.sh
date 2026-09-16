@@ -40,6 +40,95 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# ── WHICH XCODE BUILDS THE MAC ────────────────────────────────────────
+#
+# NOT necessarily the one `xcode-select` points at, and that is
+# deliberate. Xcode 27 made a macOS deployment target below 12.0 a build
+# error, and this project's Catalyst build reports 10.15 from somewhere no
+# build setting reaches: every pod target, the app target and BOTH
+# projects set to 12.0 at target and project level did not move it, and
+# neither did `MACOSX_DEPLOYMENT_TARGET=12.0` passed on the xcodebuild
+# command line, which outranks every other scope there is. 105 targets
+# failed at CreateBuildDescription, every time, before compiling anything.
+#
+# So it is not a setting. It is platform metadata, most likely from the
+# podspecs — hermes-engine's prebuilt macOS framework declares 10.15 in
+# its own Info.plist — which makes it upstream React Native's to fix.
+# Under Xcode 26.6 the identical tree builds with ZERO such errors, which
+# is what pins this: the toolchain, not the project.
+#
+# 2.22.0 shipped Android and iOS without the Mac because this was found
+# at release time, the Mac being the one platform built nowhere else.
+# This block exists so that cannot be the way anybody learns it again.
+#
+# WHEN UPSTREAM FIXES IT: raise CATALYST_MAX_XCODE, or delete this whole
+# block. To retest against the current toolchain without editing
+# anything:  CATALYST_DEVELOPER_DIR="$(xcode-select -p)" ./scripts/build-catalyst.sh
+CATALYST_MAX_XCODE=26
+CATALYST_XCODE_FALLBACK="${CATALYST_XCODE:-/Applications/Xcode-26.app}"
+
+xcode_major_of() {  # $1: a DEVELOPER_DIR, or "" for whatever is selected
+  local v
+  if [ -n "$1" ]; then
+    v=$(DEVELOPER_DIR="$1" xcodebuild -version 2>/dev/null | sed -n 's/^Xcode \([0-9][0-9]*\).*/\1/p')
+  else
+    v=$(xcodebuild -version 2>/dev/null | sed -n 's/^Xcode \([0-9][0-9]*\).*/\1/p')
+  fi
+  echo "${v:-0}"
+}
+
+resolve_catalyst_xcode() {
+  # Named explicitly: trust it, say so, and do not second-guess the
+  # version — this is also how you retest a newer Xcode on purpose.
+  if [ -n "${CATALYST_DEVELOPER_DIR:-}" ]; then
+    [ -d "$CATALYST_DEVELOPER_DIR" ] \
+      || { echo "✗ CATALYST_DEVELOPER_DIR is not a directory: $CATALYST_DEVELOPER_DIR" >&2; return 1; }
+    export DEVELOPER_DIR="$CATALYST_DEVELOPER_DIR"
+    echo "▸ Catalyst toolchain: Xcode $(xcode_major_of "$DEVELOPER_DIR") (CATALYST_DEVELOPER_DIR)"
+    return 0
+  fi
+
+  local selected
+  selected=$(xcode_major_of "")
+  if [ "$selected" -le "$CATALYST_MAX_XCODE" ] && [ "$selected" -gt 0 ]; then
+    echo "▸ Catalyst toolchain: Xcode $selected (the selected one)"
+    return 0
+  fi
+
+  if [ -d "$CATALYST_XCODE_FALLBACK/Contents/Developer" ]; then
+    local fb
+    fb=$(xcode_major_of "$CATALYST_XCODE_FALLBACK/Contents/Developer")
+    if [ "$fb" -le "$CATALYST_MAX_XCODE" ] && [ "$fb" -gt 0 ]; then
+      export DEVELOPER_DIR="$CATALYST_XCODE_FALLBACK/Contents/Developer"
+      echo "▸ Catalyst toolchain: Xcode $fb at $CATALYST_XCODE_FALLBACK"
+      echo "  (the selected Xcode is $selected, which cannot build Catalyst here)"
+      return 0
+    fi
+  fi
+
+  echo "✗ No Xcode on this Mac can build the Catalyst app." >&2
+  echo "  Selected: Xcode $selected. Needs: $CATALYST_MAX_XCODE or older." >&2
+  echo "  Install one from https://developer.apple.com/download/all," >&2
+  echo "  expand it, and put it at $CATALYST_XCODE_FALLBACK — do not" >&2
+  echo "  overwrite the Xcode you build iOS with, and do not xcode-select" >&2
+  echo "  it; only this script needs it. Or name one yourself:" >&2
+  echo "      CATALYST_DEVELOPER_DIR=/path/to/Xcode.app/Contents/Developer" >&2
+  echo "  A release can ship without the Mac in the meantime:" >&2
+  echo "      SKIP_CATALYST=1 ./scripts/release.sh X.Y.Z" >&2
+  return 1
+}
+
+# `--check-toolchain` answers "would this build even start?" and exits.
+# release.sh asks in PREFLIGHT, so a missing toolchain costs a second
+# rather than being found after the Android build, which is where 2.22.0
+# found it.
+if [ "${1:-}" = "--check-toolchain" ]; then
+  resolve_catalyst_xcode
+  exit $?
+fi
+
+resolve_catalyst_xcode || exit 1
+
 # Default to whatever Developer ID this Mac holds, rather than to ad-hoc.
 # Naming one explicitly still wins; `SIGN_IDENTITY=-` is the deliberate
 # opt-out and says so out loud.

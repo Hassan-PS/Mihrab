@@ -51,6 +51,7 @@ for a job with an irreversible step in the middle:
 | **Every Mac's widgets froze on upgrade**, fixed only by the cask's `postflight` | the list predates the Mac build |
 | **Every Mac's widgets were removed on upgrade** — replacing the app drops the extension's PlugInKit record and nothing re-registers it, so WidgetKit has no provider and discards the placement | same postflight, second failure, found only because a user said so |
 | **Eight releases shipped unnotarized**, 2.11.0 to 2.13.3 — Gatekeeper blocked the first launch of every Mac install and the cask carried a caveat apologising for it | notarization was a comment in `build-catalyst.sh` asking a human to run `notarytool`, and this file never mentioned it at all |
+| **2.22.0 shipped without the Mac** — Xcode 27 turned a sub-12.0 macOS deployment target into a build error and the Catalyst build died at release time, with Android and iOS already built and every gate green | the Mac is the only platform built nowhere but a release, so a toolchain change that breaks it is invisible until the worst possible moment |
 | **Five consecutive releases failed CI on GitHub**, 2.13.1 to 2.13.5 — every one of them for the same reason, and four failure mails arrived without anyone connecting them to the release that sent them | nothing; the cycle ran `jest` and `tsc` on the release machine and never once asked GitHub whether the same suite had passed there |
 
 Both of the macOS entries above share a cause, and it is not a missing
@@ -134,6 +135,48 @@ finishes:
   ./scripts/xcode-cloud.py resume && ./scripts/xcode-cloud.py start
   ./scripts/xcode-cloud.py pause
   ```
+
+### The Mac needs its own Xcode
+
+**Xcode 27 cannot build the Catalyst app.** It made a macOS deployment
+target below 12.0 an error, and this project reports 10.15 from somewhere
+no build setting reaches — every pod target, the app target and both
+projects at 12.0, target *and* project level, plus
+`MACOSX_DEPLOYMENT_TARGET=12.0` on the xcodebuild command line, which
+outranks all of them. 105 targets fail before anything compiles. The same
+tree builds clean under Xcode 26.6, so it is the toolchain, not the
+project. The cause is most likely podspec platform metadata upstream in
+React Native; hermes-engine's prebuilt macOS framework declares 10.15 in
+its own `Info.plist`.
+
+So keep a second Xcode at **`/Applications/Xcode-26.app`**. Do not
+`xcode-select` it — iOS and everything else should stay on the current
+one. `build-catalyst.sh` finds it by itself: it uses the selected Xcode
+when that is 26 or older, falls back to `/Applications/Xcode-26.app`, and
+stops with instructions when neither works. `release.sh` asks the same
+question in preflight, so a missing toolchain costs a second rather than
+being found after the Android build.
+
+Two knobs, both documented at the head of `build-catalyst.sh`:
+`CATALYST_XCODE` moves the fallback path, and `CATALYST_DEVELOPER_DIR`
+names a toolchain outright and skips the version check — which is also how
+you retest a newer Xcode once upstream fixes this:
+
+```sh
+CATALYST_DEVELOPER_DIR="$(xcode-select -p)" ./scripts/build-catalyst.sh
+```
+
+When that starts working, raise `CATALYST_MAX_XCODE` or delete the block.
+
+**If the Mac genuinely cannot be built**, a release can still ship the
+other two: `SKIP_CATALYST=1 ./scripts/release.sh X.Y.Z` skips the build,
+the zip as an asset and the cask bump together. The cask is deliberately
+left pointing at the last version that *has* a zip — one naming a version
+without one 404s on every `brew install` — and `verify-release.sh` will
+fail its five Mac checks, which is correct rather than something to
+silence. Ship the Mac afterwards by building the zip, `gh release upload`
+it onto the existing tag, then bumping the cask's version and sha against
+the *published* zip and pushing the tap.
 
 For beta tags, swap the Gradle commands for `assembleFdroidBeta` /
 `bundlePlayBeta` and mark the GitHub release as **prerelease** — the
