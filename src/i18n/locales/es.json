@@ -163,7 +163,7 @@
     "clockFormatHelp": "El modo automático sigue la configuración del reloj de tu dispositivo. Los horarios de oración, la tabla mensual y los widgets usan el mismo formato.",
     "clockFormatExample": "Por ejemplo: {{time}}",
     "systemDynamicColors": "Colores del sistema",
-    "systemDynamicColorsHelp": "Utiliza los colores semánticos y dinámicos de su dispositivo en la aplicación cuando el tema es Sistema. El negro puro (OLED) aún oscurece los fondos cuando el modo oscuro está activado.",
+    "systemDynamicColorsHelp": "Utiliza los colores semánticos y dinámicos de su dispositivo en la aplicación, sea cual sea el tema que elija. El negro puro (OLED) aún oscurece los fondos cuando el modo oscuro está activado.",
     "pureBlack": "Negro puro (OLED)",
     "pureBlackHelp": "Fondo negro verdadero en modo oscuro para pantallas OLED.",
     "dataSource": "fuente de datos",
@@ -1043,8 +1043,8 @@
     "readingMarkerLabel": "Lectura",
     "khatmahMarkerLabel": "Khatmah",
     "khatmah": "Khatmah",
-    "khatmahDaysLeft": "Quedan {{count}} días",
-    "khatmahDaysLeft_one": "Queda {{count}} día",
+    "khatmahDaysLeft": "{{count}} días de lectura restantes",
+    "khatmahDaysLeft_one": "{{count}} día de lectura restante",
     "khatmahProgress": "{{read}} / {{total}} páginas · hoy: {{today}}",
     "khatmahBehind": "{{count}} por recuperar",
     "startKhatmah": "Comenzar una khatmah",
@@ -1231,7 +1231,12 @@
     "surahDownloadStrip": "Descargando {{surah}} · {{pct}} %",
     "readerTitle": "Leer una sura",
     "verseByVerse": "Vista versículo a versículo",
-    "verseByVerseHelp": "Desactivado, una sura se abre como mushaf y ahí se queda. Activado, también puede leerse como una lista de versículos con la traducción debajo de cada uno, y la cabecera del lector incluye un botón para pasar de una a otra."
+    "verseByVerseHelp": "Desactivado, una sura se abre como mushaf y ahí se queda. Activado, también puede leerse como una lista de versículos con la traducción debajo de cada uno, y la cabecera del lector incluye un botón para pasar de una a otra.",
+    "screenTitle": "Mientras lee",
+    "keepAwake": "Mantener la pantalla encendida",
+    "keepAwakeHelp": "Mantiene la pantalla encendida mientras una sura, el mushaf o Tilawah estén abiertos, y la libera en cuanto sale — así, seguir los versículos con la recitación sonando no exige tocar la pantalla. El tiempo de espera de pantalla de su teléfono no se modifica.",
+    "khatmahBehindPages": "{{count}} páginas de retraso",
+    "khatmahBehindPages_one": "{{count}} página de retraso"
   },
   "reading": {
     "textSize": "Tamaño del texto",

@@ -163,7 +163,7 @@
     "clockFormatHelp": "Automatisch folgt der Uhreinstellung deines Geräts. Gebetszeiten, Monatstabelle und Widgets verwenden dasselbe Format.",
     "clockFormatExample": "Zum Beispiel: {{time}}",
     "systemDynamicColors": "Systemfarben",
-    "systemDynamicColorsHelp": "Verwendet die semantischen und dynamischen Farben Ihres Geräts in der App, wenn das Design „System“ ist. Reines Schwarz (OLED) verdunkelt den Hintergrund immer noch, wenn der Dunkelmodus aktiviert ist.",
+    "systemDynamicColorsHelp": "Verwendet die semantischen und dynamischen Farben Ihres Geräts in der App, unabhängig vom gewählten Design. Reines Schwarz (OLED) verdunkelt den Hintergrund immer noch, wenn der Dunkelmodus aktiviert ist.",
     "pureBlack": "Reines Schwarz (OLED)",
     "pureBlackHelp": "Echtschwarzer Hintergrund im Dunkelmodus für OLED-Displays.",
     "dataSource": "Datenquelle",
@@ -1043,8 +1043,8 @@
     "readingMarkerLabel": "Lesen",
     "khatmahMarkerLabel": "Khatma",
     "khatmah": "Khatma",
-    "khatmahDaysLeft": "Noch {{count}} Tage",
-    "khatmahDaysLeft_one": "Noch {{count}} Tag",
+    "khatmahDaysLeft": "Noch {{count}} Tage Lesung",
+    "khatmahDaysLeft_one": "Noch {{count}} Tag Lesung",
     "khatmahProgress": "{{read}} / {{total}} Seiten · heute: {{today}}",
     "khatmahBehind": "{{count}} aufzuholen",
     "startKhatmah": "Khatma starten",
@@ -1231,7 +1231,12 @@
     "surahDownloadStrip": "{{surah}} wird geladen · {{pct}} %",
     "readerTitle": "Eine Sure lesen",
     "verseByVerse": "Vers-für-Vers-Ansicht",
-    "verseByVerseHelp": "Aus öffnet sich eine Sure als Mushaf und bleibt dort. An lässt sie sich auch als Liste von Versen lesen, mit der Übersetzung unter jedem Vers, und die Kopfzeile des Lesers erhält eine Schaltfläche zum Wechseln zwischen beiden."
+    "verseByVerseHelp": "Aus öffnet sich eine Sure als Mushaf und bleibt dort. An lässt sie sich auch als Liste von Versen lesen, mit der Übersetzung unter jedem Vers, und die Kopfzeile des Lesers erhält eine Schaltfläche zum Wechseln zwischen beiden.",
+    "screenTitle": "Beim Lesen",
+    "keepAwake": "Bildschirm anlassen",
+    "keepAwakeHelp": "Hält den Bildschirm an, solange eine Sure, der Mushaf oder Tilawah geöffnet ist, und gibt ihn frei, sobald Sie die Ansicht verlassen — den Versen bei laufender Rezitation zu folgen erfordert also kein Tippen auf den Bildschirm. Die Bildschirmsperre Ihres Telefons bleibt unverändert.",
+    "khatmahBehindPages": "{{count}} Seiten im Rückstand",
+    "khatmahBehindPages_one": "{{count}} Seite im Rückstand"
   },
   "reading": {
     "textSize": "Schriftgröße",

@@ -163,7 +163,7 @@
     "clockFormatHelp": "自动模式跟随设备自身的时钟设置。礼拜时间、月历表格和小组件都使用同一种格式。",
     "clockFormatExample": "例如：{{time}}",
     "systemDynamicColors": "系统颜色",
-    "systemDynamicColorsHelp": "当主题为“系统”时，在应用程序中使用设备的语义和动态颜色。当深色模式开启时，纯黑色 (OLED) 仍然会使背景变暗。",
+    "systemDynamicColorsHelp": "无论选择哪种主题，都在应用程序中使用设备的语义和动态颜色。当深色模式开启时，纯黑色 (OLED) 仍然会使背景变暗。",
     "pureBlack": "纯黑（OLED）",
     "pureBlackHelp": "OLED 显示器深色模式下的纯黑色背景。",
     "dataSource": "数据来源",
@@ -1043,8 +1043,8 @@
     "readingMarkerLabel": "阅读",
     "khatmahMarkerLabel": "完读",
     "khatmah": "古兰经完读",
-    "khatmahDaysLeft": "剩余 {{count}} 天",
-    "khatmahDaysLeft_one": "剩余 {{count}} 天",
+    "khatmahDaysLeft": "还剩 {{count}} 天的诵读",
+    "khatmahDaysLeft_one": "还剩 {{count}} 天的诵读",
     "khatmahProgress": "{{read}} / {{total}} 页 · 今日：{{today}}",
     "khatmahBehind": "需补读 {{count}}",
     "startKhatmah": "开始完读",
@@ -1231,7 +1231,12 @@
     "surahDownloadStrip": "正在下载 {{surah}} · {{pct}}%",
     "readerTitle": "阅读一章",
     "verseByVerse": "逐节视图",
-    "verseByVerseHelp": "关闭时，一章以经文视图打开并保持不变。开启时，还可以按逐节列表阅读，每节下方附有译文，阅读器顶栏会出现在两者之间切换的按钮。"
+    "verseByVerseHelp": "关闭时，一章以经文视图打开并保持不变。开启时，还可以按逐节列表阅读，每节下方附有译文，阅读器顶栏会出现在两者之间切换的按钮。",
+    "screenTitle": "阅读时",
+    "keepAwake": "保持屏幕常亮",
+    "keepAwakeHelp": "在打开苏拉、穆斯哈夫或诵读页面期间保持屏幕常亮，离开后立即释放——这样在诵读播放时跟读经文就不必反复触碰屏幕。您手机自身的屏幕超时设置不受影响。",
+    "khatmahBehindPages": "落后 {{count}} 页",
+    "khatmahBehindPages_one": "落后 {{count}} 页"
   },
   "reading": {
     "textSize": "文字大小",

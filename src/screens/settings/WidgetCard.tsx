@@ -62,9 +62,10 @@ function WidgetCardImpl() {
     return null;
   }
 
-  // The same condition AppearanceCard uses to hide its accent picker.
-  const needsOwnPicker =
-    appearance.appearance === 'system' && appearance.useSystemDynamicTheme;
+  // The same condition AppearanceCard uses to hide its accent picker —
+  // no longer tied to the System appearance, since system colours can now
+  // be chosen under Light and Dark too.
+  const needsOwnPicker = appearance.useSystemDynamicTheme;
 
   return (
     // Titled now. This used to be the whole of a page called Home screen

@@ -37,6 +37,7 @@ import {
   khatmahDay,
   khatmahDaysLeft,
   khatmahPages,
+  isLivePlan,
   readingContinueTarget,
   type KhatmahPlan,
   type LastRead,
@@ -80,7 +81,7 @@ export function pagesReadToday(plan: KhatmahPlan, now: number): number {
 }
 
 export function activeKhatmah(state: QuranState): KhatmahPlan | undefined {
-  return state.khatmah.find(k => k.completedAt == null);
+  return state.khatmah.find(isLivePlan);
 }
 
 export function selectQuranCardState(

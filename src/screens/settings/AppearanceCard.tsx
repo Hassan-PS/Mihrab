@@ -116,7 +116,6 @@ function AppearanceCardImpl() {
   // Picker is hidden under dynamic colors — both app and widget follow OS.
   // Android = Material You; iOS = Liquid Glass (system colours).
   const dynamicColorsActive =
-    settings.appearance === 'system' &&
     settings.useSystemDynamicTheme &&
     (Platform.OS === 'android' || Platform.OS === 'ios');
   const verdantActive = settings.tintedSurfaces && !dynamicColorsActive;
@@ -196,10 +195,12 @@ function AppearanceCardImpl() {
                   : t('settings.systemDynamicColorsHelp')
             }
             value={settings.useSystemDynamicTheme}
-            // Only answerable while the theme follows the system: there is
-            // nothing dynamic to follow once Light or Dark is pinned.
-            // Verdant owns the palette when on — system colours wait.
-            disabled={settings.appearance !== 'system' || verdantActive}
+            // Answerable under Light and Dark as well as System. Pinning a
+            // mode says which mode is drawn, not where its colours come
+            // from — "dark, in my wallpaper's colours" is a reasonable ask
+            // and used to be unsayable. Verdant still owns the palette
+            // when it is on, because two colour sources cannot both win.
+            disabled={verdantActive}
             // Material You / iOS dynamic colors are resolved at view-attach
             // time, so flipping them mid-session leaves stale tints on
             // already-mounted surfaces (#110). Defer the actual change to a

@@ -5,6 +5,7 @@ import {
   useCompanionChoice,
 } from '../../quran/CompanionTextControls';
 import { usePrayerSettings } from '../../context/PrayerSettingsContext';
+import { setQuranPrefs, useQuranState } from '../../quran/quranState';
 import {
   SettingsGroup,
   SettingsLinkRow,
@@ -40,6 +41,7 @@ function QuranCardImpl() {
   const { t } = useTranslation();
   const { settings, updateSettings } = usePrayerSettings();
   const { mode, editionLabel } = useCompanionChoice();
+  const quran = useQuranState();
   const [sheetVisible, setSheetVisible] = useState(false);
 
   const modeLabel =
@@ -78,6 +80,25 @@ function QuranCardImpl() {
           onValueChange={next =>
             updateSettings({ quranVerseByVerseEnabled: next })
           }
+        />
+      </SettingsGroup>
+      {/* THE SAME PREFERENCE Tilāwah's coffee button holds, not a second
+          one. Two switches over one lock is a bug waiting to be filed:
+          whichever was touched last would appear to win while the other
+          went on claiming the opposite. This is the place you look for
+          it — the coffee button is the shortcut you reach for with the
+          recitation already playing. */}
+      <SettingsGroup
+        title={t('quran.screenTitle', 'While you read')}
+        footer={t('quran.keepAwakeHelp', {
+          defaultValue:
+            'Holds the screen on while a surah, the mushaf or Tilawah is open, and lets go the moment you leave — so following the verses with the recitation playing does not mean tapping the screen to keep it lit. Your phone’s own screen timeout is left alone.',
+        })}>
+        <SettingsToggleRow
+          testID="settings-keep-awake"
+          title={t('quran.keepAwake', 'Keep the screen on')}
+          value={quran.prefs.keepAwake}
+          onValueChange={next => setQuranPrefs({ keepAwake: next })}
         />
       </SettingsGroup>
       <CompanionTextSheet

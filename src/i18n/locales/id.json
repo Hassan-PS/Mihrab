@@ -163,7 +163,7 @@
     "clockFormatHelp": "Otomatis mengikuti pengaturan jam perangkat Anda. Waktu salat, tabel bulanan, dan widget menggunakan format yang sama.",
     "clockFormatExample": "Misalnya: {{time}}",
     "systemDynamicColors": "Warna sistem",
-    "systemDynamicColorsHelp": "Menggunakan warna semantik dan dinamis perangkat Anda di aplikasi jika temanya adalah Sistem. Hitam murni (OLED) tetap menggelapkan latar belakang saat mode gelap aktif.",
+    "systemDynamicColorsHelp": "Menggunakan warna semantik dan dinamis perangkat Anda di aplikasi, apa pun tema yang Anda pilih. Hitam murni (OLED) tetap menggelapkan latar belakang saat mode gelap aktif.",
     "pureBlack": "Hitam murni (OLED)",
     "pureBlackHelp": "Latar belakang hitam sesungguhnya dalam mode gelap untuk tampilan OLED.",
     "dataSource": "Sumber data",
@@ -1043,8 +1043,8 @@
     "readingMarkerLabel": "Bacaan",
     "khatmahMarkerLabel": "Khataman",
     "khatmah": "Khataman",
-    "khatmahDaysLeft": "{{count}} hari lagi",
-    "khatmahDaysLeft_one": "{{count}} hari lagi",
+    "khatmahDaysLeft": "{{count}} hari bacaan tersisa",
+    "khatmahDaysLeft_one": "{{count}} hari bacaan tersisa",
     "khatmahProgress": "{{read}} / {{total}} halaman · hari ini: {{today}}",
     "khatmahBehind": "{{count}} perlu dikejar",
     "startKhatmah": "Mulai khataman",
@@ -1231,7 +1231,12 @@
     "surahDownloadStrip": "Mengunduh {{surah}} · {{pct}}%",
     "readerTitle": "Membaca surah",
     "verseByVerse": "Tampilan ayat per ayat",
-    "verseByVerseHelp": "Nonaktif, surah terbuka sebagai mushaf dan tetap begitu. Aktif, surah juga dapat dibaca sebagai daftar ayat dengan terjemahan di bawah setiap ayat, dan header pembaca menampilkan tombol untuk berpindah di antara keduanya."
+    "verseByVerseHelp": "Nonaktif, surah terbuka sebagai mushaf dan tetap begitu. Aktif, surah juga dapat dibaca sebagai daftar ayat dengan terjemahan di bawah setiap ayat, dan header pembaca menampilkan tombol untuk berpindah di antara keduanya.",
+    "screenTitle": "Saat Anda membaca",
+    "keepAwake": "Biarkan layar tetap menyala",
+    "keepAwakeHelp": "Menjaga layar tetap menyala selama surah, mushaf, atau Tilawah terbuka, dan melepaskannya begitu Anda keluar — sehingga mengikuti ayat sambil mendengarkan bacaan tidak perlu menyentuh layar. Batas waktu layar ponsel Anda tidak diubah.",
+    "khatmahBehindPages": "tertinggal {{count}} halaman",
+    "khatmahBehindPages_one": "tertinggal {{count}} halaman"
   },
   "reading": {
     "textSize": "Ukuran teks",

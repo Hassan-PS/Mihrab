@@ -111,7 +111,7 @@ describe('the Widget card carries the picker in the one case it must', () => {
     // The two conditions must stay each other's mirror image: one picker
     // on screen, always, never two and never none.
     expect(src).toMatch(
-      /appearance\.appearance === 'system' &&\s*appearance\.useSystemDynamicTheme/,
+      /const needsOwnPicker = appearance\.useSystemDynamicTheme;/,
     );
     expect(src).toContain('needsOwnPicker ?');
   });

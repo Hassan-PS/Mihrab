@@ -163,7 +163,7 @@
     "clockFormatHelp": "Otomatik, cihazınızın kendi saat ayarını izler. Namaz vakitleri, aylık tablo ve widget'lar aynı biçimi kullanır.",
     "clockFormatExample": "Örneğin: {{time}}",
     "systemDynamicColors": "Sistem renkleri",
-    "systemDynamicColorsHelp": "Tema Sistem olduğunda uygulamada cihazınızın anlamsal ve dinamik renklerini kullanır. Saf siyah (OLED), karanlık mod açıkken arka planları hâlâ karartıyor.",
+    "systemDynamicColorsHelp": "Hangi temayı seçerseniz seçin, uygulamada cihazınızın anlamsal ve dinamik renklerini kullanır. Saf siyah (OLED), karanlık mod açıkken arka planları hâlâ karartıyor.",
     "pureBlack": "Saf siyah (OLED)",
     "pureBlackHelp": "OLED ekranlar için karanlık modda gerçek siyah arka plan.",
     "dataSource": "Veri kaynağı",
@@ -1043,8 +1043,8 @@
     "readingMarkerLabel": "Okuma",
     "khatmahMarkerLabel": "Hatim",
     "khatmah": "Hatim",
-    "khatmahDaysLeft": "{{count}} gün kaldı",
-    "khatmahDaysLeft_one": "{{count}} gün kaldı",
+    "khatmahDaysLeft": "{{count}} günlük okuma kaldı",
+    "khatmahDaysLeft_one": "{{count}} günlük okuma kaldı",
     "khatmahProgress": "{{read}} / {{total}} sayfa · bugün: {{today}}",
     "khatmahBehind": "Telafi edilecek: {{count}}",
     "startKhatmah": "Hatim başlat",
@@ -1231,7 +1231,12 @@
     "surahDownloadStrip": "{{surah}} indiriliyor · %{{pct}}",
     "readerTitle": "Sure okuma",
     "verseByVerse": "Ayet ayet görünüm",
-    "verseByVerseHelp": "Kapalıyken sure mushaf olarak açılır ve öyle kalır. Açıkken her ayetin altında meali bulunan bir ayet listesi olarak da okunabilir ve okuyucunun başlığına ikisi arasında geçiş düğmesi gelir."
+    "verseByVerseHelp": "Kapalıyken sure mushaf olarak açılır ve öyle kalır. Açıkken her ayetin altında meali bulunan bir ayet listesi olarak da okunabilir ve okuyucunun başlığına ikisi arasında geçiş düğmesi gelir.",
+    "screenTitle": "Okurken",
+    "keepAwake": "Ekran açık kalsın",
+    "keepAwakeHelp": "Bir sure, mushaf veya Tilavet açıkken ekranı açık tutar, ayrıldığınız anda bırakır — böylece tilavet çalarken ayetleri takip etmek için ekrana dokunmanız gerekmez. Telefonunuzun kendi ekran kapanma süresi değiştirilmez.",
+    "khatmahBehindPages": "{{count}} sayfa geride",
+    "khatmahBehindPages_one": "{{count}} sayfa geride"
   },
   "reading": {
     "textSize": "Metin boyutu",

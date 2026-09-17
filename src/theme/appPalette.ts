@@ -137,12 +137,23 @@ export function shouldUseDynamicSystemColors(
    *  • iOS     → "Liquid Glass": native semantic system colours + the
    *    translucent blurred chrome iOS provides, so the app reads as part of
    *    the OS and adapts to light/dark automatically.
-   * Both are opt-in via the same toggle and only apply under the "System"
-   * appearance (so an explicit Light/Dark choice still uses brand accents).
+   * Both are opt-in via the same toggle, and it applies under ANY
+   * appearance. It used to be answerable only under "System", on the
+   * reasoning that there is nothing dynamic to follow once Light or Dark
+   * is pinned — which confused two different things. What the appearance
+   * preference pins is WHICH MODE is drawn; where the colours come from
+   * is this toggle's business. Somebody who keeps the app dark all day
+   * has no way to say "dark, in my wallpaper's colours", and that is a
+   * reasonable thing to want. `buildDynamicSystemPalette` takes `isDark`
+   * from the resolved mode either way, so pinning one simply stops that
+   * mode tracking the OS — the palette is still the system's.
+   *
+   * `appearance` stays in the signature: callers pass it, and it is what
+   * a future rule about a particular mode would key on.
    */
+  void appearance;
   return (
     (Platform.OS === 'android' || Platform.OS === 'ios') &&
-    (appearance ?? 'system') === 'system' &&
     !!useSystemDynamicTheme
   );
 }

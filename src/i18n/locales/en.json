@@ -163,7 +163,7 @@
     "clockFormatHelp": "Automatic follows your device's own clock setting. Prayer times, the month table and your widgets all use the same format.",
     "clockFormatExample": "For example: {{time}}",
     "systemDynamicColors": "System colors",
-    "systemDynamicColorsHelp": "Uses your device’s semantic and dynamic colors in the app when theme is System. Pure black (OLED) still darkens backgrounds when dark mode is on.",
+    "systemDynamicColorsHelp": "Uses your device’s semantic and dynamic colors in the app, whichever theme you pick. Pure black (OLED) still darkens backgrounds when dark mode is on.",
     "pureBlack": "Pure black (OLED)",
     "pureBlackHelp": "True black background in dark mode for OLED displays.",
     "dataSource": "Data source",
@@ -1043,8 +1043,8 @@
     "readingMarkerLabel": "Reading",
     "khatmahMarkerLabel": "Khatmah",
     "khatmah": "Khatmah",
-    "khatmahDaysLeft": "{{count}} days left",
-    "khatmahDaysLeft_one": "{{count}} day left",
+    "khatmahDaysLeft": "{{count}} days of reading left",
+    "khatmahDaysLeft_one": "{{count}} day of reading left",
     "khatmahProgress": "{{read}} / {{total}} pages · today: {{today}}",
     "khatmahBehind": "{{count}} to catch up",
     "startKhatmah": "Start a khatmah",
@@ -1231,7 +1231,12 @@
     "surahDownloadStrip": "Downloading {{surah}} · {{pct}}%",
     "readerTitle": "Reading a surah",
     "verseByVerse": "Verse-by-verse view",
-    "verseByVerseHelp": "Off, a surah opens as the mushaf and stays there. On, it can also be read as a list of verses with the translation under each one, and the reader’s header carries a button to move between the two."
+    "verseByVerseHelp": "Off, a surah opens as the mushaf and stays there. On, it can also be read as a list of verses with the translation under each one, and the reader’s header carries a button to move between the two.",
+    "screenTitle": "While you read",
+    "keepAwake": "Keep the screen on",
+    "keepAwakeHelp": "Holds the screen on while a surah, the mushaf or Tilawah is open, and lets go the moment you leave — so following the verses with the recitation playing does not mean tapping the screen to keep it lit. Your phone’s own screen timeout is left alone.",
+    "khatmahBehindPages": "{{count}} pages behind",
+    "khatmahBehindPages_one": "{{count}} page behind"
   },
   "reading": {
     "textSize": "Text size",

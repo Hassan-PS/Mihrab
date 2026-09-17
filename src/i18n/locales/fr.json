@@ -163,7 +163,7 @@
     "clockFormatHelp": "Le mode automatique suit le réglage d'horloge de votre appareil. Les heures de prière, le tableau mensuel et les widgets utilisent tous le même format.",
     "clockFormatExample": "Par exemple : {{time}}",
     "systemDynamicColors": "Couleurs du système",
-    "systemDynamicColorsHelp": "Utilise les couleurs sémantiques et dynamiques de votre appareil dans l'application lorsque le thème est Système. Le noir pur (OLED) assombrit toujours les arrière-plans lorsque le mode sombre est activé.",
+    "systemDynamicColorsHelp": "Utilise les couleurs sémantiques et dynamiques de votre appareil dans l'application, quel que soit le thème choisi. Le noir pur (OLED) assombrit toujours les arrière-plans lorsque le mode sombre est activé.",
     "pureBlack": "Noir pur (OLED)",
     "pureBlackHelp": "Véritable fond noir en mode sombre pour les écrans OLED.",
     "dataSource": "Source de données",
@@ -1043,8 +1043,8 @@
     "readingMarkerLabel": "Lecture",
     "khatmahMarkerLabel": "Khatma",
     "khatmah": "Khatma",
-    "khatmahDaysLeft": "{{count}} jours restants",
-    "khatmahDaysLeft_one": "{{count}} jour restant",
+    "khatmahDaysLeft": "{{count}} jours de lecture restants",
+    "khatmahDaysLeft_one": "{{count}} jour de lecture restant",
     "khatmahProgress": "{{read}} / {{total}} pages · aujourd'hui : {{today}}",
     "khatmahBehind": "{{count}} à rattraper",
     "startKhatmah": "Commencer une khatma",
@@ -1231,7 +1231,12 @@
     "surahDownloadStrip": "Téléchargement de {{surah}} · {{pct}} %",
     "readerTitle": "Lire une sourate",
     "verseByVerse": "Vue verset par verset",
-    "verseByVerseHelp": "Désactivé, une sourate s’ouvre en mushaf et y reste. Activé, elle peut aussi se lire comme une liste de versets avec la traduction sous chacun, et l’en-tête du lecteur reçoit un bouton pour passer de l’une à l’autre."
+    "verseByVerseHelp": "Désactivé, une sourate s’ouvre en mushaf et y reste. Activé, elle peut aussi se lire comme une liste de versets avec la traduction sous chacun, et l’en-tête du lecteur reçoit un bouton pour passer de l’une à l’autre.",
+    "screenTitle": "Pendant la lecture",
+    "keepAwake": "Garder l’écran allumé",
+    "keepAwakeHelp": "Garde l’écran allumé tant qu’une sourate, le mushaf ou Tilawah est ouvert, et le relâche dès que vous quittez — suivre les versets pendant la récitation ne demande donc pas de toucher l’écran. La mise en veille de votre téléphone reste inchangée.",
+    "khatmahBehindPages": "{{count}} pages de retard",
+    "khatmahBehindPages_one": "{{count}} page de retard"
   },
   "reading": {
     "textSize": "Taille du texte",

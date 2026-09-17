@@ -52,6 +52,7 @@ import {
   khatmahAyahsRead,
   khatmahCurrentPortion,
   khatmahDay,
+  khatmahBehindBy,
   khatmahDaysLeft,
   khatmahPages,
   removeBookmark,
@@ -366,6 +367,22 @@ export function QuranScreen() {
   // is a number nobody can picture.
   const pages = plan ? khatmahPages(plan, quran.prefs.riwayah) : null;
   const daysLeft = plan ? khatmahDaysLeft(plan) : 0;
+  /**
+   * THE ONE NUMBER ON THIS CARD THAT IS THE CALENDAR'S (issue #53).
+   *
+   * `daysLeft` counts PORTIONS remaining, not days until a date — a plan
+   * is a duration here, and skipping a day does not spend one. That is
+   * deliberate and it is why nothing re-cuts itself at midnight. But the
+   * card said "18 days left" on a plan whose thirtieth day falls in
+   * fourteen, and a reader has no way to hear that as anything but a
+   * countdown, so it read as a frozen counter rather than a different
+   * question being answered.
+   *
+   * The deficit was already computed and already on the WIDGET. It just
+   * never reached the screen the reader is looking at, which left the
+   * widget the more honest of the two surfaces.
+   */
+  const behindPages = plan ? khatmahBehindBy(plan) : 0;
   const readAyahs = plan ? khatmahAyahsRead(plan) : 0;
 
   /**
@@ -475,10 +492,22 @@ export function QuranScreen() {
                 {t('quran.khatmah', 'Khatmah')}
               </Text>
               <Text style={[styles.khatmahMeta, { color: palette.muted }]}>
-                {t('quran.khatmahDaysLeft', {
-                  defaultValue: '{{count}} days left',
-                  count: daysLeft,
-                })}
+                {[
+                  t('quran.khatmahDaysLeft', {
+                    defaultValue: '{{count}} days of reading left',
+                    count: daysLeft,
+                  }),
+                  // Only when there IS a deficit: a reader on schedule
+                  // does not need telling they are not behind.
+                  behindPages > 0
+                    ? t('quran.khatmahBehindPages', {
+                        defaultValue: '{{count}} pages behind',
+                        count: behindPages,
+                      })
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
               </Text>
             </View>
             {/* The book. The lighter run at its end is reading done past

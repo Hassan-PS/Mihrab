@@ -203,6 +203,17 @@ export function mergeKhatmah(
       mine.completedAt != null && p.completedAt != null
         ? Math.min(mine.completedAt, p.completedAt)
         : (mine.completedAt ?? p.completedAt);
+    // ABANDONMENT WINS, and it is why this field exists. A plan deleted
+    // on one device used to be simply absent from its snapshot, which is
+    // indistinguishable from a plan the OTHER device had just made — so
+    // the union put it straight back and the delete undid itself on the
+    // next round. The tombstone travels instead, and one side carrying it
+    // is enough: earliest date if both do, so the merge stays commutative
+    // and merging a snapshot with itself still returns itself.
+    const abandonedAt =
+      mine.abandonedAt != null && p.abandonedAt != null
+        ? Math.min(mine.abandonedAt, p.abandonedAt)
+        : (mine.abandonedAt ?? p.abandonedAt);
     // The pinned position is a "where I am", so the further-through one is
     // the later one; ties keep whichever the local device already had.
     const position =
@@ -216,6 +227,10 @@ export function mergeKhatmah(
       pagesRead,
       ...(ayahsRead !== undefined ? { ayahsRead } : {}),
       completedAt,
+      // Spread conditionally: writing `abandonedAt: undefined` onto a pair
+      // that has none adds a key neither input had, and merging a snapshot
+      // with itself would stop returning itself.
+      ...(abandonedAt != null ? { abandonedAt } : {}),
       ...(position !== undefined ? { position } : {}),
     });
   }

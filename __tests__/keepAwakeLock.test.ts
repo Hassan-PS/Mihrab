@@ -64,6 +64,10 @@ describe('every holder goes through it', () => {
   it.each([
     'src/screens/quran/TilawahScreen.tsx',
     'src/quran/mushafReaderCore.tsx',
+    // The translation reader was the one that did NOT hold it (#52), and
+    // it is the screen people read along with the recitation — which
+    // read, from the outside, as the setting being broken.
+    'src/screens/quran/TranslationSurahScreen.tsx',
   ])('%s', file => {
     const src = read(file);
     expect(src).toContain('useKeepAwake(');
@@ -83,5 +87,29 @@ describe('every holder goes through it', () => {
       .filter(f => !f.endsWith('keepAwakeLock.ts'))
       .filter(f => /@sayem314\/react-native-keep-awake/.test(fs.readFileSync(f, 'utf-8')));
     expect(offenders).toEqual([]);
+  });
+});
+
+describe('it is answerable from Settings, not only Tilawah', () => {
+  it('Settings → Quran carries the row', () => {
+    const card = read('src/screens/settings/QuranCard.tsx');
+    expect(card).toContain('testID="settings-keep-awake"');
+    expect(card).toMatch(/value=\{quran\.prefs\.keepAwake\}/);
+    expect(card).toMatch(/setQuranPrefs\(\{ keepAwake: next \}\)/);
+  });
+
+  it('over the SAME preference the coffee button holds', () => {
+    // Two switches over one lock would let each claim the other is
+    // wrong, depending on which was touched last.
+    const tilawah = read('src/screens/quran/TilawahScreen.tsx');
+    expect(tilawah).toMatch(/setQuranPrefs\(\{ keepAwake: !keepAwake \}\)/);
+  });
+
+  it('and is on until somebody turns it off', () => {
+    const state = read('src/quran/quranState.ts');
+    expect(state).toMatch(/keepAwake: true,/);
+    // Stored prefs are spread OVER the defaults, so a blob written before
+    // this key existed still reads as on rather than as missing.
+    expect(state).toMatch(/\.\.\.DEFAULT_QURAN_STATE\.prefs,\s*\n\s*\.\.\.\(r\.prefs \?\? \{\}\),/);
   });
 });

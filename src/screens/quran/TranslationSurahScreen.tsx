@@ -46,6 +46,7 @@ import {
   CompanionTextSheet,
   useCompanionChoice,
 } from '../../quran/CompanionTextControls';
+import { useKeepAwake } from '../../quran/keepAwakeLock';
 import {
   useOverlayDismissGuard,
   useSettledMeasure,
@@ -110,6 +111,14 @@ export function TranslationSurahScreen({
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const quran = useQuranState();
+  // The screen stays lit here for the same reason it does in the muṣḥaf
+  // reader and Tilāwah, and it is this screen people most often read
+  // ALONG WITH the recitation — following the verses while the audio
+  // plays is exactly when nobody is touching the screen (issue #52).
+  // It went to the other two and not this one, which read as the setting
+  // simply not working. One counted lock, three holders; see
+  // keepAwakeLock.ts on why the count matters when two are mounted.
+  useKeepAwake(quran.prefs.keepAwake);
   const playback = usePlaybackStatus();
   // Header closures read playback via a ref so the nav header doesn't
   // rebuild on every ayah change.

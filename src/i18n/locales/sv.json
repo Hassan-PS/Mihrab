@@ -163,7 +163,7 @@
     "clockFormatHelp": "Automatiskt följer enhetens egen klockinställning. Bönetider, månadstabellen och widgetarna använder samma format.",
     "clockFormatExample": "Till exempel: {{time}}",
     "systemDynamicColors": "Systemfärger",
-    "systemDynamicColorsHelp": "Använder enhetens semantiska och dynamiska färger i appen när temat är System. Ren svart (OLED) mörkar fortfarande bakgrunder i mörkt läge.",
+    "systemDynamicColorsHelp": "Använder enhetens semantiska och dynamiska färger i appen, oavsett vilket tema du väljer. Ren svart (OLED) mörkar fortfarande bakgrunder i mörkt läge.",
     "pureBlack": "Helt svart (OLED)",
     "pureBlackHelp": "Helt svart bakgrund i mörkt läge för OLED-skärmar.",
     "dataSource": "Datakälla",
@@ -1043,8 +1043,8 @@
     "readingMarkerLabel": "Läsning",
     "khatmahMarkerLabel": "Khatmah",
     "khatmah": "Khatmah",
-    "khatmahDaysLeft": "{{count}} dagar kvar",
-    "khatmahDaysLeft_one": "{{count}} dag kvar",
+    "khatmahDaysLeft": "{{count}} dagar kvar att läsa",
+    "khatmahDaysLeft_one": "{{count}} dag kvar att läsa",
     "khatmahProgress": "{{read}} / {{total}} sidor · idag: {{today}}",
     "khatmahBehind": "{{count}} att komma ikapp",
     "startKhatmah": "Starta en khatmah",
@@ -1231,7 +1231,12 @@
     "surahDownloadStrip": "Laddar ner {{surah}} · {{pct}} %",
     "readerTitle": "Att läsa en sura",
     "verseByVerse": "Vers-för-vers-vy",
-    "verseByVerseHelp": "Av öppnas en sura som mushaf och stannar där. På kan den också läsas som en lista med verser, med översättningen under varje vers, och läsarens sidhuvud får en knapp för att växla mellan de två."
+    "verseByVerseHelp": "Av öppnas en sura som mushaf och stannar där. På kan den också läsas som en lista med verser, med översättningen under varje vers, och läsarens sidhuvud får en knapp för att växla mellan de två.",
+    "screenTitle": "Medan du läser",
+    "keepAwake": "Håll skärmen tänd",
+    "keepAwakeHelp": "Håller skärmen tänd så länge en sura, mushafen eller Tilawah är öppen, och släpper så fort du lämnar — att följa verserna medan recitationen spelas kräver alltså inte att du rör skärmen. Telefonens egen skärmtimeout lämnas orörd.",
+    "khatmahBehindPages": "{{count}} sidor efter",
+    "khatmahBehindPages_one": "{{count}} sida efter"
   },
   "reading": {
     "textSize": "Textstorlek",

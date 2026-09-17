@@ -79,6 +79,23 @@ export type KhatmahPlan = {
   /** Set when pagesRead reaches 604. */
   completedAt: number | null;
   /**
+   * When the reader abandoned this plan — a TOMBSTONE, not a deletion.
+   *
+   * Dropping the row is what let a paired device bring the plan back:
+   * `mergeKhatmah` unites the two sides by id, and a row that is absent
+   * locally and present on the other device is indistinguishable from a
+   * row the other device has just created. The delete was purely local,
+   * so the next sync round put it back — the same bug `removedPeers.ts`
+   * describes for devices and `coerceSunnahLog` describes for a cleared
+   * day, and the same answer both give: the removal is a fact with a
+   * date on it, and it travels.
+   *
+   * Everything that looks for "the plan I am on" must go through
+   * `isLivePlan`, which is the one place that guarantees an abandoned
+   * plan reads as gone.
+   */
+  abandonedAt?: number;
+  /**
    * Ḥafṣ pages already behind the reader when the plan was made — the
    * plan covers what FOLLOWS them, cut into `targetDays` portions.
    *
@@ -349,6 +366,19 @@ function coerceKhatmah(v: unknown): KhatmahPlan | null {
     typeof r.completedAt === 'number' && Number.isFinite(r.completedAt)
       ? r.completedAt
       : null;
+  const abandonedAt =
+    typeof r.abandonedAt === 'number' && Number.isFinite(r.abandonedAt)
+      ? r.abandonedAt
+      : null;
+  // Expired tombstones are dropped rather than carried: past the TTL the
+  // plan is gone everywhere and the row is pure weight in every sealed
+  // file. `coerceSunnahLog` prunes on exactly this reasoning.
+  if (
+    abandonedAt != null &&
+    Date.now() - abandonedAt > KHATMAH_TOMBSTONE_TTL_DAYS * 24 * 60 * 60 * 1000
+  ) {
+    return null;
+  }
   const out: KhatmahPlan = {
     id: r.id,
     startedAt,
@@ -356,6 +386,7 @@ function coerceKhatmah(v: unknown): KhatmahPlan | null {
     pagesRead,
     completedAt,
   };
+  if (abandonedAt != null) out.abandonedAt = abandonedAt;
   const p = r.position;
   if (p && typeof p === 'object') {
     const surah = int((p as Record<string, unknown>).surah, 1, 114);
@@ -922,12 +953,30 @@ export function startKhatmah(
   updateQuranState(prev => ({
     ...prev,
     // One active plan at a time; completed plans stay for history.
-    khatmah: [...prev.khatmah.filter(k => k.completedAt != null), plan],
+    khatmah: [...prev.khatmah.filter(k => !isLivePlan(k)), plan],
   }));
 }
 
+/**
+ * How long an abandoned plan is remembered as abandoned — the same ninety
+ * days, for the same reason, as the sunnah tombstones and the peer
+ * removals: long enough for a tablet that has been in a drawer to learn
+ * about it, short enough that the blob does not grow for ever.
+ */
+export const KHATMAH_TOMBSTONE_TTL_DAYS = 90;
+
+/**
+ * A plan the reader is actually on: not finished, and not abandoned.
+ *
+ * The single place that guarantees an abandoned plan reads as gone, the
+ * way `indexByDate` is for cleared prayers.
+ */
+export function isLivePlan(k: KhatmahPlan): boolean {
+  return k.completedAt == null && k.abandonedAt == null;
+}
+
 export function activeKhatmah(s: QuranState): KhatmahPlan | undefined {
-  return s.khatmah.find(k => k.completedAt == null);
+  return s.khatmah.find(isLivePlan);
 }
 
 function localYmd(now: number = Date.now()): string {
@@ -954,7 +1003,7 @@ export function recordKhatmahProgress(
   riwayah: RiwayahId = DEFAULT_RIWAYAH,
 ): void {
   updateQuranState(prev => {
-    const active = prev.khatmah.find(k => k.completedAt == null);
+    const active = prev.khatmah.find(isLivePlan);
     if (!active) return prev;
     // The page is converted to ayahs FIRST, then compared. Comparing pages
     // would be comparing two different muṣḥafs the moment the reader
@@ -1150,7 +1199,7 @@ export function setKhatmahPosition(
   page: number,
 ): void {
   updateQuranState(prev => {
-    const active = prev.khatmah.find(k => k.completedAt == null);
+    const active = prev.khatmah.find(isLivePlan);
     if (!active) return prev;
     return {
       ...prev,
@@ -1189,7 +1238,7 @@ export function clearKhatmahPosition(): void {
 /** Rewind only today's progress (to the day-start snapshot). */
 export function resetKhatmahToday(): void {
   updateQuranState(prev => {
-    const active = prev.khatmah.find(k => k.completedAt == null);
+    const active = prev.khatmah.find(isLivePlan);
     if (!active) return prev;
     const today = localYmd();
     const baseAyahs =
@@ -1231,7 +1280,7 @@ export function resetKhatmahToday(): void {
 /** Restart the active plan from page 0 with a fresh clock. */
 export function resetKhatmahAll(): void {
   updateQuranState(prev => {
-    const active = prev.khatmah.find(k => k.completedAt == null);
+    const active = prev.khatmah.find(isLivePlan);
     if (!active) return prev;
     // Back to where the PLAN began, which is page 0 for most plans and
     // the reader's own start for one begun partway (issue #17). Rewinding
@@ -1261,9 +1310,15 @@ export function resetKhatmahAll(): void {
 }
 
 export function abandonKhatmah(id: string): void {
+  const at = Date.now();
   updateQuranState(prev => ({
     ...prev,
-    khatmah: prev.khatmah.filter(k => k.id !== id),
+    // A WRITE, not a deletion — see `abandonedAt`. The row stays so the
+    // abandonment can reach the other devices; `coerceKhatmah` drops it
+    // once it is older than any peer could still argue about.
+    khatmah: prev.khatmah.map(k =>
+      k.id === id && k.abandonedAt == null ? { ...k, abandonedAt: at } : k,
+    ),
   }));
 }
 
@@ -1473,7 +1528,7 @@ export function khatmahDay(
  */
 export function finishKhatmahPortion(): void {
   updateQuranState(prev => {
-    const active = prev.khatmah.find(k => k.completedAt == null);
+    const active = prev.khatmah.find(isLivePlan);
     if (!active) return prev;
     const to = khatmahCurrentPortion(active).to;
     if (to <= khatmahAyahsRead(active)) return prev;
@@ -1511,7 +1566,7 @@ export function finishKhatmahPortion(): void {
  */
 export function stepKhatmahBack(): void {
   updateQuranState(prev => {
-    const active = prev.khatmah.find(k => k.completedAt == null);
+    const active = prev.khatmah.find(isLivePlan);
     if (!active) return prev;
     const days = planDays(active);
     const current = khatmahCurrentPortion(active).day;
