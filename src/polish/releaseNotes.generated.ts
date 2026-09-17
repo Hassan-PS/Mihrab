@@ -19,6 +19,16 @@ export type ReleaseNote = {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    code: 275,
+    version: '2.23.0',
+    date: '2026-09-17',
+    notes: {
+      en: '• Deleting a khatmah no longer brings it back. On a paired device the plan returned within a sync round or two; an abandoned plan now stays abandoned everywhere.\n• The screen stays on in the verse-by-verse reader too — it already did in the mushaf and Tilawah — with a switch for it in Settings → Quran.\n• System colours (Material You) now work with Light or Dark chosen, not only System.\n• The khatmah card says "days of reading left", and how many pages behind you are.',
+      ar: '• حذف الختمة لم يعد يعيدها. على جهاز مقترن كانت الخطة تعود بعد جولة مزامنة أو اثنتين؛ والآن تبقى محذوفة على كل الأجهزة.\n• تبقى الشاشة مضاءة في قارئ الآية بالآية أيضًا — وكانت كذلك في المصحف والتلاوة — مع مفتاح لها في الإعدادات ← القرآن.\n• ألوان النظام تعمل الآن مع اختيار الفاتح أو الداكن، لا مع «النظام» فقط.\n• بطاقة الختمة تقول «أيام القراءة المتبقية»، وكم صفحة تأخرت.',
+      sv: '• Att radera en khatmah tar inte tillbaka den längre. På en parkopplad enhet kom planen åter efter en synk eller två; en avslutad plan förblir nu borta överallt.\n• Skärmen förblir tänd även i vers-för-vers-läsaren — det gjorde den redan i mushafen och Tilawah — med en knapp för det i Inställningar → Koranen.\n• Systemfärger (Material You) fungerar nu med Ljust eller Mörkt valt, inte bara System.\n• Khatmah-kortet säger "dagar kvar att läsa", och hur många sidor efter du ligger.',
+    },
+  },
+  {
     code: 274,
     version: '2.22.0',
     date: '2026-09-16',

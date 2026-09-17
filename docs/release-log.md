@@ -855,3 +855,15 @@ which outranks every scope there is — the error did not move, on the same
 the podspecs (hermes-engine's prebuilt macOS framework declares 10.15 in
 its own Info.plist), which makes it an upstream React Native problem. The
 fast way back to a shipping Mac is Xcode 26 and `DEVELOPER_DIR`.
+
+## 2.23.0 (275) — 2026-09-17
+
+Ran clean on the first attempt.
+
+Changed the release cycle itself:
+
+  - `docs/DISTRIBUTION.md`
+  - `scripts/build-catalyst.sh`
+  - `scripts/release.sh`
+
+**Lesson:** _(unfilled)_
