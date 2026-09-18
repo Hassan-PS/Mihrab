@@ -893,3 +893,11 @@ Generalised: an error that says a command failed, without saying what it
 left behind, is an error that costs more than the failure. Every
 irreversible step in this script should be able to describe its own
 wreckage.
+
+## 2.24.0 (276) — 2026-09-18
+
+Took 1 aborted attempt(s) before it ran clean:
+
+  - 1 origin/main has commits main does not — pull first
+
+**Lesson:** _(unfilled)_

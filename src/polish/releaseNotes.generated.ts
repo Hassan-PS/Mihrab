@@ -19,6 +19,16 @@ export type ReleaseNote = {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    code: 276,
+    version: '2.24.0',
+    date: '2026-09-18',
+    notes: {
+      en: '• A bookmark can follow your reading, so it stays where you stopped — or stay pinned to its ayah. Each bookmark has its own switch.\n• Khatmah progress is the pages you actually read. Mark a page read or unread beside the surah name; pages you skipped are counted and can be gone back to.\n• A dot beside the surah name says which of your places is recording.\n• New: start the day at sunset, so an evening\'s reading counts towards the day that has begun (Settings → Quran).',
+      ar: '• يمكن للعلامة أن تتبع قراءتك فتبقى حيث توقفت — أو تثبت على آيتها. لكل علامة مفتاحها.\n• تقدّم الختمة صار الصفحات التي قرأتها فعلًا. علّم الصفحة مقروءة أو غير مقروءة بجانب اسم السورة؛ والصفحات التي تخطّيتها تُحصى ويمكن العودة إليها.\n• نقطة بجانب اسم السورة تبيّن أيّ مواضعك يسجّل الآن.\n• جديد: ابدأ اليوم من المغرب، فتُحسب قراءة المساء لليوم الذي بدأ للتو (الإعدادات ← القرآن).',
+      sv: '• Ett bokmärke kan följa din läsning, så det ligger där du slutade — eller stanna på sin vers. Varje bokmärke har sin egen knapp.\n• Khatmah-framsteget är de sidor du faktiskt läst. Markera en sida som läst eller oläst intill surans namn; överhoppade sidor räknas och går att återvända till.\n• En prick intill surans namn visar vilken av dina platser som spelar in.\n• Nytt: låt dygnet börja vid solnedgången, så att en kvälls läsning räknas till dygnet som just börjat (Inställningar → Koranen).',
+    },
+  },
+  {
     code: 275,
     version: '2.23.0',
     date: '2026-09-17',
