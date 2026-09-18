@@ -69,6 +69,13 @@ export type MushafTextPageSurfaceProps = {
    * already owns, which is the same reason it owns the palette at all.
    */
   bookmarks?: readonly QuranBookmark[];
+  /**
+   * The one following bookmark whose ayah is drawn (#54) — the anchor of
+   * the open visit. A following bookmark moves with the reading, so
+   * `ayahTint` draws none of them unless it is this one; without this
+   * prop reaching it, a freshly placed anchor is never washed at all.
+   */
+  anchorBookmarkId?: string | null;
   /** The reading marker — where "Continue reading" leads (#41). */
   readingPosition?: AyahRefLike | null;
   khatmahPosition?: AyahRefLike | null;
@@ -269,6 +276,7 @@ function GlyphPageSurface({
   selected,
   playing,
   bookmarks,
+  anchorBookmarkId,
   readingPosition,
   khatmahPosition,
   khatmahTarget,
@@ -308,6 +316,7 @@ function GlyphPageSurface({
         selected,
         playing,
         bookmarks,
+        anchorBookmarkId,
         readingPosition,
         khatmahPosition,
         khatmahTarget,
@@ -318,6 +327,7 @@ function GlyphPageSurface({
       selected,
       playing,
       bookmarks,
+      anchorBookmarkId,
       readingPosition,
       khatmahPosition,
       khatmahTarget,
@@ -420,6 +430,7 @@ function UnicodePageSurface({
   selected,
   playing,
   bookmarks,
+  anchorBookmarkId,
   readingPosition,
   khatmahPosition,
   khatmahTarget,
@@ -446,6 +457,7 @@ function UnicodePageSurface({
         selected,
         playing,
         bookmarks,
+        anchorBookmarkId,
         readingPosition,
         khatmahPosition,
         khatmahTarget,
@@ -456,6 +468,7 @@ function UnicodePageSurface({
       selected,
       playing,
       bookmarks,
+      anchorBookmarkId,
       readingPosition,
       khatmahPosition,
       khatmahTarget,

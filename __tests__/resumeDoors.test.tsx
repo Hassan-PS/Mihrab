@@ -77,6 +77,7 @@ const khatmah: NonNullable<QuranCardState['khatmah']> = {
   daysToGo: 23,
   progress: 0.2,
   target: { page: 142, surah: 6, ayah: 111 },
+  gap: null,
 };
 
 const reading = {
@@ -137,6 +138,88 @@ describe('the doors', () => {
     expect(texts(tree.root).some(s => s.includes('23 days to go'))).toBe(true);
     act(() => buttons(tree.root)[0].props.onPress());
     expect(onOpenKhatmah).toHaveBeenCalled();
+  });
+
+  it('says nothing about unread pages when there are none', () => {
+    const shown = texts(render({ khatmah, reading: null }).tree.root);
+    expect(shown.some(s => /unread/i.test(s))).toBe(false);
+    expect(buttons(render({ khatmah, reading: null }).tree.root)).toHaveLength(1);
+  });
+
+  it('names the pages left behind, and offers to go there', () => {
+    // A khatmah no longer stalls on a hole, so the hole has to say it is
+    // there — and saying it without a way back is a chore, not an offer.
+    const gap = {
+      target: { page: 11, surah: 2, ayah: 44 },
+      pages: 4,
+      day: 1,
+      oneDay: true,
+      onlyLeft: false,
+    };
+    const { tree, onOpenKhatmah } = render({
+      khatmah: { ...khatmah, gap },
+      reading: null,
+    });
+    const shown = texts(tree.root);
+    expect(shown).toContain('4 pages unread on day 1');
+    expect(shown).toContain('Go');
+    // Two targets, so two buttons: the door continues the plan, the row
+    // goes back for the hole. One tap target could not mean both.
+    const controls = buttons(tree.root);
+    expect(controls).toHaveLength(2);
+    act(() => controls[0].props.onPress());
+    expect(onOpenKhatmah).toHaveBeenLastCalledWith(khatmah.target);
+    act(() => controls[1].props.onPress());
+    expect(onOpenKhatmah).toHaveBeenLastCalledWith(gap.target);
+  });
+
+  it('drops the day when the unread pages straddle more than one', () => {
+    // Two stretches, days apart: naming one of them would be telling the
+    // reader the wrong place to look.
+    const shown = texts(
+      render({
+        khatmah: {
+          ...khatmah,
+          gap: {
+            target: { page: 11, surah: 2, ayah: 44 },
+            pages: 7,
+            day: 1,
+            oneDay: false,
+            onlyLeft: false,
+          },
+        },
+        reading: null,
+      }).tree.root,
+    );
+    expect(shown).toContain('7 pages unread behind you');
+    expect(shown.some(s => /day/i.test(s) && /unread/i.test(s))).toBe(false);
+  });
+
+  it('becomes the way back when the holes are all that is left', () => {
+    // Nothing ahead and a live plan: "Today's reading done · 53 days to
+    // go" would be three true-sounding things about a book that is read
+    // but for two pages.
+    const gap = {
+      target: { page: 11, surah: 2, ayah: 44 },
+      pages: 2,
+      day: 1,
+      oneDay: true,
+      onlyLeft: true,
+    };
+    const { tree, onOpenKhatmah } = render({
+      khatmah: { ...khatmah, done: true, pagesLeftToday: 0, gap },
+      reading: null,
+    });
+    const shown = texts(tree.root);
+    expect(shown).toContain('Finish the pages you skipped');
+    expect(shown).toContain('2 pages unread on day 1');
+    expect(shown).not.toContain("Today's reading done");
+    // One control, not two saying the same thing — and it leads there.
+    const controls = buttons(tree.root);
+    expect(controls).toHaveLength(1);
+    expect(shown).not.toContain('Go');
+    act(() => controls[0].props.onPress());
+    expect(onOpenKhatmah).toHaveBeenLastCalledWith(khatmah.target);
   });
 
   it('sets the reference in its own text, so the name shrinks and the number never does', () => {

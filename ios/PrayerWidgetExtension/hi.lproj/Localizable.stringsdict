@@ -83,6 +83,22 @@
 			<string>पटरी पर · %d पृष्ठ बाक़ी</string>
 		</dict>
 	</dict>
+	<key>widget_reading_skipped</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%d पृष्ठ छूट गया</string>
+			<key>other</key>
+			<string>%d पृष्ठ छूट गए</string>
+		</dict>
+	</dict>
 	<key>widget_reading_behind</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

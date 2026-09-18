@@ -83,6 +83,10 @@
         <item quantity="one">Al día · %1$d página restante</item>
         <item quantity="other">Al día · %1$d páginas restantes</item>
     </plurals>
+    <plurals name="widget_reading_skipped">
+        <item quantity="one">%1$d página saltada antes</item>
+        <item quantity="other">%1$d páginas saltadas antes</item>
+    </plurals>
     <plurals name="widget_reading_behind">
         <item quantity="one">%1$d página atrasada</item>
         <item quantity="other">%1$d páginas atrasadas</item>

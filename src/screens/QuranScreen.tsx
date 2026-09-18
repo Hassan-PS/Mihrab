@@ -19,6 +19,7 @@ import {
   Modal,
   Pressable,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -49,7 +50,7 @@ import {
   activeKhatmah,
   finishKhatmahPortion,
   hydrateQuranState,
-  khatmahAyahsRead,
+  khatmahReachAyah,
   khatmahCurrentPortion,
   khatmahDay,
   khatmahBehindBy,
@@ -58,6 +59,7 @@ import {
   removeBookmark,
   resetKhatmahAll,
   resetKhatmahToday,
+  setBookmarkFollows,
   setQuranPrefs,
   startKhatmah,
   stepKhatmahBack,
@@ -301,11 +303,19 @@ export function QuranScreen() {
     };
   }, [votdMode, votdRef, i18n.language, quran.prefs.tafsirEditionId]);
 
-  const openSurah = (surahNumber: number, scrollToAyah?: number, page?: number) => {
+  const openSurah = (
+    surahNumber: number,
+    scrollToAyah?: number,
+    page?: number,
+    sessionBookmarkId?: string,
+    sessionKhatmah?: boolean,
+  ) => {
     navigation.navigate('QuranSurah', {
       surahNumber,
       scrollToAyah,
       initialPage: page,
+      sessionBookmarkId,
+      sessionKhatmah,
     });
   };
 
@@ -383,7 +393,9 @@ export function QuranScreen() {
    * widget the more honest of the two surfaces.
    */
   const behindPages = plan ? khatmahBehindBy(plan) : 0;
-  const readAyahs = plan ? khatmahAyahsRead(plan) : 0;
+  // The reach, like the rest of the card: the bar must not wind back to a
+  // hole the card is separately offering to send the reader to.
+  const readAyahs = plan ? khatmahReachAyah(plan) : 0;
 
   /**
    * Start the plan the sheet describes.
@@ -467,7 +479,11 @@ export function QuranScreen() {
             // place: the muṣḥaf takes the page and the translation reader
             // the ayah, and a marker pinned in one reader still lands in
             // the other after the mode has been switched.
-            onOpenKhatmah={target => openSurah(target.surah, target.ayah, target.page)}
+            // The khatmah's own door: this visit is the plan's, which is
+            // what puts the done-marks in the header — see `readingSession`.
+            onOpenKhatmah={target =>
+              openSurah(target.surah, target.ayah, target.page, undefined, true)
+            }
             onOpenReading={marker => openSurah(marker.surah, marker.ayah, marker.page)}
             onOpenQuran={() => {}}
           />
@@ -1250,7 +1266,12 @@ export function QuranScreen() {
           key={b.id}
           accessibilityRole="button"
           accessibilityLabel={`${findSurah(b.surah)?.romanized ?? ''} ${b.surah}:${b.ayah}`}
-          onPress={() => openSurah(b.surah, b.ayah, b.page)}
+          // A bookmark opened from here OWNS the visit, following or
+          // not: a bookmark IS a kept place, so the marker has nothing
+          // to add and everything to lose by trailing this reading —
+          // see `recordReading`. Following decides whether the bookmark
+          // itself walks along, not whose visit this is.
+          onPress={() => openSurah(b.surah, b.ayah, b.page, b.id)}
           style={[
             styles.row,
             { backgroundColor: palette.card, ...cardEdgeStyle(palette) },
@@ -1267,7 +1288,32 @@ export function QuranScreen() {
             </Text>
             <Text style={[styles.english, { color: palette.muted }]}>
               {t('quran.pageLabel', { page: b.page })}
+              {` · ${
+                b.follows
+                  ? t('quran.followingOn', 'moves as you read')
+                  : t('quran.followingOff', 'stays on this ayah')
+              }`}
             </Text>
+          </View>
+          {/* Fixed pin or a place that keeps itself — per bookmark, where
+              the bookmark is, not in a settings page nobody would look in
+              for it. The switch owns its own touches; the row still opens.
+
+              A bare switch in a row says nothing about WHICH of the row's
+              properties it holds, and the off state said nothing at all.
+              So it is named above the track, and the line under the surah
+              name reads the state out in words either way. */}
+          <View style={styles.followControl}>
+            <Text style={[styles.followLabel, { color: palette.muted }]}>
+              {t('quran.followToggle', 'Follow')}
+            </Text>
+            <Switch
+              accessibilityLabel={t('quran.bookmarkFollows', 'Follows your reading')}
+              value={!!b.follows}
+              onValueChange={next => setBookmarkFollows(b.id, next)}
+              trackColor={{ true: palette.accentSolid }}
+              style={styles.followSwitch}
+            />
           </View>
           <Pressable
             accessibilityRole="button"
@@ -1881,6 +1927,14 @@ const styles = StyleSheet.create({
   },
   bookmarkDot: { width: 14, height: 14, borderRadius: RADIUS.sm },
   deleteBtn: { paddingHorizontal: SPACING.sm, paddingVertical: SPACING.sm },
+  followSwitch: { marginStart: SPACING.xs },
+  followControl: { alignItems: 'center' },
+  followLabel: {
+    fontSize: TYPE.caption.fontSize,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+    marginBottom: 1,
+  },
   deleteGlyph: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
   khatmahActions: { flexDirection: 'row', gap: SPACING.sm, marginTop: SPACING.xs },
   khatmahBtn: {

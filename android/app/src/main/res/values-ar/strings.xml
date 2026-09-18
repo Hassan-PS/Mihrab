@@ -101,6 +101,10 @@
         <item quantity="many">ضمن الخطة · %1$d صفحةً متبقية</item>
         <item quantity="other">ضمن الخطة · %1$d صفحة متبقية</item>
     </plurals>
+    <plurals name="widget_reading_skipped">
+        <item quantity="one">تخطّيت %1$d صفحة سابقًا</item>
+        <item quantity="other">تخطّيت %1$d صفحة سابقًا</item>
+    </plurals>
     <plurals name="widget_reading_behind">
         <item quantity="zero">متأخر %1$d صفحة</item>
         <item quantity="one">متأخر %1$d صفحة</item>

@@ -149,9 +149,11 @@ describe('the Android reading widget', () => {
     // the disc beside the surah name makes a sound. Pinned as the two URL
     // templates rather than by slicing the file between functions — the
     // prose around these explains the param, and prose is not behaviour.
-    expect(kotlin).toContain('Uri.parse("mihrab://read/$surah?$position")');
+    // `sessionParam` is the khatmah's door telling the reader whose
+    // visit this is; it says nothing about sound.
+    expect(kotlin).toContain('"mihrab://read/$surah?$position${sessionParam(r)}"');
     expect(kotlin).toContain(
-      'Uri.parse("mihrab://read/$surah?$position&playFromAyah=$ayah")',
+      '"mihrab://read/$surah?$position&playFromAyah=$ayah${sessionParam(r)}"',
     );
     // One sender, so the card's tap cannot have quietly grown one.
     expect(kotlin.match(/playFromAyah=\$ayah/g)).toHaveLength(1);
@@ -190,10 +192,10 @@ describe('the iOS reading widget', () => {
 
   it('leaves its own tap silent', () => {
     expect(swift).toContain(
-      'return URL(string: "mihrab://read/\\(r.surah)?\\(position)")',
+      'URL(string: "mihrab://read/\\(r.surah)?\\(position)\\(sessionParam(r))")',
     );
     expect(swift).toContain(
-      'return URL(string: "mihrab://read/\\(r.surah)?\\(position)&playFromAyah=\\(r.ayah)")',
+      'URL(string: "mihrab://read/\\(r.surah)?\\(position)&playFromAyah=\\(r.ayah)\\(sessionParam(r))")',
     );
     expect(swift.match(/playFromAyah=/g)).toHaveLength(1);
   });

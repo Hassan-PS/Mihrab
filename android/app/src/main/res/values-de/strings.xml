@@ -83,6 +83,10 @@
         <item quantity="one">Im Plan · %1$d Seite übrig</item>
         <item quantity="other">Im Plan · %1$d Seiten übrig</item>
     </plurals>
+    <plurals name="widget_reading_skipped">
+        <item quantity="one">%1$d Seite übersprungen</item>
+        <item quantity="other">%1$d Seiten übersprungen</item>
+    </plurals>
     <plurals name="widget_reading_behind">
         <item quantity="one">%1$d Seite im Rückstand</item>
         <item quantity="other">%1$d Seiten im Rückstand</item>

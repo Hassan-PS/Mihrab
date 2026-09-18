@@ -103,6 +103,22 @@
 			<string>По графику · осталось %d страницы</string>
 		</dict>
 	</dict>
+	<key>widget_reading_skipped</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%d стр. пропущена</string>
+			<key>other</key>
+			<string>%d стр. пропущено</string>
+		</dict>
+	</dict>
 	<key>widget_reading_behind</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

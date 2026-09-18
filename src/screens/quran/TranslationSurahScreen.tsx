@@ -47,6 +47,7 @@ import {
   useCompanionChoice,
 } from '../../quran/CompanionTextControls';
 import { useKeepAwake } from '../../quran/keepAwakeLock';
+import { SessionDot, useSessionColor } from '../../quran/SessionDot';
 import {
   useOverlayDismissGuard,
   useSettledMeasure,
@@ -111,6 +112,9 @@ export function TranslationSurahScreen({
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const quran = useQuranState();
+  // Whose visit this is, in that trail's own ink — the khatmah excluded
+  // here, because it is not credited from this reader (see `SessionDot`).
+  const sessionColor = useSessionColor('translation');
   // The screen stays lit here for the same reason it does in the muṣḥaf
   // reader and Tilāwah, and it is this screen people most often read
   // ALONG WITH the recitation — following the verses while the audio
@@ -118,7 +122,7 @@ export function TranslationSurahScreen({
   // It went to the other two and not this one, which read as the setting
   // simply not working. One counted lock, three holders; see
   // keepAwakeLock.ts on why the count matters when two are mounted.
-  useKeepAwake(quran.prefs.keepAwake);
+  useKeepAwake(quran.prefs.readerKeepAwake);
   const playback = usePlaybackStatus();
   // Header closures read playback via a ref so the nav header doesn't
   // rebuild on every ayah change.
@@ -231,6 +235,40 @@ export function TranslationSurahScreen({
       } as any,
       // The NAME follows the app language.
       title: surahName(surah),
+      /**
+       * A PULSING DOT BESIDE THE NAME while something is keeping this
+       * reading — the same signal the muṣḥaf's header carries, in the
+       * same colours (#54).
+       *
+       * This is the reader people use WITH the recitation playing, so it
+       * is the one where nothing gets touched for twenty minutes and the
+       * one where "is this being recorded" is least answerable from the
+       * screen. `useSessionColor('translation')` leaves the khatmah out:
+       * a plan is credited from muṣḥaf page turns and nowhere else, so a
+       * cyan dot here would claim a recording that is not happening.
+       *
+       * Only set when there IS a colour, so a plain reading keeps the
+       * platform's own title exactly as it was.
+       */
+      ...(sessionColor
+        ? {
+            headerTitle: () => (
+              <View style={styles.headerTitleRow}>
+                <SessionDot color={sessionColor} size={8} />
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    color: String(palette.text),
+                    fontSize: TYPE.headline.fontSize,
+                    fontWeight: '600',
+                    writingDirection: isArabic ? 'rtl' : 'ltr',
+                  }}>
+                  {surahName(surah)}
+                </Text>
+              </View>
+            ),
+          }
+        : {}),
       /**
        * THE SIZE CONTROL LIVES IN THE BAR, NOT IN THE SURAH'S HEADER.
        *
@@ -352,6 +390,7 @@ export function TranslationSurahScreen({
     surah,
     surahNumber,
     isArabic,
+    sessionColor,
     palette.accentSolid,
     palette.bg,
     palette.text,
@@ -971,6 +1010,7 @@ const headerSide = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
+  headerTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   scroll: { padding: SPACING.lg, gap: SPACING.md },
   header: {
     padding: SPACING.xl,

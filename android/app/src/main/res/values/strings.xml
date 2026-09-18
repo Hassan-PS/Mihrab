@@ -94,6 +94,10 @@
         <item quantity="one">On track · %1$d page left</item>
         <item quantity="other">On track · %1$d pages left</item>
     </plurals>
+    <plurals name="widget_reading_skipped">
+        <item quantity="one">%1$d page skipped earlier</item>
+        <item quantity="other">%1$d pages skipped earlier</item>
+    </plurals>
     <plurals name="widget_reading_behind">
         <item quantity="one">%1$d page behind</item>
         <item quantity="other">%1$d pages behind</item>

@@ -93,6 +93,10 @@
         <item quantity="many">По графику · осталось %1$d страниц</item>
         <item quantity="other">По графику · осталось %1$d страницы</item>
     </plurals>
+    <plurals name="widget_reading_skipped">
+        <item quantity="one">%1$d стр. пропущена</item>
+        <item quantity="other">%1$d стр. пропущено</item>
+    </plurals>
     <plurals name="widget_reading_behind">
         <item quantity="one">Отставание на %1$d страницу</item>
         <item quantity="few">Отставание на %1$d страницы</item>

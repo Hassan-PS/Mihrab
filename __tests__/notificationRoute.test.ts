@@ -85,18 +85,39 @@ describe('the khatmah reminder opens where the plan is NOW', () => {
     const url = await notificationRoute({
       data: { route: ROUTE_KHATMAH },
     } as never);
-    expect(url).toBe('mihrab://read/3?scrollToAyah=7');
+    expect(url).toBe('mihrab://read/3?scrollToAyah=7&sessionKhatmah=1');
     mockTarget = { page: 100, surah: 5, ayah: 1 };
     expect(
       await notificationRoute({ data: { route: ROUTE_KHATMAH } } as never),
-    ).toBe('mihrab://read/5?scrollToAyah=1');
+    ).toBe('mihrab://read/5?scrollToAyah=1&sessionKhatmah=1');
   });
 
   it('sends a muṣḥaf reader to the page instead', async () => {
     mockLastReadMode = 'mushaf';
     expect(
       await notificationRoute({ data: { route: ROUTE_KHATMAH } } as never),
-    ).toBe('mihrab://read/3?initialPage=42');
+    ).toBe('mihrab://read/3?initialPage=42&sessionKhatmah=1');
+  });
+
+  it('and says the visit is the plan’s, as the home card does', async () => {
+    // Same offer, same behaviour: the reader draws the plan's done-marks
+    // and leaves the reading marker alone. Without this the reminder
+    // landed on the very page the card lands on and behaved differently.
+    for (const mode of ['mushaf', 'withTranslation']) {
+      mockLastReadMode = mode;
+      const url = await notificationRoute({
+        data: { route: ROUTE_KHATMAH },
+      } as never);
+      expect(url).toContain('sessionKhatmah=1');
+    }
+  });
+
+  it('and the fallback carries nothing — there is no plan to own a visit', async () => {
+    mockActive = null;
+    const url = await notificationRoute({
+      data: { route: ROUTE_KHATMAH },
+    } as never);
+    expect(url).not.toContain('sessionKhatmah');
   });
 
   it('never carries both a page and an ayah', async () => {

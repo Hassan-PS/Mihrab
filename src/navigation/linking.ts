@@ -28,6 +28,11 @@ import type { RootStackParamList } from './types';
 
 export const MIHRAB_SCHEME = 'mihrab://';
 
+/** A link's boolean: present and `1` is true, anything else is not. */
+function flag(value: string): boolean {
+  return value === '1';
+}
+
 /** Only a positive integer is a surah, a page or an ayah. */
 function positiveInt(value: string): number | undefined {
   const n = Number(value);
@@ -111,6 +116,13 @@ export const linking: LinkingOptions<RootStackParamList> = {
        * sent alongside whichever of the two positions the reader needs
        * (issue #25). A link without it opens silently, as every link did
        * before it existed.
+       *
+       * `sessionKhatmah=1` says the link IS the khatmah's door — the
+       * widget's reading card and the khatmah reminder both offer the
+       * plan's own page, and the reader has to know that to draw the
+       * plan's done-marks and to keep the reading marker out of it (see
+       * `quran/readingSession`). Without it those two doors would land on
+       * the same page as the home card and behave differently.
        */
       QuranSurah: {
         path: 'read/:surahNumber',
@@ -119,6 +131,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
           initialPage: positiveInt as (v: string) => number,
           scrollToAyah: positiveInt as (v: string) => number,
           playFromAyah: positiveInt as (v: string) => number,
+          sessionKhatmah: flag as (v: string) => boolean,
         },
       },
       /**

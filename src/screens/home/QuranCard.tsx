@@ -31,7 +31,13 @@ import { HOME_TABLE_RADIUS } from './tokens';
 
 type Props = {
   /** Open the reader at a place — surah, and the page or the ayah. */
-  onOpenAt: (surah: number, page?: number, ayah?: number) => void;
+  onOpenAt: (
+    surah: number,
+    page?: number,
+    ayah?: number,
+    /** This visit is the khatmah's — see `quran/readingSession`. */
+    khatmah?: boolean,
+  ) => void;
   /** Opens the Quran home (surah list, khatmah controls). */
   onOpenQuran: () => void;
 };
@@ -57,7 +63,8 @@ function QuranCardImpl({ onOpenAt, onOpenQuran }: Props) {
   // The khatmah is a muṣḥaf page: the reader lands on it whichever reader
   // they are in, and the translation reader takes the page's first ayah.
   const openKhatmah = useCallback(
-    (target: KhatmahTarget) => onOpenAt(target.surah, target.page, target.ayah),
+    (target: KhatmahTarget) =>
+      onOpenAt(target.surah, target.page, target.ayah, true),
     [onOpenAt],
   );
   // The marker is an ayah with the page it sits on; the route carries

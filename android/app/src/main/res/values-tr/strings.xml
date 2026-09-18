@@ -78,6 +78,10 @@
         <item quantity="one">Plana uygun · %1$d sayfa kaldı</item>
         <item quantity="other">Plana uygun · %1$d sayfa kaldı</item>
     </plurals>
+    <plurals name="widget_reading_skipped">
+        <item quantity="one">%1$d sayfa atlandı</item>
+        <item quantity="other">%1$d sayfa atlandı</item>
+    </plurals>
     <plurals name="widget_reading_behind">
         <item quantity="one">%1$d sayfa geride</item>
         <item quantity="other">%1$d sayfa geride</item>

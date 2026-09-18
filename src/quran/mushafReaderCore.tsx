@@ -25,6 +25,8 @@ import {
 import { useNavigation, usePreventRemove } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useKeepAwake } from './keepAwakeLock';
+import { SessionDot, useAnchorBookmarkId, useSessionColor } from './SessionDot';
+import { PageProgressMark, usePageProgress } from './PageProgressMark';
 import { useKeyboardInset } from '../hooks/useKeyboardInset';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { usePagePalette } from './useScrubberChrome';
@@ -32,6 +34,7 @@ import {
   easternNumerals,
   findPageForAyah,
   firstAyahOfPage,
+  pageMetaIn,
   pagesForRiwayah,
   surahsForRiwayah,
   totalPagesForRiwayah,
@@ -41,6 +44,7 @@ import type { KhatmahPages } from './quranState';
 import {
   KHATMAH_COLOR,
   activeKhatmah,
+  moveSessionToPage,
   drawnReadingPosition,
   khatmahCurrentPortion,
   khatmahMarkerAyah,
@@ -90,6 +94,12 @@ export type MushafReaderProps = {
   audioSheetSignal?: number;
   onTitleChange?: (title: string) => void;
   /**
+   * The page now on screen. The screen outside draws the khatmah's
+   * done-mark beside the surah name, and out of fullscreen that name
+   * lives in the nav header, which knows nothing about pages.
+   */
+  onPageChange?: (page: number) => void;
+  /**
    * Where the reader on screen publishes its own page turn.
    *
    * The keyboard is bound ONCE, in `MushafReader` — the gate in front of
@@ -120,7 +130,7 @@ export function pageStartAyah(
   page: number,
   riwayah: RiwayahId = DEFAULT_RIWAYAH,
 ): { surah: number; ayah: number } {
-  const meta = pagesForRiwayah(riwayah).find(p => p.page === page);
+  const meta = pageMetaIn(page, riwayah);
   return meta ? { ...meta.start } : { surah: 1, ayah: 1 };
 }
 
@@ -257,9 +267,14 @@ export function useMushafReaderCore({
   initialPage,
   audioSheetSignal,
   onTitleChange,
+  onPageChange,
 }: Pick<
   MushafReaderProps,
-  'surahNumber' | 'initialPage' | 'audioSheetSignal' | 'onTitleChange'
+  | 'surahNumber'
+  | 'initialPage'
+  | 'audioSheetSignal'
+  | 'onTitleChange'
+  | 'onPageChange'
 >): MushafReaderCore {
   const quran = useQuranState();
   const playback = usePlaybackStatus();
@@ -339,10 +354,13 @@ export function useMushafReaderCore({
     });
   }, [hydrated, tone]);
 
-  // ── Keep the screen awake while reading (QR-13) ─────────────────────
+  // ── Keep the screen awake while reading (QR-13, #52) ────────────────
   // Through the counted lock: Tilāwah holds it too, and is still on screen
-  // underneath when this reader pops — see keepAwakeLock.ts.
-  useKeepAwake(quran.prefs.keepAwake);
+  // underneath when this reader pops — see keepAwakeLock.ts. The READING
+  // preference, not Tilāwah's coffee cup: one flag under two controls
+  // meant a cup switched off for a session of listening left the muṣḥaf
+  // to go dark days later.
+  useKeepAwake(quran.prefs.readerKeepAwake);
 
   // ── Header title follows the visible page's starting surah ──────────
   // …and the app language: an Arabic UI gets الفاتحة, not "Al-Fatihah".
@@ -361,6 +379,10 @@ export function useMushafReaderCore({
     );
     if (surah) onTitleChange(mushafSurahName(surah, language));
   }, [currentPage, onTitleChange, language, riwayah]);
+
+  useEffect(() => {
+    onPageChange?.(currentPage);
+  }, [currentPage, onPageChange]);
 
   // ── Last-read + khatmah on page turns (QR-10/21) ────────────────────
   const commitPageTurn = useCallback(
@@ -521,9 +543,13 @@ export function useMushafReaderCore({
       const clamped = Math.max(1, Math.min(totalPages, page));
       setCurrentPage(clamped);
       commitPageTurn(clamped, clamped); // record position; not a sequential turn
+      // A scrub inside a following session is a destination chosen on
+      // purpose, so that bookmark goes with it and is drawn there — see
+      // `moveSessionToPage`. Without one, a jump still records nothing.
+      moveSessionToPage(clamped, riwayah);
       setJumpVisible(false);
     },
-    [commitPageTurn, totalPages],
+    [commitPageTurn, totalPages, riwayah],
   );
   const peekPage = useCallback(
     (page: number) => {
@@ -556,9 +582,14 @@ export function useMushafReaderCore({
   // above.
   const reading = drawnReadingPosition(quran);
   const readingKey = reading ? `${reading.surah}:${reading.ayah}` : '';
+  // The one following bookmark drawn on the page, if any — it stops being
+  // drawn as soon as reading carries it along. Cheap to key on: it changes
+  // once when the visit opens and once on the first turn, not per page.
+  const anchorBookmarkId = useAnchorBookmarkId();
   const marks = useMemo<AyahMarkProps>(
     () => ({
       bookmarks: quran.bookmarks,
+      anchorBookmarkId,
       readingPosition: readingKey
         ? { surah: Number(readingKey.split(':')[0]), ayah: Number(readingKey.split(':')[1]) }
         : null,
@@ -567,7 +598,7 @@ export function useMushafReaderCore({
       // null once the book is read — there is nothing left to aim at.
       khatmahTarget: plan ? khatmahMarkerAyah(plan) : null,
     }),
-    [quran.bookmarks, plan, readingKey],
+    [quran.bookmarks, plan, readingKey, anchorBookmarkId],
   );
 
   /**
@@ -699,8 +730,9 @@ export function MushafPageHeader({
   labelMaxWidth?: number;
 }) {
   const { t } = useTranslation();
-  const pages = pagesForRiwayah(riwayah);
-  const meta = pages.find(p => p.page === page) ?? pages[0];
+  const sessionColor = useSessionColor();
+  const pageProgress = usePageProgress(page, riwayah);
+  const meta = pageMetaIn(page, riwayah) ?? pagesForRiwayah(riwayah)[0];
   // The pill cycles the CHOICE (auto included), whatever `tone` is drawn.
   const nextChoice = nextMushafTone(mushafToneChoice(useQuranState().prefs));
   return (
@@ -710,6 +742,26 @@ export function MushafPageHeader({
         show === 'label' && labelSide !== 'start' && styles.pageHeaderLabelEnd,
       ]}>
       {show !== 'pill' ? (
+        <View
+          style={[
+            styles.pageHeaderLabelRow,
+            // The marks go on the INNER side of the name — the side facing
+            // the middle of the window. The row hugs whichever edge the
+            // camera left free, and a rounded corner eats the last few dp
+            // of that edge: a 7dp dot out there is half a dot. Reversing
+            // the row when the name hugs the start puts the marks between
+            // the name and the screen's middle in both arrangements.
+            labelSide === 'start' && styles.pageHeaderLabelRowFlip,
+          ]}>
+          {/* Fullscreen hides the nav bar, so this is the only surah name
+              on screen — the session's dot belongs beside it here for the
+              same reason it sits beside the one up there. */}
+          {isFullscreen && sessionColor ? (
+            <SessionDot color={sessionColor} size={7} />
+          ) : null}
+          {isFullscreen && pageProgress ? (
+            <PageProgressMark state={pageProgress} page={page} riwayah={riwayah} size={8} />
+          ) : null}
         <Text
           numberOfLines={1}
           style={[
@@ -735,6 +787,7 @@ export function MushafPageHeader({
                 juz: easternNumerals(meta.juz),
               })}
         </Text>
+        </View>
       ) : null}
       {show !== 'label' ? (
         // The pill names the tone a tap goes TO — paper → sepia → night →
@@ -1011,6 +1064,15 @@ const styles = StyleSheet.create({
   // spread's outer right corner.
   pageHeaderLabelEnd: { justifyContent: 'flex-end' },
   pageHeaderTextIsland: { maxWidth: '38%' },
+  pageHeaderLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    flexShrink: 1,
+  },
+  // Physical, not logical: the reader's pager is pinned `direction: 'ltr'`
+  // (see `listWrap`), which is what lets `labelSide` mean left and right.
+  pageHeaderLabelRowFlip: { flexDirection: 'row-reverse' },
   pageHeaderText: {
     fontSize: TYPE.footnote.fontSize,
     fontWeight: '600',

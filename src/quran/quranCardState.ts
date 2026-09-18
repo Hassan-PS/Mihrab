@@ -31,11 +31,16 @@
  * asks: the states belong somewhere testable, and two screens draw them.
  */
 import { khatmahContinueTarget, type KhatmahTarget } from './khatmahTarget';
+import { countRanges } from './khatmahDone';
+import { firstAyahOfPage } from './pages';
+import { type RiwayahId } from './riwayat';
 import {
   KHATMAH_TOTAL_AYAHS,
-  khatmahAyahsRead,
   khatmahDay,
   khatmahDaysLeft,
+  khatmahDone,
+  khatmahGap,
+  khatmahOnlyGapsLeft,
   khatmahPages,
   isLivePlan,
   readingContinueTarget,
@@ -57,12 +62,53 @@ export type QuranCardKhatmah = {
   progress: number;
   /** Where "Continue khatmah" leads. */
   target: KhatmahTarget;
+  /**
+   * A stretch behind the reader that was never read, if there is one, and
+   * where to go for it. Null is the ordinary case.
+   *
+   * It exists because the plan no longer stalls on one: reading on is
+   * credited and the hole stays open, so something has to say the hole is
+   * there — otherwise a khatmah could be "finished" with pages in it the
+   * reader knows they skipped. See `khatmahGap`.
+   */
+  gap: KhatmahGap | null;
+};
+
+export type KhatmahGap = {
+  /** The nearest unread page — what a tap opens. */
+  target: KhatmahTarget;
+  /** Every unread page behind the reader, not just this stretch's. */
+  pages: number;
+  /** The day the nearest one belongs to. */
+  day: number;
+  /** All of them fall in that day, so naming it is honest. */
+  oneDay: boolean;
+  /**
+   * There is nothing left AHEAD — these holes are the whole of the
+   * reading that remains. The door becomes the way back to them, and the
+   * row inside it would be saying the same thing twice.
+   */
+  onlyLeft: boolean;
 };
 
 export type QuranCardState = {
   khatmah: QuranCardKhatmah | null;
   reading: LastRead | null;
 };
+
+/** `khatmahGap` as something the card can open. */
+function gapDoor(plan: KhatmahPlan, riwayah: RiwayahId): KhatmahGap | null {
+  const gap = khatmahGap(plan, riwayah);
+  if (!gap) return null;
+  const start = firstAyahOfPage(gap.page, riwayah);
+  return {
+    target: { page: gap.page, surah: start.surah, ayah: start.ayah },
+    pages: gap.pages,
+    day: gap.day,
+    oneDay: gap.oneDay,
+    onlyLeft: khatmahOnlyGapsLeft(plan),
+  };
+}
 
 function localYmd(now: number): string {
   const d = new Date(now);
@@ -114,11 +160,15 @@ export function selectQuranCardState(
       done: day.done,
       pagesLeftToday: day.done ? 0 : Math.max(1, pages.leftToday),
       daysToGo: khatmahDaysLeft(plan, now),
+      // What was READ, not the contiguous run: one un-marked page early
+      // on would otherwise drag the bar back to that page and report a
+      // plan two thirds done as barely started.
       progress: Math.max(
         0,
-        Math.min(1, khatmahAyahsRead(plan) / KHATMAH_TOTAL_AYAHS),
+        Math.min(1, countRanges(khatmahDone(plan)) / KHATMAH_TOTAL_AYAHS),
       ),
       target: khatmahContinueTarget(plan, state.prefs.riwayah),
+      gap: gapDoor(plan, state.prefs.riwayah),
     };
   }
 

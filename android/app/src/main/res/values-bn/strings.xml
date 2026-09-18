@@ -81,6 +81,10 @@
         <item quantity="one">নির্ধারিত গতিতে · %1$d পৃষ্ঠা বাকি</item>
         <item quantity="other">নির্ধারিত গতিতে · %1$d পৃষ্ঠা বাকি</item>
     </plurals>
+    <plurals name="widget_reading_skipped">
+        <item quantity="one">আগে %1$d পৃষ্ঠা বাদ পড়েছে</item>
+        <item quantity="other">আগে %1$d পৃষ্ঠা বাদ পড়েছে</item>
+    </plurals>
     <plurals name="widget_reading_behind">
         <item quantity="one">%1$d পৃষ্ঠা পিছিয়ে</item>
         <item quantity="other">%1$d পৃষ্ঠা পিছিয়ে</item>

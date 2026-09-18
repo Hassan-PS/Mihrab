@@ -16,6 +16,7 @@
  * ran, and each platform edge case landed here as another one.
  */
 import { useCallback, useEffect, useRef } from 'react';
+import { beginReadingSession, endReadingSession } from '../quran/readingSession';
 import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import { StyleSheet, Text, View } from 'react-native';
@@ -43,7 +44,35 @@ export function QuranSurahScreen() {
   const { palette } = useAppPalette();
   const { settings, updateSettings } = usePrayerSettings();
   const route = useRoute<RouteProp<RootStackParamList, 'QuranSurah'>>();
-  const { surahNumber, initialPage, scrollToAyah, playFromAyah } = route.params;
+  const {
+    surahNumber,
+    initialPage,
+    scrollToAyah,
+    playFromAyah,
+    sessionBookmarkId,
+    sessionKhatmah,
+  } = route.params;
+
+  /**
+   * WHOSE VISIT THIS IS, for as long as it lasts.
+   *
+   * Set on arrival from what was opened — a following bookmark, the
+   * khatmah, or nothing — and forgotten the moment this screen goes, so
+   * a session
+   * can never outlive the reader it belongs to. Re-run when the param
+   * changes, because navigating to this route again with a different
+   * bookmark IS a new visit. See `quran/readingSession`.
+   */
+  useEffect(() => {
+    beginReadingSession(
+      sessionBookmarkId
+        ? { kind: 'bookmark', id: sessionBookmarkId }
+        : sessionKhatmah
+          ? { kind: 'khatmah' }
+          : null,
+    );
+    return () => endReadingSession();
+  }, [sessionBookmarkId, sessionKhatmah]);
 
   /**
    * BACK LEAVES FULLSCREEN BEFORE IT LEAVES THE READER.

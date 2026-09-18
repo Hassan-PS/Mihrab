@@ -44,6 +44,8 @@ import { findSurah } from './quran';
 import { surahName } from './surahName';
 import { READING_COLOR, type LastRead } from './quranState';
 import type { KhatmahTarget } from './khatmahTarget';
+import { PAGE_TO_READ } from './PageProgressMark';
+import type { KhatmahGap } from './quranCardState';
 import type { QuranCardKhatmah, QuranCardState } from './quranCardState';
 
 type Props = {
@@ -111,31 +113,116 @@ function Door({
   );
 }
 
+/**
+ * THE PAGES LEFT BEHIND, AND THE WAY BACK TO THEM.
+ *
+ * A khatmah no longer stalls on a hole — reading on is credited while
+ * unread pages sit behind the reader (`khatmahCreditWindow`). That is the
+ * right trade, but it means the plan can reach its last page with pages
+ * in it nobody read, so the hole has to say so, and saying "4 pages
+ * unread on day 1" without a way there is a chore rather than an offer.
+ *
+ * Its own pressable, INSIDE the door: the door continues the khatmah and
+ * this goes somewhere else, so one tap target could not mean both. Drawn
+ * only when there is a hole, which is the uncommon case.
+ */
+function GapRow({
+  gap,
+  label,
+  onPress,
+}: {
+  gap: KhatmahGap;
+  label: string;
+  onPress: () => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={
+        gap.oneDay
+          ? t('quran.khatmahGapOpen', {
+              defaultValue: 'Read the {{count}} pages left unread on day {{day}}',
+              count: gap.pages,
+              day: gap.day,
+            })
+          : t('quran.khatmahGapOpenMany', {
+              defaultValue: 'Read the {{count}} pages left unread behind you',
+              count: gap.pages,
+            })
+      }
+      hitSlop={6}
+      onPress={onPress}
+      style={styles.gapRow}>
+      <View style={[styles.gapDot, { borderColor: PAGE_TO_READ }]} />
+      <Text
+        style={[styles.gapLabel, { color: PAGE_TO_READ }]}
+        numberOfLines={1}>
+        {/* Holes come in sets, and a set can straddle days: the count is
+            every unread page behind the reader, and the day is named only
+            while they all belong to it. */}
+        {label}
+      </Text>
+      <Text style={[styles.gapGo, { color: PAGE_TO_READ }]}>
+        {t('quran.khatmahGapGo', 'Go')}
+      </Text>
+    </Pressable>
+  );
+}
+
 function KhatmahDoor({
   khatmah,
   divided,
   column,
   onPress,
+  onOpenGap,
 }: {
   khatmah: QuranCardKhatmah;
   divided?: boolean;
   column?: boolean;
   onPress: () => void;
+  onOpenGap: () => void;
 }) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
-  const title = khatmah.done
-    ? t('home.readingDone', "Today's reading done")
-    : t('quran.continueKhatmah', 'Continue khatmah');
-  const left = khatmah.done
-    ? t('home.khatmahDaysToGo', {
-        defaultValue: '{{count}} days to go',
-        count: khatmah.daysToGo,
-      })
-    : t('home.pagesLeftToday', {
-        defaultValue: '{{count}} pages left today',
-        count: khatmah.pagesLeftToday,
-      });
+  /**
+   * NOTHING AHEAD, HOLES BEHIND — the end of a khatmah read out of order.
+   *
+   * The plan is live (holes keep it from completing) and there is no
+   * forward page, so "Continue khatmah · Today's reading done · 53 days
+   * to go" would be three true-sounding things about a book that is read
+   * but for two pages. The door says what is actually left and leads
+   * there; the row inside it would be the same sentence twice.
+   */
+  const onlyGaps = khatmah.gap?.onlyLeft === true;
+  const gapText = khatmah.gap
+    ? khatmah.gap.oneDay
+      ? t('quran.khatmahGap', {
+          defaultValue: '{{count}} pages unread on day {{day}}',
+          count: khatmah.gap.pages,
+          day: khatmah.gap.day,
+        })
+      : t('quran.khatmahGapMany', {
+          defaultValue: '{{count}} pages unread behind you',
+          count: khatmah.gap.pages,
+        })
+    : '';
+  const title = onlyGaps
+    ? t('quran.khatmahFinishGaps', 'Finish the pages you skipped')
+    : khatmah.done
+      ? t('home.readingDone', "Today's reading done")
+      : t('quran.continueKhatmah', 'Continue khatmah');
+  const left = onlyGaps
+    ? gapText
+    : khatmah.done
+      ? t('home.khatmahDaysToGo', {
+          defaultValue: '{{count}} days to go',
+          count: khatmah.daysToGo,
+        })
+      : t('home.pagesLeftToday', {
+          defaultValue: '{{count}} pages left today',
+          count: khatmah.pagesLeftToday,
+        });
   return (
     <Door label={title} onPress={onPress} divided={divided} column={column}>
       {column ? null : <QuranBookIcon color={palette.accentSolid} size={20} />}
@@ -160,7 +247,7 @@ function KhatmahDoor({
           style={[styles.subtitle, { color: palette.muted }]}
           numberOfLines={1}
           maxFontSizeMultiplier={TABULAR_MAX_FONT_SCALE}>
-          {column
+          {column || onlyGaps
             ? left
             : `${t('home.khatmahDay', {
                 defaultValue: 'Khatmah day {{day}} of {{total}}',
@@ -169,6 +256,9 @@ function KhatmahDoor({
               })} · ${left}`}
         </Text>
         <ProgressBar value={khatmah.progress} color={palette.accentSolid} />
+        {khatmah.gap && !onlyGaps ? (
+          <GapRow gap={khatmah.gap} label={gapText} onPress={onOpenGap} />
+        ) : null}
       </View>
     </Door>
   );
@@ -281,6 +371,11 @@ function ResumeDoorsImpl({
           khatmah={khatmah}
           column={column}
           onPress={() => onOpenKhatmah(khatmah.target)}
+          // The same door, a different page: it is the plan's reading, so
+          // the visit is the plan's and the done-marks are drawn.
+          onOpenGap={() =>
+            khatmah.gap ? onOpenKhatmah(khatmah.gap.target) : undefined
+          }
         />
       ) : null}
       {reading ? (
@@ -327,4 +422,13 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.full,
   },
   chipLabel: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
+  gapRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    marginTop: SPACING.sm,
+  },
+  gapDot: { width: 8, height: 8, borderRadius: RADIUS.full, borderWidth: 1.5 },
+  gapLabel: { fontSize: TYPE.caption.fontSize, fontWeight: '600', flexShrink: 1 },
+  gapGo: { fontSize: TYPE.caption.fontSize, fontWeight: '700' },
 });

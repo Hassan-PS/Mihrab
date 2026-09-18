@@ -15,6 +15,7 @@ import {
   FlatList,
   Pressable,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   View,
@@ -30,9 +31,11 @@ import { DEFAULT_RIWAYAH, type RiwayahId } from './riwayat';
 import {
   KHATMAH_TOTAL_PAGES,
   khatmahPages,
+  setBookmarkFollows,
   useQuranState,
   type QuranBookmark,
 } from './quranState';
+import { claimReadingSession } from './readingSession';
 import { activeKhatmah } from './quranCardState';
 import { Chip } from '../components/controls';
 import { desktopSize } from '../responsive/desktop';
@@ -198,7 +201,15 @@ function MushafIndexSidebarImpl({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${item.surah}:${item.ayah}`}
-      onPress={() => onSelectPage(item.page)}
+      // This index is INSIDE the reader, so the visit is already open;
+      // tapping a bookmark hands it over rather than starting one — the
+      // page turns from here on are this bookmark's, and the marker
+      // stops taking them. Following or fixed: a bookmark keeps its own
+      // place either way, so the marker would only duplicate it.
+      onPress={() => {
+        claimReadingSession({ kind: 'bookmark', id: item.id });
+        onSelectPage(item.page);
+      }}
       style={styles.row}>
       <View style={styles.rowBody}>
         <Text style={[styles.rowTitle, { color: palette.text }]} numberOfLines={1}>
@@ -206,7 +217,25 @@ function MushafIndexSidebarImpl({
         </Text>
         <Text style={[styles.rowMeta, { color: palette.muted }]} numberOfLines={1}>
           {t('quran.pageLabel', { page: item.page })}
+          {` · ${
+            item.follows
+              ? t('quran.followingOn', 'moves as you read')
+              : t('quran.followingOff', 'stays on this ayah')
+          }`}
         </Text>
+      </View>
+      {/* Named, for the same reason as the bookmarks tab: a bare track
+          beside a row does not say which of the row's properties it is. */}
+      <View style={styles.followControl}>
+        <Text style={[styles.followLabel, { color: palette.muted }]}>
+          {t('quran.followToggle', 'Follow')}
+        </Text>
+        <Switch
+          accessibilityLabel={t('quran.bookmarkFollows', 'Follows your reading')}
+          value={!!item.follows}
+          onValueChange={next => setBookmarkFollows(item.id, next)}
+          trackColor={{ true: palette.accentSolid }}
+        />
       </View>
     </Pressable>
   );
@@ -373,6 +402,8 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   rowBody: { flex: 1, minWidth: 0 },
+  followControl: { alignItems: 'center' },
+  followLabel: { fontSize: desktopSize(10), fontWeight: '600', marginBottom: 1 },
   rowTitle: { fontSize: desktopSize(14), fontWeight: '600' },
   rowMeta: { fontSize: desktopSize(11), marginTop: 1 },
   rowArabic: { fontSize: desktopSize(15), ...arabicTextStyle('body') },

@@ -36,7 +36,7 @@ import {
   mergeQuran,
   mergeSunnah,
 } from '../src/sync/merge';
-import { DEFAULT_QURAN_STATE } from '../src/quran/quranState';
+import { DEFAULT_QURAN_STATE, pagesThroughAyahs } from '../src/quran/quranState';
 
 const NOW = '2026-08-19T06:00:00.000Z';
 
@@ -325,6 +325,142 @@ describe('the merge is an algebra — this is what makes P2P safe', () => {
     expect(A.prayers.some(p => p.date === '2026-08-21')).toBe(true);
     expect(A.prayers.some(p => p.date === '2026-08-18')).toBe(true);
     expect(A.prayers.some(p => p.date === '2026-08-17')).toBe(true);
+  });
+});
+
+/**
+ * THE PHONE AND THE MAC, THROUGH A FILE.
+ *
+ * Everything this session added to the khatmah and the preferences was
+ * proved against `mergeKhatmah`/`mergeQuran` directly. That is the unit,
+ * not the trip: a snapshot is built, serialised, parsed by a reader that
+ * distrusts it, and merged — and a field the reader drops, or a shape
+ * `JSON.stringify` flattens, is invisible to a unit test and permanent on
+ * a real pair of devices.
+ */
+describe('the round trip a paired device actually makes', () => {
+  const snap = (d: SnapshotData) => buildSnapshot(d, everything(), NOW);
+  const merge = (x: SnapshotData, y: SnapshotData) =>
+    mergeData(x, snap(y), everything());
+
+  /** The plan as it stands on the phone: read to 100, page 11 taken back. */
+  const withHole = (): SnapshotData => ({
+    ...emptyData(),
+    quran: {
+      ...DEFAULT_QURAN_STATE,
+      khatmah: [
+        {
+          id: 'k1',
+          startedAt: 1_690_000_000_000,
+          targetDays: 30,
+          pagesRead: pagesThroughAyahs(1300),
+          ayahsRead: 1300,
+          completedAt: null,
+          done: [
+            [1, 1300],
+            [1310, 2000],
+          ],
+          marks: [[1301, 1309, 1_800_000_000_000, 0]],
+        },
+      ],
+    },
+  });
+
+  /** The Mac, which never saw the un-mark and still covers those ayahs. */
+  const withoutHole = (): SnapshotData => ({
+    ...emptyData(),
+    quran: {
+      ...DEFAULT_QURAN_STATE,
+      khatmah: [
+        {
+          id: 'k1',
+          startedAt: 1_690_000_000_000,
+          targetDays: 30,
+          pagesRead: pagesThroughAyahs(2000),
+          ayahsRead: 2000,
+          completedAt: null,
+          done: [[1, 2000]],
+        },
+      ],
+    },
+  });
+
+  const planOf = (d: SnapshotData) => d.quran!.khatmah[0];
+  const covers = (d: SnapshotData, ayah: number) =>
+    planOf(d).done!.some(([f, t]) => f <= ayah && ayah <= t);
+
+  it('carries the claims through the file at all', () => {
+    // `marks` is a tuple array inside a plan inside the Quran blob, three
+    // layers down and newly added — exactly where a reader silently drops
+    // a field it was never taught about.
+    const back = mergeData(emptyData(), roundTrip(withHole()), everything());
+    expect(planOf(back).marks).toEqual([[1301, 1309, 1_800_000_000_000, 0]]);
+    expect(covers(back, 1305)).toBe(false);
+  });
+
+  it('and the un-mark survives the other device, both directions', () => {
+    const phoneFirst = merge(withHole(), withoutHole());
+    const macFirst = merge(withoutHole(), withHole());
+    expect(covers(phoneFirst, 1305)).toBe(false);
+    expect(covers(macFirst, 1305)).toBe(false);
+    // Everything either side actually read is still there.
+    expect(covers(phoneFirst, 1500)).toBe(true);
+    expect(covers(macFirst, 1500)).toBe(true);
+  });
+
+  it('and the mirror the Mac sends does not talk over the hole', () => {
+    // The Mac's `ayahsRead` is 2000 and the phone's is 1300. Taking the
+    // max would tell an older build that everything to 2000 is read.
+    const merged = merge(withHole(), withoutHole());
+    expect(planOf(merged).ayahsRead).toBe(1300);
+    // The page mirror follows the ayah one, not the Mac's larger number.
+    expect(planOf(merged).pagesRead).toBe(pagesThroughAyahs(1300));
+    expect(planOf(merged).pagesRead).toBeLessThan(pagesThroughAyahs(2000));
+  });
+
+  it('and a second round changes nothing', () => {
+    const once = merge(withHole(), withoutHole());
+    expect(merge(once, withoutHole())).toEqual(once);
+    expect(merge(once, withHole())).toEqual(once);
+  });
+
+  it('a preference set on the device that has not read still wins', () => {
+    // It used to ride on `lastRead.updatedAt`: change a setting on the Mac,
+    // read on the phone, and the Mac's choice was dropped without a word.
+    const mac: SnapshotData = {
+      ...emptyData(),
+      quran: {
+        ...DEFAULT_QURAN_STATE,
+        prefs: { ...DEFAULT_QURAN_STATE.prefs, reciterId: 'minshawi' },
+        prefsUpdatedAt: 2_000_000_000_000,
+      },
+    };
+    const phone: SnapshotData = {
+      ...emptyData(),
+      quran: {
+        ...DEFAULT_QURAN_STATE,
+        lastRead: { surah: 2, ayah: 1, page: 2, mode: 'mushaf', updatedAt: 2_100_000_000_000 },
+        prefsUpdatedAt: 1_000_000_000_000,
+      },
+    };
+    expect(merge(phone, mac).quran!.prefs.reciterId).toBe('minshawi');
+    expect(merge(mac, phone).quran!.prefs.reciterId).toBe('minshawi');
+    // And the phone's newer reading place is kept: two questions, two answers.
+    expect(merge(phone, mac).quran!.lastRead?.page).toBe(2);
+  });
+
+  it('a three-device ring converges on the hole, not around it', () => {
+    let A = withHole();
+    let B = withoutHole();
+    let C = withoutHole();
+    for (let round = 0; round < 2; round++) {
+      B = merge(B, A);
+      C = merge(C, B);
+      A = merge(A, C);
+    }
+    expect(A).toEqual(B);
+    expect(B).toEqual(C);
+    expect(covers(A, 1305)).toBe(false);
   });
 });
 

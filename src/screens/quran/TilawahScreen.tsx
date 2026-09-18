@@ -687,10 +687,12 @@ export function TilawahScreen() {
   /**
    * The coffee toggle: don't let the screen go dark while I listen.
    *
-   * It shares `keepAwake` with the reader rather than adding a second
-   * flag, because it is one question — "keep the screen on while I am in
-   * the Qur'an" — and the reader's copy had no visible control anywhere.
-   * This gives the preference a home you can see.
+   * ITS OWN FLAG, not the reader's (#52). It used to share one, on the
+   * reasoning that it is one question — "keep the screen on while I am in
+   * the Qur'an". It is two: this cup is reached with the recitation
+   * already playing and gets turned off for an evening of listening, and
+   * that silently told the muṣḥaf to go dark too. The reader's is
+   * `readerKeepAwake`, answerable in Settings → Quran.
    *
    * Released on unmount whatever the preference says: a lock held by a
    * screen that is gone is a flat battery nobody can explain.

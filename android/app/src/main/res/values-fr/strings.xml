@@ -95,6 +95,10 @@
         <item quantity="one">À jour · %1$d page restante</item>
         <item quantity="other">À jour · %1$d pages restantes</item>
     </plurals>
+    <plurals name="widget_reading_skipped">
+        <item quantity="one">%1$d page sautée</item>
+        <item quantity="other">%1$d pages sautées</item>
+    </plurals>
     <plurals name="widget_reading_behind">
         <item quantity="one">%1$d page de retard</item>
         <item quantity="other">%1$d pages de retard</item>

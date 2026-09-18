@@ -104,6 +104,13 @@ export type AyahMarkSources = {
   khatmahTarget?: AyahRefLike | null;
   accentColor: string;
   nightMode: boolean;
+  /**
+   * The one following bookmark whose ayah is drawn: the anchor of the
+   * open visit. A following bookmark moves with the reading, so drawing
+   * every one of them would put a colour under the first line of
+   * whatever page you had reached — see the loop in `ayahTint`.
+   */
+  anchorBookmarkId?: string | null;
 };
 
 const key = (surah: number, ayah: number) => `${surah}:${ayah}`;
@@ -129,6 +136,7 @@ export function ayahTint({
   khatmahTarget,
   accentColor,
   nightMode,
+  anchorBookmarkId,
 }: AyahMarkSources): AyahTint {
   const night = nightMode ? 1 : 0;
   const marks = new Map<string, string>();
@@ -146,7 +154,18 @@ export function ayahTint({
   // theirs — a bookmark IS its colour, and would be lost under another —
   // and the reading marker keeps the medallion instead (`ayahEndInk`).
   put(readingPosition, READING_COLOR, ALPHA.reading);
+  // A FOLLOWING BOOKMARK IS NOT A MARK ON AN AYAH (issue #54). It moves
+  // with the reading, so the ayah it would wash is whichever one happens
+  // to start the page you have reached — a colour appearing under the
+  // first line of every page, which reads as "you bookmarked this" and is
+  // not something the reader did. The session says itself in the chrome
+  // instead, as a pulsing dot beside the surah name (`SessionDot`), which
+  // is where a fact about the visit belongs. A fixed pin is still a mark:
+  // that one IS an ayah the reader chose.
   for (const b of bookmarks ?? []) {
+    // Drawn only while it is the anchor of the open visit — see
+    // `readingSession.anchorVisible`.
+    if (b.follows && b.id !== anchorBookmarkId) continue;
     put(b, BOOKMARK_COLORS[b.color] ?? accentColor, ALPHA.bookmark);
   }
   put(khatmahTarget, KHATMAH_COLOR, ALPHA.target);

@@ -158,9 +158,12 @@ export async function notificationRoute(
       // The reader they were last in, which is the same signal the
       // Continue-reading widget uses to choose between the two.
       const mushaf = getQuranState().lastRead?.mode === 'mushaf';
+      // This IS the khatmah's door, so it says so: the reader draws the
+      // plan's done-marks and leaves the reading marker alone, exactly as
+      // when the home card is tapped. Same offer, same behaviour.
       return readUrl(
         target.surah,
-        mushaf ? `initialPage=${target.page}` : `scrollToAyah=${target.ayah}`,
+        `${mushaf ? `initialPage=${target.page}` : `scrollToAyah=${target.ayah}`}&sessionKhatmah=1`,
       );
     } catch {
       return `${MIHRAB_SCHEME}quran`;

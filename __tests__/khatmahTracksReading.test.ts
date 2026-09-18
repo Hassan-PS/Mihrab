@@ -14,12 +14,15 @@ import {
   getQuranState,
   khatmahCurrentPage,
   khatmahCurrentPortion,
-  KHATMAH_TRAIL_SLACK_PAGES,
+  khatmahGap,
   khatmahTracksPage,
+  isKhatmahPageDone,
   recordKhatmahPageTurn,
   setKhatmahPosition,
   startKhatmah,
 } from '../src/quran/quranState';
+import { ayahAtIndex } from '../src/quran/ayahIndex';
+import { findPageForAyah } from '../src/quran/pages';
 
 const plan = () => activeKhatmah(getQuranState())!;
 
@@ -141,11 +144,37 @@ describe('a few pages ahead is still the plan’s own trail', () => {
   it('counts a turn that starts just ahead of the frontier', () => {
     expect(frontier()).toBe(249);
     expect(khatmahTracksPage(250)).toBe(true);
-    expect(khatmahTracksPage(249 + KHATMAH_TRAIL_SLACK_PAGES)).toBe(true);
+    expect(khatmahTracksPage(259)).toBe(true);
   });
 
-  it('still refuses a page past the width of the trail', () => {
-    expect(khatmahTracksPage(249 + KHATMAH_TRAIL_SLACK_PAGES + 1)).toBe(false);
+  /**
+   * THE WIDTH IS THE PORTION NOW, not a distance.
+   *
+   * The slack was ten pages because progress was a
+   * high-water mark: everything between the frontier and the page read
+   * had to be counted too, so ten pages was the most the plan could ever
+   * be wrong by. With a set of what has actually been read there is no
+   * such cost — a turn credits the pages it turned past and nothing else
+   * — so the limit is what it should always have been: read inside
+   * today's portion and it counts, however you arrived; read a future
+   * day's and it does not, because you have not earned it.
+   */
+  it('counts anywhere inside today’s portion, well past the old ten', () => {
+    const portionEnd = khatmahCurrentPortion(plan()).to;
+    const lastPage = findPageForAyah(
+      ayahAtIndex(portionEnd).surah,
+      ayahAtIndex(portionEnd).ayah,
+      'hafs',
+    );
+    expect(lastPage).toBeGreaterThan(259);
+    expect(khatmahTracksPage(lastPage)).toBe(true);
+  });
+
+  it('and refuses a future day’s reading, which is the point of the window', () => {
+    const portionEnd = khatmahCurrentPortion(plan()).to;
+    const wellPast = ayahAtIndex(Math.min(portionEnd + 400, 6236));
+    const page = findPageForAyah(wellPast.surah, wellPast.ayah, 'hafs');
+    expect(khatmahTracksPage(page)).toBe(false);
   });
 
   it('catches up when the reader arrives one page past it and reads on', () => {
@@ -165,14 +194,41 @@ describe('a few pages ahead is still the plan’s own trail', () => {
     expect(frontier()).toBe(268);
   });
 
-  it('credits the pages it stepped over, and no more than the trail’s width', () => {
-    // The trade this makes, stated: the gap becomes read. What bounds the
-    // damage is that the gap can never be wider than the trail.
-    const before = plan().pagesRead;
-    recordKhatmahPageTurn(249 + KHATMAH_TRAIL_SLACK_PAGES, 260);
-    expect(plan().pagesRead - before).toBeLessThanOrEqual(
-      KHATMAH_TRAIL_SLACK_PAGES + 1,
-    );
+  it('credits the pages it turned past, and not the ones it arrived over', () => {
+    /**
+     * THE TRADE THAT USED TO BE HERE IS GONE.
+     *
+     * Crediting ran from the plan's start, so arriving ten pages ahead
+     * and turning once banked all ten. The ten-page slack was the bound
+     * on that — a turn starting further ahead was refused outright — and
+     * replacing the slack with the
+     * portion window quietly removed the bound: a portion is a twentieth
+     * of the book on a thirty-day plan and an eighth of it on a
+     * seven-day one.
+     *
+     * So a turn credits its own crossing. Arriving at 259 and turning to
+     * 260 reads 259, and 250–258 stay unread until the reader goes back
+     * for them — which is what the card's unread row is for.
+     */
+    recordKhatmahPageTurn(259, 260);
+    expect(isKhatmahPageDone(plan(), 259)).toBe(true);
+    for (const page of [249, 255, 258]) {
+      expect(isKhatmahPageDone(plan(), page)).toBe(false);
+    }
+    // The legacy mirror stays at the plan's own start — nothing
+    // contiguous has been read from it — as it must.
+    expect(plan().pagesRead).toBe(248);
+    // Pages 249–258: ten, offered on the card, and gone the moment the
+    // reader goes back for them.
+    expect(khatmahGap(plan())?.pages).toBe(10);
+    expect(khatmahGap(plan())?.page).toBe(249);
+  });
+
+  it('but a fling credits every page it crossed — issue #44’s own rule', () => {
+    recordKhatmahPageTurn(250, 256);
+    for (const page of [250, 251, 252, 253, 254, 255]) {
+      expect(isKhatmahPageDone(plan(), page)).toBe(true);
+    }
   });
 
   it('leaves a plan alone when the reader is genuinely elsewhere', () => {

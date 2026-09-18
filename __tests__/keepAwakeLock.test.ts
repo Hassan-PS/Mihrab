@@ -20,6 +20,7 @@ import {
   _keepAwakeHolders,
   acquireKeepAwake,
 } from '../src/quran/keepAwakeLock';
+import { coerceQuranState } from '../src/quran/quranState';
 
 const REPO = path.resolve(__dirname, '..');
 const read = (p: string) => fs.readFileSync(path.join(REPO, p), 'utf-8');
@@ -90,26 +91,52 @@ describe('every holder goes through it', () => {
   });
 });
 
-describe('it is answerable from Settings, not only Tilawah', () => {
-  it('Settings → Quran carries the row', () => {
+describe('reading and listening are two questions', () => {
+  // They shared one flag, which is how a muṣḥaf came to go dark: the
+  // coffee cup is reached with the recitation already playing and gets
+  // switched off for an evening of listening, and days later the reader
+  // obeyed it. Issue #52 asked for the reading one to be answerable
+  // "separate from tilawah", and this is what that means.
+  it('Settings → Quran holds the READING preference', () => {
     const card = read('src/screens/settings/QuranCard.tsx');
     expect(card).toContain('testID="settings-keep-awake"');
-    expect(card).toMatch(/value=\{quran\.prefs\.keepAwake\}/);
-    expect(card).toMatch(/setQuranPrefs\(\{ keepAwake: next \}\)/);
+    expect(card).toMatch(/value=\{quran\.prefs\.readerKeepAwake\}/);
+    expect(card).toMatch(/setQuranPrefs\(\{ readerKeepAwake: next \}\)/);
   });
 
-  it('over the SAME preference the coffee button holds', () => {
-    // Two switches over one lock would let each claim the other is
-    // wrong, depending on which was touched last.
+  it('and both readers obey that one', () => {
+    for (const f of [
+      'src/quran/mushafReaderCore.tsx',
+      'src/screens/quran/TranslationSurahScreen.tsx',
+    ]) {
+      expect(read(f)).toContain('useKeepAwake(quran.prefs.readerKeepAwake)');
+    }
+  });
+
+  it('while the coffee button keeps its own, and keeps working', () => {
     const tilawah = read('src/screens/quran/TilawahScreen.tsx');
     expect(tilawah).toMatch(/setQuranPrefs\(\{ keepAwake: !keepAwake \}\)/);
+    expect(tilawah).toContain('useKeepAwake(keepAwake)');
+    // And it does not hold the readers' flag (prose may name it).
+    expect(tilawah).not.toContain('useKeepAwake(quran.prefs.readerKeepAwake)');
+    expect(tilawah).not.toMatch(/setQuranPrefs\(\{ readerKeepAwake/);
   });
 
-  it('and is on until somebody turns it off', () => {
+  it('both are on until somebody turns them off', () => {
     const state = read('src/quran/quranState.ts');
     expect(state).toMatch(/keepAwake: true,/);
+    expect(state).toMatch(/readerKeepAwake: true,/);
     // Stored prefs are spread OVER the defaults, so a blob written before
-    // this key existed still reads as on rather than as missing.
+    // these keys existed still reads as on rather than as missing.
     expect(state).toMatch(/\.\.\.DEFAULT_QURAN_STATE\.prefs,\s*\n\s*\.\.\.\(r\.prefs \?\? \{\}\),/);
+  });
+
+  it('and the reading one never inherits the cup’s answer', () => {
+    // The whole point: a coffee cup switched off was never a decision
+    // about the muṣḥaf, so the new key does not read the old one.
+    expect(coerceQuranState({ version: 1, prefs: { keepAwake: false } }).prefs
+      .readerKeepAwake).toBe(true);
+    expect(coerceQuranState({ version: 1, prefs: { readerKeepAwake: false } })
+      .prefs.readerKeepAwake).toBe(false);
   });
 });

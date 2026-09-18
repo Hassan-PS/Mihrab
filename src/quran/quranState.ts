@@ -25,6 +25,27 @@ import {
   totalPagesForRiwayah,
 } from './pages';
 import { DEFAULT_RIWAYAH, coerceRiwayahId, type RiwayahId } from './riwayat';
+import {
+  addRange,
+  applyMarks,
+  contiguousFrom,
+  firstMissingFrom,
+  highestCovered,
+  normalizeRanges,
+  rangesCover,
+  marksDenyAny,
+  rangesEqual,
+  subtractRange,
+  type AyahMark,
+  type AyahRange,
+} from './khatmahDone';
+import {
+  claimReadingSession,
+  noteReadingMoved,
+  noteReadingPlaced,
+  readingSessionOwner,
+  releaseReadingOwner,
+} from './readingSession';
 
 /** The Quran blob's key. Exported so the snapshot layer names it once. */
 export const QURAN_STORAGE_KEY = 'mihrab.quran.v1';
@@ -47,6 +68,30 @@ export type QuranBookmark = {
   page: number;
   color: BookmarkColor;
   createdAt: number;
+  /**
+   * A bookmark that MOVES: it records the reading done from it, instead
+   * of staying where it was dropped (issue #54).
+   *
+   * Off — and absent, for every bookmark made before this existed — it
+   * is what a bookmark has always been: a fixed pin. On, it is a place
+   * that keeps itself. Open it and read, and the turns are its; leave
+   * and come back a week later, and it is where you stopped. It is how a
+   * reader keeps a surah read now and then, or a passage under revision,
+   * without the evening's Al-Mulk wiping either — see `readingSession`
+   * for which of them a turn belongs to.
+   */
+  follows?: boolean;
+  /**
+   * When it last changed — moved, recoloured, or switched to following.
+   *
+   * A bookmark used to be immutable after creation, and the sync merge
+   * leaned on that: first copy wins, by id. A bookmark that can move
+   * would then move on one device and never on the other, silently —
+   * the merge takes the newer of two copies now, and this is what
+   * "newer" means. Absent on bookmarks written before this existed;
+   * `createdAt` stands in.
+   */
+  updatedAt?: number;
 };
 
 export type LastRead = {
@@ -95,6 +140,42 @@ export type KhatmahPlan = {
    * plan reads as gone.
    */
   abandonedAt?: number;
+  /**
+   * WHICH ayahs the plan has read, as inclusive `[from, to]` index
+   * ranges — the authoritative record of progress (issue #54 follow-on).
+   *
+   * `ayahsRead` and `pagesRead` are a high-water mark, and a mark can
+   * only say how FAR. It could not hold "today's portion read out of
+   * order", and it had to count pages nobody read whenever a reader
+   * skipped forward — the trade `khatmahTracksPage` spells out. This can
+   * hold both: a page read is a page done, and a page skipped stays
+   * undone however far past it the reader goes.
+   *
+   * In ayahs for the same reason `ayahsRead` is: a page belongs to one
+   * printed muṣḥaf, an ayah belongs to the book. See `khatmahDone`.
+   *
+   * Absent on plans written before this existed, and on those the
+   * high-water mark is converted into a single range — identical
+   * behaviour, nothing lost. Both legacy fields go on being written from
+   * the CONTIGUOUS run of this set, so a device still on an older build
+   * reads exactly what it always read.
+   */
+  done?: AyahRange[];
+  /**
+   * DATED CLAIMS, so an un-mark survives the union (additive).
+   *
+   * `done` merges by union and a union only grows, so it cannot carry
+   * "not read": un-mark a page here and the other device's set puts it
+   * back on the next merge — the khatmah-delete bug, one level down. The
+   * hand-made claims are logged with the time they were made and
+   * replayed over the union, so the last thing the reader said about a
+   * page wins wherever they said it. See `AyahMark`.
+   *
+   * Page turns are not logged; they extend `done`, which the union
+   * already carries. Only a hand-made claim, and a reading that crosses
+   * one, need a date.
+   */
+  marks?: AyahMark[];
   /**
    * Ḥafṣ pages already behind the reader when the plan was made — the
    * plan covers what FOLLOWS them, cut into `targetDays` portions.
@@ -214,7 +295,40 @@ export type QuranPrefs = {
    * it. Said once, on the first switch, and then never again.
    */
   riwayahNoticeSeen: boolean;
+  /**
+   * WHAT A NEW BOOKMARK DOES — follow the reading, or stay put (additive).
+   *
+   * Two jobs wear one badge. A star already says "this ayah matters to
+   * me", so a bookmark is a PLACE, and a place that keeps itself is what
+   * a place is for: `follow` is the default because it is what the object
+   * means. `fixed` is the old behaviour, for a reader who wants coloured
+   * pins and nothing else, and `ask` shows the choice in the ayah sheet
+   * the moment a bookmark is made rather than deciding for them.
+   *
+   * It sets a new bookmark's STARTING state and nothing more — the switch
+   * on the bookmark's own row still overrides it, for that bookmark,
+   * forever. A blob from before this field takes `fixed`, so nothing a
+   * reader already has changes under them.
+   */
+  bookmarkFollowDefault: 'follow' | 'fixed' | 'ask';
+  /**
+   * TILĀWAH's coffee cup, and only it (the name predates the split).
+   *
+   * It used to be both this and the readers' — one flag under two
+   * controls, on the reasoning that it is one question. It is not: the
+   * coffee cup is reached with the recitation already playing and gets
+   * turned off for a session of listening, and that silently took the
+   * muṣḥaf's keep-awake with it. Issue #52 asked for the reading one to
+   * be answerable "separate from tilawah", and this is what that means.
+   */
   keepAwake: boolean;
+  /**
+   * READING — the muṣḥaf and the verse-by-verse reader. Settings → Quran
+   * is its control. Default on, which is the issue's own ask, and a blob
+   * without the field takes the default rather than inheriting whatever
+   * the coffee cup happened to be left at.
+   */
+  readerKeepAwake: boolean;
   /** Memorization masking in translation view. */
   hideMode: 'none' | 'arabic' | 'translation';
   repeat: RepeatSettings;
@@ -278,6 +392,21 @@ export type QuranState = {
   starred: string[];
   khatmah: KhatmahPlan[];
   prefs: QuranPrefs;
+  /**
+   * WHEN THE PREFERENCES LAST CHANGED (additive).
+   *
+   * They used to ride on `lastRead.updatedAt` — the only timestamp this
+   * store kept — so a preference changed on a device that had not read
+   * since lost to one that had. Which is the wrong way round for exactly
+   * the settings nobody changes while reading: switch New bookmarks on
+   * the Mac and the phone's older choice came back on the next sync,
+   * silently. A preference is a write, so it gets a write time.
+   *
+   * Absent on a blob from before the field, which reads as 0 — older
+   * than any stamped change, which is the truthful answer: that device
+   * has never knowingly chosen.
+   */
+  prefsUpdatedAt?: number;
 };
 
 export const DEFAULT_QURAN_STATE: QuranState = {
@@ -294,7 +423,9 @@ export const DEFAULT_QURAN_STATE: QuranState = {
     mushafToneAuto: true,
     riwayah: DEFAULT_RIWAYAH,
     riwayahNoticeSeen: false,
+    bookmarkFollowDefault: 'follow',
     keepAwake: true,
+    readerKeepAwake: true,
     hideMode: 'none',
     repeat: { eachAyah: 1, range: 1, pauseFactor: 0 },
     votdMode: 'translation',
@@ -343,7 +474,14 @@ function coerceBookmark(v: unknown): QuranBookmark | null {
     typeof r.createdAt === 'number' && Number.isFinite(r.createdAt)
       ? r.createdAt
       : 0;
-  return { id: r.id, surah, ayah, page, color, createdAt };
+  const out: QuranBookmark = { id: r.id, surah, ayah, page, color, createdAt };
+  // Only when set: a key written onto a bookmark that never had it makes
+  // a snapshot merged with itself stop equalling itself.
+  if (r.follows === true) out.follows = true;
+  if (typeof r.updatedAt === 'number' && Number.isFinite(r.updatedAt)) {
+    out.updatedAt = r.updatedAt;
+  }
+  return out;
 }
 
 function coerceKhatmah(v: unknown): KhatmahPlan | null {
@@ -407,10 +545,46 @@ function coerceKhatmah(v: unknown): KhatmahPlan | null {
   if (ar !== null) out.ayahsRead = ar;
   const dsa = int(r.dayStartAyahsRead, 0, TOTAL_AYAHS);
   if (dsa !== null) out.dayStartAyahsRead = dsa;
+  if (Array.isArray(r.done)) {
+    const ranges = normalizeRanges(r.done as AyahRange[], TOTAL_AYAHS);
+    if (ranges.length > 0) out.done = ranges;
+  }
+  if (Array.isArray(r.marks)) {
+    const cutoff =
+      Date.now() - KHATMAH_TOMBSTONE_TTL_DAYS * 24 * 60 * 60 * 1000;
+    const marks = (r.marks as unknown[])
+      .map(m => coerceMark(m))
+      .filter((m): m is AyahMark => m !== null)
+      // The same ninety days the other tombstones keep. A claim older
+      // than that has had every chance to reach every device.
+      .filter(m => m[2] >= cutoff)
+      .sort((a, b) => a[2] - b[2] || a[0] - b[0])
+      // Bounded: the newest are the ones that still decide anything, and
+      // an unbounded log would grow in a blob that syncs whole.
+      .slice(-KHATMAH_MARK_LIMIT);
+    if (marks.length > 0) out.marks = marks;
+  }
   if (typeof r.dayStartDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.dayStartDate)) {
     out.dayStartDate = r.dayStartDate;
   }
   return out;
+}
+
+/** At most this many claims travel with a plan — newest kept. */
+const KHATMAH_MARK_LIMIT = 128;
+
+function coerceMark(v: unknown): AyahMark | null {
+  if (!Array.isArray(v) || v.length < 4) return null;
+  const [from, to, at, read] = v as unknown[];
+  const ok = (n: unknown, lo: number, hi: number) =>
+    typeof n === 'number' && Number.isFinite(n) && n >= lo && n <= hi
+      ? Math.trunc(n)
+      : null;
+  const f = ok(from, 1, TOTAL_AYAHS);
+  const t = ok(to, 1, TOTAL_AYAHS);
+  const a = ok(at, 1, Number.MAX_SAFE_INTEGER);
+  if (f === null || t === null || a === null || t < f) return null;
+  return [f, t, a, read === 1 ? 1 : 0];
 }
 
 function coerceLastRead(v: unknown): LastRead | null {
@@ -447,6 +621,17 @@ function coerceLastRead(v: unknown): LastRead | null {
  */
 export function coerceQuranState(raw: unknown): QuranState {
   return mergeStored(raw);
+}
+
+/**
+ * A stored `bookmarkFollowDefault`, or `fixed` for a blob without one.
+ *
+ * The default in `DEFAULT_QURAN_STATE` is `follow`, which is right for a
+ * fresh install and wrong to apply retroactively: a reader with twenty
+ * coloured pins did not ask for them to start walking.
+ */
+function coerceFollowDefault(v: unknown): QuranPrefs['bookmarkFollowDefault'] {
+  return v === 'follow' || v === 'ask' ? v : 'fixed';
 }
 
 /** Merge a possibly-older stored blob over the defaults (additive schema). */
@@ -510,7 +695,25 @@ function mergeStored(raw: unknown): QuranState {
       // existed chose a tone, and keeps it.
       mushafToneAuto:
         (r.prefs as { mushafToneAuto?: unknown } | undefined)?.mushafToneAuto === true,
+      // A blob from before the field keeps the behaviour it had: fixed
+      // pins. Only a fresh install gets the default above.
+      bookmarkFollowDefault: coerceFollowDefault(
+        (r.prefs as { bookmarkFollowDefault?: unknown } | undefined)
+          ?.bookmarkFollowDefault,
+      ),
+      // On unless it was explicitly turned off, and the old shared flag
+      // is NOT consulted: a coffee cup switched off during Tilāwah was
+      // never a decision about the muṣḥaf.
+      readerKeepAwake:
+        (r.prefs as { readerKeepAwake?: unknown } | undefined)
+          ?.readerKeepAwake !== false,
     },
+    // Kept if it is there and sane, and LEFT OUT otherwise rather than
+    // written as 0: an export of a blob that never had it must round-trip
+    // to itself, key for key.
+    ...(typeof r.prefsUpdatedAt === 'number' && r.prefsUpdatedAt > 0
+      ? { prefsUpdatedAt: r.prefsUpdatedAt }
+      : {}),
   };
 }
 
@@ -681,26 +884,97 @@ export function isKhatmahPage(
  * the khatmah erased the afternoon's place in Al-Kahf, and the marker
  * was never more than "the last page looked at".
  *
- * So the khatmah's own reading — a muṣḥaf page within reach of the
- * plan's page — leaves the marker where it is, UNLESS the marker was
- * already riding with the plan, in which case it comes along. That
- * second clause is what keeps a reader with one trail exactly where
- * they were: every marker written before this existed sits on the
- * plan's page, and a marker that stopped following would have looked
- * like a lost place. The moment such a reader reads somewhere else, the
- * marker detaches and becomes theirs; the moment it is theirs, the
- * khatmah cannot take it back.
- *
- * Translation mode always writes. Khatmah progress is credited from
- * muṣḥaf page turns and nowhere else, so a plan read in translation
- * never advances on its own — and a marker that refused to follow that
- * reading would be a place lost with nothing to point at it instead.
+ * There are three trails now, not two — a khatmah, any number of
+ * bookmarks, and the marker — and the marker is the one that takes what
+ * the others did not claim. Each of the two rules that hold it back is
+ * written at the point it applies, below: a bookmark visit records no
+ * marker at all, and the khatmah vetoes a marker that was not already
+ * riding with the plan.
  */
 export function recordReading(
   pos: Omit<LastRead, 'updatedAt' | 'pinned'>,
   riwayah: RiwayahId = DEFAULT_RIWAYAH,
 ): void {
   const prev = getQuranState();
+  const owner = readingSessionOwner();
+
+  /**
+   * ── A BOOKMARK VISIT IS NOT THE MARKER'S TO RECORD ────────────────
+   *
+   * Whatever was opened owns the turns — see `readingSession` for why
+   * proximity cannot be the rule once there is more than one bookmark.
+   * What follows from that, and is the whole of this branch: while a
+   * bookmark owns the visit the marker does not move AT ALL.
+   *
+   * A bookmark IS a kept place, so a second marker trailing the same
+   * reading is a duplicate of a thing the reader already has — and
+   * worse, it is a duplicate that destroys something: the marker it
+   * overwrites is where that reader was when they were reading from the
+   * index, which is the one place nothing else remembers. Resuming a
+   * bookmark for ten minutes must not cost them that.
+   *
+   * So neither following mode matters here. A following bookmark walks
+   * with the reading; a fixed one stays where it was pinned; and in both
+   * cases the marker is left alone, because in both cases the place is
+   * already kept by the thing that was opened.
+   *
+   * Reading away from it records NOTHING, which is the honest answer:
+   * someone who swipes off to look something up has not started a
+   * reading anywhere, and the bookmark is not dragged after them
+   * (`withinBookmarkReach`). To keep a place out there, open it from the
+   * index — that visit is the marker's — or bookmark it.
+   */
+  if (owner?.kind === 'bookmark') {
+    const b = prev.bookmarks.find(x => x.id === owner.id);
+    if (b) {
+      /**
+       * A TURN THAT DID NOT CHANGE THE PAGE MOVES NOTHING.
+       *
+       * `recordReading` is given the page's FIRST ayah, so a recorded
+       * turn that lands on the page the bookmark is already on would
+       * rewrite a deliberately marked ayah — the reader picks 2:47,
+       * something re-settles on the same page, and the bookmark says
+       * 2:1 instead. There is no reading to record in that case, and
+       * the precise ayah is worth more than the page start it would be
+       * replaced with. It also keeps the anchor drawn, which a rewrite
+       * would have quietly put out.
+       */
+      if (b.follows && withinBookmarkReach(b, pos) && pos.page !== b.page) {
+        moveBookmark(b.id, pos);
+        // Carried along by reading, so it stops being drawn: the wash
+        // would otherwise reappear under the first line of every page
+        // turned to, which is not a place anybody marked.
+        noteReadingMoved();
+      }
+      return;
+    }
+    // Deleted mid-visit: there is no kept place any more, so the turns
+    // fall to the marker like any other reading.
+  }
+
+  /**
+   * ── THE KHATMAH'S VETO, WHICH GUARDS THE MARKER AND NOTHING ELSE ──
+   *
+   * A muṣḥaf page within reach of the plan's page leaves the marker
+   * where it is, UNLESS the marker was already riding with the plan, in
+   * which case it comes along. That second clause is what keeps a reader
+   * with one trail exactly where they were: every marker written before
+   * this existed sits on the plan's page, and a marker that stopped
+   * following would have looked like a lost place. The moment such a
+   * reader reads somewhere else, the marker detaches and becomes theirs;
+   * the moment it is theirs, the khatmah cannot take it back.
+   *
+   * It is evaluated HERE, after the bookmark branch, because it is a
+   * rule about the marker. It used to return from the top of the
+   * function, which also froze a following bookmark that happened to be
+   * read within two pages of the plan — a bookmark session silently
+   * recording nothing, for a reason that had nothing to do with it.
+   *
+   * Translation mode always writes. Khatmah progress is credited from
+   * muṣḥaf page turns and nowhere else, so a plan read in translation
+   * never advances on its own — and a marker that refused to follow that
+   * reading would be a place lost with nothing to point at it instead.
+   */
   const marker = prev.lastRead;
   if (
     pos.mode === 'mushaf' &&
@@ -788,34 +1062,241 @@ export function isStarred(s: QuranState, surah: number, ayah: number): boolean {
   return s.starred.includes(ayahKey(surah, ayah));
 }
 
+/**
+ * A change stamp later than the bookmark's last one.
+ *
+ * The merge keeps whichever copy is NEWER, by strict comparison, and the
+ * wall clock is too coarse to order two changes made here in the same
+ * millisecond — create and recolour, or two switch flips — so the later
+ * could lose to the earlier on the other device. One past the last stamp
+ * is later than it and still a time the other device can compare.
+ */
+function stampAfter(b: QuranBookmark): number {
+  return Math.max(Date.now(), (b.updatedAt ?? b.createdAt) + 1);
+}
+
 export function addBookmark(
   surah: number,
   ayah: number,
   page: number,
   color: BookmarkColor,
+  /**
+   * Whether the new bookmark follows the reading. Omitted means "what the
+   * reader's default says" — `ask` counts as not following until they say
+   * otherwise, because a place that moves without being asked for is
+   * worse than one that does not move.
+   */
+  follows?: boolean,
 ): void {
-  const bookmark: QuranBookmark = {
-    id: `${Date.now()}-${Math.floor(Math.random() * 1e6)}`,
-    surah,
-    ayah,
-    page,
-    color,
-    createdAt: Date.now(),
-  };
-  updateQuranState(prev => ({
-    ...prev,
-    // One bookmark per ayah: re-bookmarking replaces (color change).
-    bookmarks: [
-      ...prev.bookmarks.filter(b => !(b.surah === surah && b.ayah === ayah)),
-      bookmark,
-    ],
-  }));
+  /**
+   * BOOKMARKING AN AYAH DURING A FOLLOWING SESSION MOVES THAT BOOKMARK,
+   * rather than leaving a second one behind (issue #54).
+   *
+   * Reported from the device: open a following bookmark, read on a few
+   * pages, tap an ayah and bookmark it — and you left the muṣḥaf with TWO
+   * bookmarks in the same colour, one on the ayah you chose and one where
+   * the following bookmark had got to. Two marks for one place, and no way
+   * to tell which was which.
+   *
+   * The gesture means "my place is here", which is what a following
+   * bookmark is for; it is the same reading, said precisely. The bookmark
+   * takes the ayah and the colour that was tapped, keeps `createdAt` so it
+   * stays where it was in the list, and any other pin already on that ayah
+   * gives way — one bookmark per ayah, as before.
+   *
+   * It asks reach for itself. It used to lean on `recordReading` having
+   * released the session once the reading went far enough, which is no
+   * longer something that happens — a bookmark owns its visit until the
+   * visit ends. Bookmarking an ayah fifty pages away is a NEW place, not
+   * this one said precisely, so the reach that decides whether reading
+   * moves the bookmark decides this too.
+   */
+  const owner = readingSessionOwner();
+  if (owner?.kind === 'bookmark') {
+    const session = getQuranState().bookmarks.find(b => b.id === owner.id);
+    if (session?.follows && withinBookmarkReach(session, { surah, page })) {
+      const at = stampAfter(session);
+      updateQuranState(prev => ({
+        ...prev,
+        bookmarks: [
+          ...prev.bookmarks.filter(
+            b => b.id !== session.id && !(b.surah === surah && b.ayah === ayah),
+          ),
+          { ...session, surah, ayah, page, color, updatedAt: at },
+        ],
+      }));
+      // Put here on purpose, so it is drawn again.
+      noteReadingPlaced();
+      return;
+    }
+  }
+  const now = Date.now();
+  updateQuranState(prev => {
+    /**
+     * One bookmark per ayah: re-bookmarking is a RECOLOUR, and a recolour
+     * keeps the bookmark's identity. It used to make a new one and drop
+     * the old, which was two bugs: the visit it owned now named a dead
+     * id, so the marker quietly took over — and on the other device the
+     * old id was still there, so the sync produced two bookmarks on one
+     * ayah. A following bookmark recoloured is still following; a new
+     * colour is not a reason to lose a place that keeps itself.
+     */
+    const replaced = prev.bookmarks.find(b => b.surah === surah && b.ayah === ayah);
+    const wants =
+      follows ?? prev.prefs.bookmarkFollowDefault === 'follow';
+    const base: QuranBookmark = replaced
+      ? { ...replaced, page, color, updatedAt: stampAfter(replaced) }
+      : {
+          id: `${now}-${Math.floor(Math.random() * 1e6)}`,
+          surah,
+          ayah,
+          page,
+          color,
+          createdAt: now,
+        };
+    const next: QuranBookmark =
+      replaced?.follows || wants
+        ? { ...base, follows: true, updatedAt: base.updatedAt ?? now }
+        : base;
+    return {
+      ...prev,
+      bookmarks: [
+        ...prev.bookmarks.filter(b => !(b.surah === surah && b.ayah === ayah)),
+        next,
+      ],
+    };
+  });
+  /**
+   * A BOOKMARK THAT FOLLOWS, MADE MID-READING, TAKES THE VISIT.
+   *
+   * Flipping the switch on an existing bookmark already does this
+   * (`setBookmarkFollows`), and making one already flipped meant the same
+   * thing and did not: the marker went on recording while the new
+   * bookmark sat where it was made until the next visit — two places
+   * kept for one reading, which is the duplicate this whole model exists
+   * to avoid.
+   *
+   * Not from a khatmah visit. That reading belongs to the plan, and
+   * marking an ayah inside it is a note, not a change of what is being
+   * read.
+   */
+  const after = readingSessionOwner();
+  const made = getQuranState().bookmarks.find(
+    b => b.surah === surah && b.ayah === ayah,
+  );
+  if (made?.follows && (after == null || after.kind === 'reading')) {
+    claimReadingSession({ kind: 'bookmark', id: made.id });
+  }
 }
 
 export function removeBookmark(id: string): void {
+  // An owner that no longer exists cannot own the visit.
+  const owner = readingSessionOwner();
+  if (owner?.kind === 'bookmark' && owner.id === id) releaseReadingOwner();
   updateQuranState(prev => ({
     ...prev,
     bookmarks: prev.bookmarks.filter(b => b.id !== id),
+  }));
+}
+
+/**
+ * Switch a bookmark between a fixed pin and a place that keeps itself.
+ *
+ * Turning it ON while the reader is open hands the open visit to it —
+ * "mark where I am, and keep tracking from here" is what that gesture
+ * means. From the Qur'an tab's list, with no reader open, it is only a
+ * setting, and `claimReadingSession` says so by doing nothing.
+ */
+export function setBookmarkFollows(id: string, follows: boolean): void {
+  updateQuranState(prev => ({
+    ...prev,
+    bookmarks: prev.bookmarks.map(b => {
+      if (b.id !== id) return b;
+      const next: QuranBookmark = { ...b, updatedAt: stampAfter(b) };
+      if (follows) next.follows = true;
+      else delete next.follows;
+      return next;
+    }),
+  }));
+  // Switching it ON hands this bookmark the open visit. Switching it OFF
+  // does NOT hand the visit to anyone: the bookmark still owns it, it
+  // just stops walking with the reading. Releasing it used to let the
+  // marker take the turns, which is the duplicate place `recordReading`
+  // exists to avoid.
+  if (follows) claimReadingSession({ kind: 'bookmark', id });
+}
+
+/**
+ * How far a following bookmark can be read from before the visit is no
+ * longer its reading. Anywhere in the SAME SURAH counts — Al-Baqarah is
+ * forty-eight pages and reading it end to end is one reading — and a
+ * few pages past its end, for the turn that crosses into the next one.
+ * Beyond that the reader has gone to look something up, and dragging the
+ * bookmark after them would lose the place it was keeping.
+ */
+export const BOOKMARK_PAGE_REACH = 3;
+
+/**
+ * A SCRUB IS THE READER SAYING "MY READING IS HERE NOW" — so a following
+ * bookmark goes with it.
+ *
+ * Reported from the device: scrub to a page, read on from there, and
+ * nothing was saved. Two reasons, and both were right on their own. The
+ * jump records no reading by design — "a turn is reading; a jump is not"
+ * (#41), which is what stops a glance at the index stealing your place.
+ * And the first real turn after the jump was then far outside the
+ * bookmark's reach, so the session was released and the marker took it:
+ * correct for someone who swiped off to look something up, wrong for
+ * someone who deliberately went to where they meant to read.
+ *
+ * Scrubbing is not browsing. It is a destination chosen on purpose, and
+ * inside a following session it moves that bookmark rather than losing
+ * it — which also puts reach back around the new page, so the reading
+ * that follows keeps being tracked.
+ *
+ * IT IS NOT DRAWN THERE, THOUGH. What the reader chose was a PAGE, and
+ * the ayah this lands on is only whichever one that page happens to
+ * start with — washing it says "you marked this line" about a line
+ * nobody picked, which is the same noise the wash was taken off page
+ * turns to avoid. So the position is recorded and the anchor goes out,
+ * exactly as it does when reading carries the bookmark along. The wash
+ * is for an ayah that was actually chosen: the one the visit opened on,
+ * or one the reader bookmarked by hand.
+ *
+ * Only the session's bookmark. With nothing owning the visit a jump still
+ * records nothing at all, exactly as before: `lastRead` waits for a turn.
+ */
+export function moveSessionToPage(
+  page: number,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): void {
+  const owner = readingSessionOwner();
+  if (owner?.kind !== 'bookmark') return;
+  const b = getQuranState().bookmarks.find(x => x.id === owner.id);
+  if (!b?.follows) return;
+  const first = firstAyahOfPage(page, riwayah);
+  moveBookmark(b.id, { surah: first.surah, ayah: first.ayah, page });
+  noteReadingMoved();
+}
+
+function withinBookmarkReach(
+  b: QuranBookmark,
+  pos: { surah: number; page: number },
+): boolean {
+  return pos.surah === b.surah || Math.abs(pos.page - b.page) <= BOOKMARK_PAGE_REACH;
+}
+
+function moveBookmark(
+  id: string,
+  pos: { surah: number; ayah: number; page: number },
+): void {
+  updateQuranState(prev => ({
+    ...prev,
+    bookmarks: prev.bookmarks.map(b =>
+      b.id === id
+        ? { ...b, surah: pos.surah, ayah: pos.ayah, page: pos.page, updatedAt: stampAfter(b) }
+        : b,
+    ),
   }));
 }
 
@@ -835,6 +1316,9 @@ export function setQuranPrefs(partial: Partial<QuranPrefs>): void {
       ...partial,
       repeat: { ...prev.prefs.repeat, ...(partial.repeat ?? {}) },
     },
+    // Every path into the preferences goes through here, which is what
+    // makes one stamp enough — see `prefsUpdatedAt`.
+    prefsUpdatedAt: Date.now(),
   }));
 }
 
@@ -858,6 +1342,82 @@ export const KHATMAH_TOTAL_AYAHS = TOTAL_AYAHS;
  * count. Converting it through Hafs pagination is exact for the only
  * riwayah those plans could ever have been reading.
  */
+/**
+ * The first ayah the plan is responsible for — one past whatever was
+ * already behind the reader when it was made (`fromPage`).
+ */
+export function khatmahStartAyah(plan: KhatmahPlan): number {
+  const from = Math.trunc(plan.fromPage ?? 0);
+  if (!Number.isFinite(from) || from <= 0) return 1;
+  return ayahsThroughPage(Math.min(KHATMAH_TOTAL_PAGES - 1, from), DEFAULT_RIWAYAH) + 1;
+}
+
+/**
+ * What the plan has read, as a set — the one place old plans are brought
+ * forward. Without a stored set, the high-water mark IS the set: one run
+ * from the plan's start to wherever it had got to.
+ */
+/**
+ * The resolved set, once per plan object.
+ *
+ * Replaying the claims builds a new array, and this is called for every
+ * page of the gap scan and again by everything that asks whether a page
+ * is read — so without this, a plan with one claim on it re-resolved
+ * itself several hundred times per render. A plan is replaced wholesale
+ * on every write (`updateQuranState` maps to new objects), so the object
+ * itself is the key: same plan, same answer, and nothing to invalidate.
+ */
+const doneCache = new WeakMap<KhatmahPlan, AyahRange[]>();
+
+export function khatmahDone(plan: KhatmahPlan): AyahRange[] {
+  const hit = doneCache.get(plan);
+  if (hit) return hit;
+  const base = (() => {
+    if (plan.done && plan.done.length > 0) return plan.done;
+    const read = khatmahAyahsRead(plan);
+    const start = khatmahStartAyah(plan);
+    return read < start ? [] : [[start, read] as AyahRange];
+  })();
+  // Replaying claims the local set already reflects is a no-op — both
+  // range operations are idempotent — so this needs no special case for
+  // "already resolved". What it catches is a `done` that came from a
+  // legacy high-water mark, or from a merge, with claims outstanding.
+  const resolved =
+    !plan.marks || plan.marks.length === 0
+      ? base
+      : applyMarks(base, plan.marks, TOTAL_AYAHS);
+  doneCache.set(plan, resolved);
+  return resolved;
+}
+
+/** Is this page of this muṣḥaf read — every ayah of it? */
+/**
+ * Does the plan reach this page at all?
+ *
+ * A khatmah begun at page 143 owns what FOLLOWS page 143; the pages
+ * behind it are not its to mark, and offering to mark them would be
+ * offering something `toggleKhatmahPageDone` then declines to do.
+ */
+export function khatmahCoversPage(
+  plan: KhatmahPlan,
+  page: number,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): boolean {
+  return ayahsThroughPage(page, riwayah) >= khatmahStartAyah(plan);
+}
+
+export function isKhatmahPageDone(
+  plan: KhatmahPlan,
+  page: number,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): boolean {
+  const first = firstAyahOfPage(page, riwayah);
+  const from = ayahIndexOf(first.surah, first.ayah);
+  const to = ayahsThroughPage(page, riwayah);
+  if (to < from) return false;
+  return rangesCover(khatmahDone(plan), from, to);
+}
+
 export function khatmahAyahsRead(plan: KhatmahPlan): number {
   if (typeof plan.ayahsRead === 'number') {
     return Math.min(TOTAL_AYAHS, Math.max(0, Math.trunc(plan.ayahsRead)));
@@ -880,12 +1440,20 @@ export function ayahsThroughPage(page: number, riwayah: RiwayahId): number {
   return Math.max(0, ayahIndexOf(next.surah, next.ayah) - 1);
 }
 
-/** The Hafs page that many ayahs reach — for the `pagesRead` mirror. */
-function pagesThroughAyahs(ayahs: number): number {
+/**
+ * Ḥafṣ pages FULLY read by that many ayahs — for the `pagesRead` mirror.
+ *
+ * Fully, not reached: a run ending mid-page has not read that page, and
+ * the mirror is a count of finished pages. It made no difference while
+ * every caller passed a page's last ayah; it does now that a pin or a
+ * rewind can leave the run ending anywhere.
+ */
+export function pagesThroughAyahs(ayahs: number): number {
   if (ayahs <= 0) return 0;
   if (ayahs >= TOTAL_AYAHS) return KHATMAH_TOTAL_PAGES;
   const at = ayahAtIndex(ayahs);
-  return findPageForAyah(at.surah, at.ayah, DEFAULT_RIWAYAH);
+  const page = findPageForAyah(at.surah, at.ayah, DEFAULT_RIWAYAH);
+  return ayahsThroughPage(page, DEFAULT_RIWAYAH) <= ayahs ? page : page - 1;
 }
 
 /**
@@ -994,13 +1562,29 @@ function withDaySnapshot(plan: KhatmahPlan, now?: number): KhatmahPlan {
     ...plan,
     dayStartDate: today,
     dayStartPagesRead: plan.pagesRead,
-    dayStartAyahsRead: khatmahAyahsRead(plan),
+    // The REACH, like everything else that answers "where is the reader"
+    // — a snapshot taken from the contiguous run would put the day back
+    // at a hole every morning.
+    dayStartAyahsRead: khatmahReachAyah(plan),
   };
 }
 
 export function recordKhatmahProgress(
   page: number,
   riwayah: RiwayahId = DEFAULT_RIWAYAH,
+  /**
+   * The first page of the stretch actually turned past.
+   *
+   * It is what the reading credits and what it may claim. A turn knows
+   * it (`recordKhatmahPageTurn` passes it) and crediting only the pages
+   * crossed is the honest reading of one.
+   *
+   * ABSENT MEANS "I HAVE READ UP TO HERE" — a catch-up rather than a
+   * turn, credited from the plan's start, which is what a caller naming
+   * a page and nothing else can only mean. Nothing in the app takes that
+   * path today; it is the shape of the function's own contract.
+   */
+  fromPage?: number,
 ): void {
   updateQuranState(prev => {
     const active = prev.khatmah.find(isLivePlan);
@@ -1009,20 +1593,93 @@ export function recordKhatmahProgress(
     // would be comparing two different muṣḥafs the moment the reader
     // switched riwayah, and the high-water mark would jump or stall.
     const reached = ayahsThroughPage(page, riwayah);
-    const have = khatmahAyahsRead(active);
-    if (reached <= have) return prev;
-    const done = Math.min(reached, TOTAL_AYAHS);
+    /**
+     * THE SET FIRST; the high-water fields are written FROM it.
+     *
+     * Everything read up to `page` that falls inside the plan's credit
+     * window is marked done. The window is what stops a future day being
+     * banked (`khatmahCreditWindow`); within it, a page read is a page
+     * done however the reader got there.
+     */
+    const window = khatmahCreditWindow(active);
+    const start = khatmahStartAyah(active);
+    const credited = Math.min(reached, window[1]);
+    const floor = Math.max(start, window[0]);
+    const turnedFrom =
+      fromPage === undefined
+        ? floor
+        : (() => {
+            const at = firstAyahOfPage(
+              Math.max(1, Math.min(fromPage, page)),
+              riwayah,
+            );
+            return Math.max(floor, ayahIndexOf(at.surah, at.ayah));
+          })();
+    /**
+     * ── WHAT A TURN CREDITS IS WHAT IT TURNED PAST ────────────────────
+     *
+     * It used to credit everything from the plan's start to the page
+     * reached, on the reasoning that a page read is a page done however
+     * the reader got there. That was a deliberate trade with a stated
+     * bound: a ten-page slack, the most a plan
+     * could ever be wrong by, because a turn starting further ahead than
+     * that was refused outright.
+     *
+     * Replacing the slack with the portion window took the bound away
+     * and nothing said so. A portion is a twentieth of the book on a
+     * thirty-day plan and an eighth of it on a seven-day one, so an
+     * arrival mid-portion plus one page turn could bank eighty pages
+     * nobody had read — silently, and reported as progress.
+     *
+     * The pages turned past are known (`recordKhatmahPageTurn` passes
+     * them) and they are the honest answer. A fling still credits every
+     * page it crossed, which is what issue #44 asked for; an arrival
+     * followed by reading on credits what was read and leaves the pages
+     * behind it unread — which is exactly what the card's own row now
+     * offers to send the reader back for.
+     */
+    const filled =
+      credited >= turnedFrom
+        ? addRange(khatmahDone(active), turnedFrom, credited, TOTAL_AYAHS)
+        : khatmahDone(active);
+    /**
+     * READING THAT CROSSES SOMETHING THE READER DENIED MUST SAY SO —
+     * AND MUST SAY IT ONLY ABOUT THE PAGES IT ACTUALLY CROSSED.
+     *
+     * Page turns are not logged; the union carries them (`AyahMark`).
+     * The exception is reading back over a page that was un-marked,
+     * because "not read" is a dated claim and without a newer one the
+     * other way the next merge replays it.
+     *
+     * The width matters more than it looks. Crediting runs from the
+     * plan's start, so a claim over the credited span would say "all of
+     * this is read" and erase every skipped page behind the reader — one
+     * page turn after an un-mark and the hole closed itself. The pages
+     * turned past are what the reader can honestly claim.
+     */
+    const crosses =
+      credited >= turnedFrom &&
+      marksDenyAny(active.marks ?? [], turnedFrom, credited);
+    const marks = crosses ? withMark(active, turnedFrom, credited, 1) : active.marks;
+    const next = settled(active, filled, marks);
+    // By CONTENT, not identity: every range operation builds a new array,
+    // and a turn that re-reads credited ground must not persist, re-render
+    // two screens and throw away two memos for a set that did not change.
+    if (
+      marks === active.marks &&
+      rangesEqual(next.done, khatmahDone(active)) &&
+      next.ayahsRead <= khatmahAyahsRead(active)
+    ) {
+      return prev;
+    }
+    const done = next.ayahsRead;
     return {
       ...prev,
       khatmah: prev.khatmah.map(k =>
         k.id === active.id
           ? {
               ...withDaySnapshot(k),
-              ayahsRead: done,
-              // Mirrored in Hafs pages so older versions and the sync
-              // merge, which takes the max of this field, still mean
-              // something.
-              pagesRead: pagesThroughAyahs(done),
+              ...next,
               // A PIN IS A STARTING POINT, NOT AN ANCHOR.
               //
               // `khatmahCurrentPage` answers with the pinned page while a
@@ -1049,19 +1706,6 @@ export function recordKhatmahProgress(
     };
   });
 }
-
-/**
- * How far ahead of the plan a page can be and still be the plan's trail.
- *
- * Ten pages is half a hizb. It has to be wide enough to absorb what the
- * app itself loses — a flick that crosses several pages, a corrected
- * settle, an arrival that lands one past the frontier — and narrow enough
- * that it can never be mistaken for having gone somewhere else in the
- * muṣḥaf, which is measured in juz, not pages. It is also the ceiling on
- * how wrong the plan can be in the reader's favour: ten pages, once,
- * visible on the card.
- */
-export const KHATMAH_TRAIL_SLACK_PAGES = 10;
 
 /**
  * Is the reading in front of the reader the khatmah's own reading?
@@ -1103,7 +1747,7 @@ export const KHATMAH_TRAIL_SLACK_PAGES = 10;
  * not, and it was reported back as "works for about six swipes, then it
  * blocks again".
  *
- * So the trail has a width. A page within `KHATMAH_TRAIL_SLACK_PAGES` of
+ * So the trail has a width. A page within ten pages of
  * the frontier is the plan's own reading and the turn from it counts —
  * which credits the pages in between, because a high-water mark is the
  * only shape progress has here. That is the trade: skip five pages on
@@ -1115,6 +1759,264 @@ export const KHATMAH_TRAIL_SLACK_PAGES = 10;
  * pages from a plan sitting at page 50, a bookmark across the muṣḥaf is
  * hundreds, and both are still refused.
  */
+/**
+ * WHAT READING CAN COUNT RIGHT NOW — the plan's own rule, in ayahs.
+ *
+ * A page read inside today's portion counts, however the reader arrived:
+ * another session, the index, a surah opened for its own sake. Reading
+ * that belongs to a FUTURE day does not — it has not been earned, and
+ * counting it would let a plan be finished out of order without ever
+ * having read what lies between.
+ *
+ * With one exception, which is the same principle rather than a hole in
+ * it: once today's portion is finished, reading on into the next one
+ * counts too. Reading ahead is still reading, and a reader who has done
+ * their day and carries on should not be told it did not happen.
+ *
+ * This replaces the ten-page slack, which approximated the same
+ * idea with distance — ten pages either side of the frontier, chosen
+ * because a high-water mark had to count everything in between and ten
+ * was the most it could be wrong by. A set of pages read has no such
+ * cost, so the window can be what it always should have been: the
+ * portion.
+ */
+/**
+ * Mark one page of the plan read, or unread — by hand, from the mark
+ * beside the surah name.
+ *
+ * NOT GATED BY THE CREDIT WINDOW, and deliberately: the window is what
+ * READING has to satisfy, because reading is ambiguous — the app is
+ * inferring intent from page turns and must not bank a future day off a
+ * glance. A tap is not an inference. It is the reader saying which pages
+ * they have read, which is the same standing `finishKhatmahPortion` and
+ * `setKhatmahPosition` already have: "reading is what has to prove it
+ * belongs; saying so out loud does not".
+ *
+ * So this is also the way out of a wrong count in either direction —
+ * pages the plan credited that you had not read, and pages you read
+ * somewhere it could not see.
+ *
+ * Unmarking is what the old shape could never do. A high-water mark can
+ * only be wound back to a point, taking everything after it along; a set
+ * can lose one page out of the middle and keep the rest.
+ */
+export function toggleKhatmahPageDone(
+  page: number,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): void {
+  updateQuranState(prev => {
+    const active = prev.khatmah.find(isLivePlan);
+    if (!active) return prev;
+    const first = firstAyahOfPage(page, riwayah);
+    const from = Math.max(khatmahStartAyah(active), ayahIndexOf(first.surah, first.ayah));
+    const to = ayahsThroughPage(page, riwayah);
+    // A page entirely behind the plan's own start is not its to mark.
+    if (to < from) return prev;
+    // Nor is one beyond what the plan may credit today. A tap is a claim
+    // about a page, not a licence to skip the portions in between — see
+    // `khatmahPageInWindow`. The mark is not offered out there either;
+    // this is the same rule, held where it cannot be got around.
+    if (!khatmahPageInWindow(active, page, riwayah)) return prev;
+    const current = khatmahDone(active);
+    const wasDone = rangesCover(current, from, to);
+    const changed = wasDone
+      ? subtractRange(current, from, to, TOTAL_AYAHS)
+      : addRange(current, from, to, TOTAL_AYAHS);
+    // A TAP IS THE READER SPEAKING, so it is dated and travels. Without
+    // this the other device's set would put an un-marked page straight
+    // back on the next merge — see `AyahMark`.
+    const next = settled(active, changed, withMark(active, from, to, wasDone ? 0 : 1));
+    const start = khatmahStartAyah(active);
+    const everything = rangesCover(next.done, start, TOTAL_AYAHS);
+    return {
+      ...prev,
+      khatmah: prev.khatmah.map(k =>
+        k.id === active.id
+          ? {
+              ...k,
+              ...next,
+              // Unmarking a page of a finished khatmah re-opens it; the
+              // plan is only complete while everything really is read.
+              completedAt: everything ? (k.completedAt ?? Date.now()) : null,
+            }
+          : k,
+      ),
+    };
+  });
+}
+
+/**
+ * What the plan may be told about RIGHT NOW — from its start through the
+ * end of the portion the reader is standing in.
+ *
+ * ── A GAP MUST NOT FREEZE THE FRONTIER ────────────────────────────────
+ *
+ * The obvious reading of "where is the reader" is `khatmahCurrentPortion`
+ * — the portion holding the first UNREAD ayah. It is the right answer for
+ * the day pill and the page marker, and it was the wrong one here,
+ * because it is measured from the contiguous run and so a hole stops it
+ * dead. Read pages 1–10, scrub to 15 and read 15–20, and the frontier is
+ * still page 10: the window still ends where day one ends, and tomorrow's
+ * pages are refused for four pages nobody remembers skipping. The plan
+ * looks stuck, silently — the same stall as issue #44, by another route.
+ *
+ * So the window takes the FURTHEST ayah read (`highestCovered`) as the
+ * reader's position and ends at the end of the portion that follows it.
+ * Reading on is credited while the hole stays open; the hole is reported
+ * separately and can be gone to (`khatmahGap`), rather than quietly
+ * taxing every day after it.
+ *
+ * It still refuses al-Kahf to a plan in Aal-Imran, which is the whole
+ * point of having a window: reach is where the reader has BEEN, and a
+ * page fifty portions ahead of that is not a page they have read.
+ *
+ * The lower bound stays the gap's own portion, so going back to fill it
+ * is always credited.
+ */
+export function khatmahCreditWindow(plan: KhatmahPlan): AyahRange {
+  // From the plan's own start, so going back for a hole is credited, to
+  // the end of the portion the reader is standing in.
+  return [khatmahStartAyah(plan), khatmahCurrentPortion(plan).to];
+}
+
+/**
+ * EVERY PAGE LEFT UNREAD BEHIND THE READER, and the first one to go to.
+ *
+ * Holes come in sets. Skip five pages, read one, miss another, read on —
+ * that is two stretches, and reporting only the first would leave the
+ * reader closing a gap they were told about, being told about the next
+ * one, and never knowing how much was actually outstanding. So the count
+ * is all of it and the destination is the nearest of it.
+ *
+ * Counted in PAGES by asking each page, rather than by measuring the
+ * ayah holes: a hole can sit inside one page, two holes can share a
+ * page, and a page is what the reader is being asked to go and read.
+ *
+ * Only holes with reading PAST them count. The first unread ayah at the
+ * frontier is not a hole, it is where they stopped.
+ */
+export type KhatmahGapReport = {
+  page: number;
+  pages: number;
+  day: number;
+  oneDay: boolean;
+};
+
+/**
+ * One entry, keyed on the set's identity.
+ *
+ * The scan asks every page from the first hole to the reach, which is up
+ * to six hundred page lookups and range scans, and `selectQuranCardState`
+ * calls it on every render of the home card and the Qur'an tab — and the
+ * tab stays mounted under the reader, so that is every page turn. The
+ * ranges are replaced wholesale on each write, so their identity is a
+ * sound key: same array, same answer.
+ */
+let gapMemo: {
+  done: readonly AyahRange[];
+  riwayah: RiwayahId;
+  start: number;
+  report: KhatmahGapReport | null;
+} | null = null;
+
+export function khatmahGap(
+  plan: KhatmahPlan,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): KhatmahGapReport | null {
+  const done = khatmahDone(plan);
+  const memoStart = khatmahStartAyah(plan);
+  if (
+    gapMemo &&
+    gapMemo.done === done &&
+    gapMemo.riwayah === riwayah &&
+    gapMemo.start === memoStart
+  ) {
+    return gapMemo.report;
+  }
+  const report = computeKhatmahGap(plan, riwayah, done);
+  gapMemo = { done, riwayah, start: memoStart, report };
+  return report;
+}
+
+function computeKhatmahGap(
+  plan: KhatmahPlan,
+  riwayah: RiwayahId,
+  done: readonly AyahRange[],
+): KhatmahGapReport | null {
+  const start = khatmahStartAyah(plan);
+  const reach = highestCovered(done);
+  if (reach < start) return null;
+  /**
+   * WALK THE HOLES, NOT THE PAGES.
+   *
+   * A page is unread exactly when some ayah of it is missing — so the
+   * unread pages are the pages the holes touch, and the holes are the
+   * gaps between the ranges of a set that is already sorted and disjoint.
+   * Asking all six hundred pages instead cost two ayah-to-page
+   * conversions each and answered the same question; holes are almost
+   * always one or two.
+   *
+   * Nothing past the reach is a hole. That is the frontier — where the
+   * reader stopped — and it is not something they skipped.
+   */
+  let pages = 0;
+  let firstUnread = 0;
+  let lastUnread = 0;
+  let firstMissing = 0;
+  let at = start;
+  for (const [f, t] of done) {
+    if (at > reach) break;
+    if (f > at) {
+      const holeTo = Math.min(f - 1, reach);
+      if (firstMissing === 0) firstMissing = at;
+      const from = pageOfAyahIndex(at, riwayah);
+      const to = pageOfAyahIndex(holeTo, riwayah);
+      // A page can be touched by two holes — a read stretch inside one
+      // page — and it is still one page to go and read.
+      const countFrom = Math.max(from, lastUnread + 1);
+      if (to >= countFrom) pages += to - countFrom + 1;
+      if (firstUnread === 0) firstUnread = from;
+      lastUnread = Math.max(lastUnread, to);
+    }
+    at = Math.max(at, t + 1);
+  }
+  if (pages === 0) return null;
+  const day = khatmahPortionOf(plan, firstMissing);
+  const lastDay = khatmahPortionOf(
+    plan,
+    ayahsThroughPage(lastUnread, riwayah),
+  );
+  // Naming one day is only honest while they all belong to it.
+  return { page: firstUnread, pages, day, oneDay: day === lastDay };
+}
+
+/**
+ * Is this page one the plan may act on RIGHT NOW?
+ *
+ * The portion, not a distance — see `khatmahCreditWindow`. A page counts
+ * when any of it lies in the window: the reader read that page, and a
+ * page straddling the portion's end is still this reading.
+ *
+ * This is the one gate. Reading credit passes through it, and so does
+ * every hand-made claim about the plan — marking a page read, moving the
+ * khatmah's position. A plan sitting in Aal-Imran has no business being
+ * told that a page of al-Kahf is done, or that its position is there:
+ * whichever way that claim arrived, it is about a portion the plan has
+ * not reached, and the plan would have to invent the fifty portions in
+ * between to make sense of it.
+ */
+export function khatmahPageInWindow(
+  plan: KhatmahPlan,
+  page: number,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): boolean {
+  const window = khatmahCreditWindow(plan);
+  const first = firstAyahOfPage(page, riwayah);
+  const from = ayahIndexOf(first.surah, first.ayah);
+  const to = ayahsThroughPage(page, riwayah);
+  return to >= window[0] && from <= window[1];
+}
+
 export function khatmahTracksPage(
   page: number,
   riwayah: RiwayahId = DEFAULT_RIWAYAH,
@@ -1122,7 +2024,7 @@ export function khatmahTracksPage(
 ): boolean {
   const plan = activeKhatmah(s);
   if (!plan) return false;
-  return page <= khatmahCurrentPage(plan, riwayah) + KHATMAH_TRAIL_SLACK_PAGES;
+  return khatmahPageInWindow(plan, page, riwayah);
 }
 
 /**
@@ -1163,7 +2065,11 @@ export function recordKhatmahPageTurn(
 ): void {
   if (!khatmahTracksPage(prevPage, riwayah)) return;
   if (newPage <= prevPage) return;
-  recordKhatmahProgress(newPage - 1, riwayah);
+  // The pages left behind are `prevPage … newPage - 1` — every one of
+  // them, because a fling settles several pages on (#44) and the reader
+  // saw all of them. That span is also what the reading may CLAIM about
+  // pages it was told were skipped; see `recordKhatmahProgress`.
+  recordKhatmahProgress(newPage - 1, riwayah, prevPage);
 }
 
 /**
@@ -1182,9 +2088,30 @@ export function khatmahCurrentPage(
     // muṣḥaf it was pinned in; re-resolve it through the ayah.
     return findPageForAyah(plan.position.surah, plan.position.ayah, riwayah);
   }
-  const read = khatmahAyahsRead(plan);
-  if (read >= TOTAL_AYAHS) return totalPagesForRiwayah(riwayah);
-  const next = ayahAtIndex(read + 1);
+  // Where they are, not where the contiguous run stopped — see
+  // `khatmahReachAyah`. One un-marked page used to send "Continue
+  // khatmah" back to it, every time, from every door.
+  const reach = khatmahReachAyah(plan);
+  if (reach >= TOTAL_AYAHS) {
+    /**
+     * NOTHING AHEAD. Continuing means going back for what was left.
+     *
+     * A hole keeps a plan from completing (`khatmahIsComplete`), so a
+     * reader who has reached the last page with pages still unread has a
+     * live plan and no forward page to offer. This used to hand back the
+     * last page, over and over, while the only reading left was behind
+     * them — the plan's own door pointing at the one place it was
+     * finished with.
+     */
+    const missing = firstMissingFrom(
+      khatmahDone(plan),
+      khatmahStartAyah(plan),
+      TOTAL_AYAHS,
+    );
+    if (missing <= TOTAL_AYAHS) return pageOfAyahIndex(missing, riwayah);
+    return totalPagesForRiwayah(riwayah);
+  }
+  const next = ayahAtIndex(reach + 1);
   return findPageForAyah(next.surah, next.ayah, riwayah);
 }
 
@@ -1215,8 +2142,24 @@ export function setKhatmahPosition(
               // "everything before here" rule the page form has always
               // had, expressed in the coordinate that survives a riwayah
               // switch.
-              ayahsRead: Math.max(0, ayahIndexOf(surah, ayah) - 1),
-              pagesRead: Math.max(0, Math.min(KHATMAH_TOTAL_PAGES, page - 1)),
+              // A pin is the reader saying where they are, and it is
+              // authoritative in both directions — what is behind it is
+              // read, what is ahead is not — which is what the mirror has
+              // always said of a pin. Two claims, one act, in that order;
+              // the second is the one the union would otherwise undo.
+              ...settled(
+                k,
+                normalizeRanges(
+                  ayahIndexOf(surah, ayah) - 1 >= khatmahStartAyah(k)
+                    ? [[khatmahStartAyah(k), ayahIndexOf(surah, ayah) - 1]]
+                    : [],
+                  TOTAL_AYAHS,
+                ),
+                withMarks(k, [
+                  [khatmahStartAyah(k), ayahIndexOf(surah, ayah) - 1, 1],
+                  [ayahIndexOf(surah, ayah), TOTAL_AYAHS, 0],
+                ]),
+              ),
               completedAt: null,
             }
           : k,
@@ -1256,8 +2199,11 @@ export function resetKhatmahToday(): void {
         k.id === active.id
           ? {
               ...k,
-              ayahsRead: baseAyahs,
-              pagesRead: basePages,
+              ...settled(
+                k,
+                doneRewound(k, baseAyahs),
+                withMark(k, baseAyahs + 1, TOTAL_AYAHS, 0),
+              ),
               dayStartDate: today,
               dayStartPagesRead: basePages,
               dayStartAyahsRead: baseAyahs,
@@ -1295,8 +2241,11 @@ export function resetKhatmahAll(): void {
           ? {
               ...k,
               startedAt: Date.now(),
-              pagesRead: from,
-              ayahsRead: ayahs,
+              ...settled(
+                k,
+                doneRewound(k, ayahs),
+                withMark(k, ayahs + 1, TOTAL_AYAHS, 0),
+              ),
               position: null,
               dayStartDate: localYmd(),
               dayStartPagesRead: from,
@@ -1466,11 +2415,161 @@ export function khatmahPortion(plan: KhatmahPlan, day: number): KhatmahPortion {
   };
 }
 
-/** The portion the reader is in — the one holding the next unread ayah. */
+/**
+ * HOW FAR THE READER HAS GOT — the furthest ayah read, holes and all.
+ *
+ * `khatmahAyahsRead` is the contiguous run from the plan's start, and it
+ * has to stay that: it is the legacy mirror, and a device still reading
+ * it must never be told about progress past a hole. But it is the wrong
+ * answer to "where is the reader", because one un-marked page behind them
+ * winds it back to that page — and then the plan's next page, its day
+ * number and its portion all point at somewhere they left long ago.
+ *
+ * The hole is not forgotten; it is reported and offered on its own
+ * (`khatmahGap`), which is what lets everything else look forward.
+ */
+export function khatmahReachAyah(plan: KhatmahPlan): number {
+  return Math.max(
+    khatmahStartAyah(plan) - 1,
+    highestCovered(khatmahDone(plan)),
+    khatmahAyahsRead(plan),
+  );
+}
+
+/** Which page of a given muṣḥaf holds an ayah index. */
+function pageOfAyahIndex(index: number, riwayah: RiwayahId): number {
+  const at = ayahAtIndex(Math.max(1, Math.min(TOTAL_AYAHS, Math.trunc(index))));
+  return findPageForAyah(at.surah, at.ayah, riwayah);
+}
+
+/** The reach, in pages of the muṣḥaf in hand. */
+export function khatmahReachPage(
+  plan: KhatmahPlan,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): number {
+  const reach = khatmahReachAyah(plan);
+  return reach < khatmahStartAyah(plan) ? 0 : pageOfAyahIndex(reach, riwayah);
+}
+
+/**
+ * The plan has run out of pages AHEAD, and only holes are left behind.
+ *
+ * The end state of a khatmah read out of order: nothing forward to
+ * continue to, and a live plan, because holes keep it from completing.
+ * What "continue" means then is going back, which is what
+ * `khatmahCurrentPage` answers — this is so the card can say so rather
+ * than reporting a day as done and a plan as running.
+ */
+export function khatmahOnlyGapsLeft(plan: KhatmahPlan): boolean {
+  return (
+    khatmahReachAyah(plan) >= TOTAL_AYAHS && !khatmahIsComplete(plan)
+  );
+}
+
+/** Every ayah from the plan's start is read — the only thing that finishes one. */
+export function khatmahIsComplete(plan: KhatmahPlan): boolean {
+  const start = khatmahStartAyah(plan);
+  return rangesCover(khatmahDone(plan), start, TOTAL_AYAHS);
+}
+
+/**
+ * THE SET HAS TO MOVE WITH EVERY REWIND AND EVERY CLAIM.
+ *
+ * Progress used to be one number, so rewinding it was one assignment.
+ * With a set of read ranges, an assignment to `ayahsRead` alone leaves
+ * the ranges claiming pages the reader has just taken back: "reset
+ * today" would leave every check green, and — since the reach is read
+ * from the set — leave the plan's next page where it was. These two put
+ * the set where the number says it is.
+ */
+/**
+ * Log a claim, newest last and bounded.
+ *
+ * Only hand-made claims and readings that cross one come through here —
+ * see `AyahMark`. A page turn that touches nothing the reader has denied
+ * needs no date, because the union already carries it.
+ */
+function withMarks(
+  plan: KhatmahPlan,
+  claims: ReadonlyArray<readonly [from: number, to: number, read: 0 | 1]>,
+): AyahMark[] | undefined {
+  const usable = claims.filter(([from, to]) => to >= from);
+  if (usable.length === 0) return plan.marks;
+  const have = plan.marks ?? [];
+  /**
+   * MONOTONIC, because replay order IS the rule.
+   *
+   * The wall clock is what lets two devices' claims be ordered against
+   * each other, and it is too coarse to order two claims made here: a
+   * reader who un-marks a page and reads it again in the same
+   * millisecond — or a test, or a pin, which is two claims in one act —
+   * would have them replayed in whatever order the array sort happened
+   * to pick, and the later claim could lose to the earlier one. One past
+   * the newest claim we already hold is both later than it and still a
+   * wall-clock time the other device can compare against.
+   */
+  let at = Math.max(Date.now(), (have[have.length - 1]?.[2] ?? 0) + 1);
+  const next: AyahMark[] = [...have];
+  for (const [from, to, read] of usable) {
+    next.push([from, to, at, read]);
+    at += 1;
+  }
+  return next.slice(-KHATMAH_MARK_LIMIT);
+}
+
+function withMark(
+  plan: KhatmahPlan,
+  from: number,
+  to: number,
+  read: 0 | 1,
+): AyahMark[] | undefined {
+  return withMarks(plan, [[from, to, read]]);
+}
+
+/**
+ * WHAT EVERY WRITER STORES: the resolved set and the mirror derived from it.
+ *
+ * Three fields say one thing and they have to agree. The set is stored
+ * with the claims already replayed, so a merge that replays them again
+ * gets the same set back (idempotence, which the P2P cycle rests on).
+ * The legacy mirror is the CONTIGUOUS run of that set — never a number
+ * a writer chose, because a chosen number can point past a hole and tell
+ * an older device about pages nobody read.
+ */
+function settled(
+  plan: KhatmahPlan,
+  done: readonly AyahRange[],
+  marks: AyahMark[] | undefined,
+): { done: AyahRange[]; ayahsRead: number; pagesRead: number; marks?: AyahMark[] } {
+  const resolved = marks?.length ? applyMarks(done, marks, TOTAL_AYAHS) : [...done];
+  const contiguous = Math.max(
+    0,
+    contiguousFrom(resolved, khatmahStartAyah(plan), TOTAL_AYAHS),
+  );
+  return {
+    done: resolved,
+    ayahsRead: contiguous,
+    pagesRead: pagesThroughAyahs(contiguous),
+    ...(marks === undefined ? {} : { marks }),
+  };
+}
+
+function doneRewound(plan: KhatmahPlan, to: number): AyahRange[] {
+  return subtractRange(khatmahDone(plan), to + 1, TOTAL_AYAHS, TOTAL_AYAHS);
+}
+
+function doneFilled(plan: KhatmahPlan, to: number): AyahRange[] {
+  const start = khatmahStartAyah(plan);
+  return to >= start
+    ? addRange(khatmahDone(plan), start, to, TOTAL_AYAHS)
+    : khatmahDone(plan);
+}
+
+/** The portion the reader is in — the one holding the page they are on. */
 export function khatmahCurrentPortion(plan: KhatmahPlan): KhatmahPortion {
-  const read = khatmahAyahsRead(plan);
-  if (read >= TOTAL_AYAHS) return khatmahPortion(plan, planDays(plan));
-  return khatmahPortion(plan, khatmahPortionOf(plan, read + 1));
+  const reach = khatmahReachAyah(plan);
+  if (reach >= TOTAL_AYAHS) return khatmahPortion(plan, planDays(plan));
+  return khatmahPortion(plan, khatmahPortionOf(plan, reach + 1));
 }
 
 /**
@@ -1497,7 +2596,10 @@ export function khatmahDay(
   plan: KhatmahPlan,
   now: number = Date.now(),
 ): KhatmahDayState {
-  const read = khatmahAyahsRead(plan);
+  // Where the reader is, not where the contiguous run stopped. One
+  // un-marked page behind them used to make a finished day report itself
+  // unfinished and nag for pages they had read — see `khatmahReachAyah`.
+  const read = khatmahReachAyah(plan);
   const opened =
     plan.dayStartDate === localYmd(now)
       ? Math.min(read, Math.max(0, plan.dayStartAyahsRead ?? read))
@@ -1530,16 +2632,30 @@ export function finishKhatmahPortion(): void {
   updateQuranState(prev => {
     const active = prev.khatmah.find(isLivePlan);
     if (!active) return prev;
-    const to = khatmahCurrentPortion(active).to;
-    if (to <= khatmahAyahsRead(active)) return prev;
+    const portion = khatmahCurrentPortion(active);
+    const to = portion.to;
+    // Already covered — by the set, not the mirror, which a hole behind
+    // the reader would hold back even with the portion fully read.
+    if (rangesCover(khatmahDone(active), portion.from, to)) return prev;
+    /**
+     * The claim is THE PORTION, not everything from the plan's start.
+     * "Finish today's reading" says nothing about a page the reader
+     * un-marked last week, and a claim from the start would be newer than
+     * that denial and erase it. The fill still runs from the start, as
+     * reading credit does; the replay puts the older holes back.
+     */
+    const next = settled(
+      active,
+      doneFilled(active, to),
+      withMark(active, portion.from, to, 1),
+    );
     return {
       ...prev,
       khatmah: prev.khatmah.map(k =>
         k.id === active.id
           ? {
               ...withDaySnapshot(k),
-              ayahsRead: to,
-              pagesRead: pagesThroughAyahs(to),
+              ...next,
               // A pin inside the portion just read is spent; leaving it
               // would send "continue" backwards into finished ground.
               position:
@@ -1547,7 +2663,9 @@ export function finishKhatmahPortion(): void {
                 ayahIndexOf(k.position.surah, k.position.ayah) <= to
                   ? null
                   : k.position,
-              completedAt: to >= TOTAL_AYAHS ? Date.now() : null,
+              completedAt: rangesCover(next.done, khatmahStartAyah(k), TOTAL_AYAHS)
+                ? (k.completedAt ?? Date.now())
+                : null,
             }
           : k,
       ),
@@ -1580,8 +2698,7 @@ export function stepKhatmahBack(): void {
         k.id === active.id
           ? {
               ...k,
-              ayahsRead: to,
-              pagesRead: pages,
+              ...settled(k, doneRewound(k, to), withMark(k, to + 1, TOTAL_AYAHS, 0)),
               dayStartDate: today,
               dayStartAyahsRead: to,
               dayStartPagesRead: pages,
@@ -1627,7 +2744,9 @@ export function khatmahDaysLeft(
   plan: KhatmahPlan,
   _now: number = Date.now(),
 ): number {
-  if (khatmahAyahsRead(plan) >= TOTAL_AYAHS) return 0;
+  // Complete means every ayah, so a plan with a hole still has a day in
+  // it however far the reader has reached.
+  if (khatmahIsComplete(plan)) return 0;
   return Math.max(
     0,
     plan.targetDays - khatmahCurrentPortion(plan).day + 1,
@@ -1643,6 +2762,7 @@ export function khatmahDaysLeft(
 export function khatmahBehindBy(
   plan: KhatmahPlan,
   now: number = Date.now(),
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
 ): number {
   const dayMs = 24 * 60 * 60 * 1000;
   const daysElapsed = Math.floor((now - plan.startedAt) / dayMs);
@@ -1654,7 +2774,11 @@ export function khatmahBehindBy(
     KHATMAH_TOTAL_PAGES,
     from + Math.round((span / planDays(plan)) * daysElapsed),
   );
-  return Math.max(0, expected - plan.pagesRead);
+  // Against the reach, not the contiguous mirror: pages behind a hole are
+  // already reported as unread (`khatmahGap`), and counting them here as
+  // well would tell the reader they are sixty pages behind schedule over
+  // two pages they skipped.
+  return Math.max(0, expected - khatmahReachPage(plan, riwayah));
 }
 
 /** What a khatmah has left, counted in pages of the muṣḥaf in hand. */
@@ -1705,7 +2829,7 @@ export function khatmahPages(
   };
   const total = totalPagesForRiwayah(riwayah);
   const day = khatmahDay(plan, now);
-  const read = khatmahAyahsRead(plan);
+  const read = khatmahReachAyah(plan);
   const first = pageOf(day.portion.from);
   const last = pageOf(day.portion.to);
   const today = Math.max(1, last - first + 1);
@@ -1735,6 +2859,7 @@ export function khatmahPages(
 /** Test-only: reset module state. */
 export function __resetQuranStateForTests(): void {
   state = DEFAULT_QURAN_STATE;
+  gapMemo = null;
   hydrated = false;
   hydrating = null;
   listeners.clear();

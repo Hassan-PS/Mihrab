@@ -547,6 +547,8 @@ struct WidgetPayload: Codable {
     let pagesToday: Int
     let doneToday: Int
     let behindBy: Int
+    /// Pages left unread behind the reader; absent in the ordinary case.
+    let skipped: Int?
     let daysLeft: Int
   }
 

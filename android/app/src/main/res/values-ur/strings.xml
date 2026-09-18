@@ -81,6 +81,10 @@
         <item quantity="one">درست رفتار پر · %1$d صفحہ باقی</item>
         <item quantity="other">درست رفتار پر · %1$d صفحے باقی</item>
     </plurals>
+    <plurals name="widget_reading_skipped">
+        <item quantity="one">%1$d صفحہ چھوٹ گیا</item>
+        <item quantity="other">%1$d صفحات چھوٹ گئے</item>
+    </plurals>
     <plurals name="widget_reading_behind">
         <item quantity="one">%1$d صفحہ پیچھے</item>
         <item quantity="other">%1$d صفحے پیچھے</item>

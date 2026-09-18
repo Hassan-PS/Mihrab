@@ -61,6 +61,18 @@ describe('the fullscreen phone reader', () => {
     expect(core).toMatch(/labelMaxWidth != null && \{ maxWidth: labelMaxWidth \}/);
   });
 
+  it('keeps the session dot and the khatmah mark off the rounded corner', () => {
+    // The row hugs whichever edge the camera left free, and a rounded
+    // corner eats the last few dp of that edge — a 7dp dot out there is
+    // half a dot. The marks belong on the side of the name facing the
+    // middle of the window, which means reversing the row when the name
+    // hugs the start.
+    expect(core).toMatch(/labelSide === 'start' && styles\.pageHeaderLabelRowFlip/);
+    expect(core).toMatch(/pageHeaderLabelRowFlip: \{ flexDirection: 'row-reverse' \}/);
+    // Physical sides only work because the pager is pinned LTR.
+    expect(phone).toMatch(/listWrap: \{ flex: 1, direction: 'ltr' \}/);
+  });
+
   it('pads the download strip past the cutout in fullscreen on Android', () => {
     expect(reader).toMatch(/Math\.max\(cutout\.top, insets\.top\)/);
     expect(reader).not.toMatch(/Platform\.OS !== 'ios' \? 0 :/);

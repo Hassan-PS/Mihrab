@@ -39,7 +39,9 @@ import {
   khatmahBehindBy,
   khatmahDay,
   khatmahDaysLeft,
+  khatmahGap,
   khatmahPages,
+  khatmahReachPage,
   type KhatmahPlan,
   type LastRead,
   type QuranBookmark,
@@ -200,6 +202,17 @@ export type WidgetKhatmah = {
   doneToday: number;
   behindBy: number;
   daysLeft: number;
+  /**
+   * Pages left unread BEHIND the reader, if any (additive).
+   *
+   * A plan read out of order does not stall on them any more — reading
+   * on is credited and the holes stay open — so the widget would
+   * otherwise say "Done for today" about a book with pages in it the
+   * reader knows they skipped. Zero or absent is the ordinary case; the
+   * app's own card carries the same number, and the widget's tap already
+   * lands on the first of them once nothing is ahead.
+   */
+  skipped?: number;
 };
 
 export type WidgetReadingBlock = {
@@ -560,13 +573,15 @@ export function buildReadingBlock(input: {
      */
     const state = khatmahDay(plan, now);
     const pages = khatmahPages(plan, input.riwayah, now);
+    const gap = khatmahGap(plan, input.riwayah);
     khatmah = {
       day: state.portion.day,
       targetDays: plan.targetDays,
       pagesToday: pages.today,
       doneToday: pages.doneToday,
-      behindBy: khatmahBehindBy(plan, now),
+      behindBy: khatmahBehindBy(plan, now, input.riwayah),
       daysLeft: khatmahDaysLeft(plan, now),
+      ...(gap ? { skipped: gap.pages } : {}),
     };
   }
 
@@ -576,7 +591,10 @@ export function buildReadingBlock(input: {
     ayah,
     page,
     juz: juzForPage(page),
-    pagesRead: plan ? plan.pagesRead : page,
+    // The reach, not the contiguous mirror: `plan.pagesRead` winds back to
+    // a hole, and the widget saying "63 pages" while the card's bar says
+    // two thirds is the same number twice with two answers.
+    pagesRead: plan ? khatmahReachPage(plan, input.riwayah) : page,
     totalPages: KHATMAH_TOTAL_PAGES,
     bookmarks: input.bookmarks.length,
     lastReadAt: last?.updatedAt ?? null,

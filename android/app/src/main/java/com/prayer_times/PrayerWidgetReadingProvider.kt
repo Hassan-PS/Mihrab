@@ -345,12 +345,20 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
           ),
         )
         val behind = khatmah.optInt("behindBy", 0)
+        val skipped = khatmah.optInt("skipped", 0)
         val left = (khatmah.optInt("pagesToday", 0) - khatmah.optInt("doneToday", 0)).coerceAtLeast(0)
         views.setTextViewText(
           R.id.reading_side_note,
           when {
             behind > 0 ->
               context.resources.getQuantityString(R.plurals.widget_reading_behind, behind, behind)
+            // Skipped pages outrank "done for today": a plan read out of
+            // order no longer stalls on them, so this is the only place
+            // on the widget that says they are there at all — and "Done
+            // for today" over a book with pages missing is the sentence
+            // this exists to stop.
+            skipped > 0 ->
+              context.resources.getQuantityString(R.plurals.widget_reading_skipped, skipped, skipped)
             left == 0 -> context.getString(R.string.widget_reading_done_today)
             else ->
               context.resources.getQuantityString(R.plurals.widget_reading_left, left, left)
@@ -462,6 +470,21 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
     }
 
     /**
+     * WHOSE READING THIS CARD OFFERS.
+     *
+     * With a plan running, the position in the payload IS the plan's own
+     * next page — the app decides that (`widgetBlocks`), and the payload
+     * carries `khatmah` exactly when it did. So the presence of that
+     * object is the same question as "is this the khatmah's door", and
+     * the link says so with `sessionKhatmah=1`: the reader then draws the
+     * plan's done-marks and leaves the reading marker alone, as it does
+     * when the home card is tapped. Without it the widget and the card
+     * would land on the same page and behave differently.
+     */
+    private fun sessionParam(r: JSONObject): String =
+      if (r.optJSONObject("khatmah") != null) "&sessionKhatmah=1" else ""
+
+    /**
      * mihrab://read/2?initialPage=3 or ?scrollToAyah=1 — the surah screen
      * picks its reader from which of the two it is given, which is why the
      * app resolves `mode` rather than this side guessing.
@@ -473,7 +496,10 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
       } else {
         "scrollToAyah=${r.optInt("ayah", 1)}"
       }
-      val intent = Intent(Intent.ACTION_VIEW, Uri.parse("mihrab://read/$surah?$position")).apply {
+      val intent = Intent(
+        Intent.ACTION_VIEW,
+        Uri.parse("mihrab://read/$surah?$position${sessionParam(r)}"),
+      ).apply {
         setPackage(context.packageName)
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
       }
@@ -510,7 +536,7 @@ class PrayerWidgetReadingProvider : AppWidgetProvider() {
       }
       val intent = Intent(
         Intent.ACTION_VIEW,
-        Uri.parse("mihrab://read/$surah?$position&playFromAyah=$ayah"),
+        Uri.parse("mihrab://read/$surah?$position&playFromAyah=$ayah${sessionParam(r)}"),
       ).apply {
         setPackage(context.packageName)
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

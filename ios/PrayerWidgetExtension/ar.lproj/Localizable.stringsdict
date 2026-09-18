@@ -123,6 +123,22 @@
 			<string>ضمن الخطة · %d صفحة متبقية</string>
 		</dict>
 	</dict>
+	<key>widget_reading_skipped</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>تخطّيت %d صفحة سابقًا</string>
+			<key>other</key>
+			<string>تخطّيت %d صفحة سابقًا</string>
+		</dict>
+	</dict>
 	<key>widget_reading_behind</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

@@ -73,6 +73,10 @@
     <plurals name="widget_reading_left">
         <item quantity="other">进度正常 · 还剩 %1$d 页</item>
     </plurals>
+    <plurals name="widget_reading_skipped">
+        <item quantity="one">跳过了 %1$d 页</item>
+        <item quantity="other">跳过了 %1$d 页</item>
+    </plurals>
     <plurals name="widget_reading_behind">
         <item quantity="other">落后 %1$d 页</item>
     </plurals>

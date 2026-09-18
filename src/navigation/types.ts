@@ -31,6 +31,24 @@ export type RootStackParamList = {
     /** Translation mode: scroll to this ayah (search / bookmark deep links). */
     scrollToAyah?: number;
     /**
+     * The following bookmark this visit was opened FROM, if any. It owns
+     * the visit's page turns — see `quran/readingSession`. Sent only when
+     * a bookmark that follows is tapped; every other way in leaves it
+     * undefined, and the reading is the marker's as it always was.
+     */
+    sessionBookmarkId?: string;
+    /**
+     * This visit was opened from the KHATMAH — the home card's door, the
+     * Qur'an tab's, or the plan's own "continue". It owns the visit the
+     * same way a following bookmark does, and it is what the done-marks
+     * beside the surah name are drawn for: they say which pages of the
+     * plan are read, which is an answer to a question only a khatmah
+     * reading asked. Every other way in leaves it undefined, and the
+     * khatmah still counts the reading if it lands in today's portion —
+     * crediting never depended on the door (`khatmahTracksPage`).
+     */
+    sessionKhatmah?: boolean;
+    /**
      * Start reciting from this ayah on arrival — issue #25.
      *
      * An ayah rather than a flag, because the two params above are a

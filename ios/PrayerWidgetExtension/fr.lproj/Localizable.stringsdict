@@ -83,6 +83,22 @@
 			<string>À jour · %d pages restantes</string>
 		</dict>
 	</dict>
+	<key>widget_reading_skipped</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>%d page sautée</string>
+			<key>other</key>
+			<string>%d pages sautées</string>
+		</dict>
+	</dict>
 	<key>widget_reading_behind</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

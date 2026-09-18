@@ -52,7 +52,9 @@ import {
   usePublishBackAnswer,
   type BackInterceptRef,
 } from '../../navigation/backIntercept';
-import { arabicTextStyle } from '../../theme/typography';
+import { TYPE, arabicTextStyle } from '../../theme/typography';
+import { SessionDot, useSessionColor } from '../../quran/SessionDot';
+import { PageProgressMark, usePageProgress } from '../../quran/PageProgressMark';
 import { RiwayahPicker } from '../../quran/RiwayahPicker';
 import { SPACING } from '../../theme/tokens';
 
@@ -87,6 +89,7 @@ export function MushafSurahScreen({
 }: Props) {
   const { t, i18n } = useTranslation();
   const isArabic = i18n.language === 'ar';
+  const sessionColor = useSessionColor();
   const { palette } = useAppPalette();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -181,6 +184,16 @@ export function MushafSurahScreen({
    * toggles, palette and night-mode changes — kept clobbering the reader's
    * value with the route's static `surah.romanized`.
    */
+  /**
+   * The page on screen, reported by the reader as it turns — the nav
+   * header draws the khatmah's done-mark beside the surah name and has
+   * no other way to know which page that name belongs to.
+   */
+  const [markPage, setMarkPage] = useState(initialPage ?? 1);
+  const handleReaderPageChange = useCallback((page: number) => {
+    setMarkPage(page);
+  }, []);
+  const pageProgress = usePageProgress(markPage, riwayah);
   const [readerTitle, setReaderTitle] = useState<string | null>(null);
   const handleReaderTitleChange = useCallback((title: string) => {
     setReaderTitle(title);
@@ -255,6 +268,11 @@ export function MushafSurahScreen({
      * edge, and the app's own chrome waits behind the back button.
      */
     const ink = dark ? '#f2f2f2' : '#1a1a1a';
+    const headerTitleRow = {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: desktopSize(6),
+    };
     const pageChrome = quranHydrated
       ? {
             ...(isIOS
@@ -349,6 +367,46 @@ export function MushafSurahScreen({
       // Either way the NAME follows the app language — an Arabic UI over a
       // page of Arabic script should not be titled "Al-Fatihah".
       title: readerTitle || surahName(surah),
+      /**
+       * A PULSING DOT BESIDE THE NAME, in the colour of whichever trail
+       * is keeping this reading (issue #54) — a following bookmark, the
+       * khatmah, or the reading marker.
+       *
+       * `headerTitle` rather than `title` alone, because a dot is not a
+       * string. It takes the ink and the writing direction the header was
+       * already giving the title, so the text is the same text arriving
+       * by a different prop. Every open reader now has an owner and so a
+       * dot; `headerTitle` still falls back to the platform's own title
+       * when there is no session at all, which is what a screenshot or a
+       * cold start sees before the effect has run.
+       */
+      ...(sessionColor || pageProgress
+        ? {
+            headerTitle: () => (
+              <View style={headerTitleRow}>
+                {sessionColor ? <SessionDot color={sessionColor} size={8} /> : null}
+                {pageProgress ? (
+                  <PageProgressMark
+                    state={pageProgress}
+                    page={markPage}
+                    riwayah={riwayah}
+                    size={9}
+                  />
+                ) : null}
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    color: ink,
+                    fontSize: TYPE.headline.fontSize,
+                    fontWeight: '600',
+                    writingDirection: isArabic ? 'rtl' : 'ltr',
+                  }}>
+                  {readerTitle || surahName(surah)}
+                </Text>
+              </View>
+            ),
+          }
+        : {}),
       headerRight: () => (
         // Wider gaps on the Mac: these are pointer targets on a desktop,
         // not thumb targets on a tablet, and Catalyst has already scaled
@@ -448,6 +506,12 @@ export function MushafSurahScreen({
     isArabic,
     isFullscreen,
     readerTitle,
+    pageProgress,
+    markPage,
+    // The dot appears and goes with the session, so the header has to be
+    // re-issued when it changes — otherwise a bookmark switched to
+    // following mid-reading would not show until the next resize.
+    sessionColor,
     palette.bg,
     tone,
     quranHydrated,
@@ -499,6 +563,7 @@ export function MushafSurahScreen({
         onToggleFullscreen={toggleFullscreen}
         audioSheetSignal={audioSheetSignal}
         onTitleChange={handleReaderTitleChange}
+        onPageChange={handleReaderPageChange}
       />
       {riwayahSheet}
     </>

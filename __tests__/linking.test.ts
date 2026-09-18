@@ -5,9 +5,14 @@
  * either side is silent — the link is accepted, the app comes to the front,
  * and it opens on the wrong screen — so the strings are pinned here.
  */
+import { readFileSync } from 'fs';
+import path from 'path';
+
 import { getStateFromPath } from '@react-navigation/native';
 
 import { linking, MIHRAB_SCHEME } from '../src/navigation/linking';
+
+const src = (p: string) => readFileSync(path.join(__dirname, '..', p), 'utf8');
 
 /** What `linking` hands React Navigation, for a given mihrab:// URL. */
 function stateFor(url: string) {
@@ -109,5 +114,41 @@ describe('mihrab:// route table', () => {
 
   it('refuses a surah number that is not one', () => {
     expect(params('mihrab://read/0').surahNumber).toBeUndefined();
+  });
+
+  // ── the khatmah's doors, outside the app ───────────────────────────
+
+  it('carries sessionKhatmah as a boolean, not the string "1"', () => {
+    // The screen branches on it to claim the visit for the plan. A
+    // truthy "0" would make every door the khatmah's.
+    const p = params('mihrab://read/3?initialPage=42&sessionKhatmah=1');
+    expect(p.sessionKhatmah).toBe(true);
+    expect(params('mihrab://read/3?initialPage=42&sessionKhatmah=0').sessionKhatmah)
+      .toBe(false);
+  });
+
+  it('and a link without it leaves the visit to the marker', () => {
+    // The trap this table's own comment warns about: a query key that is
+    // not listed in `parse` is dropped in silence. That is what made the
+    // widget and the reminder behave unlike the home card.
+    expect(params('mihrab://read/2?initialPage=3')).not.toHaveProperty(
+      'sessionKhatmah',
+    );
+  });
+
+  it('both widgets send it, and only with a plan running', () => {
+    // The payload carries `khatmah` exactly when the card's position is
+    // the plan's own page, so its presence IS the question — and the
+    // "play from here" link is the same destination, out loud.
+    const kotlin = src(
+      'android/app/src/main/java/com/prayer_times/PrayerWidgetReadingProvider.kt',
+    );
+    expect(kotlin).toMatch(
+      /optJSONObject\("khatmah"\) != null\) "&sessionKhatmah=1" else ""/,
+    );
+    expect(kotlin.match(/\$\{sessionParam\(r\)\}/g) ?? []).toHaveLength(2);
+    const swift = src('ios/PrayerWidgetExtension/ReadingWidget.swift');
+    expect(swift).toMatch(/r\.khatmah != nil \? "&sessionKhatmah=1" : ""/);
+    expect(swift.match(/\\\(sessionParam\(r\)\)/g) ?? []).toHaveLength(2);
   });
 });

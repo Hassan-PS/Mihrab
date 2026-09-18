@@ -27,9 +27,20 @@ import type { FastEntry } from '../fasting/fasting';
 import type { SunnahDay, SunnahLog } from '../journal/sunnah';
 import type { DhikrLog } from '../practice/practiceStore';
 import {
+  applyMarks,
+  contiguousFrom,
+  mergeMarks,
+  unionRanges,
+} from '../quran/khatmahDone';
+import {
   ayahsThroughPage,
+  khatmahDone,
+  khatmahStartAyah,
+  pagesThroughAyahs,
+  KHATMAH_TOTAL_AYAHS as TOTAL_AYAHS,
   type KhatmahPlan,
   type QuranState,
+  type QuranBookmark,
 } from '../quran/quranState';
 import { DEFAULT_RIWAYAH } from '../quran/riwayat';
 import type { Snapshot, SnapshotData, SyncSelection } from './snapshot';
@@ -192,7 +203,8 @@ export function mergeKhatmah(
     // for a pair that has none would add a field to the output that was
     // not in either input, and merging a snapshot with ITSELF would stop
     // returning itself — the idempotence the whole P2P cycle rests on.
-    const ayahsRead =
+    const hasSet = mine.done != null || p.done != null;
+    const maxAyahsRead =
       mine.ayahsRead === undefined && p.ayahsRead === undefined
         ? undefined
         : Math.max(
@@ -210,6 +222,49 @@ export function mergeKhatmah(
     // next round. The tombstone travels instead, and one side carrying it
     // is enough: earliest date if both do, so the merge stays commutative
     // and merging a snapshot with itself still returns itself.
+    /**
+     * WHICH PAGES, UNIONED. Two devices that each read part of the book
+     * have both read those parts, so neither side can lose a range — and
+     * union is commutative and idempotent, which is what keeps merging
+     * order-free and a snapshot merged with itself equal to itself. The
+     * high-water fields below still take the max, for a device that has
+     * not been updated yet and reads only those.
+     */
+    /**
+     * BOTH DEVICES' READING, THEN BOTH DEVICES' CLAIMS, IN TIME ORDER.
+     *
+     * The union is what lets two devices reading different parts keep
+     * both. It is also why it alone cannot carry an un-mark: a union only
+     * grows, so a page removed here came back from there, every round —
+     * the same shape as the khatmah delete that resurrected itself. The
+     * dated claims are merged like everything else and replayed over the
+     * union, so the last thing the reader actually said about a page is
+     * what it says, whichever device they said it on. See `AyahMark`.
+     */
+    const marks = mergeMarks(mine.marks, p.marks);
+    const doneRanges = applyMarks(
+      unionRanges(khatmahDone(mine), khatmahDone(p), TOTAL_AYAHS),
+      marks,
+      TOTAL_AYAHS,
+    );
+    /**
+     * THE MIRROR FOLLOWS THE SET, once there is one. Taking the max of the
+     * two mirrors was right while the mirrors were the whole story; with
+     * a set that can carry a hole, the max can point past one — the other
+     * device's number, over a page this device just un-marked — and an
+     * older build reading only the mirror is told about pages nobody
+     * read. The contiguous run of the merged set is what both writers
+     * store locally, so it is also what keeps a snapshot merged with
+     * itself equal to itself.
+     */
+    const contiguous = hasSet
+      ? Math.max(
+          0,
+          contiguousFrom(doneRanges, khatmahStartAyah(mine), TOTAL_AYAHS),
+        )
+      : undefined;
+    const ayahsRead = contiguous ?? maxAyahsRead;
+    const pagesReadOut = contiguous !== undefined ? pagesThroughAyahs(contiguous) : pagesRead;
     const abandonedAt =
       mine.abandonedAt != null && p.abandonedAt != null
         ? Math.min(mine.abandonedAt, p.abandonedAt)
@@ -224,13 +279,18 @@ export function mergeKhatmah(
       ...mine,
       ...p,
       startedAt: Math.min(mine.startedAt, p.startedAt),
-      pagesRead,
+      pagesRead: pagesReadOut,
       ...(ayahsRead !== undefined ? { ayahsRead } : {}),
       completedAt,
       // Spread conditionally: writing `abandonedAt: undefined` onto a pair
       // that has none adds a key neither input had, and merging a snapshot
       // with itself would stop returning itself.
       ...(abandonedAt != null ? { abandonedAt } : {}),
+      // Only when one of them actually carried a set, or a pair that had
+      // none would come out with a key neither input had.
+      ...(mine.done || p.done ? { done: doneRanges } : {}),
+      // Same rule: a pair that never claimed anything must not gain a key.
+      ...(marks.length > 0 ? { marks } : {}),
       ...(position !== undefined ? { position } : {}),
     });
   }
@@ -244,12 +304,30 @@ export function mergeKhatmah(
  * `prefs` is taken whole rather than field-by-field. They are one coherent
  * choice about how to read — renderer, reciter, repeat counts, tafsir
  * edition — and a half-and-half blend of two devices' preferences is a
- * configuration neither user chose. `lastRead.updatedAt` is the only
- * timestamp the Quran store keeps, so it doubles as the tiebreak.
+ * configuration neither user chose.
+ *
+ * They have their own timestamp now. They used to ride on
+ * `lastRead.updatedAt`, the only one this store kept, which tied a
+ * settings change to whether that device had also read: change a
+ * preference on the Mac, read on the phone, and the Mac's choice was
+ * dropped on the next sync without a word. `prefsUpdatedAt` is written
+ * by `setQuranPrefs` and by nothing else.
  */
 export function mergeQuran(local: QuranState, incoming: QuranState): QuranState {
+  // NEWEST COPY WINS, by id. It used to be first copy wins — the local one
+  // kept, the incoming one dropped — which was correct while a bookmark
+  // could not change after it was made. A following bookmark can: it
+  // moves as it is read from, and with the old rule it moved on one
+  // device and never on the other, silently. `updatedAt` is written on
+  // every change; a bookmark from before it existed has never changed,
+  // so `createdAt` is its truthful stand-in. Ties keep the local copy,
+  // so merging a snapshot with itself still returns itself.
+  const stamp = (b: QuranBookmark) => b.updatedAt ?? b.createdAt;
   const bookmarks = new Map(local.bookmarks.map(b => [b.id, b]));
-  for (const b of incoming.bookmarks) if (!bookmarks.has(b.id)) bookmarks.set(b.id, b);
+  for (const b of incoming.bookmarks) {
+    const mine = bookmarks.get(b.id);
+    if (!mine || stamp(b) > stamp(mine)) bookmarks.set(b.id, b);
+  }
 
   const starred = [...new Set([...local.starred, ...incoming.starred])].sort();
 
@@ -257,13 +335,48 @@ export function mergeQuran(local: QuranState, incoming: QuranState): QuranState 
   const theirsAt = incoming.lastRead?.updatedAt ?? 0;
   const theirsIsNewer = theirsAt > mineAt;
 
+  /**
+   * Its own question, its own answer — falling back to the reading stamp
+   * for a side that has none.
+   *
+   * A snapshot written before `prefsUpdatedAt` existed, or exported by an
+   * older build, carries no preference time at all. Reading 0 for it
+   * would make an import of such a snapshot bring nothing: the receiving
+   * device is also at 0, the tie keeps local, and the imported reciter,
+   * tafsir and reading choices are silently dropped. So an unstamped
+   * side is judged the way it always was, by `lastRead.updatedAt`, and a
+   * stamped one by the stamp. Both are wall-clock milliseconds.
+   *
+   * Ties keep the local copy, like every other tie here, so merging a
+   * snapshot with itself returns it.
+   */
+  const prefsStamp = (s: QuranState) =>
+    s.prefsUpdatedAt && s.prefsUpdatedAt > 0
+      ? s.prefsUpdatedAt
+      : (s.lastRead?.updatedAt ?? 0);
+  const minePrefsAt = prefsStamp(local);
+  const theirPrefsAt = prefsStamp(incoming);
+  const theirPrefsAreNewer = theirPrefsAt > minePrefsAt;
+
   return {
     version: 1,
     lastRead: theirsIsNewer ? incoming.lastRead : local.lastRead,
     bookmarks: [...bookmarks.values()].sort((a, b) => a.createdAt - b.createdAt),
     starred,
     khatmah: mergeKhatmah(local.khatmah, incoming.khatmah),
-    prefs: theirsIsNewer ? incoming.prefs : local.prefs,
+    prefs: theirPrefsAreNewer ? incoming.prefs : local.prefs,
+    // The stamp travels with the choice, or the loser's own next sync
+    // would look newer than the winner it just accepted. Left out when
+    // neither side ever had one, so two old snapshots merge to an old
+    // snapshot rather than gaining a field.
+    ...(Math.max(local.prefsUpdatedAt ?? 0, incoming.prefsUpdatedAt ?? 0) > 0
+      ? {
+          prefsUpdatedAt: Math.max(
+            local.prefsUpdatedAt ?? 0,
+            incoming.prefsUpdatedAt ?? 0,
+          ),
+        }
+      : {}),
   };
 }
 

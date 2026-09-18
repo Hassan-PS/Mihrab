@@ -315,8 +315,16 @@ describe('the readers hand the page a handler, not an arrow around one', () => {
     const core = read('src/quran/mushafReaderCore.tsx');
     // `readingKey` is the PINNED marker as a string — a pin is rare and
     // deliberate, so the key does not move on a page turn either (#41).
-    expect(core).toMatch(/\[quran\.bookmarks, plan, readingKey\],?\s*\n\s*\);/);
+    // `anchorBookmarkId` is the following bookmark being DRAWN (#54): it
+    // changes when the visit opens on one and again on the first turn
+    // that carries it along, so twice a visit rather than once a page.
+    expect(core).toMatch(
+      /\[quran\.bookmarks, plan, readingKey, anchorBookmarkId\],?\s*\n\s*\);/,
+    );
     expect(core).not.toMatch(/\}, \[quran\]\);/);
     expect(core).not.toMatch(/\[quran\.bookmarks, plan, quran\.lastRead\]/);
+    // And NOT the bookmark itself, which moves on every turn — the id is
+    // stable while the same bookmark is the anchor.
+    expect(core).not.toMatch(/readingKey, anchorBookmark\]/);
   });
 });

@@ -34,11 +34,13 @@ import { getAyahTranslation, QURAN_TRANSLATIONS } from '../translations';
 import { useActiveEdition } from '../useActiveEdition';
 import {
   activeKhatmah,
+  khatmahPageInWindow,
   addBookmark,
   clearKhatmahPosition,
   findBookmark,
   isStarred,
   removeBookmark,
+  setBookmarkFollows,
   setKhatmahPosition,
   setReadingPosition,
   toggleStar,
@@ -277,6 +279,9 @@ export function AyahActionSheet({
   const plan = activeKhatmah(state);
   const isKhatmahHere =
     plan?.position?.surah === surah && plan?.position?.ayah === ayah;
+  // The muṣḥaf on screen: which portion a page belongs to is a question
+  // about THIS print's pagination, not the default one's.
+  const riwayah = resolveRiwayah(state.prefs.riwayah);
   // The other trail's marker (#41): pinned here, or recorded here by
   // reading — either way "Continue reading" already leads to this ayah.
   const isReadingHere =
@@ -691,6 +696,62 @@ export function AyahActionSheet({
             })}
           </View>
 
+          {/**
+           * DOES THIS PLACE KEEP ITSELF?
+           *
+           * A dialog on the way to a bookmark would tax the common case
+           * to serve the rare one, so the choice lives here as a line
+           * under the colours — set from the reader's default, one tap to
+           * change, and it changes THIS bookmark rather than the default.
+           *
+           * Drawn only once there is a bookmark to talk about. On `ask`
+           * it is drawn emphasised, which is the whole of the asking:
+           * the question is the control, and answering it is the tap it
+           * was already going to take.
+           */}
+          {bookmark ? (
+            <Pressable
+              accessibilityRole="switch"
+              accessibilityState={{ checked: !!bookmark.follows }}
+              accessibilityLabel={t(
+                'quran.bookmarkFollows',
+                'Follows your reading',
+              )}
+              hitSlop={6}
+              onPress={() => setBookmarkFollows(bookmark.id, !bookmark.follows)}
+              style={styles.followLine}>
+              <View
+                style={[
+                  styles.followBox,
+                  {
+                    borderColor: BOOKMARK_COLORS[bookmark.color],
+                    backgroundColor: bookmark.follows
+                      ? BOOKMARK_COLORS[bookmark.color]
+                      : 'transparent',
+                  },
+                ]}>
+                {bookmark.follows ? (
+                  <Text style={styles.followTick}>✓</Text>
+                ) : null}
+              </View>
+              <Text
+                style={[
+                  styles.followLineLabel,
+                  {
+                    color:
+                      state.prefs.bookmarkFollowDefault === 'ask' &&
+                      !bookmark.follows
+                        ? palette.text
+                        : palette.muted,
+                  },
+                ]}>
+                {bookmark.follows
+                  ? t('quran.followingOn', 'moves as you read')
+                  : t('quran.followingOff', 'stays on this ayah')}
+              </Text>
+            </Pressable>
+          ) : null}
+
           {/* The reading marker (#41): "Continue reading" starts here. A
               pin rather than a bookmark — there is one of it, it moves on
               as the reader reads on, and it is drawn in the reader until
@@ -733,8 +794,14 @@ export function AyahActionSheet({
             </Text>
           </Pressable>
 
-          {/* Khatmah pin (v2.7.28) — only while a plan is active. */}
-          {plan ? (
+          {/* Khatmah pin (v2.7.28) — only while a plan is active, and
+              only where the plan could actually be. Moving the position
+              to a page fifty portions ahead is not a move, it is a claim
+              that everything between was read; the plan is the thing that
+              decides that, from what was read. Already pinned here stays
+              offered whatever the window says, so a pin can always be
+              taken back off. */}
+          {plan && (isKhatmahHere || khatmahPageInWindow(plan, page, riwayah)) ? (
             <Pressable
               accessibilityRole="button"
               accessibilityState={{ selected: isKhatmahHere }}
@@ -946,6 +1013,27 @@ const styles = StyleSheet.create({
     marginTop: SPACING.lg,
   },
   bookmarkLabel: { fontSize: TYPE.footnote.fontSize, marginEnd: SPACING.xs },
+  followLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
+  },
+  followBox: {
+    width: 18,
+    height: 18,
+    borderRadius: RADIUS.sm,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  followTick: {
+    color: '#fff', // tokens-ok-line: ink on the bookmark's own colour
+    fontSize: TYPE.label.fontSize,
+    fontWeight: '700',
+    includeFontPadding: false,
+  },
+  followLineLabel: { fontSize: TYPE.footnote.fontSize, flexShrink: 1 },
   colorDot: { width: 24, height: 24, borderRadius: RADIUS.md },
   colorDotSelected: {
     borderWidth: 3, // tokens-ok-line: the selected swatch ring, thicker than a hairline by design

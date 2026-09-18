@@ -59,7 +59,7 @@ import {
 import {
   ayahCountForRiwayah,
   easternNumerals,
-  pagesForRiwayah,
+  pageMetaIn,
 } from './pages';
 import { loadRiwayahText } from './riwayahData';
 import { printedPageFor, type AllocatedLine } from './mushafPrintedLines';
@@ -398,7 +398,7 @@ export function unicodePageBlocks(
 ): UnicodePageBlock[] {
   const text = loadRiwayahText(riwayah);
   if (!text) return [];
-  const meta = pagesForRiwayah(riwayah).find(p => p.page === page);
+  const meta = pageMetaIn(page, riwayah);
   if (!meta) return [];
 
   // ── Walk this riwayah's OWN numbering ────────────────────────────────

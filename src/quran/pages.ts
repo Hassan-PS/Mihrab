@@ -124,13 +124,36 @@ export function findPageForAyah(
  * on becomes an ayah, and the ayah becomes whatever page holds it in the
  * other muṣḥaf.
  */
+/**
+ * The page's own row — by index, not by scanning for it.
+ *
+ * The table is page-ordered and one-based, so the row for page N is at
+ * N-1 and the scan was only ever confirming that. It matters because
+ * this is the bottom of everything hot: `ayahsThroughPage` asks for a
+ * row, `isKhatmahPageDone` asks for two, and the khatmah's gap scan asks
+ * for twelve hundred — which was seven hundred thousand comparisons over
+ * a six-hundred-entry array to answer one question about one plan.
+ *
+ * The guard is not ceremony. A riwayah's table is loaded from disk and
+ * this file does not own its shape (`pagesForRiwayah`), so a dataset that
+ * is short, sparse or out of order falls back to the scan rather than
+ * quietly returning the wrong page's first ayah.
+ */
+export function pageMetaIn(
+  page: number,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): MushafPageRange | undefined {
+  const pages = pagesForRiwayah(riwayah);
+  const at = pages[page - 1];
+  if (at && at.page === page) return at;
+  return pages.find(p => p.page === page);
+}
+
 export function firstAyahOfPage(
   page: number,
   riwayah: RiwayahId = DEFAULT_RIWAYAH,
 ): { surah: number; ayah: number } {
-  const pages = pagesForRiwayah(riwayah);
-  const found = pages.find(p => p.page === page);
-  return found ? found.start : { surah: 1, ayah: 1 };
+  return pageMetaIn(page, riwayah)?.start ?? { surah: 1, ayah: 1 };
 }
 
 /** The juz a page belongs to, in a given riwayah. */
@@ -138,7 +161,7 @@ export function juzForPageIn(
   page: number,
   riwayah: RiwayahId = DEFAULT_RIWAYAH,
 ): number {
-  return pagesForRiwayah(riwayah).find(p => p.page === page)?.juz ?? 1;
+  return pageMetaIn(page, riwayah)?.juz ?? 1;
 }
 
 function compare(

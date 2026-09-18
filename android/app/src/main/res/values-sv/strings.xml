@@ -83,6 +83,10 @@
         <item quantity="one">I fas · %1$d sida kvar</item>
         <item quantity="other">I fas · %1$d sidor kvar</item>
     </plurals>
+    <plurals name="widget_reading_skipped">
+        <item quantity="one">%1$d sida överhoppad</item>
+        <item quantity="other">%1$d sidor överhoppade</item>
+    </plurals>
     <plurals name="widget_reading_behind">
         <item quantity="one">%1$d sida efter</item>
         <item quantity="other">%1$d sidor efter</item>

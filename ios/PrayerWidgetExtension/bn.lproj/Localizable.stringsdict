@@ -83,6 +83,22 @@
 			<string>নির্ধারিত গতিতে · %d পৃষ্ঠা বাকি</string>
 		</dict>
 	</dict>
+	<key>widget_reading_skipped</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>আগে %d পৃষ্ঠা বাদ পড়েছে</string>
+			<key>other</key>
+			<string>আগে %d পৃষ্ঠা বাদ পড়েছে</string>
+		</dict>
+	</dict>
 	<key>widget_reading_behind</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

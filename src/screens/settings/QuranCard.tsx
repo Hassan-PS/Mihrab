@@ -6,7 +6,9 @@ import {
 } from '../../quran/CompanionTextControls';
 import { usePrayerSettings } from '../../context/PrayerSettingsContext';
 import { setQuranPrefs, useQuranState } from '../../quran/quranState';
+import { SegmentedControl } from '../../components/ui';
 import {
+  SettingsBlock,
   SettingsGroup,
   SettingsLinkRow,
   SettingsToggleRow,
@@ -82,23 +84,60 @@ function QuranCardImpl() {
           }
         />
       </SettingsGroup>
-      {/* THE SAME PREFERENCE Tilāwah's coffee button holds, not a second
-          one. Two switches over one lock is a bug waiting to be filed:
-          whichever was touched last would appear to win while the other
-          went on claiming the opposite. This is the place you look for
-          it — the coffee button is the shortcut you reach for with the
-          recitation already playing. */}
+      {/**
+       * WHAT A NEW BOOKMARK DOES.
+       *
+       * A star already says "this ayah matters to me", so a bookmark is a
+       * PLACE — and a place that keeps itself is what a place is for,
+       * which is why following is the default for a new install. This
+       * decides only how a new one STARTS: the switch on each bookmark's
+       * own row still overrides it, for that bookmark, forever.
+       *
+       * "Ask each time" is offered and not imposed. It does not open a
+       * dialog on the way to a bookmark — the ayah sheet shows the choice
+       * as a line under the colours, emphasised, and answering it is the
+       * tap it was already going to take.
+       */}
+      <SettingsGroup
+        title={t('quran.newBookmarksTitle', 'New bookmarks')}
+        footer={t('quran.newBookmarksHelp', {
+          defaultValue:
+            'A bookmark that follows moves along as you read, so it is where you stopped; a fixed one stays on the ayah you put it on. This sets what a new bookmark starts as — each bookmark keeps its own switch in the Bookmarks list.',
+        })}>
+        <SettingsBlock>
+          <SegmentedControl
+            accessibilityLabel={t('quran.newBookmarksTitle', 'New bookmarks')}
+            segments={[
+              {
+                key: 'follow',
+                label: t('quran.newBookmarksFollow', 'Follow'),
+              },
+              { key: 'fixed', label: t('quran.newBookmarksFixed', 'Stay put') },
+              { key: 'ask', label: t('quran.newBookmarksAsk', 'Ask') },
+            ]}
+            value={quran.prefs.bookmarkFollowDefault}
+            onChange={bookmarkFollowDefault =>
+              setQuranPrefs({ bookmarkFollowDefault })
+            }
+          />
+        </SettingsBlock>
+      </SettingsGroup>
+      {/* READING's own preference, not Tilāwah's coffee cup (#52). They
+          shared one flag, which is a bug in the other direction: a cup
+          switched off for an evening of listening left the muṣḥaf going
+          dark days later, and nothing on the reader's side had said so.
+          They hold the same counted lock; what differs is who asked. */}
       <SettingsGroup
         title={t('quran.screenTitle', 'While you read')}
         footer={t('quran.keepAwakeHelp', {
           defaultValue:
-            'Holds the screen on while a surah, the mushaf or Tilawah is open, and lets go the moment you leave — so following the verses with the recitation playing does not mean tapping the screen to keep it lit. Your phone’s own screen timeout is left alone.',
+            'Holds the screen on while a surah or the mushaf is open, and lets go the moment you leave — so reading does not mean tapping the screen to keep it lit. Tilawah has its own coffee button for listening, and your phone’s own screen timeout is left alone.',
         })}>
         <SettingsToggleRow
           testID="settings-keep-awake"
           title={t('quran.keepAwake', 'Keep the screen on')}
-          value={quran.prefs.keepAwake}
-          onValueChange={next => setQuranPrefs({ keepAwake: next })}
+          value={quran.prefs.readerKeepAwake}
+          onValueChange={next => setQuranPrefs({ readerKeepAwake: next })}
         />
       </SettingsGroup>
       <CompanionTextSheet

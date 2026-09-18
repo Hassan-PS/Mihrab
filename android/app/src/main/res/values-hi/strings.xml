@@ -80,6 +80,10 @@
         <item quantity="one">पटरी पर · %1$d पृष्ठ बाक़ी</item>
         <item quantity="other">पटरी पर · %1$d पृष्ठ बाक़ी</item>
     </plurals>
+    <plurals name="widget_reading_skipped">
+        <item quantity="one">%1$d पृष्ठ छूट गया</item>
+        <item quantity="other">%1$d पृष्ठ छूट गए</item>
+    </plurals>
     <plurals name="widget_reading_behind">
         <item quantity="one">%1$d पृष्ठ पीछे</item>
         <item quantity="other">%1$d पृष्ठ पीछे</item>

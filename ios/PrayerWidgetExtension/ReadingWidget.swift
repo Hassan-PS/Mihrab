@@ -61,7 +61,11 @@ struct ReadingProvider: TimelineProvider {
     surah: 2, surahName: "Al-Baqarah", ayah: 1, page: 3, juz: 1,
     pagesRead: 47, totalPages: 604, bookmarks: 3,
     lastReadAt: nil, mode: "mushaf",
-    khatmah: .init(day: 14, targetDays: 30, pagesToday: 7, doneToday: 4, behindBy: 0, daysLeft: 16)
+    // `skipped` is the ordinary nil: the sample is a plan read in order.
+    khatmah: .init(
+      day: 14, targetDays: 30, pagesToday: 7, doneToday: 4, behindBy: 0,
+      skipped: nil, daysLeft: 16
+    )
   )
 }
 
@@ -419,7 +423,14 @@ struct ReadingEntryView: View {
     if k.behindBy > 0 {
       return [widgetString("widget_reading_behind", k.behindBy)]
     }
-    if left == 0 { return ["Done for today"] }
+    // Skipped pages outrank "done for today": a plan read out of order no
+    // longer stalls on them, so this is the only place on the widget that
+    // says they are there — and "Done for today" over a book with pages
+    // missing is the sentence this exists to stop.
+    if let skipped = k.skipped, skipped > 0 {
+      return [widgetString("widget_reading_skipped", skipped)]
+    }
+    if left == 0 { return [widgetString("widget_reading_done_today")] }
     return [widgetString("widget_reading_left", left)]
   }
 
@@ -448,12 +459,26 @@ struct ReadingEntryView: View {
     }
   }
 
+  /// WHOSE READING THIS CARD OFFERS.
+  ///
+  /// With a plan running, the position in the payload IS the plan's own
+  /// next page — the app decides that (`widgetBlocks`), and the payload
+  /// carries `khatmah` exactly when it did. So the presence of that
+  /// object is the same question as "is this the khatmah's door", and the
+  /// link says so with `sessionKhatmah=1`: the reader then draws the
+  /// plan's done-marks and leaves the reading marker alone, as it does
+  /// when the home card is tapped. Without it the widget and the card
+  /// would land on the same page and behave differently.
+  private func sessionParam(_ r: WidgetPayload.Reading) -> String {
+    return r.khatmah != nil ? "&sessionKhatmah=1" : ""
+  }
+
   /// mihrab://read/2?initialPage=3 or ?scrollToAyah=1 — the surah screen
   /// picks its reader from which of the two it is given, which is why the
   /// app resolves `mode` rather than this side guessing.
   private func readingURL(_ r: WidgetPayload.Reading) -> URL? {
     let position = r.mode == "mushaf" ? "initialPage=\(r.page)" : "scrollToAyah=\(r.ayah)"
-    return URL(string: "mihrab://read/\(r.surah)?\(position)")
+    return URL(string: "mihrab://read/\(r.surah)?\(position)\(sessionParam(r))")
   }
 
   /// The same destination, arriving out loud — issue #25.
@@ -464,7 +489,7 @@ struct ReadingEntryView: View {
   /// the ayah goes every time, whichever reader the app resolved.
   private func playURL(_ r: WidgetPayload.Reading) -> URL? {
     let position = r.mode == "mushaf" ? "initialPage=\(r.page)" : "scrollToAyah=\(r.ayah)"
-    return URL(string: "mihrab://read/\(r.surah)?\(position)&playFromAyah=\(r.ayah)")
+    return URL(string: "mihrab://read/\(r.surah)?\(position)&playFromAyah=\(r.ayah)\(sessionParam(r))")
   }
 
   /// The same amber the Log screen marks a slipping plan with.
