@@ -466,7 +466,7 @@ export type PrayerAppSettings = {
   lastThirdEnabled: boolean;
   firstThirdEnabled: boolean;
   /**
-   * COUNT A DAY FROM MAGHRIB, NOT FROM MIDNIGHT — issue #58. Defaults OFF.
+   * COUNT A DAY FROM MAGHRIB, NOT FROM MIDNIGHT. Defaults OFF.
    *
    * The Islamic day begins at sunset, which is how a khatmah read in
    * Ramadan is counted: tarawih at 21:00 belongs to the day beginning, and

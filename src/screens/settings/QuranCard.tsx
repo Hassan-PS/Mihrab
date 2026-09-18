@@ -85,7 +85,7 @@ function QuranCardImpl() {
         />
       </SettingsGroup>
       {/**
-       * WHEN A DAY BEGINS, for the khatmah's own counting — issue #58.
+       * WHEN A DAY BEGINS, for the khatmah's own counting.
        *
        * The Islamic day begins at sunset: tarawih belongs to the day that
        * has just started, and a sitting that runs past midnight is one
