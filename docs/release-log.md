@@ -900,4 +900,40 @@ Took 1 aborted attempt(s) before it ran clean:
 
   - 1 origin/main has commits main does not — pull first
 
-**Lesson:** _(unfilled)_
+**Lesson:** the release shipped iOS and then reported that it had not.
+
+Xcode Cloud's push trigger did not fire for `37d8979f`. The script waited
+six minutes, started a run by hand, still got nothing, and did exactly
+what it is built to do: fell back to the local route, archived on this
+Mac, validated, and uploaded. App Store Connect has the build. Every
+other line of verification is green — both assets, the cask, the site,
+the F-Droid recipe, all three Play locales, CI.
+
+Then `verify-release.sh` failed the release, because its iOS check asks
+one question — "is there an Xcode Cloud run for this sha?" — and the
+answer is no and always will be. The fallback it is checking the outcome
+of is invisible to it. So the run ends on a red ✗ over a release that is
+complete, and the printed remedy (`resume && start`) is actively wrong
+here: starting a run now would build 276 a second time and upload a build
+number App Store Connect already has.
+
+A fallback that the verifier does not know about is not a fallback, it is
+a second way to fail. The check should ask whether iOS SHIPPED — an
+Xcode Cloud run, or a local upload this script performed — and only then
+ask by which route, reporting the local one as the warning it is rather
+than as a failure. Until it does, read a red iOS line here together with
+the "✓ iOS uploaded from this Mac" line above it; if both are present,
+the release is fine.
+
+Worth separating from that: the trigger itself. Two releases in a row
+have now not started from the push (2.19.0 went the local way for a
+different reason), and "the push trigger did not fire" has never been
+investigated, only routed around. The local route is slower, depends on
+this particular Mac and its signing identity, and is the only path left
+if it ever breaks too.
+
+Also, smaller: the first attempt died at preflight because a dataset-bot
+commit had landed on origin/main. That gate is right and cost nothing —
+but the release is now the only thing that ever notices, and it notices
+after you have decided to cut one.
+
