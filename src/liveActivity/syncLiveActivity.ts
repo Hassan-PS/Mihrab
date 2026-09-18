@@ -287,7 +287,17 @@ async function syncLiveActivityImpl(args: {
       // hero label after a rollover (the strip still uses `abbr`).
       name: localizedPrayerLabel(r.key),
       time: r.time,
-      display: r.display,
+      // Always written, never left undefined: `JSON.stringify` drops an
+      // undefined key, and the Activity's `Row.display` is a Swift
+      // non-Optional. A 24-hour clock produces no separate display string,
+      // so the whole payload used to fail to decode and no Live Activity
+      // was ever created — see `PrayerLiveActivityAttributes`.
+      // Always written, never left undefined: `JSON.stringify` drops an
+      // undefined key, and the Activity's `Row.display` is a Swift
+      // non-Optional. A 24-hour clock produces no separate display
+      // string, so the whole payload used to fail to decode and no Live
+      // Activity was ever created — see `PrayerLiveActivityAttributes`.
+      display: r.display ?? r.time,
     }));
     // Start anchor for the progress bar — previous prayer, falling back to one
     // hour before the next prayer so the bar still renders sensibly before the
@@ -313,7 +323,7 @@ async function syncLiveActivityImpl(args: {
             abbr: payload.sunriseRow.abbr,
             name: localizedPrayerLabel(payload.sunriseRow.key),
             time: payload.sunriseRow.time,
-            display: payload.sunriseRow.display,
+            display: payload.sunriseRow.display ?? payload.sunriseRow.time,
           }
         : undefined,
       extraRows: (payload.extraRows ?? []).map(r => ({
@@ -321,7 +331,7 @@ async function syncLiveActivityImpl(args: {
         abbr: r.abbr,
         name: localizedPrayerLabel(r.key),
         time: r.time,
-        display: r.display,
+        display: r.display ?? r.time,
       })),
       hijriLabel: '',
       locationLabel: '',

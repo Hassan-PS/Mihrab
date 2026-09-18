@@ -115,6 +115,44 @@ describe('syncLiveActivity → iOS content', () => {
     expect(content.systemTinted).toBe(false);
   });
 
+  /**
+   * THE KEY THAT WAS NEVER SENT — found on a simulator, 2026-09-18.
+   *
+   * `Row.display` is a Swift non-Optional with a default, and synthesized
+   * `Decodable` throws on a missing key rather than using that default.
+   * The payload builder only emits `display` when it differs from `time`,
+   * so on a 24-hour clock (like the `today` fixture here) the key was
+   * absent, `JSON.stringify` dropped it, the ContentState failed to
+   * decode, and `start` rejected into a caught promise — no Live Activity
+   * was ever created, for anyone, silently.
+   *
+   * Every row the Activity is handed must therefore carry a string.
+   */
+  test('every row carries a display string, even on a 24-hour clock', async () => {
+    const now = new Date(2026, 5, 14, 14, 0, 0, 0);
+    const p = syncLiveActivity({
+      options: { enabled: true },
+      today,
+      now,
+      accentHex: '#2563eb',
+    });
+    await jest.advanceTimersByTimeAsync(900);
+    await p;
+
+    const content = JSON.parse(startMock.mock.calls[0][0]);
+    expect(content.rows.length).toBeGreaterThan(0);
+    for (const row of content.rows) {
+      expect(typeof row.display).toBe('string');
+      expect(row.display.length).toBeGreaterThan(0);
+    }
+    for (const row of content.extraRows ?? []) {
+      expect(typeof row.display).toBe('string');
+    }
+    if (content.sunriseRow) {
+      expect(typeof content.sunriseRow.display).toBe('string');
+    }
+  });
+
   test('systemTinted flag is forwarded to the iOS content', async () => {
     const now = new Date(2026, 5, 14, 14, 0, 0, 0);
     const p = syncLiveActivity({

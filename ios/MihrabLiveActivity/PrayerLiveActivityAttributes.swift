@@ -106,6 +106,13 @@ public struct PrayerLiveActivityAttributes: ActivityAttributes {
     public var nextTimeText: String {
       nextTimeDisplay.isEmpty ? nextTime : nextTimeDisplay
     }
+
+    fileprivate enum CodingKeys: String, CodingKey {
+      case nextLabel, nextTime, nextTimeDisplay, nextEpochSeconds
+      case prevEpochSeconds, nextKey, rows, sunriseRow, extraRows
+      case hijriLabel, locationLabel, accentHex, systemTinted, tinted
+      case compactMode, showSunrise, showHijri, showLocation
+    }
   }
 
   /// One prayer row. `key` is canonical ("Fajr"/"Sunrise"/…) so the
@@ -128,6 +135,79 @@ public struct PrayerLiveActivityAttributes: ActivityAttributes {
 
     /// What to put on screen. Never feed this to a parser.
     public var text: String { display.isEmpty ? time : display }
+
+    fileprivate enum CodingKeys: String, CodingKey {
+      case key, abbr, name, time, display
+    }
+  }
+}
+
+/**
+ A DEFAULT IS NOT A FALLBACK UNLESS YOU WRITE ONE.
+
+ Five properties across these two structs say "Defaults to X so older
+ payloads still decode". They did not. Synthesized `Decodable` ignores a
+ property's default and throws `keyNotFound` — the same trap already
+ spelled out on `extraRows` and on `tinted`, which is why both of those
+ are Optional. The rest were left as defaulted non-Optionals, and one of
+ them broke the feature outright:
+
+ `Row.display` is the clock-format string, and the payload builder only
+ emits one when it differs from `time`. On a 24-hour clock the JS side
+ sent no `display`, `JSON.stringify` dropped the key, this decoder threw
+ on every payload, and `start` rejected into a caught promise — so NO
+ Live Activity was ever created, silently, for anyone reading a 24-hour
+ clock. The sender now always writes the key; these initialisers make
+ its absence survivable anyway, which is what the comments promised.
+
+ Required fields stay required. Without a next prayer there is nothing
+ to draw, and failing loudly is the right answer there.
+
+ Written in extensions so the memberwise initialisers survive for
+ previews and tests.
+ */
+@available(iOS 16.1, *)
+extension PrayerLiveActivityAttributes.ContentState {
+  public init(from decoder: Decoder) throws {
+    let c = try decoder.container(keyedBy: CodingKeys.self)
+    nextLabel = try c.decode(String.self, forKey: .nextLabel)
+    nextTime = try c.decode(String.self, forKey: .nextTime)
+    nextTimeDisplay =
+      try c.decodeIfPresent(String.self, forKey: .nextTimeDisplay) ?? ""
+    nextEpochSeconds = try c.decode(Double.self, forKey: .nextEpochSeconds)
+    prevEpochSeconds =
+      try c.decodeIfPresent(Double.self, forKey: .prevEpochSeconds) ?? 0
+    nextKey = try c.decode(String.self, forKey: .nextKey)
+    rows = try c.decode([PrayerLiveActivityAttributes.Row].self, forKey: .rows)
+    sunriseRow = try c.decodeIfPresent(
+      PrayerLiveActivityAttributes.Row.self, forKey: .sunriseRow)
+    extraRows = try c.decodeIfPresent(
+      [PrayerLiveActivityAttributes.Row].self, forKey: .extraRows)
+    hijriLabel = try c.decodeIfPresent(String.self, forKey: .hijriLabel) ?? ""
+    locationLabel =
+      try c.decodeIfPresent(String.self, forKey: .locationLabel) ?? ""
+    accentHex =
+      try c.decodeIfPresent(String.self, forKey: .accentHex) ?? "#22c55e"
+    systemTinted =
+      try c.decodeIfPresent(Bool.self, forKey: .systemTinted) ?? false
+    tinted = try c.decodeIfPresent(Bool.self, forKey: .tinted)
+    compactMode = try c.decodeIfPresent(Bool.self, forKey: .compactMode) ?? true
+    showSunrise = try c.decodeIfPresent(Bool.self, forKey: .showSunrise) ?? true
+    showHijri = try c.decodeIfPresent(Bool.self, forKey: .showHijri) ?? false
+    showLocation =
+      try c.decodeIfPresent(Bool.self, forKey: .showLocation) ?? false
+  }
+}
+
+@available(iOS 16.1, *)
+extension PrayerLiveActivityAttributes.Row {
+  public init(from decoder: Decoder) throws {
+    let c = try decoder.container(keyedBy: CodingKeys.self)
+    key = try c.decode(String.self, forKey: .key)
+    abbr = try c.decode(String.self, forKey: .abbr)
+    name = try c.decodeIfPresent(String.self, forKey: .name) ?? ""
+    time = try c.decode(String.self, forKey: .time)
+    display = try c.decodeIfPresent(String.self, forKey: .display) ?? ""
   }
 }
 #endif
