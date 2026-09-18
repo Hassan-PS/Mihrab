@@ -1255,6 +1255,9 @@
     "newBookmarksFixed": "Tetap",
     "newBookmarksAsk": "Tanya",
     "newBookmarksHelp": "Markah yang mengikuti bergerak saat Anda membaca, jadi ia berada di tempat Anda berhenti; markah tetap berada pada ayat tempat Anda meletakkannya. Ini hanya menentukan keadaan awal markah baru — setiap markah punya sakelarnya sendiri di daftar markah.",
+    "dayStartTitle": "Menghitung hari",
+    "dayStartFromMaghrib": "Mulai hari saat magrib",
+    "dayStartHelp": "Hari Islam dimulai saat matahari terbenam, jadi bacaan malam dihitung untuk hari yang baru mulai, dan sesi yang melewati tengah malam tetap satu hari. Jika mati, hari dihitung dari tengah malam. Ini hanya mengubah porsi harian khataman — tabel salat tetap berganti setelah waktu terakhir hari itu.",
     "bookmarkFollows": "Mengikuti bacaan Anda",
     "markPageRead": "Tandai halaman ini sudah dibaca",
     "markPageUnread": "Tandai halaman ini belum dibaca"

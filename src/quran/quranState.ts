@@ -25,6 +25,7 @@ import {
   totalPagesForRiwayah,
 } from './pages';
 import { DEFAULT_RIWAYAH, coerceRiwayahId, type RiwayahId } from './riwayat';
+import { islamicDayKey } from '../hijri/islamicDay';
 import {
   addRange,
   applyMarks,
@@ -1547,11 +1548,22 @@ export function activeKhatmah(s: QuranState): KhatmahPlan | undefined {
   return s.khatmah.find(isLivePlan);
 }
 
+/**
+ * WHICH DAY THE KHATMAH IS ON — the Islamic one, which begins at maghrib.
+ *
+ * A khatmah read in Ramadan is counted in Islamic days: tarawih at 21:00
+ * belongs to the day that has just begun, not the one that is ending. It
+ * also stops a sitting being split down the middle — 21:00 to 01:00 used
+ * to be two days, the card reporting "today's reading done" at 23:59 and
+ * offering a fresh empty portion at 00:01 while the reader had not moved.
+ *
+ * Read from `hijri/islamicDay`, which falls back to the civil date when
+ * maghrib is unknown — so this store keeps its own purity: no location, no
+ * prayer times, no network, and the same answer it always gave until the
+ * moment something publishes tonight's maghrib.
+ */
 function localYmd(now: number = Date.now()): string {
-  const d = new Date(now);
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${d.getFullYear()}-${m}-${dd}`;
+  return islamicDayKey(new Date(now));
 }
 
 /** Snapshot pagesRead at the first progress of each local day. */

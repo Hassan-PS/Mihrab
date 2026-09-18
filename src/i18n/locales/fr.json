@@ -1255,6 +1255,9 @@
     "newBookmarksFixed": "Fixe",
     "newBookmarksAsk": "Demander",
     "newBookmarksHelp": "Un favori qui suit avance avec votre lecture et se trouve donc là où vous vous êtes arrêté ; un favori fixe reste sur le verset où vous l'avez posé. Ceci définit seulement l'état initial d'un nouveau favori — chacun garde son propre interrupteur dans la liste.",
+    "dayStartTitle": "Compter un jour",
+    "dayStartFromMaghrib": "Commencer le jour au coucher du soleil",
+    "dayStartHelp": "Le jour islamique commence au coucher du soleil : une lecture du soir compte pour le jour qui vient de commencer, et une séance qui dépasse minuit reste un seul jour. Désactivé, les jours sont comptés à partir de minuit. Ceci ne change que la portion quotidienne de la khatma — le tableau des prières bascule toujours après la dernière heure du jour.",
     "bookmarkFollows": "Suit votre lecture",
     "markPageRead": "Marquer cette page comme lue",
     "markPageUnread": "Marquer cette page comme non lue"

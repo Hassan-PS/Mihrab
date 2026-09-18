@@ -1255,6 +1255,9 @@
     "newBookmarksFixed": "Stay put",
     "newBookmarksAsk": "Ask",
     "newBookmarksHelp": "A bookmark that follows moves along as you read, so it is where you stopped; a fixed one stays on the ayah you put it on. This sets what a new bookmark starts as — each bookmark keeps its own switch in the Bookmarks list.",
+    "dayStartTitle": "Counting a day",
+    "dayStartFromMaghrib": "Start the day at sunset",
+    "dayStartHelp": "The Islamic day begins at sunset, so an evening of reading counts towards the day that has just begun and a session that runs past midnight stays one day. Off, days are counted from midnight. This changes the khatmah’s daily portion only — the prayer table still turns after the last time of the day.",
     "bookmarkFollows": "Follows your reading",
     "markPageRead": "Mark this page as read",
     "markPageUnread": "Mark this page as not read"

@@ -56,7 +56,10 @@ export async function collectWidgetExtras(input: {
   const extras: WidgetExtras = {};
 
   // The Hijri date is computed, not stored, so it can never fail and is
-  // always worth sending.
+  // always worth sending. The CIVIL day, like the app's own heading: this
+  // block sits above the same day's prayer times, and a date that turned
+  // at maghrib while the times under it did not would be the widget
+  // disagreeing with itself. See `HomeScreen.getHijriDate`.
   try {
     extras.hijri = buildHijriBlock(now);
   } catch {

@@ -32,6 +32,7 @@
  */
 import { khatmahContinueTarget, type KhatmahTarget } from './khatmahTarget';
 import { countRanges } from './khatmahDone';
+import { islamicDayKey } from '../hijri/islamicDay';
 import { firstAyahOfPage } from './pages';
 import { type RiwayahId } from './riwayat';
 import {
@@ -110,11 +111,9 @@ function gapDoor(plan: KhatmahPlan, riwayah: RiwayahId): KhatmahGap | null {
   };
 }
 
+/** The same day the store writes its snapshot under — see `quranState`. */
 function localYmd(now: number): string {
-  const d = new Date(now);
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${d.getFullYear()}-${m}-${dd}`;
+  return islamicDayKey(new Date(now));
 }
 
 /** Pages of the plan read since the start of the local day. */

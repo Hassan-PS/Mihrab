@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { gregorianToHijri } from './convert';
+import { islamicCivilDate } from './islamicDay';
 import {
   findEventOnHijri,
   isLaylatAlQadrCandidate,
@@ -21,7 +22,10 @@ export function useTodaysIslamicEvent(now: Date = new Date()): {
   isLaylatAlQadrCandidate: boolean;
 } {
   return useMemo(() => {
-    const hijri = gregorianToHijri(now);
+    // Today's event, and today begins at maghrib: Laylat al-Qadr is a
+    // NIGHT, so an odd night of the last ten that only became "today" at
+    // midnight would light up five hours after it began.
+    const hijri = gregorianToHijri(islamicCivilDate(now));
     return {
       event: findEventOnHijri(hijri),
       hijri,

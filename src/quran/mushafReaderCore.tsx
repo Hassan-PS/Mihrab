@@ -26,6 +26,7 @@ import { useNavigation, usePreventRemove } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useKeepAwake } from './keepAwakeLock';
 import { SessionDot, useAnchorBookmarkId, useSessionColor } from './SessionDot';
+import { useIslamicDay } from '../hijri/useIslamicDay';
 import { PageProgressMark, usePageProgress } from './PageProgressMark';
 import { useKeyboardInset } from '../hooks/useKeyboardInset';
 import { useAppPalette } from '../hooks/useAppPalette';
@@ -609,9 +610,14 @@ export function useMushafReaderCore({
    * dashboard." The numbers are the card's own (`khatmahPages`), so the
    * reader and the dashboard cannot disagree about what today is.
    */
+  // Recomputed when the Islamic day turns as well: a reader still on the
+  // page at maghrib would otherwise be shown the finished day's quota
+  // until they touched something.
+  const islamicDay = useIslamicDay();
   const todayQuota = useMemo(
     () => (plan ? khatmahPages(plan, riwayah) : null),
-    [plan, riwayah],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [plan, riwayah, islamicDay],
   );
 
   const finish = useMemo<KhatmahFinish | null>(() => {

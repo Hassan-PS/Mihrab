@@ -1255,6 +1255,9 @@
     "newBookmarksFixed": "Fest",
     "newBookmarksAsk": "Fragen",
     "newBookmarksHelp": "Ein folgendes Lesezeichen wandert beim Lesen mit und steht dort, wo du aufgehört hast; ein festes bleibt auf dem Vers, auf den du es gesetzt hast. Dies legt nur fest, wie ein neues Lesezeichen beginnt — jedes behält seinen eigenen Schalter in der Lesezeichenliste.",
+    "dayStartTitle": "Einen Tag zählen",
+    "dayStartFromMaghrib": "Den Tag bei Sonnenuntergang beginnen",
+    "dayStartHelp": "Der islamische Tag beginnt bei Sonnenuntergang: Abendliches Lesen zählt zum gerade begonnenen Tag, und eine Sitzung über Mitternacht hinaus bleibt ein Tag. Aus werden Tage ab Mitternacht gezählt. Dies ändert nur das Tagespensum der Khatmah — die Gebetstabelle wechselt weiterhin nach der letzten Zeit des Tages.",
     "bookmarkFollows": "Folgt Ihrer Lesung",
     "markPageRead": "Diese Seite als gelesen markieren",
     "markPageUnread": "Diese Seite als ungelesen markieren"

@@ -466,6 +466,27 @@ export type PrayerAppSettings = {
   lastThirdEnabled: boolean;
   firstThirdEnabled: boolean;
   /**
+   * COUNT A DAY FROM MAGHRIB, NOT FROM MIDNIGHT — issue #58. Defaults OFF.
+   *
+   * The Islamic day begins at sunset, which is how a khatmah read in
+   * Ramadan is counted: tarawih at 21:00 belongs to the day beginning, and
+   * a sitting that runs past midnight is one night's reading rather than
+   * two days'. Off, everything answers by the local calendar day exactly
+   * as it always did.
+   *
+   * It is opt-in because it moves a boundary people have a habit around,
+   * and because the first evening after switching it on shows "today's
+   * reading" starting over — the stored snapshot was taken under the other
+   * rule. Nothing is lost, and nothing is recomputed behind the reader.
+   *
+   * What it governs is what gets COUNTED in a day: the khatmah's portion,
+   * and which day an Islamic event falls on. It deliberately does not move
+   * the prayer table, which turns after the last time of the day
+   * (`dayRollover`), nor the Log, whose records are keyed to events rather
+   * than to a boundary — see `hijri/islamicDay`.
+   */
+  islamicDayFromMaghrib: boolean;
+  /**
    * Mālikī second times — issue #19. Defaults OFF.
    *
    * In the Mālikī reckoning each prayer has a preferred window
@@ -680,6 +701,8 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   islamicMidnightEnabled: false,
   lastThirdEnabled: false,
   firstThirdEnabled: false,
+  // Off: the calendar day, which is what every version before this did.
+  islamicDayFromMaghrib: false,
   malikiSecondTimesEnabled: false,
   malikiSecondTimeAlerts: [],
   malikiSecondTimeAlertMinutes: 15,

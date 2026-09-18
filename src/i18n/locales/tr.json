@@ -1255,6 +1255,9 @@
     "newBookmarksFixed": "Sabit",
     "newBookmarksAsk": "Sor",
     "newBookmarksHelp": "Takip eden bir yer imi okudukça ilerler, böylece bıraktığınız yerde olur; sabit olan koyduğunuz ayette kalır. Bu yalnızca yeni bir yer iminin başlangıç durumunu belirler — her yer iminin kendi anahtarı yer imleri listesindedir.",
+    "dayStartTitle": "Günü sayma",
+    "dayStartFromMaghrib": "Günü akşam ezanıyla başlat",
+    "dayStartHelp": "İslami gün güneş batınca başlar: akşam okunanlar yeni başlayan güne sayılır ve gece yarısını aşan bir oturum tek gün kalır. Kapalıyken günler gece yarısından sayılır. Bu yalnızca hatmin günlük bölümünü değiştirir — namaz tablosu yine günün son vaktinden sonra döner.",
     "bookmarkFollows": "Okumanızı takip eder",
     "markPageRead": "Bu sayfayı okundu olarak işaretle",
     "markPageUnread": "Bu sayfayı okunmadı olarak işaretle"

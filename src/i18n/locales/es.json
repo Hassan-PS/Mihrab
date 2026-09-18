@@ -1255,6 +1255,9 @@
     "newBookmarksFixed": "Fijo",
     "newBookmarksAsk": "Preguntar",
     "newBookmarksHelp": "Un marcador que sigue avanza con tu lectura, así queda donde te detuviste; uno fijo se queda en la aleya donde lo pusiste. Esto define cómo empieza un marcador nuevo — cada uno conserva su propio interruptor en la lista de marcadores.",
+    "dayStartTitle": "Contar un día",
+    "dayStartFromMaghrib": "Empezar el día al atardecer",
+    "dayStartHelp": "El día islámico empieza al atardecer: la lectura de la tarde cuenta para el día que acaba de empezar, y una sesión que pasa de medianoche sigue siendo un día. Desactivado, los días se cuentan desde medianoche. Esto solo cambia la porción diaria del jatma — la tabla de oraciones sigue pasando tras la última hora del día.",
     "bookmarkFollows": "Sigue su lectura",
     "markPageRead": "Marcar esta página como leída",
     "markPageUnread": "Marcar esta página como no leída"

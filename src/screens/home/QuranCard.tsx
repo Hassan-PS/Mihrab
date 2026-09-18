@@ -24,6 +24,7 @@ import { useAppPalette } from '../../hooks/useAppPalette';
 import { cardEdgeStyle } from '../../theme/chrome';
 import { useQuranState, type LastRead } from '../../quran/quranState';
 import { warmMushafLayout } from '../../quran/mushafLayout';
+import { useIslamicDay } from '../../hijri/useIslamicDay';
 import { selectQuranCardState } from '../../quran/quranCardState';
 import { ResumeDoors } from '../../quran/ResumeDoors';
 import type { KhatmahTarget } from '../../quran/khatmahTarget';
@@ -45,6 +46,9 @@ type Props = {
 function QuranCardImpl({ onOpenAt, onOpenQuran }: Props) {
   const { palette } = useAppPalette();
   const quran = useQuranState();
+  // The day's portion is keyed on the Islamic day, so the card has to
+  // hear the boundary pass — nothing in `quran` changes at maghrib.
+  useIslamicDay();
   const card = selectQuranCardState(quran);
   // A card that says "Continue" into the muṣḥaf is a reader about to open
   // it. Bring the page-layout data in now, after the home screen has

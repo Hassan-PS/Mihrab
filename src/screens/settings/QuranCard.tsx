@@ -85,6 +85,36 @@ function QuranCardImpl() {
         />
       </SettingsGroup>
       {/**
+       * WHEN A DAY BEGINS, for the khatmah's own counting — issue #58.
+       *
+       * The Islamic day begins at sunset: tarawih belongs to the day that
+       * has just started, and a sitting that runs past midnight is one
+       * night's reading rather than two days'. Opt-in, because it moves a
+       * boundary people have a habit around — and the first evening after
+       * switching it on shows today's reading starting over, since the
+       * stored snapshot was taken under the other rule.
+       *
+       * Here rather than with the prayer times because what it changes is
+       * what gets COUNTED in a day. The prayer table is deliberately not
+       * affected: it turns after the last time of the day, as it always
+       * has. See `hijri/islamicDay`.
+       */}
+      <SettingsGroup
+        title={t('quran.dayStartTitle', 'Counting a day')}
+        footer={t('quran.dayStartHelp', {
+          defaultValue:
+            'The Islamic day begins at sunset, so an evening of reading counts towards the day that has just begun and a session that runs past midnight stays one day. Off, days are counted from midnight. This changes the khatmah’s daily portion only — the prayer table still turns after the last time of the day.',
+        })}>
+        <SettingsToggleRow
+          testID="settings-islamic-day"
+          title={t('quran.dayStartFromMaghrib', 'Start the day at sunset')}
+          value={settings.islamicDayFromMaghrib}
+          onValueChange={next =>
+            updateSettings({ islamicDayFromMaghrib: next })
+          }
+        />
+      </SettingsGroup>
+      {/**
        * WHAT A NEW BOOKMARK DOES.
        *
        * A star already says "this ayah matters to me", so a bookmark is a

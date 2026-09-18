@@ -1255,6 +1255,9 @@
     "newBookmarksFixed": "固定",
     "newBookmarksAsk": "询问",
     "newBookmarksHelp": "跟随的书签会随阅读移动，因此停在你读到的地方；固定的书签留在你放置的那一节。此项只决定新书签的初始状态 — 每个书签在书签列表中都有自己的开关。",
+    "dayStartTitle": "一天的计算",
+    "dayStartFromMaghrib": "从日落开始新的一天",
+    "dayStartHelp": "伊斯兰历的一天从日落开始：傍晚的诵读计入刚开始的这一天，跨过午夜的一次诵读仍算同一天。关闭时，按午夜计算。此项只改变完读的每日份额 — 礼拜时间表仍在当天最后一个时刻之后翻页。",
     "bookmarkFollows": "跟随您的阅读",
     "markPageRead": "将此页标记为已读",
     "markPageUnread": "将此页标记为未读"

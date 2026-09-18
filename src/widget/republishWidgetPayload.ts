@@ -55,7 +55,8 @@ import { applyOffsets } from '../settings/prayerOffsets';
 import { loadSettings } from '../settings/storage';
 import type { PrayerAppSettings } from '../settings/types';
 import type { TimingsMap } from '../types/prayer';
-import { addDays } from '../utils/prayerTimes';
+import { addDays, combineLocalDateAndTime } from '../utils/prayerTimes';
+import { setTodaysMaghrib } from '../hijri/islamicDay';
 import { filterOptionalTimes, injectNightTimes } from '../utils/nightTimes';
 import { collectWidgetExtras } from './collectWidgetExtras';
 import { syncPrayerWidget } from './syncPrayerWidget';
@@ -218,6 +219,36 @@ export async function republishWidgetPayload(
       Firstthird: settings.firstThirdEnabled,
     };
     const week = window.map(day => filterOptionalTimes(day, optional));
+
+    /**
+     * TODAY'S MAGHRIB, FOR EVERYTHING THAT ASKS WHAT DAY IT IS.
+     *
+     * Published from here because this already runs at app root with the
+     * timings in hand — the Qur'an tab and the Hijri label need the
+     * boundary and have no business loading prayer times for it, and the
+     * bottom tabs are lazy, so hanging it off a screen would leave it
+     * unset until Today had been opened. See `hijri/islamicDay`.
+     *
+     * ONE GATE FOR THE WHOLE FEATURE. Every consumer already treats an
+     * absent maghrib as "use the calendar day", because that was the
+     * fallback for a device with no prayer times — so the setting needs no
+     * second reading anywhere else. Off is not a code path; it is the
+     * absence of one.
+     */
+    try {
+      setTodaysMaghrib(
+        settings.islamicDayFromMaghrib && window[0].Maghrib
+          ? combineLocalDateAndTime(now, window[0].Maghrib)
+          : null,
+      );
+    } catch {
+      // `extractClock` THROWS on a clock it cannot read, and this call sits
+      // on the path that keeps every widget current. A day boundary is
+      // worth having and not worth taking the widget down for: unknown
+      // means the civil day, which is what every caller did before this
+      // existed, so failing here costs nothing that was working.
+      setTodaysMaghrib(null);
+    }
 
     const seasonal = computeSeasonalTreatment(window[0], window[1], now);
     const extras = await collectWidgetExtras({

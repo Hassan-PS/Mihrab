@@ -69,6 +69,7 @@ import {
   KHATMAH_TOTAL_AYAHS,
 } from '../quran/quranState';
 import { loadTafsir, resolveTafsirEdition } from '../quran/tafsir';
+import { useIslamicDay } from '../hijri/useIslamicDay';
 import { selectQuranCardState } from '../quran/quranCardState';
 import { ResumeDoors } from '../quran/ResumeDoors';
 import {
@@ -368,7 +369,10 @@ export function QuranScreen() {
   const pct = (part: number, whole: number) =>
     whole > 0 ? Math.max(0, Math.min(100, (part / whole) * 100)) : 0;
   const plan = activeKhatmah(quran);
-  // The two doors, from the selector Home's card uses (#41).
+  // The two doors, from the selector Home's card uses (#41). Subscribed
+  // to the boundary because the day's portion turns at maghrib and no
+  // state this screen holds turns with it.
+  useIslamicDay();
   const doors = selectQuranCardState(quran);
   // The day's portion, how much of it is read, and anything read past it.
   const day = plan ? khatmahDay(plan) : null;

@@ -1255,6 +1255,9 @@
     "newBookmarksFixed": "Stanna",
     "newBookmarksAsk": "Fråga",
     "newBookmarksHelp": "Ett bokmärke som följer flyttar med din läsning och står därför där du slutade; ett fast stannar på versen du satte det på. Detta bestämmer bara hur ett nytt bokmärke börjar — varje bokmärke har sin egen knapp i bokmärkeslistan.",
+    "dayStartTitle": "Räkna ett dygn",
+    "dayStartFromMaghrib": "Låt dygnet börja vid solnedgången",
+    "dayStartHelp": "Det islamiska dygnet börjar vid solnedgången, så kvällens läsning räknas till dygnet som just börjat och en session som passerar midnatt förblir ett dygn. Av räknas dygn från midnatt. Detta ändrar bara khatmahs dagliga del — bönetabellen vänder fortfarande efter dagens sista tid.",
     "bookmarkFollows": "Följer din läsning",
     "markPageRead": "Markera sidan som läst",
     "markPageUnread": "Markera sidan som oläst"

@@ -1050,7 +1050,25 @@ export function HomeScreen() {
     [i18n.language],
   );
   const getHijriDate = useCallback(
-    (dayOffset: number): string => formatHijriLabel(addDays(new Date(), dayOffset)),
+    /**
+     * THE CARD'S DAY, NOT THE ISLAMIC DAY — and deliberately.
+     *
+     * The Islamic day begins at maghrib (`hijri/islamicDay`), so between
+     * maghrib and the end of the card this label is one behind what a
+     * reader would answer if asked the date. It stays anyway, because this
+     * line is the TABLE's heading: the table turns to tomorrow after the
+     * last time of the day (`dayRollover`, Isha or the First Third), and
+     * the same `dayOffset` drives all three parts of the heading. Shifting
+     * this one at maghrib made it disagree with the weekday beside it for
+     * the evening, and then double-count once the table turned — the
+     * heading read two days ahead of the times underneath it.
+     *
+     * The Islamic day governs what is COUNTED in a day (the khatmah's
+     * portion) and which day an event falls on. What the table is showing
+     * is a different question, and this label answers that one.
+     */
+    (dayOffset: number): string =>
+      formatHijriLabel(addDays(new Date(), dayOffset)),
     // i18n.language drives the localised Hijri month name inside the formatter.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [i18n.language],
