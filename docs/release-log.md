@@ -866,4 +866,30 @@ Changed the release cycle itself:
   - `scripts/build-catalyst.sh`
   - `scripts/release.sh`
 
-**Lesson:** _(unfilled)_
+**Lesson:** the cut was clean; the publish was not, and the script's own
+error message sent the recovery the wrong way.
+
+`gh release create` uploads the APK as part of creating the release. On
+this cut it stalled — 21 minutes, 228MB sent for a 136MB file, ~188k
+retransmits, then nothing at all — and killing it left the release
+**created as a draft with a partial asset**, because `gh` creates, then
+uploads, then publishes. The recovery was therefore two commands: upload
+the asset on its own, then `gh release edit --draft=false --latest`.
+Nothing in the script said so. It reported `gh release failed` and exited,
+which reads as "nothing happened" and invites starting over — and starting
+over against an existing draft of the same tag is how a release ends up
+with two assets or none.
+
+The rule this belongs to is the one `release.sh` is already built around:
+everything that can fail runs before the first irreversible step. A
+136MB upload over a flaky link *is* a step that can fail, and it is
+currently welded to the step that cannot be undone. Two ways out, both
+cheap: create the release empty and upload the asset as its own retryable
+step, or — at minimum — have the failure path say what state it left
+behind. A message that names the draft is worth more than a retry that
+does not know one exists.
+
+Generalised: an error that says a command failed, without saying what it
+left behind, is an error that costs more than the failure. Every
+irreversible step in this script should be able to describe its own
+wreckage.
