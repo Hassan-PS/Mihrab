@@ -38,6 +38,7 @@ import {
   KHATMAH_TOTAL_PAGES,
   khatmahBehindBy,
   khatmahDay,
+  planDays,
   khatmahDaysLeft,
   khatmahGap,
   khatmahPages,
@@ -576,7 +577,11 @@ export function buildReadingBlock(input: {
     const gap = khatmahGap(plan, input.riwayah);
     khatmah = {
       day: state.portion.day,
-      targetDays: plan.targetDays,
+      // The plan's LENGTH, which on a plan paced to a date is the span
+      // from its first day to that date rather than the number it was
+      // made with (issue #53) — "day 9 of 30" has to mean one thing on
+      // the card and on the widget.
+      targetDays: planDays(plan),
       pagesToday: pages.today,
       doneToday: pages.doneToday,
       behindBy: khatmahBehindBy(plan, now, input.riwayah),

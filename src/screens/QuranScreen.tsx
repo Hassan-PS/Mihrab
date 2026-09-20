@@ -28,6 +28,7 @@ import { useTranslation } from 'react-i18next';
 import { useKeyboardInset } from '../hooks/useKeyboardInset';
 import { useKeyboardAwareScroll } from '../hooks/useKeyboardAwareScroll';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { KhatmahDeadlineSheet } from '../quran/KhatmahDeadlineSheet';
 import type { AppPalette } from '../theme/appPalette';
 import { SegmentedControl } from '../components/ui';
 import { useBreakpoint } from '../responsive/breakpoints';
@@ -51,10 +52,16 @@ import {
   finishKhatmahPortion,
   hydrateQuranState,
   khatmahReachAyah,
-  khatmahCurrentPortion,
+  khatmahFinishTarget,
   khatmahDay,
   khatmahBehindBy,
   khatmahDaysLeft,
+  khatmahDeadline,
+  planDays as khatmahPlanDays,
+  khatmahPerDayPages,
+  khatmahUnreadPages,
+  setKhatmahDeadline,
+  KHATMAH_TOTAL_PAGES,
   khatmahPages,
   removeBookmark,
   resetKhatmahAll,
@@ -191,6 +198,10 @@ export function QuranScreen() {
   // Custom khatmah length (v2.7.31) — the 30/60/90 presets plus a
   // free-form day count entered in a small modal.
   const [customDaysVisible, setCustomDaysVisible] = useState(false);
+  /** The "finish by a date" sheet — creating a plan, or re-dating one. */
+  const [deadlineSheet, setDeadlineSheet] = useState<'start' | 'change' | null>(
+    null,
+  );
   const [customDaysText, setCustomDaysText] = useState('');
   // Blank means "from the opening", which is what most khatmahs are.
   const [customFromText, setCustomFromText] = useState('');
@@ -397,6 +408,51 @@ export function QuranScreen() {
    * widget the more honest of the two surfaces.
    */
   const behindPages = plan ? khatmahBehindBy(plan) : 0;
+  /**
+   * THE DEADLINE MODE'S OWN NUMBERS (issue #53).
+   *
+   * `deadline` is the plan's mode: with one, `daysLeft` above is already
+   * the calendar's answer and `behindPages` is deliberately zero — the
+   * missed reading is inside today's quota rather than beside it. What
+   * the card adds here is the pace itself, which is the same fact said
+   * forwards, and the date it is paced to.
+   */
+  const deadline = plan ? khatmahDeadline(plan) : null;
+  const perDayPages = plan && deadline ? khatmahPerDayPages(plan) : 0;
+  const unreadPages = plan ? khatmahUnreadPages(plan) : KHATMAH_TOTAL_PAGES;
+  const deadlinePassed = deadline != null && daysLeft <= 0;
+  /**
+   * WHEN THE PACE HAS OUTGROWN THE PLAN, SAY SO ONCE — AND OFFER A DATE.
+   *
+   * An automatically growing quota has a failure mode this app should not
+   * ship: miss days, the quota grows, the growth makes missing likelier,
+   * and the khatmah becomes the thing you avoid opening. So when what the
+   * date now asks for is far more than the plan was made for, the card
+   * says the number and offers another date — once, quietly, in the same
+   * line, with no count of missed days attached and nothing that has to
+   * be dismissed.
+   *
+   * "Far more" is twice the plan's original pace. The honest comparison
+   * would be against what this reader has actually managed on their best
+   * day, and the app does not keep that; doubling is a proxy that cannot
+   * fire on a plan being kept.
+   */
+  const paceOutgrown =
+    plan != null &&
+    deadline != null &&
+    !deadlinePassed &&
+    perDayPages >= 2 * Math.max(1, Math.ceil(KHATMAH_TOTAL_PAGES / Math.max(1, plan.targetDays)));
+  const deadlineLabel = useMemo(() => {
+    if (!deadline) return '';
+    try {
+      return new Intl.DateTimeFormat(i18n.language, {
+        day: 'numeric',
+        month: 'short',
+      }).format(new Date(`${deadline}T12:00:00`));
+    } catch {
+      return deadline;
+    }
+  }, [deadline, i18n.language]);
   // The reach, like the rest of the card: the bar must not wind back to a
   // hole the card is separately offering to send the reader to.
   const readAyahs = plan ? khatmahReachAyah(plan) : 0;
@@ -513,12 +569,27 @@ export function QuranScreen() {
               </Text>
               <Text style={[styles.khatmahMeta, { color: palette.muted }]}>
                 {[
-                  t('quran.khatmahDaysLeft', {
-                    defaultValue: '{{count}} days of reading left',
-                    count: daysLeft,
-                  }),
+                  // A deadline plan counts DAYS to the date; a duration
+                  // plan counts the portions it has left, which is a
+                  // different question and reads the same way (#53).
+                  deadlinePassed
+                    ? t('quran.khatmahDatePassed', {
+                        defaultValue: 'Date passed — {{count}} pages left',
+                        count: unreadPages,
+                      })
+                    : t('quran.khatmahDaysLeft', {
+                        defaultValue: '{{count}} days of reading left',
+                        count: daysLeft,
+                      }),
+                  deadline && !deadlinePassed
+                    ? t('quran.khatmahByDate', {
+                        defaultValue: 'by {{date}}',
+                        date: deadlineLabel,
+                      })
+                    : null,
                   // Only when there IS a deficit: a reader on schedule
-                  // does not need telling they are not behind.
+                  // does not need telling they are not behind. A deadline
+                  // plan never has one — the pace moved instead.
                   behindPages > 0
                     ? t('quran.khatmahBehindPages', {
                         defaultValue: '{{count}} pages behind',
@@ -564,9 +635,38 @@ export function QuranScreen() {
                   '{{pages}} pages left · day {{day}} of {{days}}',
                 pages: pages.remaining,
                 day: day.portion.day,
-                days: plan.targetDays,
+                // The plan's length, which on a deadline plan is the
+                // calendar's and not the number it was made with.
+                days: khatmahPlanDays(plan),
               })}
             </Text>
+
+            {/* THE PACE, on a plan that has a date to keep (#53). The
+                number that moves when a day is missed — said forwards,
+                as what today asks for, rather than backwards as a debt. */}
+            {deadline ? (
+              <Text style={[styles.khatmahMeta, { color: palette.muted }]}>
+                {paceOutgrown || deadlinePassed ? (
+                  <>
+                    {t('quran.khatmahPaceNow', {
+                      defaultValue: 'That is {{count}} pages a day now.',
+                      count: perDayPages,
+                    })}{' '}
+                    <Text
+                      accessibilityRole="button"
+                      onPress={() => setDeadlineSheet('change')}
+                      style={{ color: palette.accentSolid, fontWeight: '600' }}>
+                      {t('quran.khatmahMoveDate', 'Move the date?')}
+                    </Text>
+                  </>
+                ) : (
+                  t('quran.khatmahPerDayToFinish', {
+                    defaultValue: '{{count}} pages a day to finish on time',
+                    count: perDayPages,
+                  })
+                )}
+              </Text>
+            ) : null}
 
             {/* The day. Its own portion, and anything read past it. */}
             <View style={styles.khatmahDayRow}>
@@ -623,7 +723,7 @@ export function QuranScreen() {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t('quran.khatmahMarkDone', {
-                  day: khatmahCurrentPortion(plan).day,
+                  day: khatmahFinishTarget(plan).day,
                   defaultValue: "Mark day {{day}}'s reading done",
                 })}
                 onPress={finishKhatmahPortion}
@@ -637,13 +737,13 @@ export function QuranScreen() {
                       pushed the label into an ellipsis at 2 : 3. */}
                   {(day.done
                     ? t('quran.khatmahMarkNext', {
-                        day: khatmahCurrentPortion(plan).day,
+                        day: khatmahFinishTarget(plan).day,
                         // Which day that is, in calendar terms — a plan's
                         // day number says nothing on its own.
                         when: formatDayWhen(
                           khatmahDayWhen(
                             plan.startedAt,
-                            khatmahCurrentPortion(plan).day,
+                            khatmahFinishTarget(plan).day,
                           ),
                           (key: string, opts: { defaultValue: string }) =>
                             t(key, opts) as string,
@@ -693,6 +793,18 @@ export function QuranScreen() {
                   </Text>
                 </Pressable>
               ))}
+              {/* The other way to say how long: a date rather than a
+                  number of days, re-pacing itself as days are missed
+                  (issue #53). Beside the durations, not instead of them. */}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('quran.khatmahByDateTitle', 'Finish by a date')}
+                onPress={() => setDeadlineSheet('start')}
+                style={[styles.chip, { borderColor: palette.border }]}>
+                <Text style={{ color: palette.accentSolid, fontWeight: '600', fontSize: TYPE.footnote.fontSize }}>
+                  {t('quran.khatmahByDateChip', 'By a date…')}
+                </Text>
+              </Pressable>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t('quran.khatmahCustom', 'Custom…')}
@@ -1456,6 +1568,22 @@ export function QuranScreen() {
                 false,
               ],
               [
+                deadline
+                  ? t('quran.khatmahChangeDate', 'Change the date')
+                  : t('quran.khatmahByDateTitle', 'Finish by a date'),
+                deadline
+                  ? t(
+                      'quran.khatmahChangeDateHelp',
+                      'Move it, or take it off and go back to a plan of a set length.',
+                    )
+                  : t(
+                      'quran.khatmahByDateHelp',
+                      'Pace the plan to a date; what is left is re-cut over the days that remain.',
+                    ),
+                () => setDeadlineSheet('change'),
+                false,
+              ],
+              [
                 t('quran.khatmahResetToday', "Reset today's reading"),
                 t(
                   'quran.khatmahResetTodayHelp',
@@ -1519,6 +1647,25 @@ export function QuranScreen() {
       </Modal>
 
       {/* Custom khatmah length (v2.7.31). */}
+      <KhatmahDeadlineSheet
+        visible={deadlineSheet !== null}
+        mode={deadlineSheet ?? 'start'}
+        current={deadline}
+        unreadPages={unreadPages}
+        onClose={() => setDeadlineSheet(null)}
+        onChoose={by => {
+          const opening = deadlineSheet === 'start';
+          setDeadlineSheet(null);
+          if (opening) {
+            // A plan made from a date still carries a length, so taking
+            // the date off later lands on a plan rather than on nothing.
+            if (by) startKhatmah(30, undefined, by);
+            return;
+          }
+          setKhatmahDeadline(by);
+        }}
+      />
+
       <Modal
         visible={customDaysVisible}
         transparent

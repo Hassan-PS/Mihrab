@@ -16,6 +16,9 @@ import {
   khatmahDay,
   khatmahDaysLeft,
   khatmahDeadline,
+  khatmahFinishTarget,
+  khatmahReachAyah,
+  finishKhatmahPortion,
   khatmahPaceToday,
   khatmahPages,
   khatmahPerDayPages,
@@ -326,5 +329,32 @@ describe('the deadline itself travels, and can be taken off', () => {
     const later = plan({ deadline: '2026-10-20', deadlineAt: 7_000 });
     expect(mergeKhatmah([soon], [later])[0].deadline).toBe('2026-10-20');
     expect(mergeKhatmah([later], [soon])[0].deadline).toBe('2026-10-20');
+  });
+});
+
+describe('the finish button on a plan paced to a date', () => {
+  beforeEach(() => __resetQuranStateForTests());
+
+  it('means today while today is unread, and tomorrow once it is done', () => {
+    const by = ymd(Date.now() + 29 * DAY);
+    startKhatmah(30, undefined, by);
+    const today = khatmahFinishTarget(activeKhatmah(getQuranState())!);
+    expect(today.from).toBe(1);
+
+    // Finish it. On a duration plan the portion in hand would advance by
+    // itself; on this one today stays today, so the button has to move.
+    finishKhatmahPortion();
+    const after = activeKhatmah(getQuranState())!;
+    expect(khatmahDay(after).done).toBe(true);
+    const next = khatmahFinishTarget(after);
+    expect(next.day).toBe(today.day + 1);
+    expect(next.from).toBe(today.to + 1);
+
+    // And pressing it again reads that next day rather than doing
+    // nothing, which is what a portion already covered used to mean.
+    finishKhatmahPortion();
+    const twice = activeKhatmah(getQuranState())!;
+    expect(khatmahReachAyah(twice)).toBeGreaterThanOrEqual(next.to);
+    expect(khatmahDay(twice).extra).toBeGreaterThan(0);
   });
 });

@@ -2730,7 +2730,12 @@ export function khatmahDeadline(plan: KhatmahPlan): string | null {
   return typeof plan.deadline === 'string' && plan.deadline ? plan.deadline : null;
 }
 
-function planDays(plan: KhatmahPlan): number {
+/**
+ * The plan's length in days — `targetDays` for a duration plan, and the
+ * span from its first day to its deadline for a dated one. Exported
+ * because "day 9 of 30" has to say the same 30 the plan is paced by.
+ */
+export function planDays(plan: KhatmahPlan): number {
   const by = khatmahDeadline(plan);
   // The whole length of a deadline plan is the calendar's: the day it
   // began to the day it is due. `targetDays` is still carried — a plan
@@ -3267,11 +3272,38 @@ export function khatmahDay(
  * thing reading ahead by hand would do, and leaves the reader in exactly
  * the place the rule above says they are.
  */
+/**
+ * THE PORTION THE FINISH BUTTON WOULD ACT ON.
+ *
+ * On a duration plan this is always the portion in hand: the day number
+ * is derived from the reading, so finishing today's moves the reader into
+ * the next one and the button follows them there.
+ *
+ * A deadline plan's portion is TODAY'S and stays today's however much is
+ * read — that is what makes reading ahead show as `extra` rather than as
+ * time travel. Which would leave the card's "✓ finish day 10 too" button
+ * pointing at a portion already covered, and `finishKhatmahPortion`
+ * declining to do anything at all. So once today's cut is read, the
+ * button means the next day's, and this is the one place that decides
+ * that — the label and the action must not disagree about which day they
+ * are talking about.
+ */
+export function khatmahFinishTarget(
+  plan: KhatmahPlan,
+  now: number = Date.now(),
+): KhatmahPortion {
+  const portion = khatmahCurrentPortion(plan, now);
+  if (!khatmahDeadline(plan)) return portion;
+  if (!rangesCover(khatmahDone(plan), portion.from, portion.to)) return portion;
+  if (portion.to >= TOTAL_AYAHS) return portion;
+  return khatmahPortion(plan, portion.day + 1, now);
+}
+
 export function finishKhatmahPortion(): void {
   updateQuranState(prev => {
     const active = prev.khatmah.find(isLivePlan);
     if (!active) return prev;
-    const portion = khatmahCurrentPortion(active);
+    const portion = khatmahFinishTarget(active);
     const to = portion.to;
     // Already covered — by the set, not the mirror, which a hole behind
     // the reader would hold back even with the portion fully read.
