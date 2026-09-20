@@ -39,7 +39,7 @@ import { claimReadingSession } from './readingSession';
 import { activeKhatmah } from './quranCardState';
 import { Chip } from '../components/controls';
 import { desktopSize } from '../responsive/desktop';
-import { suspendWhileTyping } from './useKeyPaging';
+import { usePagingKeySuspension } from './useKeyPaging';
 import { RADIUS, SPACING } from '../theme/tokens';
 
 /**
@@ -83,6 +83,7 @@ function MushafIndexSidebarImpl({
   // this needs from the hook is room at the foot: without it the last
   // matches sit under the keyboard with nowhere to scroll to.
   const kb = useKeyboardAwareScroll<FlatList>();
+  const pagingKeys = usePagingKeySuspension();
 
   // Both tables are facts about the PRINT on screen, not about the Qur'an:
   // a Warsh muṣḥaf opens al-Baqarah and juz 2 on pages of its own.
@@ -271,8 +272,11 @@ function MushafIndexSidebarImpl({
 
       {tab === 'surah' ? (
         <TextInput
-          // While this has focus the arrows move the caret, not the page.
-          {...suspendWhileTyping}
+          // While this has focus the arrows move the caret, not the page —
+          // and the claim comes back even when the field is taken off
+          // screen still focused, which the Surah/Juz/Marks tabs and the
+          // way into fullscreen both do.
+          {...pagingKeys}
           value={query}
           onChangeText={setQuery}
           placeholder={t('quran.searchSurahOrPage', 'Search surah or page')}

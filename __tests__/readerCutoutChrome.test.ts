@@ -45,11 +45,49 @@ describe('the page header shares the cutout band', () => {
   // (iOS's centred island) it keeps the near half of the window and no more.
   it('caps the label short of the camera', () => {
     const core = read('src/quran/mushafReaderCore.tsx');
-    expect(core).toContain('isFullscreen && labelMaxWidth == null && styles.pageHeaderTextIsland');
+    expect(core).toContain('island && labelMaxWidth == null && styles.pageHeaderTextIsland');
     expect(core).toContain('labelMaxWidth != null && { maxWidth: labelMaxWidth }');
     expect(core).toContain("pageHeaderTextIsland: { maxWidth: '38%' }");
     const phone = read('src/quran/MushafPhoneReader.tsx');
     expect(phone).toMatch(/classifyTopCutout\(cutout, width\)/);
+  });
+
+  /**
+   * ── AND ONLY WHERE THERE IS A CAMERA IN THE MIDDLE ──────────────────
+   *
+   * The cap used to apply wherever no exact `labelMaxWidth` was given,
+   * which is every call the SPREAD reader makes. An iPad has no Dynamic
+   * Island and a Mac has no notch over the muṣḥaf, so on the Mac in
+   * fullscreen the rule was taking 62% off a name for a hole that was not
+   * there — and with the session dot and the page mark added to the row
+   * in v2.24.0, the name came out as a letter and an ellipsis.
+   *
+   * `island` is the phone saying it has one. The spread reader does not
+   * pass it.
+   */
+  it('is a phone rule: only the phone asks for it', () => {
+    const phone = read('src/quran/MushafPhoneReader.tsx');
+    expect(phone).toMatch(/labelMaxWidth=\{label\.maxWidth\}[\s\S]{0,400}\n\s+island\n/);
+    const spread = read('src/quran/MushafSpreadReader.tsx');
+    expect(spread).not.toMatch(/\bisland\b/);
+  });
+
+  /**
+   * A percentage is a fraction OF something. The row is the flex child of
+   * a header that is one column wide; the Text sits inside a row that
+   * shrinks to its own content, so a percentage there was a fraction of
+   * whatever the text measured — which is the text asking itself how wide
+   * it is allowed to be.
+   */
+  it('caps the row, which has a width, not the text, which does not', () => {
+    const core = read('src/quran/mushafReaderCore.tsx');
+    const row = core.indexOf('styles.pageHeaderLabelRow,');
+    const island = core.indexOf('island && labelMaxWidth == null');
+    const text = core.indexOf('styles.pageHeaderText,');
+    expect(row).toBeGreaterThan(-1);
+    expect(island).toBeGreaterThan(row);
+    expect(island).toBeLessThan(text);
+    expect(core).toContain('pageHeaderTextFlex: { flexShrink: 1 }');
   });
 });
 

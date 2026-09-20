@@ -275,6 +275,10 @@ const PhonePageItem = React.memo(function PhonePageItem({
             show="label"
             labelSide={label.side}
             labelMaxWidth={label.maxWidth}
+            // The phone is the one with a cutout in the middle of the
+            // band. Where its position is known the cap above is exact;
+            // where it is not, `island` asks for the centred one's share.
+            island
           />
         ) : (
           <View style={styles.pageTopGap} />

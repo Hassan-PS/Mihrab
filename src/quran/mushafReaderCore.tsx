@@ -716,6 +716,7 @@ export function MushafPageHeader({
   show = 'both',
   labelSide,
   labelMaxWidth,
+  island = false,
 }: {
   page: number;
   isFullscreen: boolean;
@@ -734,6 +735,16 @@ export function MushafPageHeader({
   labelSide?: 'start' | 'end';
   /** A cap in dp so the label stops short of the camera, if one is near. */
   labelMaxWidth?: number;
+  /**
+   * Is there a CENTRED cutout to keep the name out of — a Dynamic Island.
+   *
+   * Only the phone has one, and only it asks. The cap used to be applied
+   * wherever `labelMaxWidth` was absent, which meant the spread reader got
+   * it: an iPad and a Mac have no island, and on the Mac in fullscreen the
+   * surah name — the one thing left that says where you are once the
+   * header is hidden — was squeezed down to a letter and an ellipsis.
+   */
+  island?: boolean;
 }) {
   const { t } = useTranslation();
   const sessionColor = useSessionColor();
@@ -751,6 +762,15 @@ export function MushafPageHeader({
         <View
           style={[
             styles.pageHeaderLabelRow,
+            // ── THE CAP GOES ON THE ROW, NOT ON THE TEXT ──────────────
+            //
+            // `38%` has to resolve against something definite, and the row
+            // is the flex child of a header that is exactly one column
+            // wide. The Text is inside a row that shrinks to its content,
+            // so a percentage there was a fraction of whatever the text
+            // itself came out as — circular, and once the session dot and
+            // the page mark joined the row (v2.24.0) it collapsed.
+            island && labelMaxWidth == null && styles.pageHeaderTextIsland,
             // The marks go on the INNER side of the name — the side facing
             // the middle of the window. The row hugs whichever edge the
             // camera left free, and a rounded corner eats the last few dp
@@ -772,12 +792,11 @@ export function MushafPageHeader({
           numberOfLines={1}
           style={[
             styles.pageHeaderText,
-            // In fullscreen this row is drawn ACROSS the status-bar band, so
-            // that the surah name and the tone pill sit either side of the
-            // cutout instead of below it — see the phone reader. The middle
-            // of the row belongs to the island: the label may have the near
-            // half of the window and no more, however long the surah's name.
-            isFullscreen && labelMaxWidth == null && styles.pageHeaderTextIsland,
+            // Shrinks inside the row rather than carrying its own cap: the
+            // row holds the island's share (above) or the cutout's exact
+            // one (below), and both belong to the whole label — the marks
+            // beside the name are as much in the camera's way as the name.
+            styles.pageHeaderTextFlex,
             labelMaxWidth != null && { maxWidth: labelMaxWidth },
             { color: ornament },
           ]}>
@@ -1069,7 +1088,13 @@ const styles = StyleSheet.create({
   // Spread: the odd (right) page shows only the label — push it to the
   // spread's outer right corner.
   pageHeaderLabelEnd: { justifyContent: 'flex-end' },
+  // In fullscreen the header row is drawn ACROSS the status-bar band, so
+  // the surah name and the tone pill sit either side of the cutout rather
+  // than below it (see the phone reader). The middle belongs to the
+  // island: the label gets the near share of the window and no more,
+  // however long the surah's name. A PHONE rule — `island` says so.
   pageHeaderTextIsland: { maxWidth: '38%' },
+  pageHeaderTextFlex: { flexShrink: 1 },
   pageHeaderLabelRow: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -26,7 +26,7 @@
  * The end of the chain is also why the ARROWS need `setPagingKeyPriority`
  * and the letters do not — see the note there.
  */
-import { useEffect } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import { NativeEventEmitter, NativeModules } from 'react-native';
 
@@ -114,6 +114,51 @@ export const suspendWhileTyping = {
   onFocus: () => setPagingKeyPriority(false),
   onBlur: () => setPagingKeyPriority(true),
 };
+
+/**
+ * The same thing, for a field that can DISAPPEAR while it has focus.
+ *
+ * A blur is the only event that hands the arrows back, and unmounting a
+ * focused `TextInput` does not fire one. The surah search is exactly that
+ * field twice over: it is rendered only on the Surah tab, so switching to
+ * Juz or Marks removes it mid-focus, and the whole sidebar is unmounted
+ * on the way into fullscreen. Either one left the claim released for the
+ * rest of the reader's life — the letters still turned pages and the
+ * arrows had gone dead, which is precisely the fault this file was
+ * written to fix, reintroduced from the other end.
+ *
+ * So the suspension is held by the component, and given back when the
+ * component goes. Only if it is still ours: a field that blurred normally
+ * has already handed it over, and re-asserting on unmount after that
+ * would claim the arrows out from under whatever has focus now.
+ */
+export function usePagingKeySuspension(): {
+  onFocus: () => void;
+  onBlur: () => void;
+} {
+  const held = useRef(false);
+  useEffect(
+    () => () => {
+      if (!held.current) return;
+      held.current = false;
+      setPagingKeyPriority(true);
+    },
+    [],
+  );
+  return useMemo(
+    () => ({
+      onFocus: () => {
+        held.current = true;
+        setPagingKeyPriority(false);
+      },
+      onBlur: () => {
+        held.current = false;
+        setPagingKeyPriority(true);
+      },
+    }),
+    [],
+  );
+}
 
 /**
  * Call `onForward` / `onBack` when the reader presses a paging key.
