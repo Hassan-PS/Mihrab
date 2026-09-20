@@ -58,6 +58,7 @@ import {
   khatmahDaysLeft,
   khatmahDeadline,
   planDays as khatmahPlanDays,
+  khatmahPaceOutgrown,
   khatmahPerDayPages,
   khatmahUnreadPages,
   setKhatmahDeadline,
@@ -422,26 +423,15 @@ export function QuranScreen() {
   const unreadPages = plan ? khatmahUnreadPages(plan) : KHATMAH_TOTAL_PAGES;
   const deadlinePassed = deadline != null && daysLeft <= 0;
   /**
-   * WHEN THE PACE HAS OUTGROWN THE PLAN, SAY SO ONCE — AND OFFER A DATE.
+   * WHEN THE PACE HAS OUTGROWN THE READER, SAY SO — AND OFFER A DATE.
    *
-   * An automatically growing quota has a failure mode this app should not
-   * ship: miss days, the quota grows, the growth makes missing likelier,
-   * and the khatmah becomes the thing you avoid opening. So when what the
-   * date now asks for is far more than the plan was made for, the card
-   * says the number and offers another date — once, quietly, in the same
-   * line, with no count of missed days attached and nothing that has to
-   * be dismissed.
-   *
-   * "Far more" is twice the plan's original pace. The honest comparison
-   * would be against what this reader has actually managed on their best
-   * day, and the app does not keep that; doubling is a proxy that cannot
-   * fire on a plan being kept.
+   * The rule, and the reason there are two halves to it, is with
+   * `khatmahPaceOutgrown`: a plan being kept must never trigger it, and a
+   * plan that never fitted should be caught early rather than at the end.
+   * All this line does is decide whether to say it.
    */
   const paceOutgrown =
-    plan != null &&
-    deadline != null &&
-    !deadlinePassed &&
-    perDayPages >= 2 * Math.max(1, Math.ceil(KHATMAH_TOTAL_PAGES / Math.max(1, plan.targetDays)));
+    plan != null && !deadlinePassed && khatmahPaceOutgrown(plan);
   const deadlineLabel = useMemo(() => {
     if (!deadline) return '';
     try {
@@ -1647,9 +1637,16 @@ export function QuranScreen() {
       </Modal>
 
       {/* Custom khatmah length (v2.7.31). */}
+      {/* MOUNTED ONLY WHILE IT IS OPEN, and that is load-bearing: the
+          sheet seeds its date from the plan's current one in `useState`,
+          which runs when the component mounts. Left mounted with the
+          screen it would have seeded on a screen that had no plan yet,
+          and re-opening it on a dated plan would offer a date a month out
+          instead of the one the reader already chose. */}
+      {deadlineSheet ? (
       <KhatmahDeadlineSheet
-        visible={deadlineSheet !== null}
-        mode={deadlineSheet ?? 'start'}
+        visible
+        mode={deadlineSheet}
         current={deadline}
         unreadPages={unreadPages}
         onClose={() => setDeadlineSheet(null)}
@@ -1657,14 +1654,26 @@ export function QuranScreen() {
           const opening = deadlineSheet === 'start';
           setDeadlineSheet(null);
           if (opening) {
-            // A plan made from a date still carries a length, so taking
-            // the date off later lands on a plan rather than on nothing.
-            if (by) startKhatmah(30, undefined, by);
+            /**
+             * A plan made from a date still carries a LENGTH, and it is
+             * the length that date implies rather than a default thirty:
+             * take the date off a "by mid-December" plan and it should
+             * become the eighty-day plan it was, not a month-long one the
+             * reader never asked for. It is also what the outgrown-pace
+             * line is measured against.
+             */
+            if (!by) return;
+            const span = Math.max(
+              1,
+              Math.min(604, Math.round((Date.parse(`${by}T12:00:00`) - Date.now()) / 86_400_000) + 1),
+            );
+            startKhatmah(span, undefined, by);
             return;
           }
           setKhatmahDeadline(by);
         }}
       />
+      ) : null}
 
       <Modal
         visible={customDaysVisible}

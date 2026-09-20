@@ -28,9 +28,12 @@ describe('the card says which question it is answering', () => {
     expect(screen).toContain('khatmahPerDayPages');
   });
 
-  it('offers a new date when the pace has outgrown the plan', () => {
+  it('offers a new date when the pace has outgrown the reader', () => {
     expect(screen).toContain('quran.khatmahMoveDate');
-    expect(screen).toMatch(/paceOutgrown =[\s\S]{0,400}2 \*/);
+    // The rule itself lives in the store, where it can be walked through
+    // a whole khatmah day by day (`khatmahDeadline.test.ts`); the screen
+    // only decides whether to say it.
+    expect(screen).toContain('khatmahPaceOutgrown(plan)');
     // Never a modal, never a count of missed days: it is a line on the
     // card with a link in it.
     expect(screen).not.toMatch(/missedDays|daysMissed/);
@@ -131,5 +134,29 @@ describe('every string the mode needs, in every language', () => {
         expect(json.quran[key]).toContain('{{count}}');
       }
     }
+  });
+});
+
+describe('the wiring, where a sheet that remembers is a bug', () => {
+  it('is mounted only while it is open, so it seeds from the plan in hand', () => {
+    // `useState` runs on mount. Left mounted with the screen, the sheet
+    // would seed its date on a screen that had no plan yet, and
+    // re-opening it on a dated plan would offer a month out rather than
+    // the date the reader already chose.
+    expect(screen).toMatch(/\{deadlineSheet \?[\s\S]{0,400}<KhatmahDeadlineSheet/);
+    expect(sheet).toMatch(/useState<number>\(\(\) => \{[\s\S]{0,200}current/);
+  });
+
+  it('starts a dated plan with the length that date implies', () => {
+    // Not a default thirty: take the date off an eighty-day plan and it
+    // should become the eighty-day plan it was. It is also what the
+    // outgrown-pace rule measures against.
+    expect(screen).toMatch(/const span = Math\.max\([\s\S]{0,200}startKhatmah\(span/);
+  });
+
+  it('and the home card reads the plan\'s length, not the number it was made with', () => {
+    expect(read('src', 'quran', 'quranCardState.ts')).toContain(
+      'targetDays: planDays(plan)',
+    );
   });
 });

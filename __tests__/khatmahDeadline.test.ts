@@ -15,7 +15,10 @@ import {
   khatmahCurrentPortion,
   khatmahDay,
   khatmahDaysLeft,
+  khatmahCreditWindow,
   khatmahDeadline,
+  khatmahIsComplete,
+  khatmahPaceOutgrown,
   khatmahFinishTarget,
   khatmahReachAyah,
   finishKhatmahPortion,
@@ -356,5 +359,156 @@ describe('the finish button on a plan paced to a date', () => {
     const twice = activeKhatmah(getQuranState())!;
     expect(khatmahReachAyah(twice)).toBeGreaterThanOrEqual(next.to);
     expect(khatmahDay(twice).extra).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * A WHOLE KHATMAH, DAY BY DAY.
+ *
+ * Everything above tests one morning. The question none of it answers is
+ * the one the mode exists for: does keeping the pace actually land on the
+ * date? So this walks a plan through its own life — pin the cut, read
+ * some fraction of it, move to tomorrow — using the shipping functions
+ * and nothing else.
+ */
+function walk(
+  totalDays: number,
+  fraction: (day: number) => number,
+): { finishedOn: number | null; quotas: number[]; nudgedOn: number | null } {
+  const start = at(2026, 8, 1);
+  const end = new Date(start + (totalDays - 1) * DAY);
+  const by = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}`;
+  let live: KhatmahPlan = {
+    id: 'walk',
+    startedAt: start,
+    targetDays: totalDays,
+    pagesRead: 0,
+    completedAt: null,
+    deadline: by,
+    deadlineAt: start,
+    done: [],
+    ayahsRead: 0,
+  };
+  let finishedOn: number | null = null;
+  let nudgedOn: number | null = null;
+  const quotas: number[] = [];
+  for (let d = 0; d < totalDays + 10; d++) {
+    const now = start + d * DAY;
+    const cut = khatmahPaceToday(live, now)!;
+    quotas.push(khatmahPerDayPages(live, now));
+    if (nudgedOn === null && khatmahPaceOutgrown(live, now)) nudgedOn = d + 1;
+    const readTo = Math.min(
+      KHATMAH_TOTAL_AYAHS,
+      cut.from - 1 + Math.round((cut.to - cut.from + 1) * fraction(d + 1)),
+    );
+    live = {
+      ...live,
+      pace: cut,
+      done: readTo >= 1 ? [[1, readTo] as [number, number]] : [],
+      ayahsRead: readTo,
+    };
+    if (finishedOn === null && khatmahIsComplete(live)) finishedOn = d + 1;
+  }
+  return { finishedOn, quotas, nudgedOn };
+}
+
+describe('a khatmah walked from its first day to its last', () => {
+  it.each([7, 14, 30, 60, 90])(
+    'keeping the pace on a %i-day plan finishes ON the date',
+    days => {
+      const { finishedOn } = walk(days, () => 1);
+      expect(finishedOn).toBe(days);
+    },
+  );
+
+  it('and the quota drifts down rather than up, as the rounding is repaid', () => {
+    // Every day's cut rounds UP, so a reader who keeps it is always a
+    // fraction ahead; the next morning's cut spends that slack instead of
+    // letting it pile into a short last day.
+    const { quotas } = walk(30, () => 1);
+    expect(quotas[0]).toBe(Math.ceil(604 / 30));
+    expect(quotas[28]).toBeLessThanOrEqual(quotas[0]);
+  });
+
+  it('missing days moves the pace, never the date', () => {
+    const { finishedOn, quotas } = walk(30, d => (d <= 5 ? 0 : 1));
+    expect(finishedOn).toBe(30);
+    // Five days of nothing, then keeping it: about four pages a day more.
+    expect(quotas[5]).toBeGreaterThan(quotas[0]);
+    expect(quotas[5] - quotas[0]).toBeLessThan(6);
+  });
+});
+
+describe('the offer of a new date fires when it should, and not otherwise', () => {
+  it('never on a plan being kept', () => {
+    expect(walk(30, () => 1).nudgedOn).toBeNull();
+  });
+
+  it('never on one that absorbed a missed week and carried on', () => {
+    // The quota went up and the reader met it. That is the mode working,
+    // not a plan that needs rescuing.
+    expect(walk(30, d => (d <= 5 ? 0 : 1)).nudgedOn).toBeNull();
+    expect(walk(30, d => (d <= 10 ? 0 : 1)).nudgedOn).toBeNull();
+  });
+
+  it('never on a reader who is faster than the plan', () => {
+    expect(walk(30, () => 2).nudgedOn).toBeNull();
+  });
+
+  it('but partway through, on a pace that is running away', () => {
+    // Half of each day's portion, every day: 21 pages a day becomes 32 by
+    // the third week and 120 by the last. The offer comes while the
+    // number is still one a person could act on.
+    const { nudgedOn, quotas } = walk(30, () => 0.5);
+    expect(nudgedOn).not.toBeNull();
+    expect(nudgedOn!).toBeGreaterThan(10);
+    expect(nudgedOn!).toBeLessThan(24);
+    expect(quotas[nudgedOn! - 1]).toBeLessThan(40);
+  });
+
+  it('and sooner on a plan that never started', () => {
+    const { nudgedOn } = walk(30, () => 0);
+    expect(nudgedOn!).toBeLessThan(15);
+  });
+
+  it('but not in the first days, when there is no evidence yet', () => {
+    const empty = plan({ done: [], ayahsRead: 0, deadline: '2026-09-30', deadlineAt: at(2026, 8, 1) });
+    expect(khatmahPaceOutgrown(empty, at(2026, 8, 2))).toBe(false);
+  });
+});
+
+/**
+ * CREDIT FOLLOWS THE READER; THE DAY DOES NOT.
+ *
+ * Today's cut is pinned to today whatever is read — that is what makes
+ * reading ahead show as `extra` rather than as time travel. The credit
+ * window must NOT be pinned with it: it ends at the portion the reader is
+ * standing in, or forty pages read would be twenty-one credited and the
+ * reader would watch their own reading disappear.
+ */
+describe('reading past today still counts', () => {
+  beforeEach(() => __resetQuranStateForTests());
+
+  it('credits every page turned, and shows the rest as extra', () => {
+    startKhatmah(30, undefined, ymd(Date.now() + 29 * DAY));
+    const cut = activeKhatmah(getQuranState())!.pace!;
+    const quota = khatmahPages(activeKhatmah(getQuranState())!, 'hafs').today;
+    for (let p = 1; p < quota * 2; p++) recordKhatmahPageTurn(p, p + 1);
+    const after = activeKhatmah(getQuranState())!;
+    expect(after.pagesRead).toBe(quota * 2 - 1);
+    expect(khatmahReachAyah(after)).toBeGreaterThan(cut.to);
+    expect(khatmahDay(after).extra).toBeGreaterThan(0);
+    // …and the day is still today's, done, with the rest beside it.
+    expect(khatmahDay(after).portion.to).toBe(cut.to);
+    expect(khatmahDay(after).done).toBe(true);
+  });
+
+  it('and the window ends at the reader, not at the calendar', () => {
+    startKhatmah(30, undefined, ymd(Date.now() + 29 * DAY));
+    const plan0 = activeKhatmah(getQuranState())!;
+    expect(khatmahCreditWindow(plan0)[1]).toBe(plan0.pace!.to);
+    for (let p = 1; p < 40; p++) recordKhatmahPageTurn(p, p + 1);
+    const moved = activeKhatmah(getQuranState())!;
+    expect(khatmahCreditWindow(moved)[1]).toBeGreaterThan(moved.pace!.to);
   });
 });

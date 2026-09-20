@@ -90,12 +90,39 @@ function randomPlan(r: () => number): KhatmahPlan {
     marks.push([from, to, NOW - Math.floor(r() * 10_000), r() < 0.5 ? 0 : 1]);
   }
   const pinned = r() < 0.5;
+  /**
+   * A third of these are paced to a DATE (issue #53), because the fields
+   * that mode added — `deadline`, `deadlineAt`, `pace` — go through this
+   * merge like everything else and had never been fuzzed through it.
+   */
+  const dated = r() < 0.35;
+  const day = `2026-09-${String(1 + Math.floor(r() * 28)).padStart(2, '0')}`;
+  const paceFrom = 1 + Math.floor(r() * (AYAHS - 5));
   return {
     id: 'k1',
     startedAt: 1_000,
     targetDays: 30,
     pagesRead: 0,
     completedAt: null,
+    ...(dated
+      ? {
+          // A date taken OFF is the stamp without the date — the shape a
+          // plan converted back to a duration has on the wire.
+          ...(r() < 0.85
+            ? { deadline: `2026-1${Math.floor(r() * 2)}-${String(1 + Math.floor(r() * 28)).padStart(2, '0')}` }
+            : {}),
+          deadlineAt: NOW - Math.floor(r() * 10_000),
+          ...(r() < 0.7
+            ? {
+                pace: {
+                  day,
+                  from: paceFrom,
+                  to: Math.min(AYAHS, paceFrom + Math.floor(r() * 8)),
+                },
+              }
+            : {}),
+        }
+      : {}),
     ...(ranges.length > 0 ? { done: ranges } : {}),
     ...(marks.length > 0 ? { marks } : {}),
     ayahsRead: 0,
@@ -139,6 +166,18 @@ function doneAyahs(plan: KhatmahPlan): number[] {
   return [...new Set(out)].sort((x, y) => x - y);
 }
 
+/**
+ * A plan carrying a `pace` but no `deadline` is not a state any device
+ * holds — `coerceKhatmah` drops it and `withPaceOfDay` removes it when
+ * the date comes off — so the generator must not invent one either.
+ */
+function canonicalMode(plan: KhatmahPlan): KhatmahPlan {
+  if (plan.deadline) return plan;
+  const rest = { ...plan };
+  delete rest.pace;
+  return rest;
+}
+
 /** What has to match between the two orders — the day baseline is local. */
 function travelling(plan: KhatmahPlan): Record<string, unknown> {
   const rest = { ...plan } as Record<string, unknown>;
@@ -152,9 +191,9 @@ describe('the khatmah merge, on a thousand disagreements it has not seen', () =>
   const plans = Array.from({ length: 1_000 }, (_, i) => {
     const r = rng(i + 1);
     return [
-      canonical(randomPlan(r)),
-      canonical(randomPlan(r)),
-      canonical(randomPlan(r)),
+      canonicalMode(canonical(randomPlan(r))),
+      canonicalMode(canonical(randomPlan(r))),
+      canonicalMode(canonical(randomPlan(r))),
     ] as const;
   });
 
@@ -184,6 +223,31 @@ describe('the khatmah merge, on a thousand disagreements it has not seen', () =>
   it('and the pages it keeps are the ones the model keeps', () => {
     for (const [a, b] of plans) {
       expect(doneAyahs(mergeKhatmah([a], [b])[0])).toEqual(modelDone(a, b));
+    }
+  });
+
+  it('a plan paced to a date comes out paced to one date, not two', () => {
+    for (const [a, b] of plans) {
+      const merged = mergeKhatmah([a], [b])[0];
+      // The mode is the presence of the field, so a merge that keeps a
+      // `pace` on a plan with no date leaves a plan nothing can read.
+      if (!merged.deadline) expect('pace' in merged).toBe(false);
+      // And a date neither side ever had must not appear.
+      if (!a.deadline && !b.deadline) expect('deadline' in merged).toBe(false);
+    }
+  });
+
+  it('never shortens a date that one side had not moved', () => {
+    for (const [a, b] of plans) {
+      const merged = mergeKhatmah([a], [b])[0];
+      if (!merged.deadline) continue;
+      const stamps = [a, b].map(p => p.deadlineAt ?? 0);
+      if (stamps[0] !== stamps[1]) continue;
+      // Equal stamps: the later date wins, so the result is never
+      // earlier than either side asked for.
+      for (const side of [a, b]) {
+        if (side.deadline) expect(merged.deadline >= side.deadline).toBe(true);
+      }
     }
   });
 

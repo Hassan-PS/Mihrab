@@ -2274,10 +2274,18 @@ export function toggleKhatmahPageDone(
  * The lower bound stays the gap's own portion, so going back to fill it
  * is always credited.
  */
-export function khatmahCreditWindow(plan: KhatmahPlan): AyahRange {
+export function khatmahCreditWindow(
+  plan: KhatmahPlan,
+  now: number = Date.now(),
+): AyahRange {
   // From the plan's own start, so going back for a hole is credited, to
-  // the end of the portion the reader is standing in.
-  return [khatmahStartAyah(plan), khatmahCurrentPortion(plan).to];
+  // the end of the portion the reader is STANDING IN — which on a plan
+  // paced to a date is not the same as today's. Today's cut is pinned to
+  // today whatever is read (that is what makes reading ahead show as
+  // `extra` rather than as time travel), so a window ending there would
+  // refuse every page past it: forty pages read, twenty-one credited,
+  // and the reader watching their own reading disappear.
+  return [khatmahStartAyah(plan), khatmahReachPortion(plan, now).to];
 }
 
 /**
@@ -2806,6 +2814,64 @@ export function khatmahUnreadPages(plan: KhatmahPlan): number {
   return ahead + (khatmahGap(plan, DEFAULT_RIWAYAH)?.pages ?? 0);
 }
 
+/**
+ * What this reader has actually been managing, in pages a day.
+ *
+ * Pages read since the plan began over the days since it began — the
+ * only record of their real pace the app keeps, and enough to tell "a
+ * plan that has slipped" from "a plan that never fitted".
+ */
+export function khatmahRealizedPace(
+  plan: KhatmahPlan,
+  now: number = Date.now(),
+): number {
+  const span = Math.max(1, KHATMAH_TOTAL_PAGES - planFrom(plan));
+  const done = Math.max(0, span - khatmahUnreadPages(plan));
+  const days = Math.max(1, -daysAway(plan.startedAt, now) + 1);
+  return done / days;
+}
+
+/**
+ * HAS THE DATE OUTGROWN THE READER? (issue #53)
+ *
+ * An automatically growing quota has a failure mode this app must not
+ * ship: miss days, the quota grows, the growth makes missing likelier,
+ * and the khatmah becomes the thing you avoid opening. A simulation of a
+ * reader doing half of each day's portion shows it plainly — 21 pages a
+ * day becomes 34 by the third week and 120 by the last.
+ *
+ * So the card offers a new date, once and quietly, when the pace has run
+ * away. TWO tests, and it needs both:
+ *
+ *   • half again the pace the plan was MADE for — so a plan being kept,
+ *     or one that absorbed a missed day or two, never triggers it; and
+ *   • half again what the reader has actually been READING — so a fast
+ *     reader who can clearly take it is not offered a way out, and a
+ *     plan that never fitted is caught early rather than at the end.
+ *
+ * Not before the plan has a few days of evidence behind it: on day one
+ * the realized pace is whatever happened in one morning.
+ */
+export function khatmahPaceOutgrown(
+  plan: KhatmahPlan,
+  now: number = Date.now(),
+): boolean {
+  if (!khatmahDeadline(plan)) return false;
+  if (khatmahIsComplete(plan)) return false;
+  const elapsed = -daysAway(plan.startedAt, now);
+  if (elapsed < 3) return false;
+  const needed = khatmahPerDayPages(plan, now);
+  const planned = Math.max(
+    1,
+    Math.ceil(
+      Math.max(1, KHATMAH_TOTAL_PAGES - planFrom(plan)) /
+        Math.max(1, planDays(plan)),
+    ),
+  );
+  const realized = Math.max(1, khatmahRealizedPace(plan, now));
+  return needed >= 1.5 * planned && needed >= 1.5 * realized;
+}
+
 /** The pace a deadline plan needs from today on, in Ḥafṣ pages a day. */
 export function khatmahPerDayPages(
   plan: KhatmahPlan,
@@ -3177,6 +3243,24 @@ function doneFilled(plan: KhatmahPlan, to: number): AyahRange[] {
 }
 
 /** The portion the reader is in — the one holding the page they are on. */
+/**
+ * THE PORTION THE READER IS STANDING IN — where the reading has got to.
+ *
+ * On a duration plan this is the same thing as "the portion in hand",
+ * because the day number is derived from the reading. On a deadline plan
+ * it is not: the day is today's cut, and a reader who has read on past it
+ * is standing in a later one. Credit follows the reader (see
+ * `khatmahCreditWindow`); the DAY does not (see `khatmahCurrentPortion`).
+ */
+export function khatmahReachPortion(
+  plan: KhatmahPlan,
+  now: number = Date.now(),
+): KhatmahPortion {
+  const reach = khatmahReachAyah(plan);
+  if (reach >= TOTAL_AYAHS) return khatmahPortion(plan, planDays(plan), now);
+  return khatmahPortion(plan, khatmahPortionOf(plan, reach + 1, now), now);
+}
+
 export function khatmahCurrentPortion(
   plan: KhatmahPlan,
   now: number = Date.now(),

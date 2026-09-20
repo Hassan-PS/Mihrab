@@ -38,6 +38,7 @@ import { type RiwayahId } from './riwayat';
 import {
   KHATMAH_TOTAL_AYAHS,
   khatmahDay,
+  planDays,
   khatmahDaysLeft,
   khatmahDone,
   khatmahGap,
@@ -155,7 +156,11 @@ export function selectQuranCardState(
     const pages = khatmahPages(plan, state.prefs.riwayah, now);
     khatmah = {
       dayNumber: day.portion.day,
-      targetDays: plan.targetDays,
+      // The plan's LENGTH, not the number it was made with: a plan paced
+      // to a date is as long as the calendar says (issue #53), and "day 9
+      // of 30" has to mean the same thing here, on the khatmah card and
+      // on the widget.
+      targetDays: planDays(plan),
       done: day.done,
       pagesLeftToday: day.done ? 0 : Math.max(1, pages.leftToday),
       daysToGo: khatmahDaysLeft(plan, now),

@@ -47,7 +47,7 @@ import {
   activeKhatmah,
   moveSessionToPage,
   drawnReadingPosition,
-  khatmahCurrentPortion,
+  khatmahFinishTarget,
   khatmahMarkerAyah,
   khatmahPages,
   recordKhatmahPageTurn,
@@ -624,7 +624,11 @@ export function useMushafReaderCore({
     if (!plan) return null;
     const at = khatmahMarkerAyah(plan);
     if (!at) return null;
-    const day = khatmahCurrentPortion(plan).day;
+    // The day the press would actually finish — today's while today is
+    // unread, and the next one once it is done. On a plan paced to a date
+    // those differ (`khatmahFinishTarget`), and a pill whose number
+    // disagreed with what pressing it did would be worse than no pill.
+    const day = khatmahFinishTarget(plan).day;
     return {
       page: findPageForAyah(at.surah, at.ayah, riwayah),
       day,
