@@ -1759,12 +1759,24 @@ export function ayahsThroughPage(page: number, riwayah: RiwayahId): number {
  * every caller passed a page's last ayah; it does now that a pin or a
  * rewind can leave the run ending anywhere.
  */
-export function pagesThroughAyahs(ayahs: number): number {
+export function pagesThroughAyahs(
+  ayahs: number,
+  /**
+   * WHOSE PAGES. Ḥafṣ by default, because that is the unit every cut in
+   * this app is made in and it must not move when the reader switches
+   * muṣḥaf. Pass the reader's own when the answer is going on screen:
+   * "fourteen pages left today" is a promise about the book in their
+   * hands, and Warsh, Qālūn and Shuʿbah each break the text across their
+   * fifteen lines differently.
+   */
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): number {
   if (ayahs <= 0) return 0;
-  if (ayahs >= TOTAL_AYAHS) return KHATMAH_TOTAL_PAGES;
+  const total = totalPagesForRiwayah(riwayah);
+  if (ayahs >= TOTAL_AYAHS) return total;
   const at = ayahAtIndex(ayahs);
-  const page = findPageForAyah(at.surah, at.ayah, DEFAULT_RIWAYAH);
-  return ayahsThroughPage(page, DEFAULT_RIWAYAH) <= ayahs ? page : page - 1;
+  const page = findPageForAyah(at.surah, at.ayah, riwayah);
+  return ayahsThroughPage(page, riwayah) <= ayahs ? page : page - 1;
 }
 
 /**
@@ -2788,8 +2800,10 @@ export function khatmahPaceToday(
   if (plan.pace && plan.pace.day === day) return plan.pace;
   const cut = paceCut({
     reach: khatmahReachAyah(plan),
-    reachPage: pagesThroughAyahs(khatmahReachAyah(plan)),
-    unreadPages: khatmahUnreadPages(plan),
+    // Ḥafṣ on both, explicitly: the cut is the one thing here that must
+    // NOT move when the reader changes muṣḥaf mid-plan.
+    reachPage: pagesThroughAyahs(khatmahReachAyah(plan), DEFAULT_RIWAYAH),
+    unreadPages: khatmahUnreadPages(plan, DEFAULT_RIWAYAH),
     totalPages: KHATMAH_TOTAL_PAGES,
     total: TOTAL_AYAHS,
     daysLeft: daysToDeadline(by, now),
@@ -2806,12 +2820,23 @@ export function khatmahPaceToday(
  * behind (`khatmahGap` already walks and memoizes those). In Ḥafṣ pages,
  * because that is the unit every cut in this app is made in.
  */
-export function khatmahUnreadPages(plan: KhatmahPlan): number {
+export function khatmahUnreadPages(
+  plan: KhatmahPlan,
+  /**
+   * The reader's muṣḥaf when this number is going on screen, and Ḥafṣ
+   * when it is feeding the CUT. Both callers exist and they want
+   * different things: the cut has to stay put when the reader switches
+   * riwayah (`paceCut`), and the sentence beside it has to count the
+   * pages they are actually turning (`khatmahPages`).
+   */
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): number {
   const ahead = Math.max(
     0,
-    KHATMAH_TOTAL_PAGES - pagesThroughAyahs(khatmahReachAyah(plan)),
+    totalPagesForRiwayah(riwayah) -
+      pagesThroughAyahs(khatmahReachAyah(plan), riwayah),
   );
-  return ahead + (khatmahGap(plan, DEFAULT_RIWAYAH)?.pages ?? 0);
+  return ahead + (khatmahGap(plan, riwayah)?.pages ?? 0);
 }
 
 /**
@@ -2876,10 +2901,12 @@ export function khatmahPaceOutgrown(
 export function khatmahPerDayPages(
   plan: KhatmahPlan,
   now: number = Date.now(),
+  /** The reader's muṣḥaf — this number is for them, not for the cut. */
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
 ): number {
   const by = khatmahDeadline(plan);
   if (!by) return 0;
-  const left = khatmahUnreadPages(plan);
+  const left = khatmahUnreadPages(plan, riwayah);
   if (left <= 0) return 0;
   return Math.max(1, Math.ceil(left / Math.max(1, daysToDeadline(by, now))));
 }

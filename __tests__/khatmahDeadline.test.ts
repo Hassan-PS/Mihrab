@@ -27,13 +27,16 @@ import {
   khatmahPerDayPages,
   khatmahBehindBy,
   khatmahUnreadAyahs,
+  khatmahUnreadPages,
   recordKhatmahPageTurn,
   setKhatmahDeadline,
+  setQuranPrefs,
   startKhatmah,
   KHATMAH_TOTAL_AYAHS,
   type KhatmahPlan,
 } from '../src/quran/quranState';
 import { mergeKhatmah } from '../src/sync/merge';
+import { totalPagesForRiwayah } from '../src/quran/pages';
 import {
   daysToDeadline,
   deadlineDayNumber,
@@ -510,5 +513,68 @@ describe('reading past today still counts', () => {
     for (let p = 1; p < 40; p++) recordKhatmahPageTurn(p, p + 1);
     const moved = activeKhatmah(getQuranState())!;
     expect(khatmahCreditWindow(moved)[1]).toBeGreaterThan(moved.pace!.to);
+  });
+});
+
+/**
+ * CHANGING MUṢḤAF MID-PLAN.
+ *
+ * A page is not a fixed quantity of Qur'an — Warsh, Qālūn and Shuʿbah
+ * each break the text across their fifteen lines differently, and Warsh
+ * divides al-Māʾidah into 122 ayahs where Ḥafṣ has 120. The app's answer
+ * has always been to keep progress in ayahs and cut the days in ḤAFṢ
+ * pages, so that switching riwayah never moves the reader's day under
+ * them (`portionEnd`). A plan paced to a date has to hold the same line,
+ * with one extra rule: the CUT is Ḥafṣ, and every sentence ABOUT it is
+ * the reader's own muṣḥaf.
+ */
+describe('a plan paced to a date, when the reading tradition changes', () => {
+  beforeEach(() => __resetQuranStateForTests());
+
+  it('keeps today\'s portion exactly where it was', () => {
+    startKhatmah(30, undefined, ymd(Date.now() + 29 * DAY));
+    const before = activeKhatmah(getQuranState())!;
+    const cut = before.pace!;
+    setQuranPrefs({ riwayah: 'warsh' });
+    const after = activeKhatmah(getQuranState())!;
+    // Same ayahs, same day: the portion is stored in ayah indices, and a
+    // muṣḥaf change is a change of how they are drawn, not of what is due.
+    expect(after.pace).toEqual(cut);
+    expect(khatmahPaceToday(after)).toEqual(cut);
+    expect(khatmahCurrentPortion(after).to).toBe(cut.to);
+  });
+
+  it('and cuts tomorrow in Ḥafṣ pages too, whatever is on screen', () => {
+    // The cut is asked for in Ḥafṣ explicitly (`paceCut`), so two devices
+    // — or one reader on two muṣḥafs — get the same portion boundaries.
+    const start = at(2026, 8, 1);
+    const dated = plan({ startedAt: start, done: [[1, 900]], ayahsRead: 900 });
+    const hafs = khatmahPaceToday(dated, at(2026, 8, 6))!;
+    setQuranPrefs({ riwayah: 'shubah' });
+    expect(khatmahPaceToday(dated, at(2026, 8, 6))).toEqual(hafs);
+  });
+
+  it('but counts the pages in the muṣḥaf the reader is holding', () => {
+    // The numbers that go on screen take a riwayah, and the default is
+    // Ḥafṣ only because that is what the cut speaks.
+    const dated = plan({ done: [[1, 900]], ayahsRead: 900 });
+    for (const riwayah of ['hafs', 'warsh', 'qalun', 'shubah'] as const) {
+      const unread = khatmahUnreadPages(dated, riwayah);
+      const perDay = khatmahPerDayPages(dated, at(2026, 8, 6), riwayah);
+      expect(unread).toBeGreaterThan(0);
+      expect(unread).toBeLessThanOrEqual(totalPagesForRiwayah(riwayah));
+      expect(perDay).toBeGreaterThan(0);
+      // The pace and the day's own quota are the same count of the same
+      // thing, so they must agree in whichever muṣḥaf is asked.
+      expect(Math.abs(perDay - khatmahPages(dated, riwayah, at(2026, 8, 6)).today))
+        .toBeLessThanOrEqual(1);
+    }
+  });
+
+  it('and a muṣḥaf this build has no data for reads as Ḥafṣ rather than breaking', () => {
+    const dated = plan({ done: [[1, 900]], ayahsRead: 900 });
+    expect(khatmahUnreadPages(dated, 'warsh')).toBe(
+      khatmahUnreadPages(dated, 'hafs'),
+    );
   });
 });

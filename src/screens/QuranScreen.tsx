@@ -62,7 +62,6 @@ import {
   khatmahPerDayPages,
   khatmahUnreadPages,
   setKhatmahDeadline,
-  KHATMAH_TOTAL_PAGES,
   khatmahPages,
   removeBookmark,
   resetKhatmahAll,
@@ -419,8 +418,18 @@ export function QuranScreen() {
    * forwards, and the date it is paced to.
    */
   const deadline = plan ? khatmahDeadline(plan) : null;
-  const perDayPages = plan && deadline ? khatmahPerDayPages(plan) : 0;
-  const unreadPages = plan ? khatmahUnreadPages(plan) : KHATMAH_TOTAL_PAGES;
+  /**
+   * In the reader's OWN muṣḥaf, like every other page count on this card.
+   * The cut behind them is made in Ḥafṣ pages and does not move when the
+   * riwayah does; these two are the sentence about it, and a sentence
+   * counting Ḥafṣ pages at someone reading Warsh is quietly wrong by a
+   * page here and there all the way down the book.
+   */
+  const perDayPages =
+    plan && deadline ? khatmahPerDayPages(plan, Date.now(), quran.prefs.riwayah) : 0;
+  const unreadPages = plan
+    ? khatmahUnreadPages(plan, quran.prefs.riwayah)
+    : totalPagesForRiwayah(quran.prefs.riwayah);
   const deadlinePassed = deadline != null && daysLeft <= 0;
   /**
    * WHEN THE PACE HAS OUTGROWN THE READER, SAY SO — AND OFFER A DATE.
