@@ -190,10 +190,14 @@ reading untouched. Three things it had to get right.
   the days asked for, and caps at a page a day, which is as slow as the
   model goes.
 - **The schedule starts at the decision.** `pacedFrom` records the page
-  the reader was on, and `khatmahBehindBy` and `khatmahPaceOutgrown` both
-  measure from there — otherwise re-pacing would report three hundred
-  pages of debt against a plan abandoned one second earlier, and the card
-  would offer a way out of a date just chosen.
+  the reader was on and `pacedDay` the store's own day (maghrib-aware —
+  people re-pace at ten in the evening, when the khatmah is already on
+  tomorrow), and `khatmahBehindBy`, `khatmahPaceOutgrown` and
+  `khatmahDayAnchor` all measure from there — otherwise re-pacing would
+  report three hundred pages of debt against a plan abandoned one second
+  earlier, the card would offer a way out of a date just chosen, and
+  tomorrow's portion would read "today". Restarting the khatmah
+  re-stamps the pair from the plan's start.
 - **The pair travels as one dated decision.** See the pacing row in
   `sync-conflict-rules.md`.
 

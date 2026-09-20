@@ -1291,7 +1291,8 @@
     "khatmahPacingDaysHelp": "A length rather than a date, so the portions wait for you. Change it, or finish by a date instead.",
     "khatmahPacingSettingsTitle": "Khatmah",
     "khatmahPacingHelp": "A khatmah is paced either by a length — the portions wait for you — or by a date, which re-cuts what is left over the days that remain. You can move between the two at any point; nothing you have read is affected.",
-    "khatmahPacingNone": "Start a khatmah on the Quran page and how it is paced — a number of days, or a date to finish by — can be changed here."
+    "khatmahPacingNone": "Start a khatmah on the Quran page and how it is paced — a number of days, or a date to finish by — can be changed here.",
+    "khatmahDays_one": "{{count}} day"
   },
   "reading": {
     "textSize": "Text size",

@@ -1291,7 +1291,8 @@
     "khatmahPacingDaysHelp": "Tarih yerine bir süre; bölümler sizi bekler. Süreyi değiştirin ya da bunun yerine bir tarihe kadar bitirin.",
     "khatmahPacingSettingsTitle": "Hatim",
     "khatmahPacingHelp": "Hatim ya bir süreye göre bölünür — bölümler sizi bekler — ya da bir tarihe göre; o zaman kalanlar kalan günlere yeniden dağıtılır. İkisi arasında istediğiniz zaman geçiş yapabilirsiniz; okuduklarınızın hiçbiri etkilenmez.",
-    "khatmahPacingNone": "Kur’an sayfasında bir hatim başlatın; nasıl bölüneceğini — gün sayısı ya da bitirilecek tarih — buradan değiştirebilirsiniz."
+    "khatmahPacingNone": "Kur’an sayfasında bir hatim başlatın; nasıl bölüneceğini — gün sayısı ya da bitirilecek tarih — buradan değiştirebilirsiniz.",
+    "khatmahDays_one": "{{count}} gün"
   },
   "reading": {
     "textSize": "Metin boyutu",

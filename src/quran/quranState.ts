@@ -30,6 +30,7 @@ import { daysAway } from './khatmahDayWhen';
 import {
   daysToDeadline,
   deadlineDayNumber,
+  deadlineInstant,
   deadlineTotalDays,
   paceCut,
   type KhatmahPace,
@@ -288,6 +289,20 @@ export type KhatmahPlan = {
    * falls back to the old rule only when NEITHER side carries a stamp.
    */
   pacedAt?: number;
+  /**
+   * THE DAY the pacing was decided — the store's own day, `YYYY-MM-DD`.
+   *
+   * `pacedAt` is an instant and orders the decisions; this is the day the
+   * schedule counts from, and the two are not the same thing for a reader
+   * who re-paces at ten in the evening. Their day rolled at maghrib
+   * (`localYmd`), so the store already thinks it is tomorrow; the civil
+   * date of the instant still says today. Counted from the instant, the
+   * plan would be a day behind by the next morning without a day having
+   * passed, and tomorrow's portion would read "today". Only the store at
+   * the moment of writing knows which day that was — yesterday's maghrib
+   * is not kept — so it is written down rather than derived.
+   */
+  pacedDay?: string;
   /**
    * The Ḥafṣ page the reader had reached when the pacing was decided.
    *
@@ -777,15 +792,20 @@ function coerceKhatmah(v: unknown): KhatmahPlan | null {
    * WAS the same thing: the moment the plan was last paced.
    */
   const stamp = typeof r.pacedAt === 'number' ? r.pacedAt : r.deadlineAt;
-  if (typeof stamp === 'number' && Number.isFinite(stamp)) {
+  // A positive instant, or nothing: zero is what the merge reads as "no
+  // stamp", and a negative one would out-rank nothing and mean nothing.
+  if (typeof stamp === 'number' && Number.isFinite(stamp) && stamp > 0) {
     out.pacedAt = stamp;
   }
-  // Where the reader stood when that decision was made. Only alongside a
-  // stamp: on its own it dates nothing, and the schedule it would move is
-  // the one thing a stray number must not be allowed to move.
+  // Where and when that decision was made. Only alongside a stamp: on
+  // their own they date nothing, and the schedule they would move is the
+  // one thing a stray number must not be allowed to move.
   if (out.pacedAt !== undefined) {
     const at = int(r.pacedFrom, 0, KHATMAH_TOTAL_PAGES);
     if (at !== null) out.pacedFrom = at;
+    if (typeof r.pacedDay === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.pacedDay)) {
+      out.pacedDay = r.pacedDay;
+    }
   }
   // The day's cut, and only on a plan that still has a date to pace
   // against — a stale one on a duration plan would be read by nothing and
@@ -1902,6 +1922,7 @@ export function startKhatmah(
      * devices spoke last (`pacedAt`).
      */
     pacedAt: now,
+    pacedDay: localYmd(now),
     pacedFrom: from,
     ...(deadline ? { deadline } : {}),
   };
@@ -2012,7 +2033,37 @@ function withPaceOfDay(plan: KhatmahPlan, now?: number): KhatmahPlan {
  * one's calendar (`khatmahBehindBy`, `khatmahPaceOutgrown`).
  */
 function repaced(plan: KhatmahPlan, at: number): KhatmahPlan {
-  return { ...plan, pacedAt: at, pacedFrom: khatmahReachPage(plan) };
+  return {
+    ...plan,
+    pacedAt: at,
+    pacedDay: localYmd(at),
+    // Never behind the plan's own start: a khatmah begun at page 143 with
+    // nothing read yet has a reach of zero, and its schedule starts at
+    // 143, not at the opening it was never going to cover.
+    pacedFrom: Math.max(planFrom(plan), khatmahReachPage(plan)),
+  };
+}
+
+/**
+ * The instant the schedule counts from — noon of `pacedDay` when the
+ * plan has one, so that a decision taken after maghrib counts from the
+ * day the store was already on. The raw instant for a plan re-paced by a
+ * build that wrote no day, and the plan's start for one never paced.
+ */
+function pacedInstant(plan: KhatmahPlan): number {
+  if (plan.pacedDay) {
+    const at = deadlineInstant(plan.pacedDay);
+    if (at !== null) return at;
+  }
+  return plan.pacedAt ?? plan.startedAt;
+}
+
+/** The plan without today's cut. */
+function unpaced(plan: KhatmahPlan): KhatmahPlan {
+  if (plan.pace === undefined) return plan;
+  const rest = { ...plan };
+  delete rest.pace;
+  return rest;
 }
 
 /** A stamp that is this device's now, and never older than the last one. */
@@ -2106,11 +2157,11 @@ export function setKhatmahDuration(days: number): void {
  */
 export function khatmahDayAnchor(plan: KhatmahPlan): number {
   if (khatmahDeadline(plan)) return plan.startedAt;
-  const at = plan.pacedAt;
   const from = plan.pacedFrom;
-  if (at === undefined || from === undefined) return plan.startedAt;
-  const day = durationPortionOf(plan, ayahsThroughHafsPage(Math.min(KHATMAH_TOTAL_PAGES, Math.max(0, from))) + 1);
-  return at - (day - 1) * 24 * 60 * 60 * 1000;
+  if (plan.pacedAt === undefined || from === undefined) return plan.startedAt;
+  const page = Math.min(KHATMAH_TOTAL_PAGES, Math.max(planFrom(plan), from));
+  const day = durationPortionOf(plan, ayahsThroughHafsPage(page) + 1);
+  return pacedInstant(plan) - (day - 1) * 24 * 60 * 60 * 1000;
 }
 
 /**
@@ -2135,8 +2186,13 @@ export function khatmahDurationForDaysLeft(
   const want = Math.min(3650, Math.max(1, Math.round(days) || 1));
   const from = planFrom(plan);
   const span = Math.max(1, KHATMAH_TOTAL_PAGES - from);
-  // What the request is actually about: the pages in front of the reader.
-  const ahead = Math.max(1, KHATMAH_TOTAL_PAGES - khatmahReachPage(plan));
+  // What the request is actually about: the pages in front of the reader
+  // — from the plan's own start when they have not begun, because a plan
+  // begun at page 143 has 461 pages ahead of it, not 604.
+  const ahead = Math.max(
+    1,
+    KHATMAH_TOTAL_PAGES - Math.max(from, khatmahReachPage(plan)),
+  );
   /**
    * A PORTION IS AT LEAST A PAGE, which caps how slow a khatmah can be.
    *
@@ -2158,6 +2214,16 @@ export function khatmahDurationForDaysLeft(
     delete probe.pace;
     return Math.max(0, targetDays - khatmahCurrentPortion(probe, now).day + 1);
   };
+  /**
+   * THE LENGTH IN HAND, if it already answers. A duration plan whose
+   * reader asks for exactly the days it has left should come back the
+   * same plan — not a neighbouring length that happens to leave the same
+   * number of days while moving every portion boundary a page, so that
+   * "day 10 of 30" reads "day 9 of 29" for having changed nothing.
+   */
+  if (!khatmahDeadline(plan) && daysLeftIf(plan.targetDays) === want) {
+    return Math.max(1, Math.trunc(plan.targetDays) || 1);
+  }
   let best = estimate;
   let bestMiss = Math.abs(daysLeftIf(estimate) - want);
   for (let n = Math.max(1, estimate - 16); n <= Math.min(span, estimate + 16); n++) {
@@ -2532,17 +2598,31 @@ export type KhatmahGapReport = {
  * ranges are replaced wholesale on each write, so their identity is a
  * sound key: same array, same answer.
  */
+/**
+ * The walk's own findings, before any day is named for them.
+ *
+ * Kept apart from the report because naming the day asks the PLAN which
+ * portion an ayah is in, and on a dated plan that means today's cut,
+ * which means the unread pages, which means this walk — a loop that ran
+ * until the stack gave out, on the first morning a reader with a skipped
+ * page opened a khatmah paced to a date. The cut needs only the count;
+ * the count needs nothing from the cut.
+ */
+type GapWalk = {
+  page: number;
+  pages: number;
+  firstMissing: number;
+  lastUnread: number;
+};
+
 let gapMemo: {
   done: readonly AyahRange[];
   riwayah: RiwayahId;
   start: number;
-  report: KhatmahGapReport | null;
+  walk: GapWalk | null;
 } | null = null;
 
-export function khatmahGap(
-  plan: KhatmahPlan,
-  riwayah: RiwayahId = DEFAULT_RIWAYAH,
-): KhatmahGapReport | null {
+function khatmahGapWalk(plan: KhatmahPlan, riwayah: RiwayahId): GapWalk | null {
   const done = khatmahDone(plan);
   const memoStart = khatmahStartAyah(plan);
   if (
@@ -2551,18 +2631,67 @@ export function khatmahGap(
     gapMemo.riwayah === riwayah &&
     gapMemo.start === memoStart
   ) {
-    return gapMemo.report;
+    return gapMemo.walk;
   }
-  const report = computeKhatmahGap(plan, riwayah, done);
-  gapMemo = { done, riwayah, start: memoStart, report };
+  const walk = walkKhatmahGap(plan, riwayah, done);
+  gapMemo = { done, riwayah, start: memoStart, walk };
+  return walk;
+}
+
+/** Pages skipped behind the reader — the number and nothing else. */
+export function khatmahGapPages(
+  plan: KhatmahPlan,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): number {
+  return khatmahGapWalk(plan, riwayah)?.pages ?? 0;
+}
+
+/**
+ * The named report, kept for a DURATION plan, whose day numbers are a
+ * function of the walk and the plan's own cut and nothing else. On a
+ * dated plan they are today's answer, and today moves, so those are
+ * named on the way out every time.
+ */
+let gapReportMemo: {
+  walk: GapWalk;
+  targetDays: number;
+  from: number;
+  report: KhatmahGapReport;
+} | null = null;
+
+export function khatmahGap(
+  plan: KhatmahPlan,
+  riwayah: RiwayahId = DEFAULT_RIWAYAH,
+): KhatmahGapReport | null {
+  const walk = khatmahGapWalk(plan, riwayah);
+  if (!walk) return null;
+  const dated = khatmahDeadline(plan) !== null;
+  const from = planFrom(plan);
+  if (
+    !dated &&
+    gapReportMemo &&
+    gapReportMemo.walk === walk &&
+    gapReportMemo.targetDays === plan.targetDays &&
+    gapReportMemo.from === from
+  ) {
+    return gapReportMemo.report;
+  }
+  const day = khatmahPortionOf(plan, walk.firstMissing);
+  const lastDay = khatmahPortionOf(
+    plan,
+    ayahsThroughPage(walk.lastUnread, riwayah),
+  );
+  // Naming one day is only honest while they all belong to it.
+  const report = { page: walk.page, pages: walk.pages, day, oneDay: day === lastDay };
+  if (!dated) gapReportMemo = { walk, targetDays: plan.targetDays, from, report };
   return report;
 }
 
-function computeKhatmahGap(
+function walkKhatmahGap(
   plan: KhatmahPlan,
   riwayah: RiwayahId,
   done: readonly AyahRange[],
-): KhatmahGapReport | null {
+): GapWalk | null {
   const start = khatmahStartAyah(plan);
   const reach = highestCovered(done);
   if (reach < start) return null;
@@ -2601,13 +2730,7 @@ function computeKhatmahGap(
     at = Math.max(at, t + 1);
   }
   if (pages === 0) return null;
-  const day = khatmahPortionOf(plan, firstMissing);
-  const lastDay = khatmahPortionOf(
-    plan,
-    ayahsThroughPage(lastUnread, riwayah),
-  );
-  // Naming one day is only honest while they all belong to it.
-  return { page: firstUnread, pages, day, oneDay: day === lastDay };
+  return { page: firstUnread, pages, firstMissing, lastUnread };
 }
 
 /**
@@ -2861,13 +2984,26 @@ export function resetKhatmahAll(): void {
       khatmah: prev.khatmah.map(k =>
         k.id === active.id
           ? {
-              ...k,
+              // Without the day's cut: it was made against reading that
+              // is being undone, and the first write of the new schedule
+              // makes a fresh one.
+              ...unpaced(k),
               startedAt: Date.now(),
               ...settled(
                 k,
                 doneRewound(k, ayahs),
                 withMark(k, ayahs + 1, TOTAL_AYAHS, 0),
               ),
+              /**
+               * "With a fresh schedule" includes the page the schedule is
+               * measured from (`pacedFrom`). A plan re-paced at page 300
+               * and then restarted would otherwise be three hundred pages
+               * behind the moment it began again. The length or the date
+               * is kept — that is the plan; this is the reading.
+               */
+              pacedAt: pacingStamp(k),
+              pacedDay: localYmd(),
+              pacedFrom: from,
               ...pinned(k, null),
               dayStartDate: localYmd(),
               dayStartPagesRead: from,
@@ -3035,7 +3171,9 @@ export function khatmahUnreadPages(
     totalPagesForRiwayah(riwayah) -
       pagesThroughAyahs(khatmahReachAyah(plan), riwayah),
   );
-  return ahead + (khatmahGap(plan, riwayah)?.pages ?? 0);
+  // The count alone — `khatmahGap` names days, and naming a day on a
+  // dated plan asks for today's cut, which asks for this.
+  return ahead + khatmahGapPages(plan, riwayah);
 }
 
 /**
@@ -3071,7 +3209,7 @@ function pacePromised(plan: KhatmahPlan): number {
   const by = khatmahDeadline(plan);
   const days =
     by && plan.pacedAt !== undefined
-      ? deadlineTotalDays(plan.pacedAt, by)
+      ? deadlineTotalDays(pacedInstant(plan), by)
       : planDays(plan);
   return left / Math.max(1, days);
 }
@@ -3869,8 +4007,7 @@ export function khatmahBehindBy(
    * this always did. Older plans carry neither and fall back to exactly
    * that.
    */
-  const since = plan.pacedAt ?? plan.startedAt;
-  const daysElapsed = Math.max(0, -daysAway(since, now));
+  const daysElapsed = Math.max(0, -daysAway(pacedInstant(plan), now));
   // Against the plan's own span, not the whole book: a khatmah begun at
   // page 143 is not five days behind on the morning it was made.
   const from = planFrom(plan);
@@ -3886,8 +4023,10 @@ export function khatmahBehindBy(
   // Against the reach, not the contiguous mirror: pages behind a hole are
   // already reported as unread (`khatmahGap`), and counting them here as
   // well would tell the reader they are sixty pages behind schedule over
-  // two pages they skipped.
-  return Math.max(0, expected - khatmahReachPage(plan, riwayah));
+  // two pages they skipped. And never below the plan's own start: the
+  // reach of a khatmah begun at page 143 with nothing read yet is zero,
+  // which read as "142 pages behind" on the morning it was made.
+  return Math.max(0, expected - Math.max(from, khatmahReachPage(plan, riwayah)));
 }
 
 /** What a khatmah has left, counted in pages of the muṣḥaf in hand. */

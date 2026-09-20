@@ -119,6 +119,9 @@ function randomPlan(r: () => number): KhatmahPlan {
           // half of it that is easiest to leave behind in a merge.
           ...(r() < 0.7 ? { pacedFrom: Math.floor(r() * 600) } : {}),
           ...(r() < 0.7
+            ? { pacedDay: `2026-09-${String(1 + Math.floor(r() * 28)).padStart(2, '0')}` }
+            : {}),
+          ...(r() < 0.7
             ? {
                 pace: {
                   day,
@@ -245,7 +248,7 @@ describe('the khatmah merge, on a thousand disagreements it has not seen', () =>
 
   it('takes one side\'s pacing whole, never half of each', () => {
     const pacing = (p: KhatmahPlan) =>
-      [p.targetDays, p.deadline ?? null, p.pacedFrom ?? null].join('|');
+      [p.targetDays, p.deadline ?? null, p.pacedFrom ?? null, p.pacedDay ?? null].join('|');
     for (const [a, b] of plans) {
       // Two plans from before the stamp are settled field by field, as
       // they always were; there is no decision to take whole.

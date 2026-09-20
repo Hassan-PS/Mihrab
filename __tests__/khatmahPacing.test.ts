@@ -30,6 +30,7 @@ import {
   khatmahPerDayPages,
   khatmahReachAyah,
   khatmahReachPage,
+  khatmahUnreadPages,
   recordKhatmahProgress,
   setKhatmahDeadline,
   setKhatmahDuration,
@@ -37,11 +38,21 @@ import {
   type KhatmahPlan,
 } from '../src/quran/quranState';
 import {
+  coerceQuranState,
   khatmahCurrentPortion,
+  khatmahDay,
   khatmahDayAnchor,
+  khatmahGap,
+  khatmahIsComplete,
+  khatmahPaceToday,
+  khatmahPages,
+  resetKhatmahAll,
+  stepKhatmahBack,
+  toggleKhatmahPageDone,
 } from '../src/quran/quranState';
 import { khatmahDayWhen } from '../src/quran/khatmahDayWhen';
 import { mergeKhatmah } from '../src/sync/merge';
+import { setTodaysMaghrib, _resetIslamicDay } from '../src/hijri/islamicDay';
 
 const DAY = 24 * 60 * 60 * 1000;
 const ymd = (at: number) => {
@@ -152,6 +163,19 @@ describe('the length that answers "I want this to take N days"', () => {
     }
   });
 
+  it('gives back the plan in hand when it already answers', () => {
+    // Asking for the days a plan already has left must not move its
+    // portion boundaries: the same days left can be had from a
+    // neighbouring length, and the reader would watch "day 10 of 30"
+    // become "day 9 of 29" for having changed nothing.
+    const plan = reading(30, 200);
+    const left = khatmahDaysLeft(plan);
+    expect(khatmahDurationForDaysLeft(plan, left)).toBe(30);
+    setKhatmahDuration(left);
+    expect(live().targetDays).toBe(30);
+    expect(khatmahCurrentPortion(live()).day).toBe(khatmahCurrentPortion(plan).day);
+  });
+
   it('is at least a day, however the question is put', () => {
     const plan = reading(30, 300);
     for (const want of [0, -5, Number.NaN]) {
@@ -255,13 +279,261 @@ describe('and its days still land on the right days of the week', () => {
 
   it('leaves a plan that has never been re-paced exactly where it was', () => {
     const plan = reading(30, 60);
-    expect(khatmahDayAnchor(plan)).toBe(plan.startedAt);
+    for (let day = 1; day <= 8; day++) {
+      expect(khatmahDayWhen(khatmahDayAnchor(plan), day)).toEqual(
+        khatmahDayWhen(plan.startedAt, day),
+      );
+    }
   });
 
   it('and a dated plan, whose days are the calendar\'s already', () => {
     reading(30, 60);
     setKhatmahDeadline(ymd(Date.now() + 9 * DAY));
     expect(khatmahDayAnchor(live())).toBe(live().startedAt);
+  });
+});
+
+describe('the unlikely shapes a khatmah can be in when it is switched', () => {
+  it('with holes behind the reader: the holes stay owed, in both modes', () => {
+    reading(30, 200);
+    for (let page = 50; page <= 60; page++) toggleKhatmahPageDone(page, 'hafs');
+    const holed = live();
+    const gap = khatmahGap(holed)?.pages ?? 0;
+    expect(gap).toBeGreaterThan(0);
+
+    setKhatmahDeadline(ymd(Date.now() + 9 * DAY));
+    // The quota is what is left INCLUDING the holes; today's cut still
+    // starts in front of the reader, where they are.
+    expect(khatmahUnreadPages(live())).toBe(604 - khatmahReachPage(live()) + gap);
+    expect(live().pace!.from).toBe(khatmahReachAyah(live()) + 1);
+    expect(khatmahGap(live())?.pages).toBe(gap);
+
+    setKhatmahDuration(10);
+    expect(khatmahDaysLeft(live())).toBe(10);
+    expect(khatmahGap(live())?.pages).toBe(gap);
+    expect(khatmahIsComplete(live())).toBe(false);
+  });
+
+  it('having read past today\'s cut on a dated plan, then asking for a length', () => {
+    reading(30, 0);
+    setKhatmahDeadline(ymd(Date.now() + 29 * DAY));
+    // Well past the day's quota.
+    for (let i = 0; i < 8; i++) recordKhatmahProgress(120, 'hafs');
+    const ahead = live();
+    expect(khatmahDay(ahead).extra).toBeGreaterThan(0);
+
+    setKhatmahDuration(20);
+    // The reader's own day follows their reading: the extra is not lost
+    // and not counted twice, and the twenty days start from here.
+    expect(khatmahDaysLeft(live())).toBe(20);
+    expect(khatmahReachAyah(live())).toBe(khatmahReachAyah(ahead));
+    expect(khatmahBehindBy(live())).toBe(0);
+  });
+
+  it('then stepping back a day: the day rewinds, the plan does not fall over', () => {
+    reading(30, 200);
+    setKhatmahDuration(10);
+    const before = live();
+    stepKhatmahBack();
+    const after = live();
+    expect(khatmahDaysLeft(after)).toBeGreaterThanOrEqual(khatmahDaysLeft(before));
+    // The reading undone was reading the new schedule counted on, so the
+    // reader is behind it by exactly that much — and by nothing more.
+    expect(khatmahBehindBy(after)).toBe(
+      khatmahReachPage(before) - khatmahReachPage(after),
+    );
+    expect(khatmahBehindBy(after)).toBeGreaterThan(0);
+    expect(khatmahPages(after, 'hafs').leftToday).toBeGreaterThan(0);
+  });
+
+  it('switching many times in one sitting settles on the last word', () => {
+    reading(30, 150);
+    const reach = khatmahReachAyah(live());
+    const sequence: Array<number | string> = [
+      7, ymd(Date.now() + 3 * DAY), 3, 400, ymd(Date.now() + DAY), 1, 45,
+    ];
+    let lastStamp = 0;
+    for (const step of sequence) {
+      if (typeof step === 'number') setKhatmahDuration(step);
+      else setKhatmahDeadline(step);
+      const plan = live();
+      expect(plan.pacedAt!).toBeGreaterThan(lastStamp);
+      lastStamp = plan.pacedAt!;
+      expect(khatmahReachAyah(plan)).toBe(reach);
+      expect(khatmahBehindBy(plan)).toBe(0);
+      if (typeof step === 'number') {
+        expect(plan.deadline).toBeUndefined();
+        expect(plan.pace).toBeUndefined();
+      } else {
+        expect(plan.deadline).toBe(step);
+        expect(plan.pace!.from).toBe(reach + 1);
+      }
+    }
+    expect(khatmahDaysLeft(live())).toBe(45);
+  });
+});
+
+describe('a dated plan with a page skipped behind the reader', () => {
+  // Naming the day a hole is in asked the plan for its portion, which on
+  // a dated plan asked for today's cut, which asked for the unread pages,
+  // which walked the holes to name their day. The stack ran out on the
+  // first morning such a plan was opened. Every path here used to loop.
+  it('cuts the morning without falling into itself', () => {
+    reading(30, 120);
+    toggleKhatmahPageDone(40, 'hafs');
+    setKhatmahDeadline(ymd(Date.now() + 9 * DAY));
+    const plan = live();
+    expect(plan.pace).toBeDefined();
+    const fresh = { ...plan };
+    delete fresh.pace;
+    // No pinned cut: the morning's own arithmetic, from scratch.
+    expect(() => khatmahPaceToday(fresh)).not.toThrow();
+    expect(() => khatmahGap(fresh)).not.toThrow();
+    expect(() => khatmahUnreadPages(fresh)).not.toThrow();
+    expect(() => khatmahPerDayPages(fresh)).not.toThrow();
+    expect(() => khatmahCurrentPortion(fresh)).not.toThrow();
+    expect(khatmahGap(fresh)!.pages).toBe(1);
+    expect(khatmahUnreadPages(fresh)).toBe(604 - khatmahReachPage(fresh) + 1);
+  });
+});
+
+describe('a plan begun partway through the book', () => {
+  it('solves for the pages in front of the reader, not the whole muṣḥaf', () => {
+    // Standing on page 143 with nothing read yet: the pages before it
+    // count as read (`fromPage`), the rest is ahead, and the reach is
+    // still zero. The estimate has to divide the right thing, or a long
+    // request lands outside the walk that corrects the rounding.
+    __resetQuranStateForTests();
+    startKhatmah(30, { page: 143 });
+    const fresh = live();
+    const ahead = 604 - fresh.fromPage!;
+    const slowest = khatmahDaysLeft({ ...fresh, targetDays: ahead });
+    for (const want of [1, 7, 30, 120, 300, ahead, 700]) {
+      const targetDays = khatmahDurationForDaysLeft(fresh, want);
+      expect(khatmahDaysLeft({ ...fresh, targetDays })).toBe(Math.min(want, slowest));
+    }
+  });
+
+  it('and measures a re-pace from the plan\'s own start, never from page one', () => {
+    __resetQuranStateForTests();
+    startKhatmah(30, { page: 143 });
+    setKhatmahDuration(20);
+    expect(live().pacedFrom).toBe(live().fromPage);
+    expect(live().pacedFrom).toBeGreaterThan(100);
+    expect(khatmahBehindBy(live())).toBe(0);
+  });
+});
+
+describe('restarting the khatmah is a fresh schedule', () => {
+  it('measures from page one again, not from where the old one was re-paced', () => {
+    reading(30, 300);
+    setKhatmahDuration(7);
+    resetKhatmahAll();
+    const again = live();
+    expect(again.pacedFrom).toBe(0);
+    expect(khatmahBehindBy(again)).toBe(0);
+    expect(again.pace).toBeUndefined();
+    // The length it had is the plan; the reading is what restarted.
+    expect(khatmahDaysLeft(again)).toBe(again.targetDays);
+  });
+});
+
+/**
+ * RE-PACED AFTER MAGHRIB — which is when people read.
+ *
+ * The store's day rolled at sunset, so at ten in the evening it is already
+ * tomorrow as far as the khatmah is concerned; the civil date of the
+ * instant still says today. A schedule counted from the instant is a day
+ * behind by the next morning without a day having passed, and tomorrow's
+ * portion reads "today". `pacedDay` is the store's own day, written at
+ * the moment only the store knows it.
+ */
+describe('a decision taken between maghrib and midnight', () => {
+  const evening = new Date(2026, 8, 18, 22).getTime();
+  const nextMorning = new Date(2026, 8, 19, 10).getTime();
+  const dayAfter = new Date(2026, 8, 20, 10).getTime();
+
+  beforeEach(() => {
+    jest.useFakeTimers({ now: evening });
+    setTodaysMaghrib(new Date(2026, 8, 18, 19));
+  });
+  afterEach(() => {
+    setTodaysMaghrib(null);
+    _resetIslamicDay();
+    jest.useRealTimers();
+  });
+
+  it('counts from the day the store was on, which is tomorrow\'s date', () => {
+    reading(30, 100);
+    setKhatmahDuration(10);
+    const plan = live();
+    expect(plan.pacedDay).toBe('2026-09-19');
+    const today = khatmahCurrentPortion(plan).day;
+
+    // Tonight: behind nothing, today is today, tomorrow is tomorrow.
+    expect(khatmahBehindBy(plan, evening)).toBe(0);
+    expect(khatmahDayWhen(khatmahDayAnchor(plan), today, evening).kind).toBe('today');
+    expect(khatmahDayWhen(khatmahDayAnchor(plan), today + 1, evening).kind).toBe('tomorrow');
+
+    // The next morning, with last night's maghrib forgotten: still the
+    // same Islamic day, so still behind nothing and still today.
+    setTodaysMaghrib(null);
+    expect(khatmahBehindBy(plan, nextMorning)).toBe(0);
+    expect(khatmahDayWhen(khatmahDayAnchor(plan), today, nextMorning).kind).toBe('today');
+    expect(khatmahDayWhen(khatmahDayAnchor(plan), today + 1, nextMorning).kind).toBe('tomorrow');
+
+    // A day later a day has passed, and it says so.
+    expect(khatmahBehindBy(plan, dayAfter)).toBeGreaterThan(0);
+  });
+
+  it('which the instant alone would have got wrong', () => {
+    reading(30, 100);
+    setKhatmahDuration(10);
+    const fromInstant = { ...live() };
+    delete fromInstant.pacedDay;
+    setTodaysMaghrib(null);
+    // Counted from the civil date of 22:00 on the 18th, the plan is a
+    // day behind on the morning of the 19th — the day it was made.
+    expect(khatmahBehindBy(fromInstant, nextMorning)).toBeGreaterThan(0);
+  });
+});
+
+describe('what survives the trip through storage', () => {
+  const stored = (plan: Record<string, unknown>) =>
+    coerceQuranState({ khatmah: [plan] }).khatmah[0];
+  const base = {
+    id: 'k',
+    startedAt: 1_000,
+    targetDays: 30,
+    pagesRead: 0,
+    completedAt: null,
+  };
+
+  it('keeps the day and the page beside a real stamp', () => {
+    const plan = stored({ ...base, pacedAt: 5_000, pacedDay: '2026-09-19', pacedFrom: 210 });
+    expect(plan.pacedAt).toBe(5_000);
+    expect(plan.pacedDay).toBe('2026-09-19');
+    expect(plan.pacedFrom).toBe(210);
+  });
+
+  it('drops a stamp that is not an instant, and everything that rode on it', () => {
+    for (const pacedAt of [0, -1, Number.NaN, 'yesterday']) {
+      const plan = stored({ ...base, pacedAt, pacedDay: '2026-09-19', pacedFrom: 210 });
+      expect(plan.pacedAt).toBeUndefined();
+      expect(plan.pacedDay).toBeUndefined();
+      expect(plan.pacedFrom).toBeUndefined();
+    }
+  });
+
+  it('drops a day that is not a day, and a page that is not a page', () => {
+    const plan = stored({ ...base, pacedAt: 5_000, pacedDay: 'Friday', pacedFrom: 900 });
+    expect(plan.pacedAt).toBe(5_000);
+    expect(plan.pacedDay).toBeUndefined();
+    expect(plan.pacedFrom).toBeUndefined();
+  });
+
+  it('still reads the name the stamp had in the first builds', () => {
+    expect(stored({ ...base, deadlineAt: 4_000, deadline: '2026-12-01' }).pacedAt).toBe(4_000);
   });
 });
 
@@ -347,6 +619,31 @@ describe('two devices, one plan, and two answers to the same question', () => {
   it('and a dated claim beats an un-updated device that cannot make one', () => {
     const merged = mergeKhatmah([{ ...base, targetDays: 90 }], [phone])[0];
     expect(pacing(merged)).toEqual(pacing(phone));
+  });
+
+  it('sends today\'s cut with the date it was cut for', () => {
+    // Both devices cut the same day. The Mac cut it for 1 December (20
+    // pages); the phone then moved the date to 3 October and re-cut the
+    // same day (60 pages). The earlier, shorter cut must not win the day
+    // back — the date it was made for is gone.
+    const macCut = { ...mac, pace: { day: '2026-09-20', from: 1000, to: 1400 } };
+    const phoneMoved = {
+      ...phone,
+      deadline: '2026-10-03',
+      pace: { day: '2026-09-20', from: 1000, to: 2200 },
+    };
+    for (const [a, b] of [
+      [macCut, phoneMoved],
+      [phoneMoved, macCut],
+    ]) {
+      const merged = mergeKhatmah([a], [b])[0];
+      expect(merged.deadline).toBe('2026-10-03');
+      expect(merged.pace).toEqual(phoneMoved.pace);
+    }
+    // Same date on both sides: the earliest cut still wins the day, as
+    // it always did.
+    const sameDate = { ...macCut, deadline: '2026-10-03', pacedAt: phoneMoved.pacedAt };
+    expect(mergeKhatmah([sameDate], [phoneMoved])[0].pace).toEqual(macCut.pace);
   });
 
   it('does not hand the winner the loser\'s page', () => {

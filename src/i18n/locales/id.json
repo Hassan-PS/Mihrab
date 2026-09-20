@@ -1291,7 +1291,8 @@
     "khatmahPacingDaysHelp": "Durasi, bukan tanggal, sehingga bagiannya menunggu Anda. Ubah durasinya, atau selesaikan pada tanggal tertentu.",
     "khatmahPacingSettingsTitle": "Khataman",
     "khatmahPacingHelp": "Khataman dibagi berdasarkan durasi — bagiannya menunggu Anda — atau berdasarkan tanggal, yang membagi ulang sisanya ke hari-hari yang tersisa. Anda bisa berpindah di antara keduanya kapan saja; tidak ada bacaan Anda yang terpengaruh.",
-    "khatmahPacingNone": "Mulai khatam di halaman Al-Qur’an, lalu di sini Anda bisa mengubah pembagiannya — sejumlah hari, atau tanggal untuk menyelesaikannya."
+    "khatmahPacingNone": "Mulai khatam di halaman Al-Qur’an, lalu di sini Anda bisa mengubah pembagiannya — sejumlah hari, atau tanggal untuk menyelesaikannya.",
+    "khatmahDays_one": "{{count}} hari"
   },
   "reading": {
     "textSize": "Ukuran teks",

@@ -77,8 +77,8 @@ see the pacing row below.
 | quran · lastRead | whole-object LWW on `updatedAt` | n/a — one value |
 | quran · prefs | whole-object LWW on `prefsUpdatedAt` | n/a — one value |
 | quran · khatmah plans | per-id; union of `done`, dated claims replayed over it | yes — `abandonedAt`, `AyahMark`, `positionAt` |
-| quran · khatmah pacing (`targetDays` + `deadline` + `pacedFrom`) | newest `pacedAt` wins and takes the whole triple; equal stamps → a duration wins, then the later date, then the longer length | yes — the stamp survives the date, so "no deadline" travels |
-| quran · khatmah day cut (`pace`) | later `day` wins; within a day the EARLIEST cut (smallest `from`) | n/a — one value, replaced daily |
+| quran · khatmah pacing (`targetDays` + `deadline` + `pacedDay` + `pacedFrom`) | newest `pacedAt` wins and takes the whole set; equal stamps → a duration wins, then the later date, then the longer length | yes — the stamp survives the date, so "no deadline" travels |
+| quran · khatmah day cut (`pace`) | goes with the date it was cut for; between two cuts for the same date, later `day` wins and within a day the EARLIEST cut (smallest `from`) | n/a — one value, replaced daily |
 | settings, location | incoming wins per top-level field | **no** — see below |
 
 ### Two left as they are, on purpose
@@ -108,8 +108,11 @@ mid-khatmah. Settled separately, "in 14 days" from the phone and "by 3
 October" from the Mac merge into a plan that is neither: the phone's
 length with the Mac's date, which nobody chose and which the card would
 then report as a date. So the pair is picked from ONE side, with
-`pacedFrom` (where the reader stood when the decision was taken, which is
-what the schedule is measured from) coming along with it.
+`pacedFrom` and `pacedDay` (where the reader stood and which day the
+store was on when the decision was taken — what the schedule is measured
+from) coming along with it, and with today's cut when the two sides had
+cut it for different dates: a cut is "what is left over the days that
+remain", so it belongs to the date it was made for.
 
 ### Why the day's cut is synced and the day's baseline is not
 

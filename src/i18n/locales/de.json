@@ -1291,7 +1291,8 @@
     "khatmahPacingDaysHelp": "Eine Dauer statt eines Datums — die Portionen warten auf dich. Ändere sie, oder schließe stattdessen bis zu einem Datum ab.",
     "khatmahPacingSettingsTitle": "Khatma",
     "khatmahPacingHelp": "Eine Khatma wird entweder nach einer Dauer eingeteilt — die Portionen warten auf dich — oder nach einem Datum, das den Rest auf die verbleibenden Tage neu verteilt. Du kannst jederzeit zwischen beiden wechseln; nichts von dem, was du gelesen hast, ändert sich dabei.",
-    "khatmahPacingNone": "Starte eine Khatma im Koran-Tab, dann lässt sich hier ändern, wie sie eingeteilt wird — eine Anzahl Tage oder ein Datum, bis zu dem sie fertig sein soll."
+    "khatmahPacingNone": "Starte eine Khatma im Koran-Tab, dann lässt sich hier ändern, wie sie eingeteilt wird — eine Anzahl Tage oder ein Datum, bis zu dem sie fertig sein soll.",
+    "khatmahDays_one": "{{count}} Tag"
   },
   "reading": {
     "textSize": "Schriftgröße",

@@ -274,7 +274,29 @@ function strongerPacing(a: KhatmahPlan, b: KhatmahPlan): KhatmahPlan {
 }
 
 type Pacing = Pick<KhatmahPlan, 'targetDays'> &
-  Partial<Pick<KhatmahPlan, 'deadline' | 'pacedAt' | 'pacedFrom'>>;
+  Partial<Pick<KhatmahPlan, 'deadline' | 'pacedAt' | 'pacedDay' | 'pacedFrom' | 'pace'>>;
+
+/**
+ * TODAY'S CUT GOES WITH THE DATE IT WAS CUT FOR.
+ *
+ * Within one day the earliest cut wins (`pickPace`) — but only between two
+ * cuts made against the SAME date. A cut is "what is left over the days
+ * that remain", so moving the date re-cuts the day, and that re-cut is
+ * the one moment the pace is allowed to change mid-day. If the merge then
+ * preferred the other device's earlier, shorter cut, the plan would show
+ * a quota for a date it no longer has until tomorrow. So when the two
+ * sides disagree about the date, the cut that travels is the one made by
+ * the side whose date won.
+ */
+function paceFor(
+  a: KhatmahPlan,
+  b: KhatmahPlan,
+  deadline: string | undefined,
+): KhatmahPlan['pace'] {
+  if (!deadline) return undefined;
+  if (a.deadline === b.deadline) return pickPace(a, b);
+  return (a.deadline === deadline ? a : b).pace;
+}
 
 function pickPacing(a: KhatmahPlan, b: KhatmahPlan): Pacing {
   const sa = a.pacedAt ?? 0;
@@ -293,19 +315,24 @@ function pickPacing(a: KhatmahPlan, b: KhatmahPlan): Pacing {
         : a.deadline >= b.deadline
           ? a.deadline
           : b.deadline;
+    const pace = paceFor(a, b, deadline);
     return {
       targetDays: Math.max(a.targetDays, b.targetDays),
       ...(deadline ? { deadline } : {}),
+      ...(pace ? { pace } : {}),
     };
   }
   const win = strongerPacing(a, b);
+  const pace = paceFor(a, b, win.deadline);
   return {
     targetDays: win.targetDays,
     ...(win.deadline ? { deadline: win.deadline } : {}),
     // Absent survives as absent: a winner with no `pacedFrom` must not
     // inherit the loser's, or the plan would be measured against a page
-    // the decision in force never mentioned.
+    // the decision in force never mentioned. The same for the day.
     ...(win.pacedFrom !== undefined ? { pacedFrom: win.pacedFrom } : {}),
+    ...(win.pacedDay !== undefined ? { pacedDay: win.pacedDay } : {}),
+    ...(pace ? { pace } : {}),
     pacedAt: Math.max(sa, sb),
   };
 }
@@ -484,8 +511,10 @@ export function mergeKhatmah(
      * to look pinned the cut, and the second must not re-cut it against
      * reading that has happened since, or the day would shrink as it was
      * read. Ties go to the shorter `to` for no reason but determinism.
+     * All of that between two cuts for the same date; a cut made for a
+     * date the merge did not keep goes with it (`paceFor`).
      */
-    const pace = pickPace(mine, p);
+    const pace = pacing.pace;
     const pinStamp = Math.max(mine.positionAt ?? 0, p.positionAt ?? 0);
     const position = pickPin(mine, p);
     const hadPin = 'position' in mine || 'position' in p;
@@ -516,6 +545,7 @@ export function mergeKhatmah(
       ...(deadline ? { deadline } : {}),
       ...(pacing.pacedAt ? { pacedAt: pacing.pacedAt } : {}),
       ...(pacing.pacedFrom !== undefined ? { pacedFrom: pacing.pacedFrom } : {}),
+      ...(pacing.pacedDay !== undefined ? { pacedDay: pacing.pacedDay } : {}),
       ...(pace && deadline ? { pace } : {}),
       /**
        * THE DAY'S BASELINE IS THIS DEVICE'S, always — see the long note
@@ -550,7 +580,9 @@ export function mergeKhatmah(
     // spread puts the loser's back, which would date the schedule from
     // somewhere nobody chose.
     if (pacing.pacedFrom === undefined) delete merged.pacedFrom;
+    if (pacing.pacedDay === undefined) delete merged.pacedDay;
     if (!pacing.pacedAt) delete merged.pacedAt;
+    if (!pace) delete merged.pace;
     byId.set(p.id, merged);
       /**
        * THE DAY'S BASELINE IS THIS DEVICE'S, always.

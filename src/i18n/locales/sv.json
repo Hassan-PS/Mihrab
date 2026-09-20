@@ -1291,7 +1291,8 @@
     "khatmahPacingDaysHelp": "En längd i stället för ett datum, så portionerna väntar på dig. Ändra längden, eller bli klar till ett datum i stället.",
     "khatmahPacingSettingsTitle": "Khatmah",
     "khatmahPacingHelp": "En khatmah läggs upp antingen efter en längd — portionerna väntar på dig — eller efter ett datum, som delar om det som återstår över de dagar som är kvar. Du kan byta mellan de två när som helst; inget du redan läst påverkas.",
-    "khatmahPacingNone": "Starta en khatmah i Koran-fliken, så kan du ändra hur den läggs upp här — ett antal dagar, eller ett datum att bli klar till."
+    "khatmahPacingNone": "Starta en khatmah i Koran-fliken, så kan du ändra hur den läggs upp här — ett antal dagar, eller ett datum att bli klar till.",
+    "khatmahDays_one": "{{count}} dag"
   },
   "reading": {
     "textSize": "Textstorlek",
