@@ -74,6 +74,8 @@ reads the same on both devices (max and min) rather than by spread order.
 | quran · lastRead | whole-object LWW on `updatedAt` | n/a — one value |
 | quran · prefs | whole-object LWW on `prefsUpdatedAt` | n/a — one value |
 | quran · khatmah plans | per-id; union of `done`, dated claims replayed over it | yes — `abandonedAt`, `AyahMark`, `positionAt` |
+| quran · khatmah deadline | newest `deadlineAt` wins; equal stamps → taking it off wins, then the later date | yes — the stamp survives the date, so "no deadline" travels |
+| quran · khatmah day cut (`pace`) | later `day` wins; within a day the EARLIEST cut (smallest `from`) | n/a — one value, replaced daily |
 | settings, location | incoming wins per top-level field | **no** — see below |
 
 ### Two left as they are, on purpose
@@ -94,6 +96,18 @@ lost — and a field the snapshot does not mention is left alone, so an older
 build cannot erase a setting it has never heard of. If a stale device ever
 starts talking over newer settings in practice, the fix is the one
 `prefsUpdatedAt` already demonstrates: give the blob a write time.
+
+### Why the day's cut is synced and the day's baseline is not
+
+They look like the same kind of thing and they are not. `dayStartDate` and
+the numbers beside it answer *"how much has happened since MY day began"* —
+a fact about one device's morning, which is why they stay local. A deadline
+plan's `pace` answers *"how much is due today"*, which is a fact about the
+PLAN: two devices that disagree about it show the reader two different
+quotas for the same day. So the cut travels, and within a day the earliest
+one wins — the first device to open the day pinned it, and a later device
+must not re-cut it against reading that has happened since, or today's
+portion would shrink as it was read.
 
 ## If you add a field to a synced blob
 

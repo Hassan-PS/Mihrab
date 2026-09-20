@@ -28,11 +28,19 @@ import { DEFAULT_RIWAYAH, coerceRiwayahId, type RiwayahId } from './riwayat';
 import { islamicDayKey } from '../hijri/islamicDay';
 import { daysAway } from './khatmahDayWhen';
 import {
+  daysToDeadline,
+  deadlineDayNumber,
+  deadlineTotalDays,
+  paceCut,
+  type KhatmahPace,
+} from './khatmahPace';
+import {
   addRange,
   applyMarks,
   compactMarks,
   contiguousFrom,
   firstMissingFrom,
+  countWithin,
   highestCovered,
   normalizeRanges,
   rangesCover,
@@ -242,6 +250,47 @@ export type KhatmahPlan = {
   ayahsRead?: number;
   /** `ayahsRead` at the start of the local day, mirroring `dayStartPagesRead`. */
   dayStartAyahsRead?: number;
+  // ── Additive fields (the deadline plan, issue #53) ────────────────
+  /**
+   * THE DATE THIS IS MEANT TO BE FINISHED BY — `YYYY-MM-DD`, civil.
+   *
+   * Absent on every plan made until now, and that absence is the plan's
+   * MODE: without it a khatmah is a duration ("finish in thirty days"),
+   * cut once when it was made, and it keeps exactly the meaning it has
+   * always had. With it the book is re-cut every day over the days that
+   * are left, and the day number becomes the calendar's rather than the
+   * reader's — see `khatmahPace.ts` for why that reversal is right for
+   * one mode and wrong for the other.
+   *
+   * A date rather than a number of days because it is the promise the
+   * reader actually made: "by the 30th" survives a week of not opening
+   * the app, where "thirty days from now" quietly becomes a different
+   * date every time you recompute it.
+   */
+  deadline?: string;
+  /**
+   * When the deadline was last set, changed or taken off.
+   *
+   * `targetDays` is set once and never edited, which is why the merge can
+   * settle it with a `Math.max`. A deadline is not like that: it is moved
+   * when a date has passed, and moving it is the whole answer to a plan
+   * that has fallen behind. So it is a claim with a date on it, exactly
+   * like `positionAt` — newest wins, and "no deadline" is something a
+   * device can say.
+   */
+  deadlineAt?: number;
+  /**
+   * TODAY'S CUT, pinned when today opened (deadline plans only).
+   *
+   * The pace is "what is unread over the days that remain", and that
+   * question cannot be asked twice in one day without the day receding as
+   * you read it — `khatmahPace.ts` has the arithmetic and the reason.
+   * Stored rather than derived from `dayStartAyahsRead` because that one
+   * is a fact about one device's morning and deliberately does not sync;
+   * two devices would pin different mornings and show different quotas
+   * for the same day.
+   */
+  pace?: KhatmahPace;
 };
 
 /** Reserved highlight color for the khatmah position (distinct from the
@@ -688,6 +737,32 @@ function coerceKhatmah(v: unknown): KhatmahPlan | null {
   }
   if (typeof r.dayStartDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.dayStartDate)) {
     out.dayStartDate = r.dayStartDate;
+  }
+  /**
+   * The deadline and its stamp travel together, and the stamp survives a
+   * deadline that has been taken OFF — that pairing is the claim "this
+   * plan has no date any more, and here is when I said so", exactly as a
+   * cleared pin is a `positionAt` with no position.
+   */
+  if (typeof r.deadline === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.deadline)) {
+    out.deadline = r.deadline;
+  }
+  if (typeof r.deadlineAt === 'number' && Number.isFinite(r.deadlineAt)) {
+    out.deadlineAt = r.deadlineAt;
+  }
+  // The day's cut, and only on a plan that still has a date to pace
+  // against — a stale one on a duration plan would be read by nothing and
+  // synced by everything.
+  if (out.deadline && r.pace && typeof r.pace === 'object') {
+    const pc = r.pace as Record<string, unknown>;
+    const day = typeof pc.day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(pc.day)
+      ? pc.day
+      : null;
+    const from = int(pc.from, 1, TOTAL_AYAHS);
+    const to = int(pc.to, 1, TOTAL_AYAHS);
+    if (day !== null && from !== null && to !== null && to >= from) {
+      out.pace = { day, from, to };
+    }
   }
   return out;
 }
@@ -1741,23 +1816,32 @@ function planStart(at: { page: number; riwayah?: RiwayahId }): {
 export function startKhatmah(
   targetDays: number,
   startingAt?: { page: number; riwayah?: RiwayahId },
+  /**
+   * A date to finish by — the plan is then paced by the calendar rather
+   * than by `targetDays`, which is still stored so that taking the date
+   * off later lands on a plan of a sensible length rather than on one.
+   */
+  deadline?: string,
 ): void {
   const { from, ayahs } = startingAt
     ? planStart(startingAt)
     : { from: 0, ayahs: 0 };
+  const now = Date.now();
   const plan: KhatmahPlan = {
-    id: `${Date.now()}`,
-    startedAt: Date.now(),
+    id: `${now}`,
+    startedAt: now,
     targetDays,
     fromPage: from,
     pagesRead: pagesThroughAyahs(ayahs),
     ayahsRead: ayahs,
     completedAt: null,
+    ...(deadline ? { deadline, deadlineAt: now } : {}),
   };
+  const paced = deadline ? withPaceOfDay(plan, now) : plan;
   updateQuranState(prev => ({
     ...prev,
     // One active plan at a time; completed plans stay for history.
-    khatmah: [...prev.khatmah.filter(k => !isLivePlan(k)), plan],
+    khatmah: [...prev.khatmah.filter(k => !isLivePlan(k)), paced],
   }));
 }
 
@@ -1804,9 +1888,10 @@ function localYmd(now: number = Date.now()): string {
 /** Snapshot pagesRead at the first progress of each local day. */
 function withDaySnapshot(plan: KhatmahPlan, now?: number): KhatmahPlan {
   const today = localYmd(now);
-  if (plan.dayStartDate === today) return plan;
+  const paced = withPaceOfDay(plan, now);
+  if (paced.dayStartDate === today) return paced;
   return {
-    ...plan,
+    ...paced,
     dayStartDate: today,
     dayStartPagesRead: plan.pagesRead,
     // The REACH, like everything else that answers "where is the reader"
@@ -1814,6 +1899,66 @@ function withDaySnapshot(plan: KhatmahPlan, now?: number): KhatmahPlan {
     // at a hole every morning.
     dayStartAyahsRead: khatmahReachAyah(plan),
   };
+}
+
+/**
+ * PIN TODAY'S CUT, once a day, for a deadline plan.
+ *
+ * Every writer that touches a plan goes through `withDaySnapshot`, and
+ * this rides with it for the same reason: the first thing the reader does
+ * today is when "today" has to be decided. Before that the cut is
+ * computed on the fly and is the same answer — it is only once reading
+ * starts that holding it still matters (`khatmahPace.ts`).
+ *
+ * A duration plan never gets one, and a plan that loses its deadline
+ * loses the pace with it, so nothing stale is left to be read by a mode
+ * that does not use it.
+ */
+function withPaceOfDay(plan: KhatmahPlan, now?: number): KhatmahPlan {
+  const by = khatmahDeadline(plan);
+  if (!by) {
+    if (plan.pace === undefined) return plan;
+    const rest = { ...plan };
+    delete rest.pace;
+    return rest;
+  }
+  const today = localYmd(now);
+  if (plan.pace?.day === today) return plan;
+  const pace = khatmahPaceToday(plan, now ?? Date.now());
+  return pace ? { ...plan, pace } : plan;
+}
+
+/**
+ * Give a plan a date to be finished by — or take the date off.
+ *
+ * The same action does both jobs the issue asks for: it is how a plan is
+ * created with a deadline, and it is the re-pace for a plan whose date
+ * has gone by. Moving the date re-cuts today as well, because the old
+ * cut was made against a number of days that no longer applies — which
+ * is the one moment the pace is allowed to change mid-day.
+ */
+export function setKhatmahDeadline(deadline: string | null): void {
+  updateQuranState(prev => {
+    const active = prev.khatmah.find(isLivePlan);
+    if (!active) return prev;
+    const at = Math.max(Date.now(), (active.deadlineAt ?? 0) + 1);
+    return {
+      ...prev,
+      khatmah: prev.khatmah.map(k => {
+        if (k.id !== active.id) return k;
+        if (!deadline) {
+          const rest = { ...k, deadlineAt: at };
+          delete rest.deadline;
+          delete rest.pace;
+          return rest;
+        }
+        const next = { ...k, deadline, deadlineAt: at };
+        delete next.pace;
+        const pace = khatmahPaceToday(next);
+        return pace ? { ...next, pace } : next;
+      }),
+    };
+  });
 }
 
 export function recordKhatmahProgress(
@@ -2574,8 +2719,98 @@ export type KhatmahDayState = {
   extra: number;
 };
 
+/**
+ * THE MODE, asked once and answered everywhere else by branching on it.
+ *
+ * A plan with a `deadline` is paced by the calendar; one without is paced
+ * by its duration, exactly as every plan made before 2.25 was. The field
+ * being absent IS the answer, so nothing has to be migrated.
+ */
+export function khatmahDeadline(plan: KhatmahPlan): string | null {
+  return typeof plan.deadline === 'string' && plan.deadline ? plan.deadline : null;
+}
+
 function planDays(plan: KhatmahPlan): number {
+  const by = khatmahDeadline(plan);
+  // The whole length of a deadline plan is the calendar's: the day it
+  // began to the day it is due. `targetDays` is still carried — a plan
+  // that was a duration before it was given a date keeps the number it
+  // was made with — but it is not what the plan means any more.
+  if (by) return deadlineTotalDays(plan.startedAt, by);
   return Math.max(1, Math.trunc(plan.targetDays) || 1);
+}
+
+/**
+ * Ayahs of this plan still unread — INCLUDING pages skipped behind.
+ *
+ * The quota is "what is left over the days that are left", and what is
+ * left is not "the book minus how far I got": a reader who skipped four
+ * pages on Tuesday still owes them. `khatmahDone` is the set of what was
+ * actually read, so the arithmetic is the plan's span less that set, and
+ * the holes pay for themselves in the pace rather than being discovered
+ * at the end. Where they ARE is `khatmahGap`'s job, and it offers to take
+ * the reader back to them.
+ */
+export function khatmahUnreadAyahs(plan: KhatmahPlan): number {
+  const start = khatmahStartAyah(plan);
+  const span = Math.max(0, TOTAL_AYAHS - start + 1);
+  return Math.max(0, span - countWithin(khatmahDone(plan), start, TOTAL_AYAHS));
+}
+
+/**
+ * TODAY'S CUT for a deadline plan — the pinned one if today pinned it.
+ *
+ * Pure: a read of a day nobody has written to yet still answers, with the
+ * cut that the first write of the day will pin. That matters for the card
+ * on a morning where nothing has been read: it shows the quota it is
+ * about to commit to, not yesterday's.
+ */
+export function khatmahPaceToday(
+  plan: KhatmahPlan,
+  now: number = Date.now(),
+): KhatmahPace | null {
+  const by = khatmahDeadline(plan);
+  if (!by) return null;
+  const day = localYmd(now);
+  if (plan.pace && plan.pace.day === day) return plan.pace;
+  const cut = paceCut({
+    reach: khatmahReachAyah(plan),
+    reachPage: pagesThroughAyahs(khatmahReachAyah(plan)),
+    unreadPages: khatmahUnreadPages(plan),
+    totalPages: KHATMAH_TOTAL_PAGES,
+    total: TOTAL_AYAHS,
+    daysLeft: daysToDeadline(by, now),
+    ayahsThroughPage: ayahsThroughHafsPage,
+  });
+  return { day, from: cut.from, to: cut.to };
+}
+
+/**
+ * PAGES STILL OWED — ahead of the reader, and behind them.
+ *
+ * The pace is what finishes the book, so a page skipped on Tuesday is
+ * still work: the count is what lies ahead plus the holes that were left
+ * behind (`khatmahGap` already walks and memoizes those). In Ḥafṣ pages,
+ * because that is the unit every cut in this app is made in.
+ */
+export function khatmahUnreadPages(plan: KhatmahPlan): number {
+  const ahead = Math.max(
+    0,
+    KHATMAH_TOTAL_PAGES - pagesThroughAyahs(khatmahReachAyah(plan)),
+  );
+  return ahead + (khatmahGap(plan, DEFAULT_RIWAYAH)?.pages ?? 0);
+}
+
+/** The pace a deadline plan needs from today on, in Ḥafṣ pages a day. */
+export function khatmahPerDayPages(
+  plan: KhatmahPlan,
+  now: number = Date.now(),
+): number {
+  const by = khatmahDeadline(plan);
+  if (!by) return 0;
+  const left = khatmahUnreadPages(plan);
+  if (left <= 0) return 0;
+  return Math.max(1, Math.ceil(left / Math.max(1, daysToDeadline(by, now))));
 }
 
 /**
@@ -2644,8 +2879,35 @@ function portionEnd(days: number, day: number, from: number = 0): number {
   return ayahsThroughHafsPage(from + Math.round((span * day) / days));
 }
 
-/** Which portion an ayah falls in, by its index. */
-export function khatmahPortionOf(plan: KhatmahPlan, index: number): number {
+/**
+ * Which portion an ayah falls in, by its index.
+ *
+ * On a deadline plan this is asked ABOUT TODAY'S CUT, for the same reason
+ * `khatmahPortion` answers from it: the days before today were cut by a
+ * pace that no longer applies, and the days after today have not been cut
+ * yet. Anything at or before today's portion is today's day number, and
+ * anything past it is however many of today's lengths beyond it lands.
+ */
+export function khatmahPortionOf(
+  plan: KhatmahPlan,
+  index: number,
+  now: number = Date.now(),
+): number {
+  const pace = khatmahPaceToday(plan, now);
+  if (pace) {
+    const today = deadlineDayNumber(plan.startedAt, plan.deadline!, now);
+    const at = Math.min(TOTAL_AYAHS, Math.max(1, Math.trunc(index)));
+    if (at <= pace.to) return today;
+    const len = Math.max(1, pace.to - pace.from + 1);
+    return Math.min(
+      planDays(plan),
+      today + Math.ceil((at - pace.to) / len),
+    );
+  }
+  return durationPortionOf(plan, index);
+}
+
+function durationPortionOf(plan: KhatmahPlan, index: number): number {
   const days = planDays(plan);
   const from = planFrom(plan);
   const base = ayahsThroughHafsPage(from);
@@ -2662,10 +2924,35 @@ export function khatmahPortionOf(plan: KhatmahPlan, index: number): number {
   return day;
 }
 
-export function khatmahPortion(plan: KhatmahPlan, day: number): KhatmahPortion {
+export function khatmahPortion(
+  plan: KhatmahPlan,
+  day: number,
+  now: number = Date.now(),
+): KhatmahPortion {
   const days = planDays(plan);
-  const from = planFrom(plan);
   const d = Math.min(days, Math.max(1, Math.trunc(day)));
+  /**
+   * A DEADLINE PLAN IS CUT FROM TODAY OUTWARDS, not from page one.
+   *
+   * There is no standing cut of the book to ask for day nine of: the cut
+   * is made each morning out of what is left (`khatmahPaceToday`). Today
+   * is that cut; a later day is the same length again, laid end to end
+   * after it, which is what the plan intends to do tomorrow if today is
+   * kept; and an earlier day is behind the reader, where the portions are
+   * no longer a promise about anything. Only today and the day after it
+   * are ever asked for — the card's "finish day N too" is the one caller
+   * that looks forward.
+   */
+  const pace = khatmahPaceToday(plan, now);
+  if (pace) {
+    const today = deadlineDayNumber(plan.startedAt, plan.deadline!, now);
+    const len = Math.max(1, pace.to - pace.from + 1);
+    const step = d - today;
+    if (step <= 0) return { day: d, from: pace.from, to: pace.to };
+    const from = Math.min(TOTAL_AYAHS, pace.to + (step - 1) * len + 1);
+    return { day: d, from, to: Math.min(TOTAL_AYAHS, from + len - 1) };
+  }
+  const from = planFrom(plan);
   return {
     day: d,
     from: portionEnd(days, d - 1, from) + 1,
@@ -2885,10 +3172,26 @@ function doneFilled(plan: KhatmahPlan, to: number): AyahRange[] {
 }
 
 /** The portion the reader is in — the one holding the page they are on. */
-export function khatmahCurrentPortion(plan: KhatmahPlan): KhatmahPortion {
+export function khatmahCurrentPortion(
+  plan: KhatmahPlan,
+  now: number = Date.now(),
+): KhatmahPortion {
   const reach = khatmahReachAyah(plan);
-  if (reach >= TOTAL_AYAHS) return khatmahPortion(plan, planDays(plan));
-  return khatmahPortion(plan, khatmahPortionOf(plan, reach + 1));
+  // A deadline plan's portion in hand is TODAY'S, whether or not the
+  // reader has got to it: the calendar decides which day it is, so
+  // reading ahead does not move them into tomorrow's reading the way it
+  // does on a duration plan (it shows as `extra`, which is what the
+  // overflow marker from 2.24.0 already reports).
+  const pace = khatmahPaceToday(plan, now);
+  if (pace) {
+    return {
+      day: deadlineDayNumber(plan.startedAt, plan.deadline!, now),
+      from: pace.from,
+      to: pace.to,
+    };
+  }
+  if (reach >= TOTAL_AYAHS) return khatmahPortion(plan, planDays(plan), now);
+  return khatmahPortion(plan, khatmahPortionOf(plan, reach + 1, now), now);
 }
 
 /**
@@ -2919,15 +3222,32 @@ export function khatmahDay(
   // un-marked page behind them used to make a finished day report itself
   // unfinished and nag for pages they had read — see `khatmahReachAyah`.
   const read = khatmahReachAyah(plan);
-  const opened =
-    plan.dayStartDate === localYmd(now)
-      ? Math.min(read, Math.max(0, plan.dayStartAyahsRead ?? read))
-      : read;
-  const day =
-    read >= TOTAL_AYAHS && opened >= TOTAL_AYAHS
-      ? planDays(plan)
-      : khatmahPortionOf(plan, Math.min(TOTAL_AYAHS, opened + 1));
-  const portion = khatmahPortion(plan, day);
+  /**
+   * A DEADLINE PLAN'S DAY IS TODAY'S CUT, full stop.
+   *
+   * The dance below — hold the day at the portion the reading STARTED in,
+   * so finishing it and reading on leaves the day done rather than
+   * dragging the reader into tomorrow — is what a duration plan needs,
+   * because its day number comes from where the reading is. A deadline
+   * plan's day number comes from the date, and its portion was pinned
+   * when the day opened, so the same behaviour falls out of asking for it
+   * directly: today's cut, what has been read of it, and the rest as
+   * `extra`.
+   */
+  const pace = khatmahPaceToday(plan, now);
+  const portion = pace
+    ? khatmahCurrentPortion(plan, now)
+    : (() => {
+        const opened =
+          plan.dayStartDate === localYmd(now)
+            ? Math.min(read, Math.max(0, plan.dayStartAyahsRead ?? read))
+            : read;
+        const day =
+          read >= TOTAL_AYAHS && opened >= TOTAL_AYAHS
+            ? planDays(plan)
+            : khatmahPortionOf(plan, Math.min(TOTAL_AYAHS, opened + 1), now);
+        return khatmahPortion(plan, day, now);
+      })();
   const length = portion.to - portion.from + 1;
   return {
     portion,
@@ -3063,14 +3383,26 @@ export function stepKhatmahBack(): void {
  */
 export function khatmahDaysLeft(
   plan: KhatmahPlan,
-  _now: number = Date.now(),
+  now: number = Date.now(),
 ): number {
   // Complete means every ayah, so a plan with a hole still has a day in
   // it however far the reader has reached.
   if (khatmahIsComplete(plan)) return 0;
+  /**
+   * ON A DEADLINE PLAN THIS IS THE CALENDAR'S ANSWER, and that is the
+   * whole point of the mode — it is the number issue #53 was reported
+   * about. A target of 30 September seen on 16 September is fourteen
+   * days, whatever the reader has or has not read; portions remaining
+   * would say eighteen and be describing a different plan.
+   *
+   * Zero once the date has passed. The card says so and offers another
+   * date; nothing counts the days that went by.
+   */
+  const by = khatmahDeadline(plan);
+  if (by) return daysToDeadline(by, now);
   return Math.max(
     0,
-    plan.targetDays - khatmahCurrentPortion(plan).day + 1,
+    plan.targetDays - khatmahCurrentPortion(plan, now).day + 1,
   );
 }
 
@@ -3085,6 +3417,17 @@ export function khatmahBehindBy(
   now: number = Date.now(),
   riwayah: RiwayahId = DEFAULT_RIWAYAH,
 ): number {
+  /**
+   * A DEADLINE PLAN IS NEVER BEHIND — its pace is.
+   *
+   * "You are 40 pages behind" is a statement about a schedule that does
+   * not move. A deadline plan's schedule moves every morning: what was
+   * missed is already inside today's quota, and saying it twice would be
+   * charging the reader for it twice. What the card shows instead is the
+   * pace itself — `khatmahPerDayPages` — which goes up when days are
+   * missed and is the same fact said forwards.
+   */
+  if (khatmahDeadline(plan)) return 0;
   /**
    * DAYS, COUNTED THE WAY THE READER'S DAYS ROLL.
    *

@@ -244,6 +244,34 @@ function pickPin(a: KhatmahPlan, b: KhatmahPlan): KhatmahPlan['position'] {
   return b.position.page > a.position.page ? b.position : a.position;
 }
 
+/**
+ * Which date a plan is due by — see the note inside `mergeKhatmah`.
+ *
+ * Decided the same way on both devices, including the ties: taking the
+ * deadline OFF is the stronger claim in the same breath (it is the one an
+ * absence could never make), and between two live dates the later one
+ * wins, because a merge that shortened someone's deadline behind their
+ * back would be asking for reading they never agreed to.
+ */
+function pickDeadline(a: KhatmahPlan, b: KhatmahPlan): string | undefined {
+  const sa = a.deadlineAt ?? 0;
+  const sb = b.deadlineAt ?? 0;
+  if (sa !== sb) return (sa > sb ? a : b).deadline;
+  if (sa > 0 && (!a.deadline || !b.deadline)) return undefined;
+  if (!a.deadline || !b.deadline) return a.deadline ?? b.deadline;
+  return a.deadline >= b.deadline ? a.deadline : b.deadline;
+}
+
+/** Today's cut, when the two devices hold different ones — see the note. */
+function pickPace(a: KhatmahPlan, b: KhatmahPlan): KhatmahPlan['pace'] {
+  if (!a.pace || !b.pace) return a.pace ?? b.pace;
+  if (a.pace.day !== b.pace.day) return a.pace.day > b.pace.day ? a.pace : b.pace;
+  if (a.pace.from !== b.pace.from) {
+    return a.pace.from < b.pace.from ? a.pace : b.pace;
+  }
+  return a.pace.to <= b.pace.to ? a.pace : b.pace;
+}
+
 /** The per-device day baseline, copied only when the device has one. */
 function dayStateOf(
   plan: KhatmahPlan,
@@ -383,10 +411,35 @@ export function mergeKhatmah(
      * two pins the further-through one wins, which is the old rule doing
      * the only job it was ever right for.
      */
+    /**
+     * THE DEADLINE IS A CLAIM WITH A DATE ON IT (issue #53).
+     *
+     * Unlike `targetDays`, which is set once and can therefore be settled
+     * with a max, a deadline is MOVED — that is the whole answer to a
+     * plan that has fallen behind, and taking it off again turns the plan
+     * back into a duration. Neither of those can be said by a value that
+     * is merely absent, so the field travels with `deadlineAt` beside it
+     * and the newest word wins, exactly as the pin does.
+     */
+    const deadlineStamp = Math.max(mine.deadlineAt ?? 0, p.deadlineAt ?? 0);
+    const deadline = pickDeadline(mine, p);
+    /**
+     * AND THE DAY'S CUT TRAVELS WITH IT, atomically.
+     *
+     * Two devices opening the same day must show the same quota, which is
+     * the reason this is stored at all rather than derived from the
+     * per-device day baseline (`khatmahPace.ts`). Later day wins — it is
+     * a fact about a day, and the newer day is the one in hand. Within
+     * one day the EARLIEST opening wins, by its `from`: the first device
+     * to look pinned the cut, and the second must not re-cut it against
+     * reading that has happened since, or the day would shrink as it was
+     * read. Ties go to the shorter `to` for no reason but determinism.
+     */
+    const pace = pickPace(mine, p);
     const pinStamp = Math.max(mine.positionAt ?? 0, p.positionAt ?? 0);
     const position = pickPin(mine, p);
     const hadPin = 'position' in mine || 'position' in p;
-    byId.set(p.id, {
+    const merged: KhatmahPlan = {
       ...withoutDayState(mine),
       ...withoutDayState(p),
       startedAt: Math.min(mine.startedAt, p.startedAt),
@@ -408,6 +461,42 @@ export function mergeKhatmah(
       // equalling itself.
       ...(hadPin ? { position } : {}),
       ...(pinStamp > 0 ? { positionAt: pinStamp } : {}),
+      // Present only when one of them had it — a pair of duration plans
+      // must not come out of the merge carrying deadline-shaped keys.
+      ...(deadline ? { deadline } : {}),
+      ...(deadlineStamp > 0 ? { deadlineAt: deadlineStamp } : {}),
+      ...(pace && deadline ? { pace } : {}),
+      /**
+       * THE DAY'S BASELINE IS THIS DEVICE'S, always — see the long note
+       * on `dayStateOf`. It is not synced state: it answers "how much has
+       * happened since MY day began", on this device's clock.
+       */
+      ...dayStateOf(mine),
+      /**
+       * Set once, when the plan is made, and never edited — so the two
+       * sides agree and this only has to be DECIDED, not resolved. Max
+       * and min respectively, because a rule that reads the same on both
+       * devices is the whole requirement: a plan cannot come out of a
+       * merge one length here and another there.
+       */
+      targetDays: Math.max(mine.targetDays, p.targetDays),
+      ...(mine.fromPage != null || p.fromPage != null
+        ? { fromPage: Math.min(mine.fromPage ?? 0, p.fromPage ?? 0) }
+        : {}),
+    };
+    /**
+     * A DEADLINE TAKEN OFF IS AN ABSENT KEY, and absent is exactly what
+     * the spread above puts back: the other device still carries the date
+     * it was given, so the plan would come back paced by a calendar the
+     * reader had opted out of. Written as a delete rather than as a
+     * `deadline: undefined`, because a key holding undefined is not the
+     * same shape on the wire and would stop a plan round-tripping.
+     */
+    if (!deadline) {
+      delete merged.deadline;
+      delete merged.pace;
+    }
+    byId.set(p.id, merged);
       /**
        * THE DAY'S BASELINE IS THIS DEVICE'S, always.
        *
@@ -425,19 +514,6 @@ export function mergeKhatmah(
        * including staying ABSENT if it had none, and `withDaySnapshot`
        * re-takes them on the next local write anyway.
        */
-      ...dayStateOf(mine),
-      /**
-       * Set once, when the plan is made, and never edited — so the two
-       * sides agree and this only has to be DECIDED, not resolved. Max
-       * and min respectively, because a rule that reads the same on both
-       * devices is the whole requirement: a plan cannot come out of a
-       * merge one length here and another there.
-       */
-      targetDays: Math.max(mine.targetDays, p.targetDays),
-      ...(mine.fromPage != null || p.fromPage != null
-        ? { fromPage: Math.min(mine.fromPage ?? 0, p.fromPage ?? 0) }
-        : {}),
-    });
   }
   return [...byId.values()].sort((a, b) => a.startedAt - b.startedAt);
 }
