@@ -18,6 +18,8 @@
  * that a date, because "Thursday" three weeks out is not a date anyone
  * can place.
  */
+import { islamicCivilDate } from '../hijri/islamicDay';
+
 export type DayWhen =
   | { kind: 'today' }
   | { kind: 'tomorrow' }
@@ -32,9 +34,29 @@ function startOfDay(at: number): number {
   return d.getTime();
 }
 
+/**
+ * TODAY IS THE STORE'S TODAY, NOT MIDNIGHT'S.
+ *
+ * The khatmah's own day rolls at maghrib for a reader who has asked for
+ * that (`islamicDayKey`, Settings → Quran), and everything that decides
+ * WHICH portion is today's goes through it. This file decided what to
+ * CALL that portion's due date and used civil midnight instead — so
+ * between maghrib and midnight the card offered to "finish day 9
+ * (tomorrow)" for the day the rest of the app had already started.
+ *
+ * `islamicCivilDate` is the bridge: the civil date whose daylight belongs
+ * to the Islamic day holding `now`. Measuring from it makes "today" here
+ * the same today as everywhere else, and leaves every other day of the
+ * week exactly where the calendar has it — which is right, because a day
+ * in three days' time is a civil date and nobody knows its maghrib yet.
+ */
+function todayOrigin(now: number): number {
+  return startOfDay(islamicCivilDate(new Date(now)).getTime());
+}
+
 /** Whole days from today to the day `at` falls on. Negative is the past. */
 export function daysAway(at: number, now: number): number {
-  return Math.round((startOfDay(at) - startOfDay(now)) / DAY_MS);
+  return Math.round((startOfDay(at) - todayOrigin(now)) / DAY_MS);
 }
 
 /** When day `day` of a plan begun at `startedAt` is due. */

@@ -6,6 +6,8 @@
  * those answers is.
  */
 import { daysAway, khatmahDayWhen, formatDayWhen } from '../src/quran/khatmahDayWhen';
+import { setTodaysMaghrib, _resetIslamicDay } from '../src/hijri/islamicDay';
+import { khatmahBehindBy } from '../src/quran/quranState';
 
 const t = (_k: string, o: { defaultValue: string }) => o.defaultValue;
 const at = (y: number, m: number, d: number, h = 12) =>
@@ -51,5 +53,87 @@ describe('when a khatmah day falls due', () => {
   it('says today and tomorrow in words, not as dates', () => {
     expect(formatDayWhen({ kind: 'today' }, t, 'en-GB')).toBe('today');
     expect(formatDayWhen({ kind: 'tomorrow' }, t, 'en-GB')).toBe('tomorrow');
+  });
+});
+
+/**
+ * ONE TODAY, NOT TWO (2026-09-20, groundwork for the deadline plan).
+ *
+ * The khatmah's own day rolls at maghrib for a reader who asked for that,
+ * and every function that decides WHICH portion is today's goes through
+ * that key. This file decided what to CALL the due date and used civil
+ * midnight, so for the hours between maghrib and midnight the card
+ * offered to "finish day 9 (tomorrow)" for the day the rest of the app
+ * had already begun.
+ */
+describe('after maghrib, today is the day the rest of the app is on', () => {
+  const evening = at(2026, 8, 18, 20); // Fri 18 Sep 2026, 20:00
+  const maghrib = new Date(at(2026, 8, 18, 19)); // an hour earlier
+  const started = at(2026, 8, 10, 9);
+
+  afterEach(() => {
+    setTodaysMaghrib(null);
+    _resetIslamicDay();
+  });
+
+  it('calls the civil tomorrow "today" once maghrib has passed', () => {
+    setTodaysMaghrib(maghrib);
+    // Day 10 of a plan begun on the 10th falls on the 19th by the
+    // calendar — and it is the day in hand from maghrib on the 18th.
+    expect(khatmahDayWhen(started, 10, evening)).toEqual({ kind: 'today' });
+    expect(daysAway(at(2026, 8, 19, 12), evening)).toBe(0);
+  });
+
+  it('and the civil today is already behind, which reads as today as well', () => {
+    setTodaysMaghrib(maghrib);
+    expect(khatmahDayWhen(started, 9, evening)).toEqual({ kind: 'today' });
+  });
+
+  it('leaves the rest of the week where the calendar has it', () => {
+    setTodaysMaghrib(maghrib);
+    expect(khatmahDayWhen(started, 11, evening)).toEqual({ kind: 'tomorrow' });
+    expect(khatmahDayWhen(started, 12, evening).kind).toBe('weekday');
+  });
+
+  it('and with no maghrib published, nothing moves', () => {
+    expect(khatmahDayWhen(started, 10, evening)).toEqual({ kind: 'tomorrow' });
+    expect(daysAway(at(2026, 8, 19, 12), evening)).toBe(1);
+  });
+});
+
+/**
+ * AND THE SAME TODAY FOR "BEHIND BY" (issue #53's first half).
+ *
+ * `khatmahBehindBy` counted a rolling twenty-four hours from the instant
+ * the plan was created — a boundary used nowhere else in the app. A plan
+ * begun at 23:00 gained a day at 23:00 each night: an hour before the day
+ * pill, and hours after maghrib for a reader whose day starts there.
+ */
+describe('being behind is counted in days, not in rolling hours', () => {
+  const start = at(2026, 8, 1, 23); // begun at 23:00 on 1 Sep
+  const plan = {
+    id: 'k',
+    startedAt: start,
+    targetDays: 30,
+    pagesRead: 0,
+    completedAt: null,
+  };
+
+  it('is not behind an hour after it was made, even past midnight', () => {
+    expect(khatmahBehindBy(plan, at(2026, 8, 1, 23) + 30 * 60_000, 'hafs')).toBe(0);
+    // 00:30 the next night used to be "a day elapsed"; it is the same day
+    // to everything else in the app, and now to this as well… but the
+    // calendar day HAS turned, so one day has passed. What must not
+    // happen is the jump at 23:00 the night before.
+    expect(khatmahBehindBy(plan, at(2026, 8, 2, 22), 'hafs')).toBe(
+      khatmahBehindBy(plan, at(2026, 8, 2, 23) + 60_000, 'hafs'),
+    );
+  });
+
+  it('counts one day per calendar day, whatever hour it is', () => {
+    const oneDay = khatmahBehindBy(plan, at(2026, 8, 2, 9), 'hafs');
+    const sameDayLater = khatmahBehindBy(plan, at(2026, 8, 2, 21), 'hafs');
+    expect(sameDayLater).toBe(oneDay);
+    expect(khatmahBehindBy(plan, at(2026, 8, 3, 9), 'hafs')).toBeGreaterThan(oneDay);
   });
 });

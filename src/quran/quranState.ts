@@ -26,6 +26,7 @@ import {
 } from './pages';
 import { DEFAULT_RIWAYAH, coerceRiwayahId, type RiwayahId } from './riwayat';
 import { islamicDayKey } from '../hijri/islamicDay';
+import { daysAway } from './khatmahDayWhen';
 import {
   addRange,
   applyMarks,
@@ -3084,8 +3085,23 @@ export function khatmahBehindBy(
   now: number = Date.now(),
   riwayah: RiwayahId = DEFAULT_RIWAYAH,
 ): number {
-  const dayMs = 24 * 60 * 60 * 1000;
-  const daysElapsed = Math.floor((now - plan.startedAt) / dayMs);
+  /**
+   * DAYS, COUNTED THE WAY THE READER'S DAYS ROLL.
+   *
+   * This used to be `floor((now - startedAt) / 86_400_000)` — a rolling
+   * twenty-four hours from the moment the plan was made, which is a
+   * boundary the app does not use anywhere else. A khatmah begun at 23:00
+   * gained a day at 23:00 every night, an hour before the day pill did
+   * and hours after maghrib for a reader whose day starts there, so the
+   * card could say "one page behind" beside a day number that disagreed.
+   *
+   * `daysAway` counts whole days from the store's own today (see
+   * `khatmahDayWhen`), which is the same today the portion, the snapshot
+   * and the pill are keyed on. Day one is the day it began: elapsed is
+   * how many days have PASSED since then, so the plan is not behind on
+   * the morning it was made.
+   */
+  const daysElapsed = Math.max(0, -daysAway(plan.startedAt, now));
   // Against the plan's own span, not the whole book: a khatmah begun at
   // page 143 is not five days behind on the morning it was made.
   const from = planFrom(plan);
