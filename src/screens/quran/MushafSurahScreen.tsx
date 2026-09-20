@@ -17,7 +17,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
-  Alert,
   Platform,
   Pressable,
   Text,
@@ -37,14 +36,13 @@ import { SIDEBAR_WIDTH, sidebarFits } from '../../quran/MushafIndexSidebar';
 import {
   resolveRiwayah,
   riwayahById,
-  type RiwayahId,
   riwayahChoiceExists,
 } from '../../quran/riwayat';
 import { useRiwayahAvailability } from '../../quran/riwayahData';
 import { surahName } from '../../quran/surahName';
+import { useSwitchRiwayah } from '../../quran/useSwitchRiwayah';
 import { mushafTone, toneIsDark, TONE_PAGE_BG } from '../../quran/mushafTone';
 import {
-  setQuranPrefs,
   useQuranState,
   useQuranHydrated,
 } from '../../quran/quranState';
@@ -122,30 +120,9 @@ export function MushafSurahScreen({
   useRiwayahAvailability();
   const riwayah = resolveRiwayah(quran.prefs.riwayah);
 
-  const switchRiwayah = useCallback(
-    (id: RiwayahId) => {
-    const target = riwayahById(id);
-    setQuranPrefs({ riwayah: target.id });
-    // Said ONCE, on the first switch to a muṣḥaf that reflows — see
-    // `riwayahNoticeSeen`. The reader keeps their place either way; what
-    // they need to know is that the lines will not fall where their
-    // printed copy puts them.
-    if (
-      riwayahById(target.id).render === 'unicode' &&
-      !quran.prefs.riwayahNoticeSeen
-    ) {
-      setQuranPrefs({ riwayahNoticeSeen: true });
-      Alert.alert(
-        t('quran.riwayahReflowTitle', 'Pages match, lines may not'),
-        t(
-          'quran.riwayahReflowBody',
-          'This muṣḥaf starts and ends every page exactly where the printed one does, but its lines are laid out by your device rather than taken from the print, so they will not always break in the same places.',
-        ),
-      );
-    }
-    },
-    [quran.prefs.riwayahNoticeSeen, t],
-  );
+  // Shared with Settings → Qur'an, which can switch muṣḥaf too — the
+  // one-time reflow notice belongs to the ACT, not to this screen.
+  const switchRiwayah = useSwitchRiwayah();
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   /**

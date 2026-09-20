@@ -1,4 +1,6 @@
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import {
   CompanionTextSheet,
@@ -6,6 +8,15 @@ import {
 } from '../../quran/CompanionTextControls';
 import { usePrayerSettings } from '../../context/PrayerSettingsContext';
 import { setQuranPrefs, useQuranState } from '../../quran/quranState';
+import { RiwayahPicker } from '../../quran/RiwayahPicker';
+import { hydrateRiwayahData, useRiwayahAvailability } from '../../quran/riwayahData';
+import {
+  availableRiwayat,
+  resolveRiwayah,
+  riwayahById,
+} from '../../quran/riwayat';
+import { useSwitchRiwayah } from '../../quran/useSwitchRiwayah';
+import type { RootStackParamList } from '../../navigation/types';
 import { SegmentedControl } from '../../components/ui';
 import {
   SettingsBlock,
@@ -44,7 +55,32 @@ function QuranCardImpl() {
   const { settings, updateSettings } = usePrayerSettings();
   const { mode, editionLabel } = useCompanionChoice();
   const quran = useQuranState();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [sheetVisible, setSheetVisible] = useState(false);
+  const [riwayahVisible, setRiwayahVisible] = useState(false);
+  /**
+   * WHICH MUṢḤAF, ASKED WHERE SETTINGS ARE (issue #53 follow-on).
+   *
+   * The choice has only ever been reachable from the muṣḥaf's own header,
+   * and only once a second tradition was already on the device — so the
+   * reader who has not downloaded one has no way to find out from the app
+   * that there is anything to choose. Here it is a row like any other,
+   * always shown: the picker lists every tradition and sends the ones
+   * that are not installed to the downloads screen, which is where they
+   * are added and removed.
+   *
+   * The availability caches are in memory and filled by a hydrate call no
+   * settings screen was making, so a riwayah installed on this device
+   * would have read as absent here. Subscribed AND hydrated.
+   */
+  useRiwayahAvailability();
+  useEffect(() => {
+    void hydrateRiwayahData();
+  }, []);
+  const riwayah = resolveRiwayah(quran.prefs.riwayah);
+  const switchRiwayah = useSwitchRiwayah();
+  const onDevice = availableRiwayat().length;
 
   const modeLabel =
     mode === 'tafsir'
@@ -53,6 +89,30 @@ function QuranCardImpl() {
 
   return (
     <>
+      {/* First, because it is a choice about the TEXT — everything below
+          is about what is shown around it. */}
+      <SettingsGroup
+        title={t('quran.riwayahSettingsTitle', 'Reading tradition')}
+        footer={t('quran.riwayahSettingsHelp', {
+          defaultValue:
+            'Which muṣḥaf the reader draws. Ḥafṣ is built in; Warsh, Qālūn and Shuʿbah are downloaded once and can be removed again. Your place, your bookmarks and your khatmah are kept in verses, so they follow you from one to another.',
+        })}>
+        <SettingsLinkRow
+          testID="settings-riwayah-row"
+          title={t('quran.riwayahSettingsTitle', 'Reading tradition')}
+          value={t(riwayahById(riwayah).nameKey, riwayahById(riwayah).arabic)}
+          onPress={() => setRiwayahVisible(true)}
+        />
+        <SettingsLinkRow
+          testID="settings-riwayah-manage"
+          title={t('quran.riwayahManage', 'Add or remove traditions')}
+          value={t('quran.riwayahOnDevice', {
+            defaultValue: '{{count}} on this device',
+            count: onDevice,
+          })}
+          onPress={() => navigation.navigate('QuranDownloads')}
+        />
+      </SettingsGroup>
       <SettingsGroup
         title={t('quran.companionTitle', 'Under each verse')}
         footer={t('quran.companionHelp', {
@@ -170,6 +230,25 @@ function QuranCardImpl() {
           onValueChange={next => setQuranPrefs({ readerKeepAwake: next })}
         />
       </SettingsGroup>
+      {/* The same picker the muṣḥaf header opens, so the two entry
+          points cannot drift apart — including the one-time notice that
+          a reflowing muṣḥaf breaks its lines differently
+          (`useSwitchRiwayah`). A tradition that is not on the device
+          sends the reader to the downloads screen instead of doing
+          nothing, which is what `onManage` is for. */}
+      <RiwayahPicker
+        visible={riwayahVisible}
+        current={riwayah}
+        onClose={() => setRiwayahVisible(false)}
+        onPick={id => {
+          setRiwayahVisible(false);
+          if (id !== riwayah) switchRiwayah(id);
+        }}
+        onManage={() => {
+          setRiwayahVisible(false);
+          navigation.navigate('QuranDownloads');
+        }}
+      />
       <CompanionTextSheet
         visible={sheetVisible}
         onClose={() => setSheetVisible(false)}

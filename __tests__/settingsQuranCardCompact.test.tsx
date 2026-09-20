@@ -67,6 +67,16 @@ jest.mock('../src/quran/quranState', () => ({
   setQuranPrefs: jest.fn(),
 }));
 
+/**
+ * The card reads its own navigation object (the muṣḥaf rows send you to
+ * the downloads screen). This suite mounts the card on its own, with no
+ * navigator above it, so it gets a stub rather than a NavigationContainer.
+ */
+jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual('@react-navigation/native'),
+  useNavigation: () => ({ navigate: jest.fn() }),
+}));
+
 import { Text } from 'react-native';
 import { QuranCard } from '../src/screens/settings/QuranCard';
 
