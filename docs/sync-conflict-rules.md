@@ -57,9 +57,12 @@ handed `dayStartDate` and the two numbers beside it to whichever device
 happened to be read second. A phone that had not been opened for a week
 reset the Mac's "today" to last week's baseline.
 
-Day-start state is **per-device** and never travels. `targetDays` and
-`fromPage` are set once and never edited, so they are merged by a rule that
-reads the same on both devices (max and min) rather than by spread order.
+Day-start state is **per-device** and never travels. `fromPage` is set once
+and never edited, so it is merged by a rule that reads the same on both
+devices (min) rather than by spread order. `targetDays` used to be in that
+sentence too; it is edited now (a khatmah can be re-paced mid-way, in
+either direction), so it travels with the date as one dated decision —
+see the pacing row below.
 
 ## The table
 
@@ -74,7 +77,7 @@ reads the same on both devices (max and min) rather than by spread order.
 | quran · lastRead | whole-object LWW on `updatedAt` | n/a — one value |
 | quran · prefs | whole-object LWW on `prefsUpdatedAt` | n/a — one value |
 | quran · khatmah plans | per-id; union of `done`, dated claims replayed over it | yes — `abandonedAt`, `AyahMark`, `positionAt` |
-| quran · khatmah deadline | newest `deadlineAt` wins; equal stamps → taking it off wins, then the later date | yes — the stamp survives the date, so "no deadline" travels |
+| quran · khatmah pacing (`targetDays` + `deadline` + `pacedFrom`) | newest `pacedAt` wins and takes the whole triple; equal stamps → a duration wins, then the later date, then the longer length | yes — the stamp survives the date, so "no deadline" travels |
 | quran · khatmah day cut (`pace`) | later `day` wins; within a day the EARLIEST cut (smallest `from`) | n/a — one value, replaced daily |
 | settings, location | incoming wins per top-level field | **no** — see below |
 
@@ -96,6 +99,17 @@ lost — and a field the snapshot does not mention is left alone, so an older
 build cannot erase a setting it has never heard of. If a stale device ever
 starts talking over newer settings in practice, the fix is the one
 `prefsUpdatedAt` already demonstrates: give the blob a write time.
+
+### Why the pacing is one row and not three
+
+`targetDays` and `deadline` are two ways of saying the same thing — "in
+thirty days" and "by the 30th" — and the reader switches between them
+mid-khatmah. Settled separately, "in 14 days" from the phone and "by 3
+October" from the Mac merge into a plan that is neither: the phone's
+length with the Mac's date, which nobody chose and which the card would
+then report as a date. So the pair is picked from ONE side, with
+`pacedFrom` (where the reader stood when the decision was taken, which is
+what the schedule is measured from) coming along with it.
 
 ### Why the day's cut is synced and the day's baseline is not
 

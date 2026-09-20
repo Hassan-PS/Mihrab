@@ -245,21 +245,69 @@ function pickPin(a: KhatmahPlan, b: KhatmahPlan): KhatmahPlan['position'] {
 }
 
 /**
- * Which date a plan is due by — see the note inside `mergeKhatmah`.
+ * HOW THE PLAN IS PACED — one decision, settled as one — see the note
+ * inside `mergeKhatmah`.
  *
- * Decided the same way on both devices, including the ties: taking the
- * deadline OFF is the stronger claim in the same breath (it is the one an
- * absence could never make), and between two live dates the later one
- * wins, because a merge that shortened someone's deadline behind their
- * back would be asking for reading they never agreed to.
+ * `targetDays` and `deadline` are two ways of saying the same thing, and
+ * the reader switches between them mid-khatmah, so they are merged as a
+ * PAIR: whichever device spoke last has its whole answer taken, stamp,
+ * date, length and the page it was decided at together. Settling them
+ * separately would let "in 14 days" from the phone and "by 3 October"
+ * from the Mac merge into a plan that is neither.
+ *
+ * Ties are decided the same way on both devices, and the order is the one
+ * that cannot cost the reader reading they never agreed to: going back to
+ * a duration is the stronger claim in the same millisecond (it is the one
+ * an absence could never make), then the later date, then the longer
+ * length.
  */
-function pickDeadline(a: KhatmahPlan, b: KhatmahPlan): string | undefined {
-  const sa = a.deadlineAt ?? 0;
-  const sb = b.deadlineAt ?? 0;
-  if (sa !== sb) return (sa > sb ? a : b).deadline;
-  if (sa > 0 && (!a.deadline || !b.deadline)) return undefined;
-  if (!a.deadline || !b.deadline) return a.deadline ?? b.deadline;
-  return a.deadline >= b.deadline ? a.deadline : b.deadline;
+function strongerPacing(a: KhatmahPlan, b: KhatmahPlan): KhatmahPlan {
+  const sa = a.pacedAt ?? 0;
+  const sb = b.pacedAt ?? 0;
+  if (sa !== sb) return sa > sb ? a : b;
+  if (!a.deadline !== !b.deadline) return a.deadline ? b : a;
+  if (a.deadline && b.deadline && a.deadline !== b.deadline) {
+    return a.deadline > b.deadline ? a : b;
+  }
+  if (a.targetDays !== b.targetDays) return a.targetDays > b.targetDays ? a : b;
+  return (a.pacedFrom ?? 0) >= (b.pacedFrom ?? 0) ? a : b;
+}
+
+type Pacing = Pick<KhatmahPlan, 'targetDays'> &
+  Partial<Pick<KhatmahPlan, 'deadline' | 'pacedAt' | 'pacedFrom'>>;
+
+function pickPacing(a: KhatmahPlan, b: KhatmahPlan): Pacing {
+  const sa = a.pacedAt ?? 0;
+  const sb = b.pacedAt ?? 0;
+  /**
+   * NEITHER SIDE DATED — two plans from before the stamp existed, where
+   * "no date" cannot be told from "a date nobody ever set", exactly as
+   * `pickPin` describes for the pin. The old rule is the only honest one
+   * there: keep the length that was set once and never edited, and keep a
+   * date rather than dropping one an un-updated device cannot re-send.
+   */
+  if (sa === 0 && sb === 0) {
+    const deadline =
+      !a.deadline || !b.deadline
+        ? (a.deadline ?? b.deadline)
+        : a.deadline >= b.deadline
+          ? a.deadline
+          : b.deadline;
+    return {
+      targetDays: Math.max(a.targetDays, b.targetDays),
+      ...(deadline ? { deadline } : {}),
+    };
+  }
+  const win = strongerPacing(a, b);
+  return {
+    targetDays: win.targetDays,
+    ...(win.deadline ? { deadline: win.deadline } : {}),
+    // Absent survives as absent: a winner with no `pacedFrom` must not
+    // inherit the loser's, or the plan would be measured against a page
+    // the decision in force never mentioned.
+    ...(win.pacedFrom !== undefined ? { pacedFrom: win.pacedFrom } : {}),
+    pacedAt: Math.max(sa, sb),
+  };
 }
 
 /** Today's cut, when the two devices hold different ones — see the note. */
@@ -412,17 +460,19 @@ export function mergeKhatmah(
      * the only job it was ever right for.
      */
     /**
-     * THE DEADLINE IS A CLAIM WITH A DATE ON IT (issue #53).
+     * HOW THE PLAN IS PACED IS A CLAIM WITH A DATE ON IT (issue #53).
      *
-     * Unlike `targetDays`, which is set once and can therefore be settled
-     * with a max, a deadline is MOVED — that is the whole answer to a
-     * plan that has fallen behind, and taking it off again turns the plan
-     * back into a duration. Neither of those can be said by a value that
-     * is merely absent, so the field travels with `deadlineAt` beside it
-     * and the newest word wins, exactly as the pin does.
+     * `targetDays` used to be set once and could therefore be settled
+     * with a max. It is edited now — the reader can re-pace a khatmah
+     * mid-way, and switch between a length and a date in either direction
+     * — and a max would quietly restore the longer of two lengths every
+     * time a device that had not heard about the change spoke. Neither a
+     * shortened plan nor a date taken off can be said by a value that is
+     * merely absent, so the pair travels with `pacedAt` beside it and the
+     * newest word wins, exactly as the pin does.
      */
-    const deadlineStamp = Math.max(mine.deadlineAt ?? 0, p.deadlineAt ?? 0);
-    const deadline = pickDeadline(mine, p);
+    const pacing = pickPacing(mine, p);
+    const deadline = pacing.deadline;
     /**
      * AND THE DAY'S CUT TRAVELS WITH IT, atomically.
      *
@@ -464,7 +514,8 @@ export function mergeKhatmah(
       // Present only when one of them had it — a pair of duration plans
       // must not come out of the merge carrying deadline-shaped keys.
       ...(deadline ? { deadline } : {}),
-      ...(deadlineStamp > 0 ? { deadlineAt: deadlineStamp } : {}),
+      ...(pacing.pacedAt ? { pacedAt: pacing.pacedAt } : {}),
+      ...(pacing.pacedFrom !== undefined ? { pacedFrom: pacing.pacedFrom } : {}),
       ...(pace && deadline ? { pace } : {}),
       /**
        * THE DAY'S BASELINE IS THIS DEVICE'S, always — see the long note
@@ -473,13 +524,12 @@ export function mergeKhatmah(
        */
       ...dayStateOf(mine),
       /**
-       * Set once, when the plan is made, and never edited — so the two
-       * sides agree and this only has to be DECIDED, not resolved. Max
-       * and min respectively, because a rule that reads the same on both
-       * devices is the whole requirement: a plan cannot come out of a
-       * merge one length here and another there.
+       * Half of the pacing decision, and taken from the same side as the
+       * other half (`pickPacing`). `fromPage` below is still set once and
+       * never edited, so a min is all it needs — a rule that reads the
+       * same on both devices is the whole requirement.
        */
-      targetDays: Math.max(mine.targetDays, p.targetDays),
+      targetDays: pacing.targetDays,
       ...(mine.fromPage != null || p.fromPage != null
         ? { fromPage: Math.min(mine.fromPage ?? 0, p.fromPage ?? 0) }
         : {}),
@@ -496,6 +546,11 @@ export function mergeKhatmah(
       delete merged.deadline;
       delete merged.pace;
     }
+    // And the same for the page the winning decision was made at: the
+    // spread puts the loser's back, which would date the schedule from
+    // somewhere nobody chose.
+    if (pacing.pacedFrom === undefined) delete merged.pacedFrom;
+    if (!pacing.pacedAt) delete merged.pacedAt;
     byId.set(p.id, merged);
       /**
        * THE DAY'S BASELINE IS THIS DEVICE'S, always.

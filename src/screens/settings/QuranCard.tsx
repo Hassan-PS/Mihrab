@@ -7,7 +7,20 @@ import {
   useCompanionChoice,
 } from '../../quran/CompanionTextControls';
 import { usePrayerSettings } from '../../context/PrayerSettingsContext';
-import { setQuranPrefs, useQuranState } from '../../quran/quranState';
+import {
+  activeKhatmah,
+  khatmahDaysLeft,
+  khatmahDeadline,
+  khatmahUnreadPages,
+  setKhatmahDeadline,
+  setKhatmahDuration,
+  setQuranPrefs,
+  useQuranState,
+} from '../../quran/quranState';
+import {
+  formatDeadline,
+  KhatmahPacingSheet,
+} from '../../quran/KhatmahPacingSheet';
 import { RiwayahPicker } from '../../quran/RiwayahPicker';
 import { hydrateRiwayahData, useRiwayahAvailability } from '../../quran/riwayahData';
 import {
@@ -51,7 +64,7 @@ import {
  * the switch between them only while it is on.
  */
 function QuranCardImpl() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { settings, updateSettings } = usePrayerSettings();
   const { mode, editionLabel } = useCompanionChoice();
   const quran = useQuranState();
@@ -59,6 +72,7 @@ function QuranCardImpl() {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [sheetVisible, setSheetVisible] = useState(false);
   const [riwayahVisible, setRiwayahVisible] = useState(false);
+  const [pacingVisible, setPacingVisible] = useState(false);
   /**
    * WHICH MUṢḤAF, ASKED WHERE SETTINGS ARE (issue #53 follow-on).
    *
@@ -81,6 +95,20 @@ function QuranCardImpl() {
   const riwayah = resolveRiwayah(quran.prefs.riwayah);
   const switchRiwayah = useSwitchRiwayah();
   const onDevice = availableRiwayat().length;
+
+  /**
+   * THE KHATMAH'S PACING, ASKED WHERE SETTINGS ARE.
+   *
+   * The same decision as the ⋯ menu on the Quran page, and deliberately
+   * the same sheet: a reader who thinks of "how long my khatmah takes" as
+   * a setting looks here, and a reader who is standing in front of their
+   * plan looks there. Only for a plan that is actually running — a
+   * pacing row with no khatmah under it would be a setting for nothing,
+   * so the group says where one comes from instead.
+   */
+  const plan = activeKhatmah(quran);
+  const planDeadline = plan ? khatmahDeadline(plan) : null;
+  const planDaysLeft = plan ? khatmahDaysLeft(plan) : 0;
 
   const modeLabel =
     mode === 'tafsir'
@@ -143,6 +171,38 @@ function QuranCardImpl() {
             updateSettings({ quranVerseByVerseEnabled: next })
           }
         />
+      </SettingsGroup>
+      <SettingsGroup
+        title={t('quran.khatmahPacingSettingsTitle', 'Khatmah')}
+        footer={
+          plan
+            ? t('quran.khatmahPacingHelp', {
+                defaultValue:
+                  'A khatmah is paced either by a length — the portions wait for you — or by a date, which re-cuts what is left over the days that remain. You can move between the two at any point; nothing you have read is affected.',
+              })
+            : t('quran.khatmahPacingNone', {
+                defaultValue:
+                  'Start a khatmah on the Quran page and how it is paced — a number of days, or a date to finish by — can be changed here.',
+              })
+        }>
+        {plan ? (
+          <SettingsLinkRow
+            testID="settings-khatmah-pacing"
+            title={t('quran.khatmahPacingTitle', 'How it is paced')}
+            value={
+              planDeadline
+                ? t('quran.khatmahByDate', {
+                    defaultValue: 'by {{date}}',
+                    date: formatDeadline(planDeadline, i18n.language),
+                  })
+                : t('quran.khatmahDays', {
+                    defaultValue: '{{count}} days',
+                    count: planDaysLeft,
+                  })
+            }
+            onPress={() => setPacingVisible(true)}
+          />
+        ) : null}
       </SettingsGroup>
       {/**
        * WHEN A DAY BEGINS, for the khatmah's own counting.
@@ -253,6 +313,26 @@ function QuranCardImpl() {
         visible={sheetVisible}
         onClose={() => setSheetVisible(false)}
       />
+      {/* MOUNTED ONLY WHILE IT IS OPEN, for the reason the Quran page
+          mounts it that way: the sheet seeds itself from the plan in
+          `useState`, which runs once when it mounts. Left mounted with
+          the card it would hold the pacing the plan had when Settings
+          was opened. */}
+      {plan && pacingVisible ? (
+        <KhatmahPacingSheet
+          visible
+          mode="change"
+          current={planDeadline}
+          currentDays={planDaysLeft}
+          unreadPages={khatmahUnreadPages(plan, quran.prefs.riwayah)}
+          onClose={() => setPacingVisible(false)}
+          onChoose={choice => {
+            setPacingVisible(false);
+            if (choice.kind === 'days') setKhatmahDuration(choice.days);
+            else setKhatmahDeadline(choice.deadline);
+          }}
+        />
+      ) : null}
     </>
   );
 }

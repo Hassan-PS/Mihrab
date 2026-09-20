@@ -32,6 +32,7 @@ import {
   recordKhatmahPageTurn,
   resetKhatmahToday,
   setKhatmahDeadline,
+  setKhatmahDuration,
   coerceQuranState,
   setQuranPrefs,
   startKhatmah,
@@ -62,7 +63,7 @@ const plan = (over: Partial<KhatmahPlan> = {}): KhatmahPlan => ({
   pagesRead: 0,
   completedAt: null,
   deadline: '2026-09-30',
-  deadlineAt: at(2026, 8, 1),
+  pacedAt: at(2026, 8, 1),
   ...over,
 });
 
@@ -188,7 +189,7 @@ describe('the writers', () => {
     startKhatmah(30, undefined, by);
     const made = activeKhatmah(getQuranState())!;
     expect(khatmahDeadline(made)).toBe(by);
-    expect(made.deadlineAt).toBeGreaterThan(0);
+    expect(made.pacedAt).toBeGreaterThan(0);
     expect(made.pace?.day).toBe(ymd(Date.now()));
     expect(made.pace!.from).toBe(1);
   });
@@ -205,11 +206,11 @@ describe('the writers', () => {
     // plan says so rather than keeping the twenty it was made with.
     expect(khatmahPerDayPages(paced)).toBeGreaterThan(50);
 
-    setKhatmahDeadline(null);
+    setKhatmahDuration(30);
     const back = activeKhatmah(getQuranState())!;
     expect(khatmahDeadline(back)).toBeNull();
     expect(back.pace).toBeUndefined();
-    expect(back.deadlineAt).toBeGreaterThan(0); // the removal is dated
+    expect(back.pacedAt).toBeGreaterThan(0); // the way back is dated too
     expect(khatmahDaysLeft(back)).toBe(30);
   });
 
@@ -259,7 +260,7 @@ describe('a duration plan is not touched by any of this', () => {
  */
 describe('the day\'s cut travels', () => {
   const by = '2026-09-30';
-  const base = plan({ deadline: by, deadlineAt: at(2026, 8, 1) });
+  const base = plan({ deadline: by, pacedAt: at(2026, 8, 1) });
 
   it('the first device to open the day is the one that cut it', () => {
     const morning = khatmahPaceToday(base, at(2026, 8, 6, 8))!;
@@ -287,21 +288,21 @@ describe('the day\'s cut travels', () => {
 });
 
 describe('the deadline itself travels, and can be taken off', () => {
-  const dated = plan({ deadline: '2026-09-30', deadlineAt: 5_000 });
+  const dated = plan({ deadline: '2026-09-30', pacedAt: 5_000 });
 
   it('the newest word wins, both ways round', () => {
-    const moved = plan({ deadline: '2026-10-15', deadlineAt: 9_000 });
+    const moved = plan({ deadline: '2026-10-15', pacedAt: 9_000 });
     for (const merged of [
       mergeKhatmah([dated], [moved])[0],
       mergeKhatmah([moved], [dated])[0],
     ]) {
       expect(merged.deadline).toBe('2026-10-15');
-      expect(merged.deadlineAt).toBe(9_000);
+      expect(merged.pacedAt).toBe(9_000);
     }
   });
 
   it('taking it off is a dated fact too, so it does not come back', () => {
-    const cleared = plan({ deadline: undefined, deadlineAt: 9_000 });
+    const cleared = plan({ deadline: undefined, pacedAt: 9_000 });
     for (const merged of [
       mergeKhatmah([dated], [cleared])[0],
       mergeKhatmah([cleared], [dated])[0],
@@ -322,7 +323,7 @@ describe('the deadline itself travels, and can be taken off', () => {
     const merged = mergeKhatmah([duration], [duration])[0];
     expect(merged).toEqual(duration);
     expect('deadline' in merged).toBe(false);
-    expect('deadlineAt' in merged).toBe(false);
+    expect('pacedAt' in merged).toBe(false);
     expect('pace' in merged).toBe(false);
   });
 
@@ -335,8 +336,8 @@ describe('the deadline itself travels, and can be taken off', () => {
     // Same stamp, two dates: the later one wins, deterministically on
     // both devices. A merge that silently pulled the date forward would
     // be asking for reading nobody agreed to.
-    const soon = plan({ deadline: '2026-09-20', deadlineAt: 7_000 });
-    const later = plan({ deadline: '2026-10-20', deadlineAt: 7_000 });
+    const soon = plan({ deadline: '2026-09-20', pacedAt: 7_000 });
+    const later = plan({ deadline: '2026-10-20', pacedAt: 7_000 });
     expect(mergeKhatmah([soon], [later])[0].deadline).toBe('2026-10-20');
     expect(mergeKhatmah([later], [soon])[0].deadline).toBe('2026-10-20');
   });
@@ -392,7 +393,7 @@ function walk(
     pagesRead: 0,
     completedAt: null,
     deadline: by,
-    deadlineAt: start,
+    pacedAt: start,
     done: [],
     ayahsRead: 0,
   };
@@ -479,7 +480,7 @@ describe('the offer of a new date fires when it should, and not otherwise', () =
   });
 
   it('but not in the first days, when there is no evidence yet', () => {
-    const empty = plan({ done: [], ayahsRead: 0, deadline: '2026-09-30', deadlineAt: at(2026, 8, 1) });
+    const empty = plan({ done: [], ayahsRead: 0, deadline: '2026-09-30', pacedAt: at(2026, 8, 1) });
     expect(khatmahPaceOutgrown(empty, at(2026, 8, 2))).toBe(false);
   });
 });
@@ -595,7 +596,7 @@ describe('dates at the edges of what a plan can be given', () => {
     // it — so finishing the book a week early was reported as being late.
     const done = plan({
       deadline: ymd(Date.now() + 10 * DAY),
-      deadlineAt: 1,
+      pacedAt: 1,
       done: [[1, KHATMAH_TOTAL_AYAHS]],
       ayahsRead: KHATMAH_TOTAL_AYAHS,
       pagesRead: 604,
@@ -607,7 +608,7 @@ describe('dates at the edges of what a plan can be given', () => {
   });
 
   it('and one whose date really has gone by says so', () => {
-    const late = plan({ deadline: ymd(Date.now() - 2 * DAY), deadlineAt: 1 });
+    const late = plan({ deadline: ymd(Date.now() - 2 * DAY), pacedAt: 1 });
     expect(khatmahDatePassed(late)).toBe(true);
   });
 
@@ -676,7 +677,7 @@ describe('the day that starts at maghrib', () => {
 
   it('and the days left count the same boundary the cut does', () => {
     // Phase 0 put these on one key; a deadline plan is where it shows.
-    const dated = plan({ deadline: ymd(Date.now() + 5 * DAY), deadlineAt: 1 });
+    const dated = plan({ deadline: ymd(Date.now() + 5 * DAY), pacedAt: 1 });
     const civil = khatmahDaysLeft(dated);
     setTodaysMaghrib(new Date(Date.now() - 60 * 60 * 1000));
     expect(khatmahDaysLeft(dated)).toBe(civil - 1);
@@ -698,7 +699,7 @@ describe('a rewind under the day that was already cut', () => {
     const rewound = plan({
       startedAt: Date.now() - 4 * DAY,
       deadline: ymd(Date.now() + 25 * DAY),
-      deadlineAt: 1,
+      pacedAt: 1,
       pace: { day: ymd(Date.now()), from: 800, to: 950 },
       done: [],
       ayahsRead: 0,

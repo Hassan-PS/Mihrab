@@ -1,5 +1,21 @@
 /**
- * "FINISH BY A DATE" — the sheet that sets, moves or removes a deadline.
+ * HOW A KHATMAH IS PACED — the one sheet that asks it, and the one that
+ * changes its mind.
+ *
+ * There are two plans in this app and they are the same plan said two
+ * ways: "in thirty days", which is the reader's own pace and waits for
+ * them, and "by the 30th", which is the calendar's and re-cuts what is
+ * left every morning (`khatmahPace.ts` has why that reversal is right for
+ * one and wrong for the other). Because they are one question, they are
+ * one sheet with a segment at the top of it, and the answer carries
+ * across when it is flipped: thirty days is a date thirty days out, and
+ * that date is thirty days. The number under both — pages a day — does
+ * not move when the reader changes which way they are saying it.
+ *
+ * That is also what makes switching mid-khatmah safe to offer. The sheet
+ * only ever reports a length or a date; the store works out what that
+ * means for a plan already under way (`setKhatmahDuration`), and nothing
+ * the reader has read is touched by either.
  *
  * ── WHY THIS IS NOT A CALENDAR ────────────────────────────────────────
  *
@@ -23,6 +39,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { getNextRamadanStart } from '../hijri/upcomingEvents';
 import { useAppPalette } from '../hooks/useAppPalette';
+import { SegmentedControl } from '../components/ui';
 import { TYPE } from '../theme/typography';
 import { RADIUS, SPACING } from '../theme/tokens';
 
@@ -47,39 +64,95 @@ function daysFromToday(at: number, now: number): number {
   );
 }
 
-export type DeadlineSheetProps = {
+/**
+ * "3 Oct" — a plan's date, in the reader's language, wherever it is put
+ * in front of them. One formatter so the Quran card, the ⋯ menu and
+ * Settings cannot drift into three ways of writing the same day.
+ */
+export function formatDeadline(deadline: string, language: string): string {
+  try {
+    return new Intl.DateTimeFormat(language, {
+      day: 'numeric',
+      month: 'short',
+    }).format(new Date(`${deadline}T12:00:00`));
+  } catch {
+    return deadline;
+  }
+}
+
+/** Which of the two the reader is choosing. `days` is the default mode. */
+export type PacingKind = 'days' | 'date';
+
+/**
+ * What the sheet reports. A length, or a date — never both, and never a
+ * plan: turning either into a change to a khatmah already under way is
+ * the store's job, not this screen's.
+ */
+export type PacingChoice =
+  | { kind: 'days'; days: number }
+  | { kind: 'date'; deadline: string };
+
+export type PacingSheetProps = {
   visible: boolean;
   /** The date the plan already has, if it has one. */
   current?: string | null;
+  /**
+   * Days of reading the plan asks for as things stand — what the sheet
+   * opens on for a plan that has no date, so that a reader who came in to
+   * change the length is looking at the length they have.
+   */
+  currentDays?: number;
   /** Pages of the muṣḥaf still unread — what the pace is divided from. */
   unreadPages: number;
-  /** Set the date. Null removes it, which is offered only when there is one. */
-  onChoose: (deadline: string | null) => void;
+  onChoose: (choice: PacingChoice) => void;
   onClose: () => void;
-  /** A plan being created says "Start"; a live one says "Set the date". */
+  /** A plan being created says "Start"; a live one says what it sets. */
   mode: 'start' | 'change';
+  /**
+   * Which way the sheet opens — the way the reader asked for it, since
+   * the card offers both. Only the opening: the segment is live either
+   * way. Defaults to the mode the plan is already in.
+   */
+  initialKind?: PacingKind;
 };
 
-export function KhatmahDeadlineSheet({
+export function KhatmahPacingSheet({
   visible,
   current,
+  currentDays,
   unreadPages,
   onChoose,
   onClose,
   mode,
-}: DeadlineSheetProps) {
+  initialKind,
+}: PacingSheetProps) {
   const { palette } = useAppPalette();
   const { t, i18n } = useTranslation();
   const now = Date.now();
-  // A month is the length nobody argues with, and it is the one the
-  // duration chips lead with.
-  const [at, setAt] = useState<number>(() => {
+  /**
+   * ONE NUMBER BEHIND BOTH VIEWS, and that is the whole trick.
+   *
+   * The date is today plus this many days less one, and a date set from a
+   * preset is read straight back into it. So the segment does not convert
+   * anything, there is no second state to keep in step, and a reader who
+   * flips to look at the other way of saying it and flips back finds the
+   * pace exactly where they left it.
+   */
+  const [days, setDays] = useState<number>(() => {
     if (current) {
       const parsed = Date.parse(`${current}T12:00:00`);
-      if (Number.isFinite(parsed) && parsed > now - DAY) return parsed;
+      if (Number.isFinite(parsed) && parsed > now - DAY) {
+        return Math.max(1, daysFromToday(parsed, now) + 1);
+      }
     }
-    return now + 29 * DAY;
+    if (currentDays && currentDays > 0) return Math.min(3650, Math.round(currentDays));
+    // A month is the length nobody argues with, and it is the one the
+    // duration chips lead with.
+    return 30;
   });
+  const [kind, setKind] = useState<PacingKind>(
+    initialKind ?? (current ? 'date' : 'days'),
+  );
 
   const ramadan = useMemo(() => getNextRamadanStart(new Date(now)), [now]);
   const endOfMonth = useMemo(() => {
@@ -87,7 +160,7 @@ export function KhatmahDeadlineSheet({
     return new Date(d.getFullYear(), d.getMonth() + 1, 0, 12).getTime();
   }, [now]);
 
-  const days = Math.max(1, daysFromToday(at, now) + 1);
+  const at = startOfDay(now).getTime() + (days - 1) * DAY;
   const perDay = Math.max(1, Math.ceil(Math.max(1, unreadPages) / days));
   const dateLabel = useMemo(() => {
     try {
@@ -100,11 +173,21 @@ export function KhatmahDeadlineSheet({
       return new Date(at).toDateString();
     }
   }, [at, i18n.language]);
+  const daysLabel = t('quran.khatmahDays', {
+    defaultValue: '{{count}} days',
+    count: days,
+  });
+  const perDayLabel = t('quran.khatmahPerDay', {
+    defaultValue: '{{count}} pages a day',
+    count: perDay,
+  });
 
-  // Never before tomorrow: a khatmah due today is not a plan, and the
-  // pace it would ask for is the whole book.
-  const move = (by: number) =>
-    setAt(prev => Math.max(now + DAY, prev + by * DAY));
+  // Never before tomorrow, and never fewer than one day's reading: a
+  // khatmah due today is not a plan, and the pace it would ask for is the
+  // whole book.
+  const move = (by: number) => setDays(prev => Math.max(1, Math.min(3650, prev + by)));
+  const setDate = (when: number) =>
+    setDays(Math.max(1, Math.min(3650, daysFromToday(when, now) + 1)));
 
   const step = (label: string, by: number) => (
     <Pressable
@@ -127,12 +210,12 @@ export function KhatmahDeadlineSheet({
     </Pressable>
   );
 
-  const preset = (label: string, when: number) => (
+  const preset = (label: string, onPress: () => void) => (
     <Pressable
       key={label}
       accessibilityRole="button"
       accessibilityLabel={label}
-      onPress={() => setAt(Math.max(now + DAY, startOfDay(when).getTime()))}
+      onPress={onPress}
       style={[styles.preset, { borderColor: palette.border }]}>
       <Text style={[styles.presetLabel, { color: palette.accentSolid }]}>
         {label}
@@ -153,20 +236,47 @@ export function KhatmahDeadlineSheet({
       />
       <View style={[styles.card, { backgroundColor: palette.card }]}>
         <Text style={[styles.title, { color: palette.text }]}>
-          {t('quran.khatmahByDateTitle', 'Finish by a date')}
+          {t('quran.khatmahPacingTitle', 'How it is paced')}
         </Text>
+        {/* The switch itself, and it is the same switch whether a plan is
+            being made or re-paced — there is no mode in which one of the
+            two is unavailable. */}
+        <View style={styles.segment}>
+          <SegmentedControl
+            testID="khatmah-pacing-mode"
+            accessibilityLabel={t('quran.khatmahPacingTitle', 'How it is paced')}
+            value={kind}
+            onChange={setKind}
+            segments={[
+              {
+                key: 'days',
+                label: t('quran.khatmahPacingDays', 'A number of days'),
+              },
+              {
+                key: 'date',
+                label: t('quran.khatmahPacingDate', 'By a date'),
+              },
+            ]}
+          />
+        </View>
         {/* The date can be "Wednesday, 30 September" in a language that
             does not abbreviate; two lines is fine, clipping is not. */}
         <Text style={[styles.date, { color: palette.text }]} numberOfLines={2}>
-          {dateLabel}
+          {kind === 'date' ? dateLabel : daysLabel}
         </Text>
+        {/* Each view says what the other one would say, so the equivalence
+            is on screen rather than implied: a length shows the day it
+            lands on, a date shows the days it comes to. Both show the
+            reading it asks for, which is the number that decides. */}
         <Text style={[styles.meta, { color: palette.muted }]}>
           {[
-            t('quran.khatmahInDays', { defaultValue: 'in {{count}} days', count: days }),
-            t('quran.khatmahPerDay', {
-              defaultValue: '{{count}} pages a day',
-              count: perDay,
-            }),
+            kind === 'date'
+              ? t('quran.khatmahInDays', {
+                  defaultValue: 'in {{count}} days',
+                  count: days,
+                })
+              : dateLabel,
+            perDayLabel,
           ].join(' · ')}
         </Text>
 
@@ -178,16 +288,28 @@ export function KhatmahDeadlineSheet({
         </View>
 
         <View style={styles.presets}>
-          {preset(t('quran.khatmahEndOfMonth', 'End of this month'), endOfMonth)}
-          {/* Only when it is a date anybody would aim at: a Ramadan
-              eleven months out is not a khatmah plan, it is a reminder. */}
-          {ramadan && daysFromToday(ramadan.getTime(), now) > 5 &&
-          daysFromToday(ramadan.getTime(), now) < 200
-            ? preset(
-                t('quran.khatmahBeforeRamadan', 'Before Ramadan'),
-                ramadan.getTime() - DAY,
+          {kind === 'days'
+            ? [30, 60, 90].map(n =>
+                preset(
+                  t('quran.khatmahDays', { defaultValue: '{{count}} days', count: n }),
+                  () => setDays(n),
+                ),
               )
-            : null}
+            : [
+                preset(t('quran.khatmahEndOfMonth', 'End of this month'), () =>
+                  setDate(endOfMonth),
+                ),
+                /* Only when it is a date anybody would aim at: a Ramadan
+                   eleven months out is not a khatmah plan, it is a
+                   reminder. */
+                ramadan &&
+                daysFromToday(ramadan.getTime(), now) > 5 &&
+                daysFromToday(ramadan.getTime(), now) < 200
+                  ? preset(t('quran.khatmahBeforeRamadan', 'Before Ramadan'), () =>
+                      setDate(ramadan.getTime() - DAY),
+                    )
+                  : null,
+              ]}
         </View>
 
         <View style={styles.actions}>
@@ -200,33 +322,29 @@ export function KhatmahDeadlineSheet({
               {t('common.cancel', 'Cancel')}
             </Text>
           </Pressable>
-          {/* Taking the date off is offered only where it means something,
-              and it is not destructive: the plan carries on as the
-              duration it was made with. */}
-          {current ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('quran.khatmahRemoveDate', 'Remove the date')}
-              onPress={() => onChoose(null)}
-              style={styles.action}>
-              <Text style={{ color: palette.muted, fontWeight: '600' }}>
-                {t('quran.khatmahRemoveDate', 'Remove the date')}
-              </Text>
-            </Pressable>
-          ) : null}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={
               mode === 'start'
                 ? t('quran.khatmahStartCta', 'Start')
-                : t('quran.khatmahSetDate', 'Set the date')
+                : kind === 'date'
+                  ? t('quran.khatmahSetDate', 'Set the date')
+                  : t('quran.khatmahSetLength', 'Set the length')
             }
-            onPress={() => onChoose(dayKeyOf(new Date(at)))}
+            onPress={() =>
+              onChoose(
+                kind === 'date'
+                  ? { kind: 'date', deadline: dayKeyOf(new Date(at)) }
+                  : { kind: 'days', days },
+              )
+            }
             style={styles.action}>
             <Text style={{ color: palette.accentSolid, fontWeight: '700' }}>
               {mode === 'start'
                 ? t('quran.khatmahStartCta', 'Start')
-                : t('quran.khatmahSetDate', 'Set the date')}
+                : kind === 'date'
+                  ? t('quran.khatmahSetDate', 'Set the date')
+                  : t('quran.khatmahSetLength', 'Set the length')}
             </Text>
           </Pressable>
         </View>
@@ -246,6 +364,7 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
   },
   title: { fontSize: TYPE.callout.fontSize, fontWeight: '700' },
+  segment: { marginTop: SPACING.sm },
   date: {
     fontSize: TYPE.title3.fontSize,
     fontWeight: '700',
@@ -281,9 +400,9 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    // Three actions on a narrow phone, and "Remove the date" is
-    // "Datum entfernen" in German and longer still in Urdu. Wrapping is
-    // the honest answer: they stack rather than being clipped.
+    // Two actions, and "Set the length" is longer in German and longer
+    // still in Urdu. Wrapping is the honest answer: they stack rather
+    // than being clipped.
     flexWrap: 'wrap',
     gap: SPACING.md,
     marginTop: SPACING.lg,

@@ -1112,10 +1112,6 @@
     "khatmahOptionsTitle": "Opciones de la jatma",
     "khatmahByDateTitle": "Terminar en una fecha",
     "khatmahByDateChip": "En una fecha…",
-    "khatmahByDateHelp": "Ajusta el plan a una fecha; lo que queda se reparte entre los días que restan.",
-    "khatmahChangeDate": "Cambiar la fecha",
-    "khatmahChangeDateHelp": "Muévela, o quítala y vuelve a un plan de duración fija.",
-    "khatmahRemoveDate": "Quitar la fecha",
     "khatmahSetDate": "Fijar la fecha",
     "khatmahByDate": "para el {{date}}",
     "khatmahInDays": "en {{count}} días",
@@ -1286,7 +1282,16 @@
     "dayStartHelp": "El día islámico empieza al atardecer: la lectura de la tarde cuenta para el día que acaba de empezar, y una sesión que pasa de medianoche sigue siendo un día. Desactivado, los días se cuentan desde medianoche. Esto solo cambia la porción diaria del jatma — la tabla de oraciones sigue pasando tras la última hora del día.",
     "bookmarkFollows": "Sigue su lectura",
     "markPageRead": "Marcar esta página como leída",
-    "markPageUnread": "Marcar esta página como no leída"
+    "markPageUnread": "Marcar esta página como no leída",
+    "khatmahPacingTitle": "Cómo se reparte",
+    "khatmahPacingDays": "Un número de días",
+    "khatmahPacingDate": "En una fecha",
+    "khatmahSetLength": "Fijar la duración",
+    "khatmahPacingDateHelp": "En {{date}} — lo que queda se reparte de nuevo cada mañana. Mueve la fecha, o vuelve a un número de días.",
+    "khatmahPacingDaysHelp": "Una duración en vez de una fecha, así las porciones te esperan. Cámbiala, o termina en una fecha.",
+    "khatmahPacingSettingsTitle": "Khatmah",
+    "khatmahPacingHelp": "Un jatma se reparte o bien por una duración — las porciones te esperan — o bien por una fecha, que vuelve a repartir lo que queda entre los días restantes. Puedes pasar de una a otra en cualquier momento; nada de lo que has leído se ve afectado.",
+    "khatmahPacingNone": "Inicia una jatma en la pestaña del Corán y aquí podrás cambiar cómo se reparte — un número de días, o una fecha para terminar."
   },
   "reading": {
     "textSize": "Tamaño del texto",

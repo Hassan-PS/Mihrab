@@ -1112,10 +1112,6 @@
     "khatmahOptionsTitle": "Hatim seçenekleri",
     "khatmahByDateTitle": "Bir tarihe kadar bitir",
     "khatmahByDateChip": "Bir tarihe kadar…",
-    "khatmahByDateHelp": "Planı bir tarihe bağlar; kalan kısım kalan günlere yeniden bölünür.",
-    "khatmahChangeDate": "Tarihi değiştir",
-    "khatmahChangeDateHelp": "İleri alın ya da kaldırıp belirli uzunlukta bir plana dönün.",
-    "khatmahRemoveDate": "Tarihi kaldır",
     "khatmahSetDate": "Tarihi belirle",
     "khatmahByDate": "{{date}} tarihine kadar",
     "khatmahInDays": "{{count}} gün içinde",
@@ -1286,7 +1282,16 @@
     "dayStartHelp": "İslami gün güneş batınca başlar: akşam okunanlar yeni başlayan güne sayılır ve gece yarısını aşan bir oturum tek gün kalır. Kapalıyken günler gece yarısından sayılır. Bu yalnızca hatmin günlük bölümünü değiştirir — namaz tablosu yine günün son vaktinden sonra döner.",
     "bookmarkFollows": "Okumanızı takip eder",
     "markPageRead": "Bu sayfayı okundu olarak işaretle",
-    "markPageUnread": "Bu sayfayı okunmadı olarak işaretle"
+    "markPageUnread": "Bu sayfayı okunmadı olarak işaretle",
+    "khatmahPacingTitle": "Nasıl bölündüğü",
+    "khatmahPacingDays": "Gün sayısı",
+    "khatmahPacingDate": "Bir tarihe kadar",
+    "khatmahSetLength": "Süreyi belirle",
+    "khatmahPacingDateHelp": "{{date}} tarihine kadar — kalanlar her sabah yeniden bölünür. Tarihi ileri alın ya da gün sayısına dönün.",
+    "khatmahPacingDaysHelp": "Tarih yerine bir süre; bölümler sizi bekler. Süreyi değiştirin ya da bunun yerine bir tarihe kadar bitirin.",
+    "khatmahPacingSettingsTitle": "Hatim",
+    "khatmahPacingHelp": "Hatim ya bir süreye göre bölünür — bölümler sizi bekler — ya da bir tarihe göre; o zaman kalanlar kalan günlere yeniden dağıtılır. İkisi arasında istediğiniz zaman geçiş yapabilirsiniz; okuduklarınızın hiçbiri etkilenmez.",
+    "khatmahPacingNone": "Kur’an sayfasında bir hatim başlatın; nasıl bölüneceğini — gün sayısı ya da bitirilecek tarih — buradan değiştirebilirsiniz."
   },
   "reading": {
     "textSize": "Metin boyutu",

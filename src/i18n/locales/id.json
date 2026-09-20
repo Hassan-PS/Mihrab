@@ -1112,10 +1112,6 @@
     "khatmahOptionsTitle": "Opsi khatam",
     "khatmahByDateTitle": "Selesai pada tanggal",
     "khatmahByDateChip": "Pada tanggal…",
-    "khatmahByDateHelp": "Sesuaikan rencana dengan sebuah tanggal; sisanya dibagi ulang ke hari-hari yang tersisa.",
-    "khatmahChangeDate": "Ubah tanggalnya",
-    "khatmahChangeDateHelp": "Geser, atau lepas dan kembali ke rencana dengan panjang tetap.",
-    "khatmahRemoveDate": "Lepas tanggalnya",
     "khatmahSetDate": "Tetapkan tanggal",
     "khatmahByDate": "sampai {{date}}",
     "khatmahInDays": "dalam {{count}} hari",
@@ -1286,7 +1282,16 @@
     "dayStartHelp": "Hari Islam dimulai saat matahari terbenam, jadi bacaan malam dihitung untuk hari yang baru mulai, dan sesi yang melewati tengah malam tetap satu hari. Jika mati, hari dihitung dari tengah malam. Ini hanya mengubah porsi harian khataman — tabel salat tetap berganti setelah waktu terakhir hari itu.",
     "bookmarkFollows": "Mengikuti bacaan Anda",
     "markPageRead": "Tandai halaman ini sudah dibaca",
-    "markPageUnread": "Tandai halaman ini belum dibaca"
+    "markPageUnread": "Tandai halaman ini belum dibaca",
+    "khatmahPacingTitle": "Bagaimana pembagiannya",
+    "khatmahPacingDays": "Sejumlah hari",
+    "khatmahPacingDate": "Pada tanggal",
+    "khatmahSetLength": "Tetapkan durasi",
+    "khatmahPacingDateHelp": "Pada {{date}} — sisanya dibagi ulang setiap pagi. Geser tanggalnya, atau kembali ke sejumlah hari.",
+    "khatmahPacingDaysHelp": "Durasi, bukan tanggal, sehingga bagiannya menunggu Anda. Ubah durasinya, atau selesaikan pada tanggal tertentu.",
+    "khatmahPacingSettingsTitle": "Khataman",
+    "khatmahPacingHelp": "Khataman dibagi berdasarkan durasi — bagiannya menunggu Anda — atau berdasarkan tanggal, yang membagi ulang sisanya ke hari-hari yang tersisa. Anda bisa berpindah di antara keduanya kapan saja; tidak ada bacaan Anda yang terpengaruh.",
+    "khatmahPacingNone": "Mulai khatam di halaman Al-Qur’an, lalu di sini Anda bisa mengubah pembagiannya — sejumlah hari, atau tanggal untuk menyelesaikannya."
   },
   "reading": {
     "textSize": "Ukuran teks",

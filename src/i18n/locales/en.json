@@ -1112,10 +1112,6 @@
     "khatmahOptionsTitle": "Khatmah options",
     "khatmahByDateTitle": "Finish by a date",
     "khatmahByDateChip": "By a date…",
-    "khatmahByDateHelp": "Pace the plan to a date; what is left is re-cut over the days that remain.",
-    "khatmahChangeDate": "Change the date",
-    "khatmahChangeDateHelp": "Move it, or take it off and go back to a plan of a set length.",
-    "khatmahRemoveDate": "Remove the date",
     "khatmahSetDate": "Set the date",
     "khatmahByDate": "by {{date}}",
     "khatmahInDays": "in {{count}} days",
@@ -1286,7 +1282,16 @@
     "dayStartHelp": "The Islamic day begins at sunset, so an evening of reading counts towards the day that has just begun and a session that runs past midnight stays one day. Off, days are counted from midnight. This changes the khatmah’s daily portion only — the prayer table still turns after the last time of the day.",
     "bookmarkFollows": "Follows your reading",
     "markPageRead": "Mark this page as read",
-    "markPageUnread": "Mark this page as not read"
+    "markPageUnread": "Mark this page as not read",
+    "khatmahPacingTitle": "How it is paced",
+    "khatmahPacingDays": "A number of days",
+    "khatmahPacingDate": "By a date",
+    "khatmahSetLength": "Set the length",
+    "khatmahPacingDateHelp": "By {{date}} — what is left is re-cut every morning. Move it, or go back to a number of days.",
+    "khatmahPacingDaysHelp": "A length rather than a date, so the portions wait for you. Change it, or finish by a date instead.",
+    "khatmahPacingSettingsTitle": "Khatmah",
+    "khatmahPacingHelp": "A khatmah is paced either by a length — the portions wait for you — or by a date, which re-cuts what is left over the days that remain. You can move between the two at any point; nothing you have read is affected.",
+    "khatmahPacingNone": "Start a khatmah on the Quran page and how it is paced — a number of days, or a date to finish by — can be changed here."
   },
   "reading": {
     "textSize": "Text size",

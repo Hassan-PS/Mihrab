@@ -1112,10 +1112,6 @@
     "khatmahOptionsTitle": "Khatmah 选项",
     "khatmahByDateTitle": "在某个日期前读完",
     "khatmahByDateChip": "按日期…",
-    "khatmahByDateHelp": "让计划对准一个日期；剩下的部分会按剩余天数重新分配。",
-    "khatmahChangeDate": "修改日期",
-    "khatmahChangeDateHelp": "往后挪，或取消日期、回到固定天数的计划。",
-    "khatmahRemoveDate": "取消日期",
     "khatmahSetDate": "设定日期",
     "khatmahByDate": "{{date}} 前",
     "khatmahInDays": "还有 {{count}} 天",
@@ -1286,7 +1282,16 @@
     "dayStartHelp": "伊斯兰历的一天从日落开始：傍晚的诵读计入刚开始的这一天，跨过午夜的一次诵读仍算同一天。关闭时，按午夜计算。此项只改变完读的每日份额 — 礼拜时间表仍在当天最后一个时刻之后翻页。",
     "bookmarkFollows": "跟随您的阅读",
     "markPageRead": "将此页标记为已读",
-    "markPageUnread": "将此页标记为未读"
+    "markPageUnread": "将此页标记为未读",
+    "khatmahPacingTitle": "如何安排进度",
+    "khatmahPacingDays": "按天数",
+    "khatmahPacingDate": "按日期",
+    "khatmahSetLength": "设定时长",
+    "khatmahPacingDateHelp": "在 {{date}} 前读完 — 剩下的部分每天早上重新分配。可以调整日期，也可以改回按天数。",
+    "khatmahPacingDaysHelp": "按时长而不是按日期，份额会等着你。可以改动时长，也可以改为在某个日期前读完。",
+    "khatmahPacingSettingsTitle": "古兰经完读",
+    "khatmahPacingHelp": "完读计划可以按时长来分配 — 份额会等着你 — 也可以按日期，剩下的部分会在余下的天数里重新分配。你随时可以在两者之间切换，已读的内容不会受影响。",
+    "khatmahPacingNone": "先在古兰经页面开始一次完读计划，之后就可以在这里更改进度安排 — 按天数，或按读完的日期。"
   },
   "reading": {
     "textSize": "文字大小",

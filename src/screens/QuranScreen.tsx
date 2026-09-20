@@ -28,7 +28,11 @@ import { useTranslation } from 'react-i18next';
 import { useKeyboardInset } from '../hooks/useKeyboardInset';
 import { useKeyboardAwareScroll } from '../hooks/useKeyboardAwareScroll';
 import { useAppPalette } from '../hooks/useAppPalette';
-import { KhatmahDeadlineSheet } from '../quran/KhatmahDeadlineSheet';
+import {
+  formatDeadline,
+  KhatmahPacingSheet,
+  type PacingKind,
+} from '../quran/KhatmahPacingSheet';
 import type { AppPalette } from '../theme/appPalette';
 import { SegmentedControl } from '../components/ui';
 import { useBreakpoint } from '../responsive/breakpoints';
@@ -54,6 +58,7 @@ import {
   khatmahReachAyah,
   khatmahFinishTarget,
   khatmahDay,
+  khatmahDayAnchor,
   khatmahBehindBy,
   khatmahDaysLeft,
   khatmahDatePassed,
@@ -63,6 +68,7 @@ import {
   khatmahPerDayPages,
   khatmahUnreadPages,
   setKhatmahDeadline,
+  setKhatmahDuration,
   khatmahPages,
   removeBookmark,
   resetKhatmahAll,
@@ -199,10 +205,18 @@ export function QuranScreen() {
   // Custom khatmah length (v2.7.31) — the 30/60/90 presets plus a
   // free-form day count entered in a small modal.
   const [customDaysVisible, setCustomDaysVisible] = useState(false);
-  /** The "finish by a date" sheet — creating a plan, or re-dating one. */
-  const [deadlineSheet, setDeadlineSheet] = useState<'start' | 'change' | null>(
-    null,
-  );
+  /**
+   * The pacing sheet — making a plan, or re-pacing the live one.
+   *
+   * `kind` is only where it OPENS: the segment inside it switches freely,
+   * so a reader who tapped "By a date…" can still come out having chosen
+   * a length, and the card's day chips are the same choice made without
+   * opening anything.
+   */
+  const [pacingSheet, setPacingSheet] = useState<{
+    mode: 'start' | 'change';
+    kind: PacingKind;
+  } | null>(null);
   const [customDaysText, setCustomDaysText] = useState('');
   // Blank means "from the opening", which is what most khatmahs are.
   const [customFromText, setCustomFromText] = useState('');
@@ -445,17 +459,10 @@ export function QuranScreen() {
    */
   const paceOutgrown =
     plan != null && !deadlinePassed && khatmahPaceOutgrown(plan);
-  const deadlineLabel = useMemo(() => {
-    if (!deadline) return '';
-    try {
-      return new Intl.DateTimeFormat(i18n.language, {
-        day: 'numeric',
-        month: 'short',
-      }).format(new Date(`${deadline}T12:00:00`));
-    } catch {
-      return deadline;
-    }
-  }, [deadline, i18n.language]);
+  const deadlineLabel = useMemo(
+    () => (deadline ? formatDeadline(deadline, i18n.language) : ''),
+    [deadline, i18n.language],
+  );
   // The reach, like the rest of the card: the bar must not wind back to a
   // hole the card is separately offering to send the reader to.
   const readAyahs = plan ? khatmahReachAyah(plan) : 0;
@@ -663,7 +670,9 @@ export function QuranScreen() {
                         'quran.khatmahMoveDateA11y',
                         'Change the date this khatmah is paced to',
                       )}
-                      onPress={() => setDeadlineSheet('change')}
+                      onPress={() =>
+                        setPacingSheet({ mode: 'change', kind: 'date' })
+                      }
                       style={{ color: palette.accentSolid, fontWeight: '600' }}>
                       {t('quran.khatmahMoveDate', 'Move the date?')}
                     </Text>
@@ -751,7 +760,10 @@ export function QuranScreen() {
                         // day number says nothing on its own.
                         when: formatDayWhen(
                           khatmahDayWhen(
-                            plan.startedAt,
+                            // Not the plan's birthday: a re-paced plan's
+                            // day numbers were recut, and counting them
+                            // from the start would call tomorrow today.
+                            khatmahDayAnchor(plan),
                             khatmahFinishTarget(plan).day,
                           ),
                           (key: string, opts: { defaultValue: string }) =>
@@ -808,7 +820,7 @@ export function QuranScreen() {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t('quran.khatmahByDateTitle', 'Finish by a date')}
-                onPress={() => setDeadlineSheet('start')}
+                onPress={() => setPacingSheet({ mode: 'start', kind: 'date' })}
                 style={[styles.chip, { borderColor: palette.border }]}>
                 <Text style={{ color: palette.accentSolid, fontWeight: '600', fontSize: TYPE.footnote.fontSize }}>
                   {t('quran.khatmahByDateChip', 'By a date…')}
@@ -1579,19 +1591,21 @@ export function QuranScreen() {
                 false,
               ],
               [
+                t('quran.khatmahPacingTitle', 'How it is paced'),
+                /* What it is paced by NOW, and the other way it could be
+                   — the row is the switch as much as it is the setting,
+                   so it names both. */
                 deadline
-                  ? t('quran.khatmahChangeDate', 'Change the date')
-                  : t('quran.khatmahByDateTitle', 'Finish by a date'),
-                deadline
-                  ? t(
-                      'quran.khatmahChangeDateHelp',
-                      'Move it, or take it off and go back to a plan of a set length.',
-                    )
-                  : t(
-                      'quran.khatmahByDateHelp',
-                      'Pace the plan to a date; what is left is re-cut over the days that remain.',
-                    ),
-                () => setDeadlineSheet('change'),
+                  ? t('quran.khatmahPacingDateHelp', {
+                      defaultValue:
+                        'By {{date}} — what is left is re-cut every morning. Move it, or go back to a number of days.',
+                      date: deadlineLabel,
+                    })
+                  : t('quran.khatmahPacingDaysHelp', {
+                      defaultValue:
+                        'A length rather than a date, so the portions wait for you. Change it, or finish by a date instead.',
+                    }),
+                () => setPacingSheet({ mode: 'change', kind: deadline ? 'date' : 'days' }),
                 false,
               ],
               [
@@ -1664,26 +1678,43 @@ export function QuranScreen() {
           screen it would have seeded on a screen that had no plan yet,
           and re-opening it on a dated plan would offer a date a month out
           instead of the one the reader already chose. */}
-      {deadlineSheet ? (
-      <KhatmahDeadlineSheet
+      {pacingSheet ? (
+      <KhatmahPacingSheet
         visible
-        mode={deadlineSheet}
-        current={deadline}
-        unreadPages={unreadPages}
-        onClose={() => setDeadlineSheet(null)}
-        onChoose={by => {
-          const opening = deadlineSheet === 'start';
-          setDeadlineSheet(null);
+        mode={pacingSheet.mode}
+        initialKind={pacingSheet.kind}
+        current={pacingSheet.mode === 'change' ? deadline : null}
+        // A plan being re-paced opens on the reading it has left, so the
+        // first thing the reader sees is what they are changing FROM.
+        currentDays={pacingSheet.mode === 'change' ? daysLeft : undefined}
+        unreadPages={
+          pacingSheet.mode === 'change' ? unreadPages : MUSHAF_TOTAL_PAGES
+        }
+        onClose={() => setPacingSheet(null)}
+        onChoose={choice => {
+          const opening = pacingSheet.mode === 'start';
+          setPacingSheet(null);
+          if (choice.kind === 'days') {
+            /**
+             * The same sentence either side of the plan's birth: "what is
+             * left should take this many days". On a new plan that is the
+             * whole book, which is `targetDays` as it always was; on a
+             * live one the store solves for the length that leaves the
+             * reader those days (`setKhatmahDuration`).
+             */
+            if (opening) startKhatmah(choice.days);
+            else setKhatmahDuration(choice.days);
+            return;
+          }
+          const by = choice.deadline;
           if (opening) {
             /**
              * A plan made from a date still carries a LENGTH, and it is
              * the length that date implies rather than a default thirty:
-             * take the date off a "by mid-December" plan and it should
-             * become the eighty-day plan it was, not a month-long one the
-             * reader never asked for. It is also what the outgrown-pace
-             * line is measured against.
+             * it is what the outgrown-pace line is measured against, and
+             * what the plan falls back to if the date is ever taken off
+             * by an older build.
              */
-            if (!by) return;
             const span = Math.max(
               1,
               Math.min(604, Math.round((Date.parse(`${by}T12:00:00`) - Date.now()) / 86_400_000) + 1),

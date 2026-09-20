@@ -269,16 +269,40 @@ export type KhatmahPlan = {
    */
   deadline?: string;
   /**
-   * When the deadline was last set, changed or taken off.
+   * WHEN THIS PLAN WAS LAST PACED — and `targetDays` and `deadline`
+   * together are what it stamps.
    *
-   * `targetDays` is set once and never edited, which is why the merge can
-   * settle it with a `Math.max`. A deadline is not like that: it is moved
-   * when a date has passed, and moving it is the whole answer to a plan
-   * that has fallen behind. So it is a claim with a date on it, exactly
-   * like `positionAt` — newest wins, and "no deadline" is something a
-   * device can say.
+   * The two fields are not two settings. They are one decision said two
+   * ways — "in thirty days" and "by the 30th" — and the reader can change
+   * their mind about it mid-khatmah, in either direction
+   * (`setKhatmahDuration`, `setKhatmahDeadline`). That is why `targetDays`
+   * can no longer be settled with a `Math.max`: it is edited now, and a
+   * max would quietly restore the longer of two lengths whenever a device
+   * that had not heard about the change spoke.
+   *
+   * So the PAIR travels with one stamp and the newest word wins, exactly
+   * as the pin does. One stamp rather than two because half a decision is
+   * not a state the reader ever asked for: "in 14 days" from this device
+   * must never merge with "by 3 October" from that one into a plan that
+   * is neither. Absent on plans written before this existed; the merge
+   * falls back to the old rule only when NEITHER side carries a stamp.
    */
-  deadlineAt?: number;
+  pacedAt?: number;
+  /**
+   * The Ḥafṣ page the reader had reached when the pacing was decided.
+   *
+   * A plan re-paced on day twenty is not twenty days behind: the promise
+   * it is measured against is the one made TODAY, from where the reader
+   * actually is. `khatmahBehindBy` and the outgrown-pace test both start
+   * from here, and both are nonsense without it — a reader who asks to
+   * finish the last third in a fortnight would be told, the same second,
+   * that they are three hundred pages behind schedule.
+   *
+   * Written by every plan made since this existed (where it equals
+   * `fromPage`), so its absence means a legacy plan, and those measure
+   * from where they began, as they always did.
+   */
+  pacedFrom?: number;
   /**
    * TODAY'S CUT, pinned when today opened (deadline plans only).
    *
@@ -739,16 +763,29 @@ function coerceKhatmah(v: unknown): KhatmahPlan | null {
     out.dayStartDate = r.dayStartDate;
   }
   /**
-   * The deadline and its stamp travel together, and the stamp survives a
+   * The pacing and its stamp travel together, and the stamp survives a
    * deadline that has been taken OFF — that pairing is the claim "this
-   * plan has no date any more, and here is when I said so", exactly as a
+   * plan is a duration again, and here is when I said so", exactly as a
    * cleared pin is a `positionAt` with no position.
    */
   if (typeof r.deadline === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.deadline)) {
     out.deadline = r.deadline;
   }
-  if (typeof r.deadlineAt === 'number' && Number.isFinite(r.deadlineAt)) {
-    out.deadlineAt = r.deadlineAt;
+  /**
+   * `deadlineAt` is what this was called while the stamp covered only the
+   * date (2.25 development builds). Read as the same thing, because it
+   * WAS the same thing: the moment the plan was last paced.
+   */
+  const stamp = typeof r.pacedAt === 'number' ? r.pacedAt : r.deadlineAt;
+  if (typeof stamp === 'number' && Number.isFinite(stamp)) {
+    out.pacedAt = stamp;
+  }
+  // Where the reader stood when that decision was made. Only alongside a
+  // stamp: on its own it dates nothing, and the schedule it would move is
+  // the one thing a stray number must not be allowed to move.
+  if (out.pacedAt !== undefined) {
+    const at = int(r.pacedFrom, 0, KHATMAH_TOTAL_PAGES);
+    if (at !== null) out.pacedFrom = at;
   }
   // The day's cut, and only on a plan that still has a date to pace
   // against — a stale one on a duration plan would be read by nothing and
@@ -1858,7 +1895,15 @@ export function startKhatmah(
     pagesRead: pagesThroughAyahs(ayahs),
     ayahsRead: ayahs,
     completedAt: null,
-    ...(deadline ? { deadline, deadlineAt: now } : {}),
+    /**
+     * THE PACING IS STAMPED FROM THE FIRST MOMENT, whichever mode it is
+     * in — a plan made today and a plan re-paced today are the same kind
+     * of claim, and only a stamp on both lets the merge tell which of two
+     * devices spoke last (`pacedAt`).
+     */
+    pacedAt: now,
+    pacedFrom: from,
+    ...(deadline ? { deadline } : {}),
   };
   const paced = deadline ? withPaceOfDay(plan, now) : plan;
   updateQuranState(prev => ({
@@ -1952,36 +1997,179 @@ function withPaceOfDay(plan: KhatmahPlan, now?: number): KhatmahPlan {
 }
 
 /**
- * Give a plan a date to be finished by — or take the date off.
+ * ── RE-PACING A KHATMAH THAT IS ALREADY UNDER WAY ─────────────────────
  *
- * The same action does both jobs the issue asks for: it is how a plan is
- * created with a deadline, and it is the re-pace for a plan whose date
- * has gone by. Moving the date re-cuts today as well, because the old
- * cut was made against a number of days that no longer applies — which
- * is the one moment the pace is allowed to change mid-day.
+ * The two modes are one question asked two ways, so the reader may answer
+ * it again at any point, in either direction, without losing a page:
+ * `setKhatmahDeadline` makes the plan the calendar's, `setKhatmahDuration`
+ * makes it the reader's again. Progress, the holes behind, the pinned
+ * position and the day's baseline are untouched by both — the only thing
+ * that changes is what the plan asks of today.
+ *
+ * Both stamp `pacedAt` and `pacedFrom`: the decision is dated, so it can
+ * be merged (see `mergeKhatmah`), and it remembers where the reader stood
+ * when it was made, so nothing measures the new promise against the old
+ * one's calendar (`khatmahBehindBy`, `khatmahPaceOutgrown`).
  */
-export function setKhatmahDeadline(deadline: string | null): void {
+function repaced(plan: KhatmahPlan, at: number): KhatmahPlan {
+  return { ...plan, pacedAt: at, pacedFrom: khatmahReachPage(plan) };
+}
+
+/** A stamp that is this device's now, and never older than the last one. */
+function pacingStamp(plan: KhatmahPlan): number {
+  return Math.max(Date.now(), (plan.pacedAt ?? 0) + 1);
+}
+
+/**
+ * Give a plan a date to be finished by.
+ *
+ * It is how a plan is created with a deadline, the re-pace for a plan
+ * whose date has gone by, and the switch for a reader who started with a
+ * length and now has a day in mind. Setting the date re-cuts today as
+ * well, because the old cut was made against a number of days that no
+ * longer applies — which is the one moment the pace is allowed to change
+ * mid-day.
+ */
+export function setKhatmahDeadline(deadline: string): void {
   updateQuranState(prev => {
     const active = prev.khatmah.find(isLivePlan);
     if (!active) return prev;
-    const at = Math.max(Date.now(), (active.deadlineAt ?? 0) + 1);
+    const at = pacingStamp(active);
     return {
       ...prev,
       khatmah: prev.khatmah.map(k => {
         if (k.id !== active.id) return k;
-        if (!deadline) {
-          const rest = { ...k, deadlineAt: at };
-          delete rest.deadline;
-          delete rest.pace;
-          return rest;
-        }
-        const next = { ...k, deadline, deadlineAt: at };
+        const next = { ...repaced(k, at), deadline };
         delete next.pace;
         const pace = khatmahPaceToday(next);
         return pace ? { ...next, pace } : next;
       }),
     };
   });
+}
+
+/**
+ * Pace the plan by a number of days again — `days` of reading from today.
+ *
+ * This is the other half of the switch, and it is also how the length of
+ * a duration plan is changed, which was not possible before: both are the
+ * same sentence, "I want what is left to take this many days".
+ *
+ * `targetDays` is the plan's whole length, not what remains, so it is
+ * solved for rather than assigned (`khatmahDurationForDaysLeft`) — a
+ * reader two thirds of the way through a book who asks for ten more days
+ * is asking for portions a third of the book divided by ten, and the plan
+ * that hands those out is a thirty-day one, not a ten-day one.
+ */
+export function setKhatmahDuration(days: number): void {
+  updateQuranState(prev => {
+    const active = prev.khatmah.find(isLivePlan);
+    if (!active) return prev;
+    const at = pacingStamp(active);
+    const targetDays = khatmahDurationForDaysLeft(active, days, at);
+    return {
+      ...prev,
+      khatmah: prev.khatmah.map(k => {
+        if (k.id !== active.id) return k;
+        const next = { ...repaced(k, at), targetDays };
+        // The date, and the cut that was made against it. A duration plan
+        // reads neither, and a stale one left on the blob would be synced
+        // by every device and understood by none.
+        delete next.deadline;
+        delete next.pace;
+        return next;
+      }),
+    };
+  });
+}
+
+/**
+ * WHICH DAY OF THE CALENDAR A PLAN'S DAY NUMBER MEANS.
+ *
+ * `khatmahDayWhen` turns "day 9" into "Thursday" by counting from the day
+ * the plan began, because day N is due N-1 days after day one. That is
+ * true right up until the plan is re-paced: a reader who was on day
+ * nineteen and asked for the rest in a week is on a plan whose portions
+ * have been recut, so they are now on (say) day six of twenty-three, and
+ * measuring THAT from the plan's birthday puts today's reading a
+ * fortnight in the past — every portion would read "today", including
+ * tomorrow's.
+ *
+ * So a re-paced plan is counted from the day it was re-paced, with the
+ * day number the reader had then. Returned as the epoch `khatmahDayWhen`
+ * should measure from, which is that day less the days before it — a
+ * virtual "day one" that lands every other day where it belongs.
+ *
+ * Duration plans only. A dated plan's day number is already the
+ * calendar's, counted from `startedAt` by `deadlineDayNumber`, and its
+ * portions are cut from today outwards rather than renumbered.
+ */
+export function khatmahDayAnchor(plan: KhatmahPlan): number {
+  if (khatmahDeadline(plan)) return plan.startedAt;
+  const at = plan.pacedAt;
+  const from = plan.pacedFrom;
+  if (at === undefined || from === undefined) return plan.startedAt;
+  const day = durationPortionOf(plan, ayahsThroughHafsPage(Math.min(KHATMAH_TOTAL_PAGES, Math.max(0, from))) + 1);
+  return at - (day - 1) * 24 * 60 * 60 * 1000;
+}
+
+/**
+ * The `targetDays` that leaves this reader `days` days of reading.
+ *
+ * A duration plan's day number is a fact about the READING — the portion
+ * holding the next unread ayah — so "how many days are left" is
+ * `targetDays` less that number, and the length that answers a given
+ * number of days depends on where the reader is standing. The estimate is
+ * the arithmetic (the whole span over the portion size the request
+ * implies); the walk around it is because the portions are cut on page
+ * boundaries and rounding can land the answer a day either side.
+ *
+ * Pure, and exported for the sheet: the reader sees the pace their choice
+ * would ask for before they commit to it.
+ */
+export function khatmahDurationForDaysLeft(
+  plan: KhatmahPlan,
+  days: number,
+  now: number = Date.now(),
+): number {
+  const want = Math.min(3650, Math.max(1, Math.round(days) || 1));
+  const from = planFrom(plan);
+  const span = Math.max(1, KHATMAH_TOTAL_PAGES - from);
+  // What the request is actually about: the pages in front of the reader.
+  const ahead = Math.max(1, KHATMAH_TOTAL_PAGES - khatmahReachPage(plan));
+  /**
+   * A PORTION IS AT LEAST A PAGE, which caps how slow a khatmah can be.
+   *
+   * Past `span` the model stops cutting by pages and falls back to an
+   * even share of the ayahs (`portionEnd`), where the day a reader is
+   * standing in no longer follows from the page they are on — so a
+   * solution found there would not be one. A reader with forty pages
+   * left who asks for a year gets a page a day, which is the gentlest
+   * plan this model has; the sheet shows them the pace before they
+   * commit, so it is on screen rather than a surprise.
+   */
+  const estimate = Math.min(
+    span,
+    Math.max(1, Math.round((span * want) / ahead) || 1),
+  );
+  const daysLeftIf = (targetDays: number): number => {
+    const probe: KhatmahPlan = { ...plan, targetDays };
+    delete probe.deadline;
+    delete probe.pace;
+    return Math.max(0, targetDays - khatmahCurrentPortion(probe, now).day + 1);
+  };
+  let best = estimate;
+  let bestMiss = Math.abs(daysLeftIf(estimate) - want);
+  for (let n = Math.max(1, estimate - 16); n <= Math.min(span, estimate + 16); n++) {
+    const miss = Math.abs(daysLeftIf(n) - want);
+    // Strictly better only, and the scan runs upwards: two lengths that
+    // are equally close give the shorter one, on both devices alike.
+    if (miss < bestMiss) {
+      best = n;
+      bestMiss = miss;
+    }
+  }
+  return best;
 }
 
 export function recordKhatmahProgress(
@@ -2868,6 +3056,27 @@ export function khatmahRealizedPace(
 }
 
 /**
+ * Pages a day the plan asked for when it was last paced.
+ *
+ * From where the reader stood then to the end of the book, over the days
+ * that decision gave itself — which for a plan made and never re-paced is
+ * the whole book over its whole length, as it always was.
+ */
+function pacePromised(plan: KhatmahPlan): number {
+  const from = Math.min(
+    KHATMAH_TOTAL_PAGES,
+    Math.max(planFrom(plan), plan.pacedFrom ?? planFrom(plan)),
+  );
+  const left = Math.max(1, KHATMAH_TOTAL_PAGES - from);
+  const by = khatmahDeadline(plan);
+  const days =
+    by && plan.pacedAt !== undefined
+      ? deadlineTotalDays(plan.pacedAt, by)
+      : planDays(plan);
+  return left / Math.max(1, days);
+}
+
+/**
  * HAS THE DATE OUTGROWN THE READER? (issue #53)
  *
  * An automatically growing quota has a failure mode this app must not
@@ -2897,13 +3106,18 @@ export function khatmahPaceOutgrown(
   const elapsed = -daysAway(plan.startedAt, now);
   if (elapsed < 3) return false;
   const needed = khatmahPerDayPages(plan, now);
-  const planned = Math.max(
-    1,
-    Math.ceil(
-      Math.max(1, KHATMAH_TOTAL_PAGES - planFrom(plan)) /
-        Math.max(1, planDays(plan)),
-    ),
-  );
+  /**
+   * THE PACE THE READER AGREED TO, which is the one they agreed to LAST.
+   *
+   * `planDays` is the whole span from the plan's first day to its date,
+   * and dividing the whole book by it describes a plan nobody is on the
+   * moment a date is set mid-khatmah: a reader who is four fifths through
+   * and gives themselves a week has signed up for that week's pace, not
+   * for the gentle average of the three months since they began. Measured
+   * the old way, the card would open by telling them the date had
+   * outgrown them — about a date they had just chosen.
+   */
+  const planned = Math.max(1, Math.ceil(pacePromised(plan)));
   const realized = Math.max(1, khatmahRealizedPace(plan, now));
   return needed >= 1.5 * planned && needed >= 1.5 * realized;
 }
@@ -3638,14 +3852,36 @@ export function khatmahBehindBy(
    * how many days have PASSED since then, so the plan is not behind on
    * the morning it was made.
    */
-  const daysElapsed = Math.max(0, -daysAway(plan.startedAt, now));
+  /**
+   * FROM THE DAY THE PLAN WAS LAST PACED, AND FROM WHERE THE READER THEN
+   * STOOD (`pacedFrom`).
+   *
+   * A schedule is a promise, and re-pacing a khatmah replaces the promise:
+   * a reader nineteen days into a plan who asks for the rest in a
+   * fortnight has just agreed to a line that starts today, at the page
+   * they are on. Measured from the plan's birthday instead, the very next
+   * render would tell them they were three hundred pages behind something
+   * they had already given up on, and the card would offer them a way out
+   * of the plan they had chosen one second earlier.
+   *
+   * A plan that has never been re-paced stamps the pair when it is made,
+   * so this is the day it began and the page it began at — the arithmetic
+   * this always did. Older plans carry neither and fall back to exactly
+   * that.
+   */
+  const since = plan.pacedAt ?? plan.startedAt;
+  const daysElapsed = Math.max(0, -daysAway(since, now));
   // Against the plan's own span, not the whole book: a khatmah begun at
   // page 143 is not five days behind on the morning it was made.
   const from = planFrom(plan);
   const span = KHATMAH_TOTAL_PAGES - from;
+  const origin = Math.min(
+    KHATMAH_TOTAL_PAGES,
+    Math.max(from, plan.pacedFrom ?? from),
+  );
   const expected = Math.min(
     KHATMAH_TOTAL_PAGES,
-    from + Math.round((span / planDays(plan)) * daysElapsed),
+    origin + Math.round((span / planDays(plan)) * daysElapsed),
   );
   // Against the reach, not the contiguous mirror: pages behind a hole are
   // already reported as unread (`khatmahGap`), and counting them here as

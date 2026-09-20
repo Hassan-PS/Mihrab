@@ -1112,10 +1112,6 @@
     "khatmahOptionsTitle": "Options de la khatma",
     "khatmahByDateTitle": "Terminer pour une date",
     "khatmahByDateChip": "Pour une date…",
-    "khatmahByDateHelp": "Cale le plan sur une date ; ce qui reste est redécoupé sur les jours restants.",
-    "khatmahChangeDate": "Changer la date",
-    "khatmahChangeDateHelp": "Déplacez-la, ou retirez-la pour revenir à un plan d’une durée fixe.",
-    "khatmahRemoveDate": "Retirer la date",
     "khatmahSetDate": "Fixer la date",
     "khatmahByDate": "pour le {{date}}",
     "khatmahInDays": "dans {{count}} jours",
@@ -1286,7 +1282,16 @@
     "dayStartHelp": "Le jour islamique commence au coucher du soleil : une lecture du soir compte pour le jour qui vient de commencer, et une séance qui dépasse minuit reste un seul jour. Désactivé, les jours sont comptés à partir de minuit. Ceci ne change que la portion quotidienne de la khatma — le tableau des prières bascule toujours après la dernière heure du jour.",
     "bookmarkFollows": "Suit votre lecture",
     "markPageRead": "Marquer cette page comme lue",
-    "markPageUnread": "Marquer cette page comme non lue"
+    "markPageUnread": "Marquer cette page comme non lue",
+    "khatmahPacingTitle": "Comment elle est répartie",
+    "khatmahPacingDays": "Un nombre de jours",
+    "khatmahPacingDate": "Pour une date",
+    "khatmahSetLength": "Fixer la durée",
+    "khatmahPacingDateHelp": "Pour le {{date}} — ce qui reste est redécoupé chaque matin. Déplacez la date, ou revenez à un nombre de jours.",
+    "khatmahPacingDaysHelp": "Une durée plutôt qu’une date, ainsi les portions vous attendent. Changez-la, ou terminez pour une date.",
+    "khatmahPacingSettingsTitle": "Khatma",
+    "khatmahPacingHelp": "Une khatma est répartie soit par une durée — les portions vous attendent — soit par une date, qui redécoupe ce qui reste sur les jours restants. Vous pouvez passer de l’une à l’autre à tout moment ; rien de ce que vous avez lu n’est affecté.",
+    "khatmahPacingNone": "Commencez une khatma dans l’onglet Coran, puis vous pourrez changer ici sa répartition — un nombre de jours, ou une date pour finir."
   },
   "reading": {
     "textSize": "Taille du texte",

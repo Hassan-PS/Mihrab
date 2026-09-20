@@ -92,7 +92,7 @@ function randomPlan(r: () => number): KhatmahPlan {
   const pinned = r() < 0.5;
   /**
    * A third of these are paced to a DATE (issue #53), because the fields
-   * that mode added — `deadline`, `deadlineAt`, `pace` — go through this
+   * that mode added — `deadline`, `pacedAt`, `pace` — go through this
    * merge like everything else and had never been fuzzed through it.
    */
   const dated = r() < 0.35;
@@ -101,7 +101,10 @@ function randomPlan(r: () => number): KhatmahPlan {
   return {
     id: 'k1',
     startedAt: 1_000,
-    targetDays: 30,
+    // VARIED, because it is edited now: a reader can re-pace a khatmah
+    // mid-way, and the length travels with the date as one decision
+    // rather than being settled on its own (`pickPacing`).
+    targetDays: 7 + Math.floor(r() * 60),
     pagesRead: 0,
     completedAt: null,
     ...(dated
@@ -111,7 +114,10 @@ function randomPlan(r: () => number): KhatmahPlan {
           ...(r() < 0.85
             ? { deadline: `2026-1${Math.floor(r() * 2)}-${String(1 + Math.floor(r() * 28)).padStart(2, '0')}` }
             : {}),
-          deadlineAt: NOW - Math.floor(r() * 10_000),
+          pacedAt: NOW - Math.floor(r() * 10_000),
+          // Where the reader stood when that decision was taken — the
+          // half of it that is easiest to leave behind in a merge.
+          ...(r() < 0.7 ? { pacedFrom: Math.floor(r() * 600) } : {}),
           ...(r() < 0.7
             ? {
                 pace: {
@@ -237,11 +243,23 @@ describe('the khatmah merge, on a thousand disagreements it has not seen', () =>
     }
   });
 
+  it('takes one side\'s pacing whole, never half of each', () => {
+    const pacing = (p: KhatmahPlan) =>
+      [p.targetDays, p.deadline ?? null, p.pacedFrom ?? null].join('|');
+    for (const [a, b] of plans) {
+      // Two plans from before the stamp are settled field by field, as
+      // they always were; there is no decision to take whole.
+      if (!(a.pacedAt ?? 0) && !(b.pacedAt ?? 0)) continue;
+      const merged = mergeKhatmah([a], [b])[0];
+      expect([pacing(a), pacing(b)]).toContain(pacing(merged));
+    }
+  });
+
   it('never shortens a date that one side had not moved', () => {
     for (const [a, b] of plans) {
       const merged = mergeKhatmah([a], [b])[0];
       if (!merged.deadline) continue;
-      const stamps = [a, b].map(p => p.deadlineAt ?? 0);
+      const stamps = [a, b].map(p => p.pacedAt ?? 0);
       if (stamps[0] !== stamps[1]) continue;
       // Equal stamps: the later date wins, so the result is never
       // earlier than either side asked for.

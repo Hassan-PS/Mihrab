@@ -47,6 +47,7 @@ import {
   activeKhatmah,
   moveSessionToPage,
   drawnReadingPosition,
+  khatmahDayAnchor,
   khatmahFinishTarget,
   khatmahMarkerAyah,
   khatmahPages,
@@ -633,7 +634,9 @@ export function useMushafReaderCore({
       page: findPageForAyah(at.surah, at.ayah, riwayah),
       day,
       // A day number means nothing without a calendar beside it.
-      when: khatmahDayWhen(plan.startedAt, day),
+      // The day the plan is counted from, which is where it was last
+      // paced rather than where it began (`khatmahDayAnchor`).
+      when: khatmahDayWhen(khatmahDayAnchor(plan), day),
     };
   }, [plan, riwayah]);
 

@@ -1112,10 +1112,6 @@
     "khatmahOptionsTitle": "Alternativ för khatmah",
     "khatmahByDateTitle": "Bli klar till ett datum",
     "khatmahByDateChip": "Till ett datum…",
-    "khatmahByDateHelp": "Låt planen följa ett datum; det som är kvar delas om på de dagar som återstår.",
-    "khatmahChangeDate": "Ändra datumet",
-    "khatmahChangeDateHelp": "Flytta det, eller ta bort det och gå tillbaka till en plan med bestämd längd.",
-    "khatmahRemoveDate": "Ta bort datumet",
     "khatmahSetDate": "Ställ in datumet",
     "khatmahByDate": "till {{date}}",
     "khatmahInDays": "om {{count}} dagar",
@@ -1286,7 +1282,16 @@
     "dayStartHelp": "Det islamiska dygnet börjar vid solnedgången, så kvällens läsning räknas till dygnet som just börjat och en session som passerar midnatt förblir ett dygn. Av räknas dygn från midnatt. Detta ändrar bara khatmahs dagliga del — bönetabellen vänder fortfarande efter dagens sista tid.",
     "bookmarkFollows": "Följer din läsning",
     "markPageRead": "Markera sidan som läst",
-    "markPageUnread": "Markera sidan som oläst"
+    "markPageUnread": "Markera sidan som oläst",
+    "khatmahPacingTitle": "Hur den läggs upp",
+    "khatmahPacingDays": "Ett antal dagar",
+    "khatmahPacingDate": "Till ett datum",
+    "khatmahSetLength": "Ställ in längden",
+    "khatmahPacingDateHelp": "Till {{date}} — det som återstår delas om varje morgon. Flytta datumet, eller gå tillbaka till ett antal dagar.",
+    "khatmahPacingDaysHelp": "En längd i stället för ett datum, så portionerna väntar på dig. Ändra längden, eller bli klar till ett datum i stället.",
+    "khatmahPacingSettingsTitle": "Khatmah",
+    "khatmahPacingHelp": "En khatmah läggs upp antingen efter en längd — portionerna väntar på dig — eller efter ett datum, som delar om det som återstår över de dagar som är kvar. Du kan byta mellan de två när som helst; inget du redan läst påverkas.",
+    "khatmahPacingNone": "Starta en khatmah i Koran-fliken, så kan du ändra hur den läggs upp här — ett antal dagar, eller ett datum att bli klar till."
   },
   "reading": {
     "textSize": "Textstorlek",

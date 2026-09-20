@@ -1112,10 +1112,6 @@
     "khatmahOptionsTitle": "Khatmah-Optionen",
     "khatmahByDateTitle": "Bis zu einem Datum abschließen",
     "khatmahByDateChip": "Bis zu einem Datum …",
-    "khatmahByDateHelp": "Richtet den Plan auf ein Datum aus; der Rest wird auf die verbleibenden Tage neu verteilt.",
-    "khatmahChangeDate": "Datum ändern",
-    "khatmahChangeDateHelp": "Verschieben – oder entfernen und zu einem Plan fester Länge zurückkehren.",
-    "khatmahRemoveDate": "Datum entfernen",
     "khatmahSetDate": "Datum festlegen",
     "khatmahByDate": "bis {{date}}",
     "khatmahInDays": "in {{count}} Tagen",
@@ -1286,7 +1282,16 @@
     "dayStartHelp": "Der islamische Tag beginnt bei Sonnenuntergang: Abendliches Lesen zählt zum gerade begonnenen Tag, und eine Sitzung über Mitternacht hinaus bleibt ein Tag. Aus werden Tage ab Mitternacht gezählt. Dies ändert nur das Tagespensum der Khatmah — die Gebetstabelle wechselt weiterhin nach der letzten Zeit des Tages.",
     "bookmarkFollows": "Folgt Ihrer Lesung",
     "markPageRead": "Diese Seite als gelesen markieren",
-    "markPageUnread": "Diese Seite als ungelesen markieren"
+    "markPageUnread": "Diese Seite als ungelesen markieren",
+    "khatmahPacingTitle": "Wie sie eingeteilt wird",
+    "khatmahPacingDays": "Eine Anzahl Tage",
+    "khatmahPacingDate": "Bis zu einem Datum",
+    "khatmahSetLength": "Dauer festlegen",
+    "khatmahPacingDateHelp": "Bis {{date}} — was übrig ist, wird jeden Morgen neu eingeteilt. Verschiebe das Datum oder kehre zu einer Anzahl Tage zurück.",
+    "khatmahPacingDaysHelp": "Eine Dauer statt eines Datums — die Portionen warten auf dich. Ändere sie, oder schließe stattdessen bis zu einem Datum ab.",
+    "khatmahPacingSettingsTitle": "Khatma",
+    "khatmahPacingHelp": "Eine Khatma wird entweder nach einer Dauer eingeteilt — die Portionen warten auf dich — oder nach einem Datum, das den Rest auf die verbleibenden Tage neu verteilt. Du kannst jederzeit zwischen beiden wechseln; nichts von dem, was du gelesen hast, ändert sich dabei.",
+    "khatmahPacingNone": "Starte eine Khatma im Koran-Tab, dann lässt sich hier ändern, wie sie eingeteilt wird — eine Anzahl Tage oder ein Datum, bis zu dem sie fertig sein soll."
   },
   "reading": {
     "textSize": "Schriftgröße",

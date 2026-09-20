@@ -129,7 +129,7 @@ of the bug the issue reports ("18 days remaining on 16 September for a
 Existing tests pin the duration behaviour; they must stay green untouched.
 
 **Phase 1 — the model** (the bulk)
-- `KhatmahPlan` gains `deadline?: string`, `deadlineAt?: number` (a stamp,
+- `KhatmahPlan` gains `deadline?: string`, `pacedAt?: number` (a stamp,
   because unlike `targetDays` a deadline is editable — same pattern as
   `positionAt`), and `pace?`.
 - New `src/quran/khatmahPace.ts` — the cut, in one place, two modes:
@@ -145,7 +145,7 @@ Existing tests pin the duration behaviour; they must stay green untouched.
   `coerceKhatmah` validates and defaults.
 
 **Phase 2 — sync** (small, and the pattern is fresh)
-Merge rules for `deadline` (newest `deadlineAt` wins) and `pace` (atomic,
+Merge rules for `deadline` (newest `pacedAt` wins) and `pace` (atomic,
 later day, then smaller `from`); coercion; a row in
 `docs/sync-conflict-rules.md`; tests beside the ones in
 `__tests__/syncRemovalsTravel.test.ts`.
@@ -176,9 +176,33 @@ the issue.
 - A deadline in the past: a number, not a panic; no auto-abandon.
 - Day-boundary: a plan whose day rolls at maghrib agrees with the pill.
 
+## Follow-on: switching between the two, mid-khatmah
+
+Shipped after the phases below, and it is what makes the mode a choice
+rather than a fork in the road: `setKhatmahDeadline` and
+`setKhatmahDuration` move a live plan either way, at any point, with the
+reading untouched. Three things it had to get right.
+
+- **A length is solved for, not assigned.** `targetDays` is the plan's
+  whole length and the reader's day number follows their reading, so "ten
+  more days" from two thirds of the way through is not `targetDays = 10`;
+  `khatmahDurationForDaysLeft` searches for the length that leaves exactly
+  the days asked for, and caps at a page a day, which is as slow as the
+  model goes.
+- **The schedule starts at the decision.** `pacedFrom` records the page
+  the reader was on, and `khatmahBehindBy` and `khatmahPaceOutgrown` both
+  measure from there — otherwise re-pacing would report three hundred
+  pages of debt against a plan abandoned one second earlier, and the card
+  would offer a way out of a date just chosen.
+- **The pair travels as one dated decision.** See the pacing row in
+  `sync-conflict-rules.md`.
+
 ## What this does not do
 
-- It does not re-pace a duration plan. Nothing existing changes meaning.
+- It does not shorten or lengthen a plan by itself; every change of pace
+  is something the reader did, in the sheet.
+- It does not re-pace a duration plan on its own. Nothing existing changes
+  meaning.
 - It does not shorten a deadline on its own, ever.
 - It does not count missed days at the reader. The number that moves is
   the pace, and the only sentence about the past is the one offering a new
