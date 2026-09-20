@@ -1108,6 +1108,8 @@
     "khatmahReminderBody": "Bagian hari ini: {{pages}} halaman — lanjutkan dari halaman {{page}}.",
     "audioButton": "Audio",
     "khatmahCustom": "Kustom…",
+    "khatmahMoveDateA11y": "Ubah tanggal yang menjadi patokan khatam ini",
+    "khatmahOptionsTitle": "Opsi khatam",
     "khatmahByDateTitle": "Selesai pada tanggal",
     "khatmahByDateChip": "Pada tanggal…",
     "khatmahByDateHelp": "Sesuaikan rencana dengan sebuah tanggal; sisanya dibagi ulang ke hari-hari yang tersisa.",

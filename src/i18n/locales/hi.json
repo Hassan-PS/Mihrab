@@ -1108,6 +1108,8 @@
     "khatmahReminderBody": "आज का हिस्सा: {{pages}} पृष्ठ — पृष्ठ {{page}} से जारी रखें।",
     "audioButton": "ऑडियो",
     "khatmahCustom": "कस्टम…",
+    "khatmahMoveDateA11y": "वह तारीख़ बदलें जिससे यह ख़त्म जुड़ी है",
+    "khatmahOptionsTitle": "ख़त्म के विकल्प",
     "khatmahByDateTitle": "एक तारीख़ तक पूरा करें",
     "khatmahByDateChip": "तारीख़ तक…",
     "khatmahByDateHelp": "योजना को एक तारीख़ से जोड़ें; बचा हुआ हिस्सा बाक़ी दिनों में फिर से बाँट दिया जाता है।",

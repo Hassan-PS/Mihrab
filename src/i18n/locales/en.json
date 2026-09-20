@@ -1108,6 +1108,8 @@
     "khatmahReminderBody": "Today's portion: {{pages}} pages — continue from page {{page}}.",
     "audioButton": "Audio",
     "khatmahCustom": "Custom…",
+    "khatmahMoveDateA11y": "Change the date this khatmah is paced to",
+    "khatmahOptionsTitle": "Khatmah options",
     "khatmahByDateTitle": "Finish by a date",
     "khatmahByDateChip": "By a date…",
     "khatmahByDateHelp": "Pace the plan to a date; what is left is re-cut over the days that remain.",

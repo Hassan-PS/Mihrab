@@ -1108,6 +1108,8 @@
     "khatmahReminderBody": "Сегодняшняя порция: {{pages}} стр. — продолжайте со страницы {{page}}.",
     "audioButton": "Аудио",
     "khatmahCustom": "Свой срок…",
+    "khatmahMoveDateA11y": "Изменить дату, к которой привязан хатм",
+    "khatmahOptionsTitle": "Параметры хатма",
     "khatmahByDateTitle": "Завершить к дате",
     "khatmahByDateChip": "К дате…",
     "khatmahByDateHelp": "Привязывает план к дате; оставшееся заново распределяется по оставшимся дням.",

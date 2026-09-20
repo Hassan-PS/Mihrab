@@ -1108,6 +1108,8 @@
     "khatmahReminderBody": "وِرد اليوم: {{pages}} صفحات — تابع من الصفحة {{page}}.",
     "audioButton": "الصوت",
     "khatmahCustom": "مخصص…",
+    "khatmahMoveDateA11y": "تغيير التاريخ الذي تُقاس عليه الختمة",
+    "khatmahOptionsTitle": "خيارات الختمة",
     "khatmahByDateTitle": "الختم قبل تاريخ",
     "khatmahByDateChip": "قبل تاريخ…",
     "khatmahByDateHelp": "اربط الخطة بتاريخ؛ وما بقي يُقسَّم من جديد على الأيام المتبقية.",

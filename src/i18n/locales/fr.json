@@ -1108,6 +1108,8 @@
     "khatmahReminderBody": "Portion du jour : {{pages}} pages — continuez à partir de la page {{page}}.",
     "audioButton": "Audio",
     "khatmahCustom": "Personnalisé…",
+    "khatmahMoveDateA11y": "Changer la date sur laquelle cette khatma est calée",
+    "khatmahOptionsTitle": "Options de la khatma",
     "khatmahByDateTitle": "Terminer pour une date",
     "khatmahByDateChip": "Pour une date…",
     "khatmahByDateHelp": "Cale le plan sur une date ; ce qui reste est redécoupé sur les jours restants.",

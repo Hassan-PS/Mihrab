@@ -1108,6 +1108,8 @@
     "khatmahReminderBody": "Dagens portion: {{pages}} sidor — fortsätt från sida {{page}}.",
     "audioButton": "Ljud",
     "khatmahCustom": "Anpassad…",
+    "khatmahMoveDateA11y": "Ändra datumet planen följer",
+    "khatmahOptionsTitle": "Alternativ för khatmah",
     "khatmahByDateTitle": "Bli klar till ett datum",
     "khatmahByDateChip": "Till ett datum…",
     "khatmahByDateHelp": "Låt planen följa ett datum; det som är kvar delas om på de dagar som återstår.",

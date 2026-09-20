@@ -56,6 +56,7 @@ import {
   khatmahDay,
   khatmahBehindBy,
   khatmahDaysLeft,
+  khatmahDatePassed,
   khatmahDeadline,
   planDays as khatmahPlanDays,
   khatmahPaceOutgrown,
@@ -430,7 +431,10 @@ export function QuranScreen() {
   const unreadPages = plan
     ? khatmahUnreadPages(plan, quran.prefs.riwayah)
     : totalPagesForRiwayah(quran.prefs.riwayah);
-  const deadlinePassed = deadline != null && daysLeft <= 0;
+  // Asked of the DATE. `daysLeft` is zero for a finished khatmah too, and
+  // deriving it from that told a reader who had just completed one that
+  // they were late for it.
+  const deadlinePassed = plan != null && khatmahDatePassed(plan);
   /**
    * WHEN THE PACE HAS OUTGROWN THE READER, SAY SO — AND OFFER A DATE.
    *
@@ -653,6 +657,12 @@ export function QuranScreen() {
                     })}{' '}
                     <Text
                       accessibilityRole="button"
+                      // Named for a screen reader, which cannot see that
+                      // the sentence before it is about the pace.
+                      accessibilityLabel={t(
+                        'quran.khatmahMoveDateA11y',
+                        'Change the date this khatmah is paced to',
+                      )}
                       onPress={() => setDeadlineSheet('change')}
                       style={{ color: palette.accentSolid, fontWeight: '600' }}>
                       {t('quran.khatmahMoveDate', 'Move the date?')}
@@ -1553,7 +1563,9 @@ export function QuranScreen() {
         />
         <View style={[styles.menuCard, { backgroundColor: palette.card }]}>
           <Text style={[styles.menuTitle, { color: palette.text }]}>
-            {t('quran.khatmahResetTitle', 'Reset khatmah')}
+            {/* Not only resets any more: the date this plan is paced to
+                is changed from here too (issue #53). */}
+            {t('quran.khatmahOptionsTitle', 'Khatmah options')}
           </Text>
           {(
             [

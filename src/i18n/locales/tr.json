@@ -1108,6 +1108,8 @@
     "khatmahReminderBody": "Bugünkü bölüm: {{pages}} sayfa — {{page}}. sayfadan devam edin.",
     "audioButton": "Ses",
     "khatmahCustom": "Özel…",
+    "khatmahMoveDateA11y": "Bu hatmin bağlı olduğu tarihi değiştir",
+    "khatmahOptionsTitle": "Hatim seçenekleri",
     "khatmahByDateTitle": "Bir tarihe kadar bitir",
     "khatmahByDateChip": "Bir tarihe kadar…",
     "khatmahByDateHelp": "Planı bir tarihe bağlar; kalan kısım kalan günlere yeniden bölünür.",

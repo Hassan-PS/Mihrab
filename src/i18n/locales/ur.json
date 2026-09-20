@@ -1108,6 +1108,8 @@
     "khatmahReminderBody": "آج کا حصہ: {{pages}} صفحات — صفحہ {{page}} سے جاری رکھیں۔",
     "audioButton": "آڈیو",
     "khatmahCustom": "حسبِ منشا…",
+    "khatmahMoveDateA11y": "وہ تاریخ بدلیں جس سے یہ ختم جُڑا ہے",
+    "khatmahOptionsTitle": "ختم کے اختیارات",
     "khatmahByDateTitle": "کسی تاریخ تک مکمل کریں",
     "khatmahByDateChip": "تاریخ تک…",
     "khatmahByDateHelp": "منصوبے کو ایک تاریخ سے جوڑیں؛ جو باقی ہے وہ بچے دنوں پر نئے سرے سے تقسیم ہو جاتا ہے۔",

@@ -1108,6 +1108,8 @@
     "khatmahReminderBody": "今日份额：{{pages}} 页 — 从第 {{page}} 页继续。",
     "audioButton": "音频",
     "khatmahCustom": "自定义…",
+    "khatmahMoveDateA11y": "修改这次khatmah所对准的日期",
+    "khatmahOptionsTitle": "Khatmah 选项",
     "khatmahByDateTitle": "在某个日期前读完",
     "khatmahByDateChip": "按日期…",
     "khatmahByDateHelp": "让计划对准一个日期；剩下的部分会按剩余天数重新分配。",

@@ -41,7 +41,11 @@ describe('the card says which question it is answering', () => {
 
   it('and says so plainly once the date has gone by', () => {
     expect(screen).toContain('quran.khatmahDatePassed');
-    expect(screen).toMatch(/deadlinePassed =[\s\S]{0,80}daysLeft <= 0/);
+    // Asked of the DATE, not of `daysLeft` — which is also zero for a
+    // khatmah that has been FINISHED, and telling someone who has just
+    // completed one that they were late for it is the bug this pins.
+    expect(screen).toContain('khatmahDatePassed(plan)');
+    expect(screen).not.toMatch(/deadlinePassed =[\s\S]{0,60}daysLeft <= 0/);
   });
 
   it('day N of M uses the plan\'s length, not the number it was made with', () => {

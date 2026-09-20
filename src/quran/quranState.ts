@@ -760,7 +760,18 @@ function coerceKhatmah(v: unknown): KhatmahPlan | null {
       : null;
     const from = int(pc.from, 1, TOTAL_AYAHS);
     const to = int(pc.to, 1, TOTAL_AYAHS);
-    if (day !== null && from !== null && to !== null && to >= from) {
+    /**
+     * NOT A DAY THAT HAS NOT HAPPENED YET. A device whose clock ran
+     * ahead — or that was set forward and back — pins a cut dated in the
+     * future; it is ignored for display (the day key will not match) but
+     * it would out-rank every real cut in the merge, for as long as it
+     * took the calendar to catch up, and the other device would keep
+     * being handed a portion nobody had opened. Tomorrow's is allowed:
+     * it is what a device an hour ahead of the day boundary writes.
+     */
+    const stale =
+      day !== null && day > localYmd(Date.now() + 24 * 60 * 60 * 1000);
+    if (day !== null && !stale && from !== null && to !== null && to >= from) {
       out.pace = { day, from, to };
     }
   }
@@ -1935,7 +1946,7 @@ function withPaceOfDay(plan: KhatmahPlan, now?: number): KhatmahPlan {
     return rest;
   }
   const today = localYmd(now);
-  if (plan.pace?.day === today) return plan;
+  if (plan.pace && paceStillFits(plan, plan.pace, today)) return plan;
   const pace = khatmahPaceToday(plan, now ?? Date.now());
   return pace ? { ...plan, pace } : plan;
 }
@@ -2797,7 +2808,7 @@ export function khatmahPaceToday(
   const by = khatmahDeadline(plan);
   if (!by) return null;
   const day = localYmd(now);
-  if (plan.pace && plan.pace.day === day) return plan.pace;
+  if (plan.pace && paceStillFits(plan, plan.pace, day)) return plan.pace;
   const cut = paceCut({
     reach: khatmahReachAyah(plan),
     // Ḥafṣ on both, explicitly: the cut is the one thing here that must
@@ -2895,6 +2906,46 @@ export function khatmahPaceOutgrown(
   );
   const realized = Math.max(1, khatmahRealizedPace(plan, now));
   return needed >= 1.5 * planned && needed >= 1.5 * realized;
+}
+
+/**
+ * HAS THE DATE GONE BY? Asked of the date, and of nothing else.
+ *
+ * `khatmahDaysLeft` answers 0 for a plan that is FINISHED as well as for
+ * one whose date has passed — it is "how many days of reading are left",
+ * and a finished plan has none. Deriving "the date passed" from it told a
+ * reader who had just completed their khatmah that they were late for it.
+ */
+export function khatmahDatePassed(
+  plan: KhatmahPlan,
+  now: number = Date.now(),
+): boolean {
+  const by = khatmahDeadline(plan);
+  return by != null && daysToDeadline(by, now) <= 0;
+}
+
+/**
+ * IS THIS CUT STILL TODAY'S — and still in front of the reader?
+ *
+ * The day key is the obvious half. The other half is that progress can
+ * move BACKWARDS underneath a pinned cut: "restart the khatmah", "step
+ * back a day", an un-marked stretch arriving from another device. The cut
+ * would then start somewhere the reader has not reached, and the card
+ * would offer "21 pages left today" for a portion with a hundred pages
+ * of unread book in front of it, while "continue" sent them somewhere
+ * else entirely. A cut that no longer touches where the reader is is not
+ * today's cut; the day is re-made from where they now are.
+ *
+ * Reading FORWARD never triggers this — that is the whole point of
+ * pinning — so the day still cannot recede as it is read.
+ */
+function paceStillFits(
+  plan: KhatmahPlan,
+  pace: KhatmahPace,
+  today: string,
+): boolean {
+  if (pace.day !== today) return false;
+  return pace.from <= khatmahReachAyah(plan) + 1;
 }
 
 /** The pace a deadline plan needs from today on, in Ḥafṣ pages a day. */

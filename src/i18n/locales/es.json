@@ -1108,6 +1108,8 @@
     "khatmahReminderBody": "Porción de hoy: {{pages}} páginas — continúa desde la página {{page}}.",
     "audioButton": "Audio",
     "khatmahCustom": "Personalizado…",
+    "khatmahMoveDateA11y": "Cambiar la fecha a la que se ajusta esta jatma",
+    "khatmahOptionsTitle": "Opciones de la jatma",
     "khatmahByDateTitle": "Terminar en una fecha",
     "khatmahByDateChip": "En una fecha…",
     "khatmahByDateHelp": "Ajusta el plan a una fecha; lo que queda se reparte entre los días que restan.",

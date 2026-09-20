@@ -16,6 +16,7 @@ import {
   khatmahDay,
   khatmahDaysLeft,
   khatmahCreditWindow,
+  khatmahDatePassed,
   khatmahDeadline,
   khatmahIsComplete,
   khatmahPaceOutgrown,
@@ -29,7 +30,9 @@ import {
   khatmahUnreadAyahs,
   khatmahUnreadPages,
   recordKhatmahPageTurn,
+  resetKhatmahToday,
   setKhatmahDeadline,
+  coerceQuranState,
   setQuranPrefs,
   startKhatmah,
   KHATMAH_TOTAL_AYAHS,
@@ -37,6 +40,7 @@ import {
 } from '../src/quran/quranState';
 import { mergeKhatmah } from '../src/sync/merge';
 import { totalPagesForRiwayah } from '../src/quran/pages';
+import { setTodaysMaghrib, _resetIslamicDay } from '../src/hijri/islamicDay';
 import {
   daysToDeadline,
   deadlineDayNumber,
@@ -575,6 +579,154 @@ describe('a plan paced to a date, when the reading tradition changes', () => {
     const dated = plan({ done: [[1, 900]], ayahsRead: 900 });
     expect(khatmahUnreadPages(dated, 'warsh')).toBe(
       khatmahUnreadPages(dated, 'hafs'),
+    );
+  });
+});
+
+/**
+ * THE EDGES, and the two that were wrong.
+ */
+describe('dates at the edges of what a plan can be given', () => {
+  beforeEach(() => __resetQuranStateForTests());
+
+  it('a finished khatmah is not "late" for its own date', () => {
+    // `khatmahDaysLeft` is 0 for a plan that is COMPLETE as well as for
+    // one whose date has passed, and the card derived "date passed" from
+    // it — so finishing the book a week early was reported as being late.
+    const done = plan({
+      deadline: ymd(Date.now() + 10 * DAY),
+      deadlineAt: 1,
+      done: [[1, KHATMAH_TOTAL_AYAHS]],
+      ayahsRead: KHATMAH_TOTAL_AYAHS,
+      pagesRead: 604,
+      startedAt: Date.now() - 5 * DAY,
+    });
+    expect(khatmahIsComplete(done)).toBe(true);
+    expect(khatmahDaysLeft(done)).toBe(0);
+    expect(khatmahDatePassed(done)).toBe(false);
+  });
+
+  it('and one whose date really has gone by says so', () => {
+    const late = plan({ deadline: ymd(Date.now() - 2 * DAY), deadlineAt: 1 });
+    expect(khatmahDatePassed(late)).toBe(true);
+  });
+
+  it('a date set to today asks for what is left, today', () => {
+    startKhatmah(30);
+    setKhatmahDeadline(ymd(Date.now()));
+    const p = activeKhatmah(getQuranState())!;
+    expect(khatmahDaysLeft(p)).toBe(1);
+    expect(khatmahPages(p, 'hafs').today).toBe(604);
+    expect(khatmahDatePassed(p)).toBe(false);
+  });
+
+  it('a date a century out asks for a page a day, not a fraction of one', () => {
+    startKhatmah(30, undefined, '2126-01-01');
+    const p = activeKhatmah(getQuranState())!;
+    expect(khatmahPages(p, 'hafs').today).toBe(1);
+    expect(p.pace!.to).toBeGreaterThan(p.pace!.from - 1);
+  });
+
+  it('a cut dated in the future is not kept — a clock ran ahead, not a day', () => {
+    // Ignored for display either way (the day key will not match), but
+    // stored it would out-rank every real cut in the merge until the
+    // calendar caught up, and the other device would keep being handed a
+    // portion nobody had opened.
+    const ahead = plan({
+      pace: { day: ymd(Date.now() + 3 * DAY), from: 1, to: 500 },
+    });
+    const coerced = coerceQuranState({ version: 1, khatmah: [ahead] }).khatmah[0];
+    expect(coerced.pace).toBeUndefined();
+    // Tomorrow's is kept: that is what a device an hour the other side of
+    // the day boundary writes.
+    const tomorrow = plan({
+      pace: { day: ymd(Date.now() + DAY), from: 1, to: 500 },
+    });
+    expect(
+      coerceQuranState({ version: 1, khatmah: [tomorrow] }).khatmah[0].pace,
+    ).toEqual(tomorrow.pace);
+  });
+});
+
+/**
+ * THE DAY THAT STARTS AT MAGHRIB (Settings → Quran).
+ *
+ * The store's day key rolls at maghrib for a reader who has asked for it,
+ * and the pace is keyed on that same key — so the evening IS a new day
+ * and gets a new cut. That is the setting working, not the pace being
+ * unstable, and this is here so nobody "fixes" it into a day that rolls
+ * at midnight while the pill beside it rolls at maghrib.
+ */
+describe('the day that starts at maghrib', () => {
+  afterEach(() => {
+    setTodaysMaghrib(null);
+    _resetIslamicDay();
+  });
+
+  it('cuts a new day at maghrib, from where the reader has got to', () => {
+    __resetQuranStateForTests();
+    startKhatmah(30, undefined, ymd(Date.now() + 29 * DAY));
+    const beforeMaghrib = activeKhatmah(getQuranState())!.pace!;
+    const anHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    setTodaysMaghrib(anHourAgo);
+    const evening = khatmahPaceToday(activeKhatmah(getQuranState())!)!;
+    expect(evening.day).not.toBe(beforeMaghrib.day);
+    expect(evening.from).toBe(beforeMaghrib.from);
+  });
+
+  it('and the days left count the same boundary the cut does', () => {
+    // Phase 0 put these on one key; a deadline plan is where it shows.
+    const dated = plan({ deadline: ymd(Date.now() + 5 * DAY), deadlineAt: 1 });
+    const civil = khatmahDaysLeft(dated);
+    setTodaysMaghrib(new Date(Date.now() - 60 * 60 * 1000));
+    expect(khatmahDaysLeft(dated)).toBe(civil - 1);
+  });
+});
+
+/**
+ * PROGRESS MOVING BACKWARDS UNDER A PINNED CUT.
+ *
+ * "Restart the khatmah", "step back a day", an un-marked stretch arriving
+ * from another device — all of them can leave the reader behind the cut
+ * that was pinned this morning. A cut that no longer touches where they
+ * are is not today's cut.
+ */
+describe('a rewind under the day that was already cut', () => {
+  beforeEach(() => __resetQuranStateForTests());
+
+  it('re-cuts the day from where the reader now is', () => {
+    const rewound = plan({
+      startedAt: Date.now() - 4 * DAY,
+      deadline: ymd(Date.now() + 25 * DAY),
+      deadlineAt: 1,
+      pace: { day: ymd(Date.now()), from: 800, to: 950 },
+      done: [],
+      ayahsRead: 0,
+    });
+    const cut = khatmahPaceToday(rewound)!;
+    expect(cut.from).toBe(1);
+    expect(khatmahDay(rewound).portion.from).toBe(1);
+    // The DAY NUMBER is still the calendar's — a rewind is not time travel.
+    expect(khatmahDay(rewound).portion.day).toBe(5);
+  });
+
+  it('and reading forward never re-cuts it, which is the whole point', () => {
+    startKhatmah(30, undefined, ymd(Date.now() + 29 * DAY));
+    const cut = activeKhatmah(getQuranState())!.pace!;
+    for (let p = 1; p < 10; p++) recordKhatmahPageTurn(p, p + 1);
+    expect(activeKhatmah(getQuranState())!.pace).toEqual(cut);
+    expect(khatmahPaceToday(activeKhatmah(getQuranState())!)).toEqual(cut);
+  });
+
+  it('the reset actions leave a day that matches the reading', () => {
+    startKhatmah(30, undefined, ymd(Date.now() + 29 * DAY));
+    for (let p = 1; p < 30; p++) recordKhatmahPageTurn(p, p + 1);
+    resetKhatmahToday();
+    const after = activeKhatmah(getQuranState())!;
+    // Whatever the rewind left, the day starts where the reader is.
+    expect(khatmahPaceToday(after)!.from).toBe(khatmahReachAyah(after) + 1);
+    expect(khatmahPages(after, 'hafs').leftToday).toBe(
+      khatmahPages(after, 'hafs').today,
     );
   });
 });

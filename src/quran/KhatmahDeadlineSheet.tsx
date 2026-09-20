@@ -113,7 +113,17 @@ export function KhatmahDeadlineSheet({
       accessibilityLabel={label}
       onPress={() => move(by)}
       style={[styles.step, { borderColor: palette.border }]}>
-      <Text style={[styles.stepLabel, { color: palette.accentSolid }]}>{label}</Text>
+      {/* One line, shrinking rather than wrapping: "− 1 semaine" and
+          "− 1 Woche" are twice the width of "− 1 week", and four of them
+          share a row on a phone at whatever text size the reader has
+          chosen. A wrapped stepper reflows the whole sheet. */}
+      <Text
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.7}
+        style={[styles.stepLabel, { color: palette.accentSolid }]}>
+        {label}
+      </Text>
     </Pressable>
   );
 
@@ -145,7 +155,11 @@ export function KhatmahDeadlineSheet({
         <Text style={[styles.title, { color: palette.text }]}>
           {t('quran.khatmahByDateTitle', 'Finish by a date')}
         </Text>
-        <Text style={[styles.date, { color: palette.text }]}>{dateLabel}</Text>
+        {/* The date can be "Wednesday, 30 September" in a language that
+            does not abbreviate; two lines is fine, clipping is not. */}
+        <Text style={[styles.date, { color: palette.text }]} numberOfLines={2}>
+          {dateLabel}
+        </Text>
         <Text style={[styles.meta, { color: palette.muted }]}>
           {[
             t('quran.khatmahInDays', { defaultValue: 'in {{count}} days', count: days }),
@@ -267,6 +281,10 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
+    // Three actions on a narrow phone, and "Remove the date" is
+    // "Datum entfernen" in German and longer still in Urdu. Wrapping is
+    // the honest answer: they stack rather than being clipped.
+    flexWrap: 'wrap',
     gap: SPACING.md,
     marginTop: SPACING.lg,
   },

@@ -1108,6 +1108,8 @@
     "khatmahReminderBody": "Heutige Portion: {{pages}} Seiten — weiter ab Seite {{page}}.",
     "audioButton": "Audio",
     "khatmahCustom": "Eigene…",
+    "khatmahMoveDateA11y": "Das Datum ändern, auf das diese Khatmah ausgerichtet ist",
+    "khatmahOptionsTitle": "Khatmah-Optionen",
     "khatmahByDateTitle": "Bis zu einem Datum abschließen",
     "khatmahByDateChip": "Bis zu einem Datum …",
     "khatmahByDateHelp": "Richtet den Plan auf ein Datum aus; der Rest wird auf die verbleibenden Tage neu verteilt.",

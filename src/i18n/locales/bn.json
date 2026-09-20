@@ -1108,6 +1108,8 @@
     "khatmahReminderBody": "আজকের অংশ: {{pages}} পৃষ্ঠা — পৃষ্ঠা {{page}} থেকে চালিয়ে যান।",
     "audioButton": "অডিও",
     "khatmahCustom": "কাস্টম…",
+    "khatmahMoveDateA11y": "যে তারিখের সঙ্গে এই খতম বাঁধা, সেটি বদলান",
+    "khatmahOptionsTitle": "খতমের অপশন",
     "khatmahByDateTitle": "একটি তারিখের মধ্যে শেষ",
     "khatmahByDateChip": "তারিখ ধরে…",
     "khatmahByDateHelp": "পরিকল্পনাটি একটি তারিখে বাঁধুন; যা বাকি আছে তা বাকি দিনগুলোতে নতুন করে ভাগ হয়।",
