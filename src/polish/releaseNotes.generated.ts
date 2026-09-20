@@ -19,6 +19,16 @@ export type ReleaseNote = {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    code: 277,
+    version: '2.24.1',
+    date: '2026-09-20',
+    notes: {
+      en: '• Mac: the muṣḥaf no longer shows three page columns with the left one running under the index after switching back to it from another full-screen app.\n• Mac: the bar above the page is the colour of the page, and the surah name is centred over the page rather than over the window.\n• Mac and iPad: in fullscreen the surah name is shown in full again, instead of a letter and an ellipsis.\n• The left and right arrow keys turn pages again after searching in the index.',
+      ar: '• ماك: لم يعد المصحف يعرض ثلاثة أعمدة للصفحات مع اختفاء الأيسر تحت الفهرس عند العودة إليه من تطبيق آخر بملء الشاشة.\n• ماك: الشريط فوق الصفحة صار بلون الصفحة، واسم السورة صار في وسط الصفحة لا في وسط النافذة.\n• ماك وآيباد: في وضع ملء الشاشة يظهر اسم السورة كاملًا مرة أخرى، بدل حرف وثلاث نقاط.\n• مفتاحا السهمين يمين ويسار يقلبان الصفحات من جديد بعد البحث في الفهرس.',
+      sv: '• Mac: mushafen visar inte längre tre sidkolumner med den vänstra under registret när du växlar tillbaka från en annan helskärmsapp.\n• Mac: listen ovanför sidan har sidans färg, och suranamnet är centrerat över sidan i stället för över fönstret.\n• Mac och iPad: i helskärm visas suranamnet helt igen, i stället för en bokstav och tre punkter.\n• Vänster- och högerpilarna bläddrar igen efter en sökning i registret.',
+    },
+  },
+  {
     code: 276,
     version: '2.24.0',
     date: '2026-09-18',

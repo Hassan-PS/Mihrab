@@ -937,3 +937,9 @@ commit had landed on origin/main. That gate is right and cost nothing —
 but the release is now the only thing that ever notices, and it notices
 after you have decided to cut one.
 
+
+## 2.24.1 (277) — 2026-09-20
+
+Ran clean on the first attempt.
+
+**Lesson:** none needed — clean run, no change to the cycle.
