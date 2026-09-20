@@ -20,6 +20,23 @@ import {
   mergeQuran,
 } from '../src/sync/merge';
 import { applyMarks, compactMarks, type AyahMark } from '../src/quran/khatmahDone';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import {
+  __resetQuranStateForTests,
+  activeKhatmah,
+  addBookmark,
+  clearKhatmahPosition,
+  getQuranState,
+  isKhatmahPageDone,
+  khatmahCurrentPage,
+  recordKhatmahPageTurn,
+  removeBookmark,
+  setKhatmahPosition,
+  startKhatmah,
+  toggleKhatmahPageDone,
+  toggleStar,
+} from '../src/quran/quranState';
 import {
   DEFAULT_QURAN_STATE,
   mergeRemovals,
@@ -34,6 +51,14 @@ import {
   liveFasts,
   type FastEntry,
 } from '../src/fasting/fasting';
+
+/**
+ * Removals are pruned at ninety days (`REMOVAL_TTL_DAYS`), so the clock in
+ * these fixtures has to be a real one — an epoch-zero stamp is a removal
+ * that expired in 1970.
+ */
+const NOW = Date.now();
+const ago = (minutes: number) => NOW - minutes * 60_000;
 
 const plan: KhatmahPlan = {
   id: 'k1',
@@ -106,6 +131,78 @@ describe('the khatmah pin, which is a thing you can take off', () => {
     expect('position' in merged).toBe(false);
     expect('positionAt' in merged).toBe(false);
     expect(merged).toEqual(plan);
+  });
+});
+
+describe('what the reader actually sees, not just what the merge returns', () => {
+  it('"continue" stops being dragged back to the spent pin', () => {
+    const pinnedAt40: KhatmahPlan = {
+      ...plan,
+      position: { surah: 2, ayah: 30, page: 40 },
+      positionAt: ago(120),
+      done: [[1, 400]],
+      ayahsRead: 400,
+      pagesRead: 40,
+    };
+    // The Mac read on past it, which spends the pin.
+    const readOn: KhatmahPlan = {
+      ...plan,
+      position: null,
+      positionAt: ago(1),
+      done: [[1, 1200]],
+      ayahsRead: 1200,
+      pagesRead: 96,
+    };
+    // The page the door opens on is derived from the reading once no pin
+    // is set — which is the whole complaint: it was opening page 40.
+    for (const merged of both(readOn, pinnedAt40)) {
+      expect(khatmahCurrentPage(merged)).toBeGreaterThan(90);
+    }
+  });
+});
+
+describe('a device still on the old build cannot undo any of it', () => {
+  /**
+   * An older build drops the fields it has never heard of, so its
+   * snapshot carries a pin with no stamp and no removal lists at all.
+   * The updated device must keep its own removals — the old one will
+   * catch up when it is updated, and until then it is the only one that
+   * still shows the row.
+   */
+  const oldBuild: KhatmahPlan = {
+    ...plan,
+    position: { surah: 2, ayah: 30, page: 40 },
+    done: [[1, 400]],
+    ayahsRead: 400,
+    pagesRead: 40,
+  };
+  const updated: KhatmahPlan = {
+    ...plan,
+    position: null,
+    positionAt: ago(1),
+    done: [[1, 1200]],
+    ayahsRead: 1200,
+    pagesRead: 96,
+  };
+
+  it('the dated clear still wins over an undated pin', () => {
+    for (const merged of both(updated, oldBuild)) {
+      expect(merged.position ?? null).toBeNull();
+    }
+  });
+
+  it('and a removal survives a snapshot that carries no removals', () => {
+    const mine = quran({
+      bookmarks: [],
+      bookmarksRemoved: [{ id: 'b1', at: ago(5) }],
+      starred: [],
+      starsRemoved: [{ id: '2:255', at: ago(5) }],
+    });
+    const old = quran({ bookmarks: [bookmark({})], starred: ['2:255'] });
+    for (const merged of [mergeQuran(mine, old), mergeQuran(old, mine)]) {
+      expect(merged.bookmarks).toEqual([]);
+      expect(merged.starred).toEqual([]);
+    }
   });
 });
 
@@ -200,6 +297,30 @@ describe('the claim log is resolved, not appended to for ever', () => {
     expect(compactMarks(once, 6236)).toEqual(once);
   });
 
+  it('never weakens an un-mark with its neighbour\'s date', () => {
+    // Un-mark page A on Monday and page B beside it on Wednesday; the
+    // other device read B on Tuesday. Joining the two denials at Monday's
+    // time would hand B back — the failure this mechanism exists to stop.
+    const monday = 1_000;
+    const tuesday = 2_000;
+    const wednesday = 3_000;
+    const denials = compactMarks(
+      [
+        [10, 19, monday, 0],
+        [20, 29, wednesday, 0],
+      ],
+      6236,
+    );
+    expect(denials).toHaveLength(2);
+    const merged = applyMarks(
+      [[1, 100]],
+      [...denials, [20, 29, tuesday, 1] as AyahMark].sort((x, y) => x[2] - y[2]),
+      6236,
+    );
+    // 20–29 was denied last, on Wednesday, so it stays denied.
+    expect(merged).toEqual([[1, 9], [30, 100]]);
+  });
+
   it('joins neighbours at the EARLIER time, never the later one', () => {
     // Joining at the later time would let today's page turn re-assert
     // ground claimed days ago and quietly undo another device's un-mark.
@@ -213,14 +334,6 @@ describe('the claim log is resolved, not appended to for ever', () => {
     expect(joined).toEqual([[0, 19, 1_000, 1]]);
   });
 });
-
-/**
- * Removals are pruned at ninety days (`REMOVAL_TTL_DAYS`), so the clock in
- * these fixtures has to be a real one — an epoch-zero stamp is a removal
- * that expired in 1970.
- */
-const NOW = Date.now();
-const ago = (minutes: number) => NOW - minutes * 60_000;
 
 const quran = (over: Partial<QuranState>): QuranState => ({
   ...DEFAULT_QURAN_STATE,
@@ -355,5 +468,140 @@ describe('a deleted fast stays deleted', () => {
     ).toEqual([]);
     // A live row of the same age is NOT a tombstone and is kept.
     expect(coerceFastEntries([{ ...kept, loggedAt: old }])).toHaveLength(1);
+  });
+});
+
+/**
+ * AND THE WRITERS, not just the merge.
+ *
+ * Every test above hands the merge a stamp somebody typed. These drive
+ * the real writers instead, because a rule the merge reads correctly is
+ * worth nothing if a writer forgets to leave the date — and there are six
+ * places that move the pin.
+ */
+describe('what the app itself writes when the reader takes something away', () => {
+  beforeEach(() => {
+    __resetQuranStateForTests();
+    startKhatmah(30);
+  });
+
+  const active = () => activeKhatmah(getQuranState())!;
+
+  it('pinning dates the pin', () => {
+    setKhatmahPosition(2, 30, 40);
+    expect(active().position).toEqual({ surah: 2, ayah: 30, page: 40 });
+    expect(active().positionAt).toBeGreaterThan(0);
+  });
+
+  it('clearing it by hand dates the clearing', () => {
+    setKhatmahPosition(2, 30, 40);
+    const pinnedAt = active().positionAt!;
+    clearKhatmahPosition();
+    expect(active().position ?? null).toBeNull();
+    expect(active().positionAt!).toBeGreaterThan(pinnedAt);
+  });
+
+  it('and so does reading past it, which is how the report started', () => {
+    setKhatmahPosition(1, 1, 1);
+    const pinnedAt = active().positionAt!;
+    for (let p = 1; p < 6; p++) recordKhatmahPageTurn(p, p + 1);
+    expect(active().position ?? null).toBeNull();
+    expect(active().positionAt!).toBeGreaterThan(pinnedAt);
+    // The stale copy on the other device cannot put it back.
+    const stale = {
+      ...active(),
+      position: { surah: 1, ayah: 1, page: 1 },
+      positionAt: pinnedAt,
+    };
+    expect(mergeKhatmah([active()], [stale])[0].position ?? null).toBeNull();
+  });
+
+  it('a pin that never moved keeps its date, so a mere sync cannot outbid one', () => {
+    setKhatmahPosition(2, 30, 40);
+    const at = active().positionAt!;
+    // Re-pinning the same ayah, or any write that leaves it alone, must
+    // not re-stamp: a device that only opened the reader would then talk
+    // over a removal made somewhere else.
+    setKhatmahPosition(2, 30, 40);
+    expect(active().positionAt).toBe(at);
+  });
+
+  it('removing a bookmark leaves a dated removal behind', () => {
+    addBookmark(2, 255, 42, 'emerald');
+    const made = getQuranState().bookmarks[0];
+    removeBookmark(made.id);
+    const state = getQuranState();
+    expect(state.bookmarks).toEqual([]);
+    const removal = state.bookmarksRemoved?.find(r => r.id === made.id);
+    expect(removal).toBeDefined();
+    expect(removal!.at).toBeGreaterThan(made.createdAt);
+    // …and the other device's copy does not come back.
+    const theirs = { ...DEFAULT_QURAN_STATE, bookmarks: [made] };
+    expect(mergeQuran(state, theirs).bookmarks).toEqual([]);
+    expect(mergeQuran(theirs, state).bookmarks).toEqual([]);
+  });
+
+  it('un-starring does too, and starring again outdates it', () => {
+    toggleStar(2, 255);
+    const starredAt = getQuranState().starsAt?.['2:255'];
+    expect(starredAt).toBeGreaterThan(0);
+    toggleStar(2, 255);
+    const off = getQuranState();
+    expect(off.starred).toEqual([]);
+    expect(off.starsRemoved?.[0]?.at).toBeGreaterThan(starredAt!);
+    const theirs = { ...DEFAULT_QURAN_STATE, starred: ['2:255'] };
+    expect(mergeQuran(off, theirs).starred).toEqual([]);
+    toggleStar(2, 255);
+    const on = getQuranState();
+    expect(on.starred).toEqual(['2:255']);
+    expect(mergeQuran(on, off).starred).toEqual(['2:255']);
+  });
+});
+
+describe('the shape holds as the book is read', () => {
+  beforeEach(() => {
+    __resetQuranStateForTests();
+    startKhatmah(30);
+  });
+
+  it('a whole khatmah of page turns does not grow the claim log', () => {
+    // Reading is a dated claim now, and a claim per page turn would be
+    // 604 of them in a blob that syncs whole — and would push the
+    // un-marks off the end of the cap, which is where the durability
+    // actually lives. The compaction is what stops that, so it is pinned
+    // here against the real writer rather than against a fixture.
+    for (let p = 1; p < 300; p++) recordKhatmahPageTurn(p, p + 1);
+    const afterReading = activeKhatmah(getQuranState())!;
+    expect(afterReading.marks!.length).toBeLessThan(4);
+
+    // Un-mark three scattered pages; each is its own dated denial and
+    // none of them is lost to the cap.
+    for (const page of [12, 140, 260]) toggleKhatmahPageDone(page);
+    const marks = activeKhatmah(getQuranState())!.marks!;
+    expect(marks.filter(m => m[3] === 0)).toHaveLength(3);
+    expect(marks.length).toBeLessThan(10);
+
+    // Read on past them all; the denials stay denied, because nothing
+    // this device did afterwards claimed those pages.
+    for (let p = 300; p < 400; p++) recordKhatmahPageTurn(p, p + 1);
+    const later = activeKhatmah(getQuranState())!;
+    for (const page of [12, 140, 260]) {
+      expect(isKhatmahPageDone(later, page)).toBe(false);
+    }
+    expect(later.marks!.length).toBeLessThan(10);
+  });
+
+  it('and every writer that moves the pin leaves a date on it', () => {
+    // Six places set `position`, and one that forgot would put the bug
+    // straight back — silently, because the merge would simply see an
+    // older stamp. Source-pinned: the value only ever comes from `pinned`.
+    const src = readFileSync(
+      join(__dirname, '..', 'src', 'quran', 'quranState.ts'),
+      'utf8',
+    );
+    const body = src.slice(src.indexOf('function pinned('));
+    const afterHelper = body.slice(body.indexOf('\n}\n'));
+    expect(afterHelper).not.toMatch(/\n\s+position:/);
+    expect(src.match(/\.\.\.pinned\(/g)?.length).toBeGreaterThanOrEqual(6);
   });
 });

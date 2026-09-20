@@ -1743,7 +1743,7 @@
     "pasteCode": "Tempel",
     "addCta": "Sandingkan",
     "pairWarnTitle": "Sandingkan dengan perangkat {{value}}?",
-    "pairWarnBody": "Semua yang tercatat di perangkat itu akan muncul di sini, dan semua yang di sini akan muncul di sana. Penggabungan tidak pernah menghapus: bila keduanya berbeda, entri yang lebih baru yang disimpan.",
+    "pairWarnBody": "Semua yang tercatat di perangkat itu akan muncul di sini, dan semua yang di sini akan muncul di sana. Bila keduanya berbeda, entri yang lebih baru yang disimpan, dan apa yang Anda hapus di satu perangkat juga terhapus di perangkat lain.",
     "pairConfirm": "Sandingkan",
     "pairedTitle": "Tersanding",
     "pairedBody": "Perangkat ini sudah menulis kuncinya ke folder. Buka Mihrab di perangkat satunya — begitu ia membaca folder itu, keduanya tersanding dan tersinkron.",

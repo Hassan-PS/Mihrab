@@ -1743,7 +1743,7 @@
     "pasteCode": "Pegar",
     "addCta": "Vincular",
     "pairWarnTitle": "¿Vincular con el dispositivo {{value}}?",
-    "pairWarnBody": "Todo lo registrado en ese dispositivo aparecerá aquí, y todo lo de aquí aparecerá allí. La fusión nunca borra: cuando los dos difieren, se conserva la entrada más reciente.",
+    "pairWarnBody": "Todo lo registrado en ese dispositivo aparecerá aquí, y todo lo de aquí aparecerá allí. Cuando los dos difieren, se conserva la entrada más reciente, y lo que elimines en un dispositivo se elimina también en el otro.",
     "pairConfirm": "Vincular",
     "pairedTitle": "Vinculado",
     "pairedBody": "Este dispositivo ha escrito su clave en la carpeta. Abre Mihrab en el otro dispositivo: en cuanto lea la carpeta, ambos quedan vinculados y sincronizando.",

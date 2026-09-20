@@ -285,6 +285,15 @@ export function applyMarks(
  *     undo an un-mark another device made in between — the bug this file
  *     exists to prevent, arriving through the compaction instead. The
  *     earlier time can only ever lose to a claim it truly predates.
+ *
+ *   • …and only READING is joined that way. An un-mark is the claim that
+ *     cannot be re-made by carrying on reading, so weakening its date by
+ *     a neighbour's is exactly the failure this whole mechanism exists to
+ *     stop: un-mark one page on Monday and the next on Wednesday, and a
+ *     join at Monday's time hands Tuesday's reading on the other device
+ *     the second page back. Denials keep their own dates unless two of
+ *     them were made in the same breath, and there are never many —
+ *     un-marking is a thing a reader does by hand.
  */
 export function compactMarks(
   marks: readonly AyahMark[],
@@ -310,8 +319,15 @@ export function compactMarks(
   const joined: AyahMark[] = [];
   for (const m of resolved) {
     const last = joined[joined.length - 1];
-    if (last && last[3] === m[3] && m[0] <= last[1] + 1) {
-      joined[joined.length - 1] = [last[0], Math.max(last[1], m[1]), Math.min(last[2], m[2]), m[3]];
+    const touching = last && last[3] === m[3] && m[0] <= last[1] + 1;
+    const mayJoin = touching && (m[3] === 1 || last[2] === m[2]);
+    if (last && mayJoin) {
+      joined[joined.length - 1] = [
+        last[0],
+        Math.max(last[1], m[1]),
+        Math.min(last[2], m[2]),
+        m[3],
+      ];
       continue;
     }
     joined.push(m);

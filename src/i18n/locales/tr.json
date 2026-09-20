@@ -1743,7 +1743,7 @@
     "pasteCode": "Yapıştır",
     "addCta": "Eşleştir",
     "pairWarnTitle": "{{value}} cihazıyla eşleştirilsin mi?",
-    "pairWarnBody": "O cihazda kayıtlı olan her şey burada, buradaki her şey de orada görünecek. Birleştirme hiçbir şeyi silmez: ikisi ayrıldığında daha yeni kayıt korunur.",
+    "pairWarnBody": "O cihazda kayıtlı olan her şey burada, buradaki her şey de orada görünecek. İkisi ayrıldığında daha yeni kayıt korunur; bir cihazda sildiğiniz şey diğerinden de silinir.",
     "pairConfirm": "Eşleştir",
     "pairedTitle": "Eşleştirildi",
     "pairedBody": "Bu cihaz anahtarını klasöre yazdı. Diğer cihazda Mihrab’ı açın — klasörü okur okumaz ikisi de eşleşmiş ve eşitleniyor olur.",

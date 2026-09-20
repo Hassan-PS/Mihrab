@@ -1743,7 +1743,7 @@
     "pasteCode": "Klistra in",
     "addCta": "Parkoppla",
     "pairWarnTitle": "Parkoppla med enhet {{value}}?",
-    "pairWarnBody": "Allt som finns registrerat på den enheten dyker upp här, och allt som finns här dyker upp där. Sammanfogningen tar aldrig bort något: där de två skiljer sig behålls den senaste posten.",
+    "pairWarnBody": "Allt som finns registrerat på den enheten dyker upp här, och allt som finns här dyker upp där. Där de två skiljer sig behålls den senaste posten – och det du tar bort på en enhet tas bort på den andra också.",
     "pairConfirm": "Parkoppla",
     "pairedTitle": "Parkopplad",
     "pairedBody": "Den här enheten har skrivit sin nyckel till mappen. Öppna Mihrab på den andra enheten — så fort den läser mappen är båda parkopplade och synkar.",

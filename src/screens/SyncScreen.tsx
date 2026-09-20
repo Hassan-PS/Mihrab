@@ -11,8 +11,10 @@
  *
  * PAIRING IS TWO-WAY, AND THE CONFIRMATION SAYS SO. The user carries one
  * code in one direction, which reads like a one-way import — so the dialog
- * before pairing states plainly that both devices will sync afterwards, and
- * that merging never deletes.
+ * before pairing states plainly that both devices will sync afterwards, what
+ * happens where the two disagree, and — since removals travel now
+ * (docs/sync-conflict-rules.md) — that a deletion on one is a deletion on
+ * the other.
  *
  * THE FOLDER IS SOMEBODY ELSE'S JOB, AND THE COPY SAYS SO. Mihrab does not
  * move the file between devices; it writes one into a folder and reads what

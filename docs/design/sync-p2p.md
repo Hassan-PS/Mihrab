@@ -367,9 +367,16 @@ next sync, on the very provider whose listing returns nothing.
 
 ## Deliberately out of scope
 
-- **Deletions.** `merge.ts` already argues this: a bookmark removed on one
-  phone comes back from the other, and that is the correct trade against
-  tombstones and a rule for whose deletion wins. Sync must not reopen it.
+- ~~**Deletions.**~~ **Reopened, 2026-09-20 — and they now travel.** The old
+  line here said a bookmark removed on one phone comes back from the other
+  and that this was the correct trade against tombstones. What it did not
+  account for is that the same shape reaches things that are not
+  annoyances: a khatmah pin that came back dragged the plan's own
+  "continue here" back to a page the reader had finished with, and an
+  un-marked page came back every round for ninety days. The rule is now
+  one line — a removal is a dated fact, and it only buries a row older than
+  itself — with the inventory, the two kinds still without one, and the
+  reasons in `docs/sync-conflict-rules.md`.
 - **Real-time.** The merge is idempotent; syncing on app open and on demand
   is enough. Anything live is cost with no benefit.
 - **The at-rest key.** It stays on its device. Always.

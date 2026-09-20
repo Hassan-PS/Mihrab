@@ -768,6 +768,22 @@ function mergeStored(raw: unknown): QuranState {
       if (typeof v === 'number' && Number.isFinite(v) && v > 0) starsAt[k] = v;
     }
   }
+  const keptStars = Array.isArray(r.starred)
+    ? new Set(
+        [
+          ...new Set(
+            r.starred.filter(
+              (k): k is string =>
+                typeof k === 'string' && /^\d{1,3}:\d{1,3}$/.test(k),
+            ),
+          ),
+        ].filter(k => !removedAfter(removedStars, k, starsAt[k] ?? 0)),
+      )
+    : new Set<string>();
+  const liveStarsAt: Record<string, number> = {};
+  for (const [k, at] of Object.entries(starsAt)) {
+    if (keptStars.has(k)) liveStarsAt[k] = at;
+  }
   return {
     version: 1,
     lastRead: coerceLastRead(r.lastRead),
@@ -787,7 +803,7 @@ function mergeStored(raw: unknown): QuranState {
                 typeof s === 'string' && /^\d{1,3}:\d{1,3}$/.test(s),
             ),
           ),
-        ].filter(k => !removedAfter(removedStars, k, starsAt[k] ?? 0))
+        ].filter(k => keptStars.has(k))
       : [],
     khatmah: Array.isArray(r.khatmah)
       ? r.khatmah.map(coerceKhatmah).filter((k): k is KhatmahPlan => k !== null)
@@ -852,7 +868,12 @@ function mergeStored(raw: unknown): QuranState {
     // exactly the blob it was.
     ...(removedBookmarks.length > 0 ? { bookmarksRemoved: removedBookmarks } : {}),
     ...(removedStars.length > 0 ? { starsRemoved: removedStars } : {}),
-    ...(Object.keys(starsAt).length > 0 ? { starsAt } : {}),
+    // A stamp for a star that is not there says nothing, and a blob that
+    // holds one does not survive a merge unchanged — the merge prunes it,
+    // so the store has to as well or `merge(a, a) === a` fails on a state
+    // only the disk can hold. Caught by the fuzz in
+    // `syncMergeProperties.test.ts`.
+    ...(Object.keys(liveStarsAt).length > 0 ? { starsAt: liveStarsAt } : {}),
   };
 }
 

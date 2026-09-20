@@ -520,9 +520,12 @@ describe('what each merge rule actually decides', () => {
     expect(m.lastRead?.page).toBe(2);
   });
 
-  it('never deletes — the price of needing no server', () => {
-    // A bookmark absent from the incoming side is NOT removed. Documented
-    // as a trade, and pinned so nobody "fixes" it into a data-loss bug.
+  it('an ABSENCE still deletes nothing — only a dated removal does', () => {
+    // A bookmark absent from the incoming side is NOT removed: absence is
+    // "I have nothing to say", and the device that says nothing must not
+    // win. Removals travel now (`bookmarksRemoved`), which is a different
+    // fact with a date on it — this is the case that keeps the two apart,
+    // and it is pinned so nobody "fixes" it into a data-loss bug.
     const mine = populated();
     const theirs = { ...emptyData(), quran: { ...DEFAULT_QURAN_STATE } };
     const merged = mergeData(mine, buildSnapshot(theirs, everything(), NOW), everything());

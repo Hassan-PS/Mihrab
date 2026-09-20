@@ -1743,7 +1743,7 @@
     "pasteCode": "Paste",
     "addCta": "Pair",
     "pairWarnTitle": "Pair with device {{value}}?",
-    "pairWarnBody": "Everything recorded on that device will appear here, and everything here will appear there. Merging never deletes: where the two disagree, the more recent entry is kept.",
+    "pairWarnBody": "Everything recorded on that device will appear here, and everything here will appear there. Where the two disagree, the more recent entry is kept — and what you delete on one device is removed from the other too.",
     "pairConfirm": "Pair",
     "pairedTitle": "Paired",
     "pairedBody": "This device has written its key to the folder. Open Mihrab on the other device — as soon as it reads the folder, both are paired and syncing.",

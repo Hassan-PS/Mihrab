@@ -1743,7 +1743,7 @@
     "pasteCode": "Coller",
     "addCta": "Associer",
     "pairWarnTitle": "Associer l’appareil {{value}} ?",
-    "pairWarnBody": "Tout ce qui est enregistré sur cet appareil apparaîtra ici, et tout ce qui est ici apparaîtra là-bas. La fusion ne supprime jamais rien : en cas de désaccord, l’entrée la plus récente est conservée.",
+    "pairWarnBody": "Tout ce qui est enregistré sur cet appareil apparaîtra ici, et tout ce qui est ici apparaîtra là-bas. En cas de désaccord, l’entrée la plus récente est conservée — et ce que vous supprimez sur un appareil est aussi supprimé sur l’autre.",
     "pairConfirm": "Associer",
     "pairedTitle": "Associé",
     "pairedBody": "Cet appareil a écrit sa clé dans le dossier. Ouvrez Mihrab sur l’autre appareil : dès qu’il lit le dossier, les deux sont associés et se synchronisent.",

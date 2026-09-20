@@ -15,12 +15,32 @@
  * right. Lose any one of them and you need a server to arbitrate, which this
  * app does not have and should not want.
  *
- * THE COST IS THAT NOTHING IS EVER DELETED. A bookmark removed on one phone
- * comes back from the other. That is a deliberate trade: the alternative is
- * tombstones and a rule for whose deletion wins, and the failure mode of
- * getting that wrong is a month of someone's prayers disappearing. A
- * resurrected bookmark is an annoyance; a deleted record is the product
- * failing at the only thing it is for.
+ * IT USED TO COST EVERY DELETION. "Nothing is ever deleted" stood here for
+ * a year, and it was a real trade at the time: the alternative is tombstones
+ * and a rule for whose removal wins, and the failure mode of getting THAT
+ * wrong is a month of someone's prayers disappearing. A resurrected bookmark
+ * is an annoyance; a deleted record is the product failing at the only thing
+ * it is for.
+ *
+ * What changed is that the annoyance turned out to have teeth. A khatmah pin
+ * that came back did not just reappear — it dragged the plan's own "continue
+ * here" back to a page the reader had finished with (`positionAt`), and an
+ * un-marked page came back every round for ninety days. So removals travel
+ * now, and they are the same shape everywhere: a REMOVAL IS A DATED FACT,
+ * and it only ever buries a row older than itself. That keeps the three
+ * properties above — a date is a max like any other — and it keeps the old
+ * fear at arm's length, because no rule here can remove a record that was
+ * written after the removal was made. Every tombstone is pruned at ninety
+ * days, by which time it has reached every device or the device is gone.
+ * docs/sync-conflict-rules.md has the inventory and the two places left
+ * without one, with the reasons.
+ *
+ * ONE DELIBERATE ASYMMETRY. The khatmah's day baseline — `dayStartDate` and
+ * the two numbers beside it — is not synced state at all: it answers "how
+ * much has happened since MY day began", on this device's clock and this
+ * device's calendar day. It is kept from the LOCAL side, so merging is not
+ * symmetric in those three fields on purpose. Everything that travels is
+ * still commutative.
  */
 import type { JournalEntry } from '../journal/journal';
 import type { FastEntry } from '../fasting/fasting';

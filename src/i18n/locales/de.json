@@ -1743,7 +1743,7 @@
     "pasteCode": "Einfügen",
     "addCta": "Koppeln",
     "pairWarnTitle": "Mit Gerät {{value}} koppeln?",
-    "pairWarnBody": "Alles, was auf jenem Gerät erfasst ist, erscheint hier, und alles von hier erscheint dort. Beim Zusammenführen wird nie etwas gelöscht: Wo beide sich unterscheiden, bleibt der neuere Eintrag.",
+    "pairWarnBody": "Alles, was auf jenem Gerät erfasst ist, erscheint hier, und alles von hier erscheint dort. Wo beide sich unterscheiden, bleibt der neuere Eintrag – und was Sie auf einem Gerät löschen, wird auch auf dem anderen entfernt.",
     "pairConfirm": "Koppeln",
     "pairedTitle": "Gekoppelt",
     "pairedBody": "Dieses Gerät hat seinen Schlüssel in den Ordner geschrieben. Öffne Mihrab auf dem anderen Gerät — sobald es den Ordner liest, sind beide gekoppelt und synchronisieren.",
