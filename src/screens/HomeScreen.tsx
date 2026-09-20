@@ -29,6 +29,7 @@ import {
   shouldResync,
 } from '../utils/resyncGate';
 import { usePrayerDay } from '../hooks/usePrayerDay';
+import { clearTimezoneShiftNotice } from '../prayer/timezoneShift';
 import { markFirstPaint, useAfterFirstPaint } from '../boot/firstPaint';
 import { usePrefetchSavedLocations } from '../hooks/usePrefetchSavedLocations';
 import { syncPrayerNotifications } from '../notifications/prayerNotifications';
@@ -273,10 +274,26 @@ export function HomeScreen() {
    * It decides who is under the status bar: the sky, or a notice. Both
    * cannot be, and the notice wins because it is on top.
    */
+  /**
+   * The clocks changed where this reader is, and the times below moved
+   * with them (issue #56). Dismissal is keyed by WHEN it was noticed, so
+   * reading one notice does not silence the next change — a reader who
+   * dismisses Morocco's September shift still hears about the next one.
+   */
+  const [tzNoticeDismissedAt, setTzNoticeDismissedAt] = useState<number | null>(
+    null,
+  );
+  const timezoneShift =
+    state.phase === 'ready' &&
+    state.timezoneShift &&
+    state.timezoneShift.at !== tzNoticeDismissedAt
+      ? state.timezoneShift
+      : null;
   const hasBanner =
     (state.phase === 'ready' && state.usingLocalFallback === true) ||
     exactAlarmDenied ||
-    notifPermDenied;
+    notifPermDenied ||
+    timezoneShift != null;
   const [nextInfo, setNextInfo] = useState<{ name: string; at: Date } | null>(
     null,
   );
@@ -1250,6 +1267,13 @@ export function HomeScreen() {
         exactAlarmDenied={exactAlarmDenied}
         notifPermDenied={notifPermDenied}
         onRetryFetch={retry}
+        timezoneShift={timezoneShift}
+        onDismissTimezoneShift={() => {
+          // Both halves: the module stops offering it to the next load,
+          // and this screen stops drawing it now.
+          clearTimezoneShiftNotice();
+          setTzNoticeDismissedAt(timezoneShift?.at ?? Date.now());
+        }}
         topInset={
           !isDashboard && !isMacCatalyst && !isRoomy && hasBanner ? insets.top : 0
         }

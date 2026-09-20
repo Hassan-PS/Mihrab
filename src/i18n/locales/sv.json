@@ -99,7 +99,8 @@
     "alertOverrideResetHint": "Återställer {{mode}}",
     "yesterday": "Igår",
     "startReading": "Börja läsa",
-    "startReadingHint": "Al-Fātiḥah, sida 1"
+    "startReadingHint": "Al-Fātiḥah, sida 1",
+    "timezoneShiftNotice": "Klockan har ställts om här ({{from}} → {{to}}). Bönetiderna har uppdaterats."
   },
   "errors": {
     "locationNeededTitle": "Plats krävs",

@@ -8,6 +8,7 @@ import { recordDataSource } from './dataStatus';
 import type { PrayerDataProviderId } from '../settings/types';
 import type { TimingsMap } from '../types/prayer';
 import { formatLocalDate } from '../utils/date';
+import { deviceUtcOffsetMinutes } from '../utils/utcOffset';
 import { AppState } from 'react-native';
 
 export type StoredPrayerData = {
@@ -48,6 +49,26 @@ type CacheEntry = StoredPrayerData & {
    *  on entries written by older versions. Surfaced on the Home hero as
    *  the data-freshness indicator. */
   lastFetchedAt?: string;
+  /**
+   * THE DEVICE'S UTC OFFSET WHEN THESE TIMES WERE STORED — issue #56.
+   *
+   * Every timing in here is a wall-clock string: "05:49". What that string
+   * MEANS depends on the rule the clocks were running under when it was
+   * written, and that rule is not a law of nature. Morocco abolished GMT+1
+   * on 2026-09-20 and every stored row became an hour wrong in the same
+   * instant — the strings did not change, the country did.
+   *
+   * Nothing in the cache could tell. There is no expiry that catches this
+   * (the rows are not old, they are superseded), and no fingerprint: a
+   * table fetched yesterday for tomorrow looks exactly as good as one
+   * fetched under the new rule. So the offset is written down, and a
+   * mismatch is what invalidation is made of.
+   *
+   * Minutes EAST of UTC, the sign people read it in: +60 for GMT+1, 0 for
+   * GMT. Absent on entries written before this existed, which is treated
+   * as "unknown" rather than as a mismatch — see `timezoneShift.ts`.
+   */
+  utcOffsetMinutes?: number;
 };
 
 type V2Shape = {
@@ -318,7 +339,15 @@ export async function saveStoredPrayerData(
   const next: V2Shape = {
     caches: {
       ...v2.caches,
-      [k]: { ...data, lastAccessedAt: new Date().toISOString() },
+      [k]: {
+        ...data,
+        lastAccessedAt: new Date().toISOString(),
+        // The rule these rows are in. Every path that writes timings
+        // records it, or a table written before a country changed its
+        // clocks is indistinguishable from one written after — same
+        // strings, same age, an hour apart (issue #56).
+        utcOffsetMinutes: deviceUtcOffsetMinutes(),
+      },
     },
   };
   return saveV2(next, k);
@@ -573,6 +602,7 @@ export async function getOrFetchPrayerTimes(
                 months,
                 lastAccessedAt: new Date().toISOString(),
                 lastFetchedAt: new Date().toISOString(),
+                utcOffsetMinutes: deviceUtcOffsetMinutes(),
               },
             },
           };
@@ -813,10 +843,106 @@ export async function refreshPrayerDataCache(
         months,
         lastAccessedAt: new Date().toISOString(),
         lastFetchedAt: new Date().toISOString(),
+        utcOffsetMinutes: deviceUtcOffsetMinutes(),
       },
     },
   };
   await saveV2(next, k);
+}
+
+/**
+ * DROP ONE LOCATION'S STORED MONTHS — issue #56.
+ *
+ * Not the slot: the slot remembers which location it is and when it was
+ * last touched, and a location whose rows are wrong is still a location.
+ * The months go, the entry stays, and the next load refills it under the
+ * rule now in force.
+ *
+ * Only this location, and that restraint is the point. A slot holds times
+ * in the local clock of ITS coordinates — flying to Casablanca changes
+ * this device's offset and changes nothing at all about the Stockholm
+ * table stored beside it. Emptying every slot on a shift would make an
+ * aeroplane cost a traveller their whole offline year.
+ */
+export async function dropStoredMonths(
+  params: Omit<StoredPrayerData, 'months'>,
+): Promise<boolean> {
+  let dropped = false;
+  try {
+    await withTimeout(
+      (async () => {
+        const v2 = await loadV2();
+        const k = cacheKey(params);
+        const entry = v2.caches[k];
+        if (!entry || Object.keys(entry.months).length === 0) return;
+        const next: V2Shape = {
+          caches: {
+            ...v2.caches,
+            [k]: {
+              ...entry,
+              months: {},
+              // The offset the empty entry now stands for, so the next
+              // load does not read the drop as another shift.
+              utcOffsetMinutes: deviceUtcOffsetMinutes(),
+            },
+          },
+        };
+        await saveV2Once(next);
+        dropped = true;
+      })(),
+      MUTEX_TIMEOUT_MS,
+      'drop months',
+    );
+  } catch (e) {
+    console.warn('prayerStorage: dropStoredMonths failed', e);
+  }
+  return dropped;
+}
+
+/**
+ * Re-fetch days this location already has — issue #56.
+ *
+ * `refreshPrayerDataCache` fills GAPS: every day already stored is skipped,
+ * which is right for a pre-fill and useless for a repair. When the stored
+ * rows are the problem, the only refresh worth the name is one that throws
+ * them away first. Bounded to the months asked for, because this is a
+ * button somebody pressed rather than a background fill.
+ */
+export async function refetchStoredMonths(
+  params: Omit<StoredPrayerData, 'months'>,
+  monthKeys: readonly string[],
+): Promise<void> {
+  try {
+    await withTimeout(
+      (async () => {
+        const v2 = await loadV2();
+        const k = cacheKey(params);
+        const entry = v2.caches[k];
+        if (!entry) return;
+        const months = { ...entry.months };
+        let touched = false;
+        for (const monthKey of monthKeys) {
+          if (months[monthKey]) {
+            delete months[monthKey];
+            touched = true;
+          }
+        }
+        if (!touched) return;
+        await saveV2Once({
+          caches: { ...v2.caches, [k]: { ...entry, months } },
+        });
+      })(),
+      MUTEX_TIMEOUT_MS,
+      'refetch months',
+    );
+  } catch (e) {
+    console.warn('prayerStorage: refetchStoredMonths failed', e);
+  }
+}
+
+/** The `YYYY-MM` key a date belongs to, for callers naming a month. */
+export function monthKeyOf(date: Date): string {
+  return getMonthKey(date);
 }
 
 /**

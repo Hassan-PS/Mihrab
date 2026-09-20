@@ -99,7 +99,8 @@
     "alertOverrideResetHint": "{{mode}} بحال کرتا ہے",
     "yesterday": "گزشتہ کل",
     "startReading": "پڑھنا شروع کریں",
-    "startReadingHint": "الفاتحہ، صفحہ ۱"
+    "startReadingHint": "الفاتحہ، صفحہ ۱",
+    "timezoneShiftNotice": "یہاں کا مقامی وقت بدل گیا ہے ({{from}} → {{to}})۔ نماز کے اوقات اپ ڈیٹ کر دیے گئے ہیں۔"
   },
   "errors": {
     "locationNeededTitle": "مقام درکار ہے۔",

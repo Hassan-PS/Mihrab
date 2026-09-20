@@ -29,9 +29,18 @@ function declaredKeys(): Map<string, string[]> {
       }
       if (!/\.tsx?$/.test(entry.name)) continue;
       const text = fs.readFileSync(p, 'utf8');
-      // Matches: const FOO_KEY = 'value';  export const KEY = "value";
+      /**
+       * Matches: const FOO_KEY = 'value';  export const KEY = "value";
+       *
+       * The bare names are in the pattern deliberately. It used to insist
+       * on a character BEFORE the word — `[A-Z][A-Z0-9_]*(?:KEY|PREFIX)` —
+       * so a store called plainly `KEY`, which is the commonest name a
+       * single-key module gives it, walked straight past this whole file.
+       * Found by writing one (issue #56) and noticing it was never asked
+       * about.
+       */
       const re =
-        /(?:export\s+)?const\s+[A-Z][A-Z0-9_]*(?:KEY|PREFIX)[A-Z0-9_]*\s*(?::\s*string\s*)?=\s*['"]([^'"]+)['"]/g;
+        /(?:export\s+)?const\s+[A-Z0-9_]*(?:KEY|PREFIX)[A-Z0-9_]*\s*(?::\s*string\s*)?=\s*['"]([^'"]+)['"]/g;
       let m: RegExpExecArray | null;
       while ((m = re.exec(text))) {
         const key = m[1];
@@ -174,6 +183,14 @@ const STAYS: Record<string, string> = {
     'URI or an iOS security-scoped bookmark, and both are meaningless on ' +
     'any other device. Carrying it would point a phone at a directory it ' +
     'has no permission for, or at somebody else’s',
+  'mihrab.prayer.utcOffset.v1':
+    'the UTC offset this DEVICE was on when it last stored prayer times ' +
+    '(issue #56). It describes one phone’s clock, and its whole job is to ' +
+    'be compared against that same phone a moment later. Carried, a Mac in ' +
+    'Stockholm would hand a phone in Casablanca the wrong idea of what it ' +
+    'was last on — inventing a shift that never happened, or worse, ' +
+    'matching the phone’s new offset and suppressing the real one, which ' +
+    'is the exact failure the file exists to prevent',
   'mihrab.quran.download.pending':
     'names a download this PHONE stopped part way through, so the app can ' +
     'offer to pick it up (issue #55). It is a fact about one device’s ' +

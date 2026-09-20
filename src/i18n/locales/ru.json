@@ -99,7 +99,8 @@
     "alertOverrideResetHint": "Возвращает {{mode}}",
     "yesterday": "Вчера",
     "startReading": "Начать чтение",
-    "startReadingHint": "Аль-Фатиха, страница 1"
+    "startReadingHint": "Аль-Фатиха, страница 1",
+    "timezoneShiftNotice": "Здесь перевели часы ({{from}} → {{to}}). Время молитв обновлено."
   },
   "errors": {
     "locationNeededTitle": "Требуется местоположение",

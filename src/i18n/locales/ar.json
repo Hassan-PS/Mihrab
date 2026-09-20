@@ -99,7 +99,8 @@
     "alertOverrideResetHint": "يعيد {{mode}}",
     "yesterday": "أمس",
     "startReading": "ابدأ القراءة",
-    "startReadingHint": "الفاتحة، الصفحة ١"
+    "startReadingHint": "الفاتحة، الصفحة ١",
+    "timezoneShiftNotice": "تغيّر التوقيت المحلي هنا ({{from}} → {{to}}). تم تحديث أوقات الصلاة."
   },
   "errors": {
     "locationNeededTitle": "الموقع مطلوب",

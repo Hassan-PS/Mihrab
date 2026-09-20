@@ -272,6 +272,43 @@ export async function pollServerIndexNow(): Promise<void> {
   await pollServerIndex();
 }
 
+/**
+ * THROW THE CACHED TABLE AWAY AND FETCH IT NOW — issue #56.
+ *
+ * The ordinary refresh is polite: it asks `index.json` at most every six
+ * hours, and only while a lookup is happening. That is right for the case
+ * it was built for, which is the builder quietly accumulating another
+ * Hijri month.
+ *
+ * It is wrong for the case that brought this in. When Morocco abolished
+ * GMT+1 every row in the cached file became an hour wrong at once, and a
+ * device that had polled ten minutes earlier went on serving it for most
+ * of a working day. So an offset change resets the poll clock, drops the
+ * memo AND the stored copy, and downloads again — the one thing the polite
+ * path will not do.
+ *
+ * Awaited, unlike `maybeRefresh`: the caller is invalidating BEFORE it
+ * loads, and the whole point is that the next lookup sees the new file.
+ * The seed is left alone — it ships with the app and is replaced by the
+ * download, not by this.
+ */
+export async function refetchHabousDatasetNow(
+  latitude: number,
+  longitude: number,
+): Promise<void> {
+  const nearest = nearestMoroccoCity(latitude, longitude);
+  if (!nearest || nearest.distanceKm > MAX_DATASET_CITY_KM) return;
+  memCity.delete(nearest.id);
+  nextIndexPollAt = 0;
+  try {
+    await AsyncStorage.removeItem(`${CACHE_PREFIX}${nearest.id}`);
+  } catch {
+    // A stored copy that will not go away is still superseded by the
+    // download below, which overwrites it.
+  }
+  await downloadCity(nearest.id);
+}
+
 /** Test seam: clear the in-process memo (does not touch AsyncStorage). */
 export function _resetHabousDatasetMemoForTests(): void {
   memCity.clear();

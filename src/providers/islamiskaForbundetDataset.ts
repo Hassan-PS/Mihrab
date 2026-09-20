@@ -316,6 +316,37 @@ export async function pollServerIndexNow(): Promise<void> {
   await pollServerIndex();
 }
 
+/**
+ * Throw the cached table away and fetch it now — issue #56, and the same
+ * note as `refetchHabousDatasetNow`.
+ *
+ * Sweden's own clock changes twice a year and those are already right: the
+ * published rows for late October were scraped with October's rule and say
+ * what October says. What this is for is the rule CHANGING — a country
+ * deciding, as Morocco did, that next month's clocks are not what last
+ * month's file assumed. Nothing about that is Moroccan, so it lives on
+ * both datasets.
+ */
+export async function refetchIslamiskaForbundetDatasetNow(
+  latitude: number,
+  longitude: number,
+): Promise<void> {
+  const { city, distanceKm } = getNearestIslamiskaForbundetCityWithDistance(
+    latitude,
+    longitude,
+  );
+  if (distanceKm > MAX_DATASET_CITY_KM) return;
+  const slug = citySlug(city);
+  memCity.delete(slug);
+  nextIndexPollAt = 0;
+  try {
+    await AsyncStorage.removeItem(cacheKey(slug));
+  } catch {
+    // Superseded by the download below either way.
+  }
+  await downloadCity(slug);
+}
+
 /** Test seam: clear the in-process memo (does not touch AsyncStorage). */
 export function _resetDatasetMemoForTests(): void {
   memCity.clear();

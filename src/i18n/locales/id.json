@@ -99,7 +99,8 @@
     "alertOverrideResetHint": "Mengembalikan {{mode}}",
     "yesterday": "Kemarin",
     "startReading": "Mulai membaca",
-    "startReadingHint": "Al-Fatihah, halaman 1"
+    "startReadingHint": "Al-Fatihah, halaman 1",
+    "timezoneShiftNotice": "Waktu setempat telah berubah ({{from}} → {{to}}). Waktu sholat sudah diperbarui."
   },
   "errors": {
     "locationNeededTitle": "Lokasi diperlukan",

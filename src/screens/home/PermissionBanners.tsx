@@ -6,21 +6,39 @@ import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import notifee from '@notifee/react-native';
 import { useTranslation } from 'react-i18next';
 import { useAppPalette } from '../../hooks/useAppPalette';
+import { formatUtcOffset } from '../../utils/utcOffset';
 import { RADIUS, SPACING } from '../../theme/tokens';
 import { TYPE } from '../../theme/typography';
 
 /**
- * Three banner conditions surfaced above the next-prayer card:
+ * Four banner conditions surfaced above the next-prayer card:
  *   • `usingLocalFallback` — the network provider failed and the widget is
  *     showing on-device adhan computations.
  *   • `exactAlarmDenied` — Android revoked SCHEDULE_EXACT_ALARM (task #3).
  *   • `notifPermDenied` — iOS notification permission denied.
+ *   • `timezoneShift` — the clocks changed where the reader is, and every
+ *     time on this screen has just moved with them (issue #56).
  */
 type PermissionBannersProps = {
   usingLocalFallback: boolean;
   exactAlarmDenied: boolean;
   notifPermDenied: boolean;
   onRetryFetch: () => void;
+  /**
+   * The offset change that caused this refresh, if one did.
+   *
+   * WHY IT IS SAID AT ALL. Morocco left GMT+1 on 2026-09-20 and every
+   * prayer time in the country moved an hour earlier the same morning
+   * (issue #56). An app that changes Fajr from 05:49 to 04:49 without a
+   * word is indistinguishable, to the person reading it, from an app that
+   * has broken — and the whole value of the correction is that they trust
+   * the new number enough to pray by it.
+   *
+   * Dismissible and never sticky: it explains something that has just
+   * happened in front of them, so it goes when they have read it.
+   */
+  timezoneShift?: { from: number; to: number } | null;
+  onDismissTimezoneShift?: () => void;
   /**
    * The status bar's height, when these are the first thing on a page
    * that runs to the top edge of the screen — the phone's Today.
@@ -37,12 +55,19 @@ function PermissionBannersImpl({
   exactAlarmDenied,
   notifPermDenied,
   onRetryFetch,
+  timezoneShift,
+  onDismissTimezoneShift,
   topInset = 0,
 }: PermissionBannersProps) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
 
-  if (!usingLocalFallback && !exactAlarmDenied && !notifPermDenied) {
+  if (
+    !usingLocalFallback &&
+    !exactAlarmDenied &&
+    !notifPermDenied &&
+    !timezoneShift
+  ) {
     return null;
   }
 
@@ -67,6 +92,31 @@ function PermissionBannersImpl({
 
   return (
     <>
+      {/* FIRST, above the offline notice: it is the one that explains why
+          the numbers underneath are not the numbers the reader remembers,
+          and the others are about how they were obtained. */}
+      {timezoneShift && (
+        <View style={[styles.banner, { backgroundColor: palette.accentBg }, leadStyle()]}>
+          <Text style={[styles.text, { color: palette.text }]}>
+            {t('home.timezoneShiftNotice', {
+              defaultValue:
+                'The clocks here changed ({{from}} → {{to}}). Prayer times have been refreshed.',
+              from: formatUtcOffset(timezoneShift.from),
+              to: formatUtcOffset(timezoneShift.to),
+            })}
+          </Text>
+          <Pressable
+            onPress={onDismissTimezoneShift}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.dismiss', 'Dismiss')}>
+            <Text style={[styles.action, { color: palette.accent }]}>
+              {t('common.dismiss', 'Dismiss')}
+            </Text>
+          </Pressable>
+        </View>
+      )}
+
       {usingLocalFallback && (
         <View style={[styles.banner, { backgroundColor: palette.accentBg }, leadStyle()]}>
           <Text style={[styles.text, { color: palette.text }]}>

@@ -21,7 +21,13 @@ import { injectNightTimes } from '../utils/nightTimes';
 import { injectDaruriTimes } from '../prayer/daruriTimes';
 import { formatLocalDate } from '../utils/date';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
-import { getCacheStatus, refreshPrayerDataCache } from '../prayer/prayerStorage';
+import {
+  getCacheStatus,
+  monthKeyOf,
+  refetchStoredMonths,
+  refreshPrayerDataCache,
+} from '../prayer/prayerStorage';
+import { refetchDatasetFor } from '../prayer/timezoneShift';
 import { ShareMonthScreen } from './ShareMonthScreen';
 import { MonthControls } from './month/MonthControls';
 import {
@@ -116,6 +122,32 @@ export function MonthTimesScreen() {
     setRefreshingCache(true);
     setRefreshProgress({ current: 0, total: 1 });
     try {
+      /**
+       * THE MONTH IN VIEW IS RE-FETCHED, NOT TOPPED UP — issue #56.
+       *
+       * `refreshPrayerDataCache` fills gaps: every day already stored is
+       * skipped. That is right for a pre-fill and useless for a repair,
+       * and repair is what somebody presses this for — Morocco left GMT+1
+       * on 2026-09-20 and the stored rows were not missing, they were an
+       * hour wrong. So the visible month is dropped first, and the
+       * dataset file it would be rebuilt from is re-downloaded ahead of
+       * it; the twelve-month top-up below then runs as it always has.
+       *
+       * Bounded to the month on screen because this is a button, not a
+       * background fill: on a provider with no dataset behind it, a clean
+       * rebuild of a year is some three hundred and sixty requests.
+       */
+      const cacheParams = {
+        provider: effectiveProvider,
+        latitude: lat,
+        longitude: lng,
+        calculationMethod: settings.calculationMethod,
+        school: settings.school,
+      };
+      await refetchDatasetFor(cacheParams);
+      await refetchStoredMonths(cacheParams, [
+        monthKeyOf(new Date(viewYear, viewMonth, 1)),
+      ]);
       await refreshPrayerDataCache(
         { provider: effectiveProvider, latitude: lat, longitude: lng,
           calculationMethod: settings.calculationMethod, school: settings.school },

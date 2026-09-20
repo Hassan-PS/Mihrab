@@ -99,7 +99,8 @@
     "alertOverrideResetHint": "Stellt {{mode}} wieder her",
     "yesterday": "Gestern",
     "startReading": "Mit dem Lesen beginnen",
-    "startReadingHint": "Al-Fātiḥa, Seite 1"
+    "startReadingHint": "Al-Fātiḥa, Seite 1",
+    "timezoneShiftNotice": "Hier wurden die Uhren umgestellt ({{from}} → {{to}}). Die Gebetszeiten wurden aktualisiert."
   },
   "errors": {
     "locationNeededTitle": "Standort erforderlich",

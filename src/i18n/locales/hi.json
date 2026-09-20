@@ -99,7 +99,8 @@
     "alertOverrideResetHint": "{{mode}} वापस लाता है",
     "yesterday": "कल (बीता)",
     "startReading": "पढ़ना शुरू करें",
-    "startReadingHint": "अल-फ़ातिहा, पृष्ठ 1"
+    "startReadingHint": "अल-फ़ातिहा, पृष्ठ 1",
+    "timezoneShiftNotice": "यहाँ का स्थानीय समय बदल गया है ({{from}} → {{to}})। नमाज़ के समय अपडेट कर दिए गए हैं।"
   },
   "errors": {
     "locationNeededTitle": "स्थान की आवश्यकता है",

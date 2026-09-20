@@ -99,7 +99,8 @@
     "alertOverrideResetHint": "恢复为{{mode}}",
     "yesterday": "昨天",
     "startReading": "开始阅读",
-    "startReadingHint": "法谛海，第 1 页"
+    "startReadingHint": "法谛海，第 1 页",
+    "timezoneShiftNotice": "本地时间已调整（{{from}} → {{to}}）。祈祷时间已刷新。"
   },
   "errors": {
     "locationNeededTitle": "需要位置",

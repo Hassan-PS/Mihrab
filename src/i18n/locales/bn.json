@@ -99,7 +99,8 @@
     "alertOverrideResetHint": "{{mode}} ফিরিয়ে আনে",
     "yesterday": "গতকাল",
     "startReading": "পড়া শুরু করুন",
-    "startReadingHint": "আল-ফাতিহা, পৃষ্ঠা ১"
+    "startReadingHint": "আল-ফাতিহা, পৃষ্ঠা ১",
+    "timezoneShiftNotice": "এখানকার স্থানীয় সময় বদলে গেছে ({{from}} → {{to}})। নামাজের সময় আপডেট করা হয়েছে।"
   },
   "errors": {
     "locationNeededTitle": "অবস্থান প্রয়োজন",

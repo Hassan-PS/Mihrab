@@ -14,6 +14,11 @@ import { recordLocationFix } from '../prayer/cityRegistry';
 import { reverseLocality, type ReverseLocality } from '../geocoding/nominatim';
 import { computeLocalAdhanTimes } from '../providers/localAdhan';
 import {
+  settleTimezoneShift,
+  pendingTimezoneShift,
+  type TimezoneShift,
+} from '../prayer/timezoneShift';
+import {
   dayTzFingerprint,
   markResynced,
   shouldResync,
@@ -130,6 +135,22 @@ export type PrayerDayState =
        * the manual city into the last-GPS-fix slot for that one frame.
        */
       fromAuto?: boolean;
+      /**
+       * The clocks changed under this reader, and these times are the
+       * answer under the new rule — issue #56.
+       *
+       * Set on the load that noticed a UTC-offset change and refreshed
+       * because of it, so the Today card can say why every time on screen
+       * has just moved by an hour. A prayer app that shifts Fajr silently
+       * is asking to be distrusted at exactly the moment it has become
+       * right.
+       *
+       * Carried on the state rather than read from the module that
+       * detected it, because this has to re-render the card, and because
+       * it belongs to THIS answer: a load that did not come from a shift
+       * clears it.
+       */
+      timezoneShift?: TimezoneShift | null;
     };
 
 // `coordsChangedSignificantly` extracted to `src/utils/coords.ts` (task #17)
@@ -273,6 +294,31 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
         settings.dataProvider,
         coords,
       );
+
+      /**
+       * HAVE THE CLOCKS CHANGED UNDER US? — issue #56, and the ordering is
+       * the fix.
+       *
+       * Every stored prayer time is a wall-clock string written under a
+       * rule, and a country can change the rule: Morocco abolished GMT+1
+       * on 2026-09-20 and every row the app held for a Moroccan city
+       * became an hour wrong without becoming a minute older. Nothing
+       * expires, nothing looks stale, and the dataset's own six-hourly
+       * poll was the only thing that ever noticed — which is the three
+       * hours the reporter waited.
+       *
+       * In FRONT of the fetch, awaited, because a load that starts first
+       * reads exactly the rows this exists to throw away. It costs one
+       * number comparison after the first call of a launch.
+       */
+      const shift = await settleTimezoneShift({
+        provider,
+        latitude,
+        longitude,
+        calculationMethod: settings.calculationMethod,
+        school: settings.school,
+      }).catch(() => null);
+      if (gen !== loadGenerationRef.current) return;
 
       if (!isBackgroundRefresh) {
         // Paint the on-device week at once rather than blanking. The
@@ -505,6 +551,10 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
           past: offsettedPast,
           backgroundRefreshing: needsCacheFill,
           fromAuto,
+          // Only where this load is the one that noticed. A later refresh
+          // of the same times is not news, and `pendingTimezoneShift`
+          // keeps the notice alive across those until it is dismissed.
+          timezoneShift: shift ?? pendingTimezoneShift(),
         }));
 
         // Off the critical path, deliberately. Not awaited: nothing below
@@ -617,6 +667,10 @@ export function usePrayerDay(settings: PrayerAppSettings, hydrated: boolean) {
             usingLocalFallback: true,
             backgroundRefreshing: false,
             fromAuto,
+            // Offline when the clocks changed: the times on screen are the
+            // device's own arithmetic, which is running under the new rule
+            // — so this is exactly the case worth explaining.
+            timezoneShift: shift ?? pendingTimezoneShift(),
           }));
         } catch {
           // Local calculation also failed (invalid coordinates?)

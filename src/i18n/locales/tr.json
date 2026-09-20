@@ -99,7 +99,8 @@
     "alertOverrideResetHint": "{{mode}} ayarını geri yükler",
     "yesterday": "Dün",
     "startReading": "Okumaya başla",
-    "startReadingHint": "Fâtiha, sayfa 1"
+    "startReadingHint": "Fâtiha, sayfa 1",
+    "timezoneShiftNotice": "Buradaki saatler değişti ({{from}} → {{to}}). Namaz vakitleri yenilendi."
   },
   "errors": {
     "locationNeededTitle": "Konum gerekli",
