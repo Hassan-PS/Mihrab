@@ -488,9 +488,13 @@ describe('one answer to “where is the reader”', () => {
     const full = { ...plan(), done: [[1, KHATMAH_TOTAL_AYAHS]] as [number, number][] };
     expect(khatmahIsComplete(full)).toBe(true);
     expect(khatmahDaysLeft(full)).toBe(0);
+    // With the claim beside it that made the hole — reading is dated now
+    // (see `AyahMark`), so a set full of read pages and a hole in it is
+    // only half the story; without the denial the replay fills it back in.
     const holed = {
       ...full,
       done: [[1, 100], [102, KHATMAH_TOTAL_AYAHS]] as [number, number][],
+      marks: [[101, 101, Date.now() + 1000, 0] as [number, number, number, 0 | 1]],
     };
     expect(khatmahIsComplete(holed)).toBe(false);
     expect(khatmahDaysLeft(holed)).toBeGreaterThan(0);
@@ -730,17 +734,23 @@ describe('an un-mark survives the other device', () => {
     read(1, 21);
     toggleKhatmahPageDone(11);
     const denied = plan();
-    // Re-read across the hole: page turns are not logged, but one that
-    // crosses something the reader denied has to say so.
+    expect(isKhatmahPageDone(denied, 11)).toBe(false);
+    // Re-read across the hole. Reading is a dated claim of its own now,
+    // so this is newer than the denial and says the opposite — and the
+    // LOG does not grow by it: the compaction resolves the two into the
+    // verdict they amount to (`compactMarks`). What must change is what
+    // the plan says about the page, not how much it had to say.
     read(10, 13);
     const mine = plan();
-    expect(mine.marks!.length).toBeGreaterThan(denied.marks!.length);
+    expect(isKhatmahPageDone(mine, 11)).toBe(true);
     const merged = mergeKhatmah([mine], [other(mine)])[0];
     expect(isKhatmahPageDone(merged, 11)).toBe(true);
   });
 
   it('a plan that never claimed anything gains no key', () => {
-    read(1, 21);
+    // A plan nobody has read a page of: reading is a claim, so this is
+    // now the only way to hold a plan with no log at all — and the merge
+    // must not hand one back with a `marks` key neither side had.
     const mine = plan();
     expect(mine.marks).toBeUndefined();
     const merged = mergeKhatmah([mine], [mine])[0];

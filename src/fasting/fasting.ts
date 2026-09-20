@@ -34,7 +34,24 @@ export type FastEntry = {
   niyyahAt?: string;
   /** Free-form notes (capped at 500 chars). */
   notes?: string;
+  /**
+   * A DELETED ENTRY, kept as a dated fact rather than dropped.
+   *
+   * Deleting used to filter the row out of the array, and the sync merge
+   * — which keeps the newest entry per `(date, type)` — cannot tell a row
+   * deleted here from a row logged there: the other device still had it,
+   * so the delete undid itself on the next round. The journal has always
+   * answered this with `status: 'cleared'` (a clear is a WRITE), and this
+   * is the same answer in this store's shape. Readers go through
+   * `liveFasts`/`findFastEntry`, which never hand back a cleared row;
+   * `coerceFastEntries` drops it once it is older than any peer could
+   * still argue about.
+   */
+  cleared?: true;
 };
+
+/** How long a deleted entry travels before it is dropped for good. */
+export const FAST_TOMBSTONE_TTL_DAYS = 90;
 
 const VALID_TYPES: ReadonlyArray<FastType> = ['ramadan', 'voluntary', 'qadha'];
 
@@ -48,6 +65,14 @@ export function coerceFastEntries(input: unknown): FastEntry[] {
     if (typeof r.type !== 'string' || !VALID_TYPES.includes(r.type as FastType)) continue;
     if (typeof r.completed !== 'boolean') continue;
     if (typeof r.loggedAt !== 'string') continue;
+    // Past the window a removal needs, the row is gone everywhere and is
+    // pure weight in every sealed file — the same prune `coerceKhatmah`
+    // and `coerceSunnahLog` do for their tombstones.
+    if (r.cleared === true) {
+      const at = Date.parse(r.loggedAt);
+      const ttl = FAST_TOMBSTONE_TTL_DAYS * 24 * 60 * 60 * 1000;
+      if (Number.isFinite(at) && Date.now() - at > ttl) continue;
+    }
     out.push({
       date: r.date,
       type: r.type as FastType,
@@ -55,9 +80,21 @@ export function coerceFastEntries(input: unknown): FastEntry[] {
       loggedAt: r.loggedAt,
       niyyahAt: typeof r.niyyahAt === 'string' ? r.niyyahAt : undefined,
       notes: typeof r.notes === 'string' ? r.notes.slice(0, 500) : undefined,
+      ...(r.cleared === true ? { cleared: true as const } : {}),
     });
   }
   return out;
+}
+
+/**
+ * The entries a reader would call theirs — everything but the tombstones.
+ *
+ * Every list, count, grid and streak goes through this. A cleared row is
+ * carried so the deletion can reach the other devices, and it must never
+ * be mistaken for a fast that happened.
+ */
+export function liveFasts(entries: readonly FastEntry[]): FastEntry[] {
+  return entries.filter(e => e.cleared !== true);
 }
 
 export function upsertFastEntry(
@@ -86,14 +123,25 @@ export function upsertFastEntry(
 }
 
 export function deleteFastEntry(entries: FastEntry[], date: string): FastEntry[] {
-  return entries.filter(e => e.date !== date);
+  const now = new Date().toISOString();
+  let found = false;
+  const next = entries.map(e => {
+    if (e.date !== date) return e;
+    found = true;
+    // A WRITE, not a removal — see `cleared`. `loggedAt` moves with it,
+    // because the merge keeps the newest word on a `(date, type)` and
+    // this is the newest word.
+    return { ...e, cleared: true as const, loggedAt: now };
+  });
+  return found ? next : entries;
 }
 
 export function findFastEntry(
   entries: FastEntry[],
   date: string,
 ): FastEntry | undefined {
-  return entries.find(e => e.date === date);
+  const found = entries.find(e => e.date === date);
+  return found?.cleared === true ? undefined : found;
 }
 
 /** Detects whether the given Gregorian date is a recurring Sunnah voluntary
@@ -136,7 +184,9 @@ export function computeFastStats(
   entries: FastEntry[],
   now: Date = new Date(),
 ): FastStats {
-  const completed = entries.filter(e => e.completed);
+  // `liveFasts` first: a deleted day is carried as a tombstone now, and
+  // it still has `completed: true` on it from when it was a fast.
+  const completed = liveFasts(entries).filter(e => e.completed);
   const stats: FastStats = {
     ramadanDaysKept: 0,
     voluntaryDaysKept: 0,

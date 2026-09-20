@@ -383,7 +383,7 @@ export function buildPracticeBlock(input: {
     }
   }
   const fasted = new Set<string>();
-  for (const f of input.fasts) if (f.completed) fasted.add(f.date);
+  for (const f of input.fasts) if (f.completed && f.cleared !== true) fasted.add(f.date);
 
   const days: WidgetPracticeDay[] = [];
   const cursor = noonOf(now);
@@ -423,7 +423,7 @@ export function buildPracticeBlock(input: {
     owed: owedPrayers(input.journal).length,
     sunnahRate: sunnahRateFor(input.sunnah, now),
     fastsThisMonth: input.fasts.filter(
-      f => f.completed && f.date.slice(0, 7) === today.slice(0, 7),
+      f => f.completed && f.cleared !== true && f.date.slice(0, 7) === today.slice(0, 7),
     ).length,
     days,
     ...(since ? { since } : {}),

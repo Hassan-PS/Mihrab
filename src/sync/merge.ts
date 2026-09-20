@@ -36,7 +36,9 @@ import {
   ayahsThroughPage,
   khatmahDone,
   khatmahStartAyah,
+  mergeRemovals,
   pagesThroughAyahs,
+  removedAfter,
   KHATMAH_TOTAL_AYAHS as TOTAL_AYAHS,
   type KhatmahPlan,
   type QuranState,
@@ -97,7 +99,20 @@ export function mergeFasting(
     const ta = at((e as { loggedAt?: string }).loggedAt);
     const tb = at((mine as { loggedAt?: string }).loggedAt);
     if (ta > tb) byKey.set(key(e), e);
-    else if (ta === tb && e.completed && !mine.completed) byKey.set(key(e), e);
+    // Same breath: a deletion is the stronger claim — it is the one the
+    // absence could never express (`FastEntry.cleared`) — and between two
+    // live rows the completed one still wins, as it always has.
+    else if (ta === tb && e.cleared === true && mine.cleared !== true) {
+      byKey.set(key(e), e);
+    } else if (
+      ta === tb &&
+      e.cleared !== true &&
+      mine.cleared !== true &&
+      e.completed &&
+      !mine.completed
+    ) {
+      byKey.set(key(e), e);
+    }
   }
   return [...byKey.values()].sort(
     (a, b) => a.date.localeCompare(b.date) || a.type.localeCompare(b.type),
@@ -181,6 +196,63 @@ export function mergeSunnah(local: SunnahLog, incoming: SunnahLog): SunnahLog {
  * the earlier completion timestamp is kept — that is when it actually
  * happened, whichever phone noticed first.
  */
+/**
+ * Which pin survives a merge — see the note inside `mergeKhatmah`.
+ *
+ * Undefined is not a value here: the caller only writes the key when one
+ * of the two sides carried it, so "no pin" comes back as null.
+ */
+function pickPin(a: KhatmahPlan, b: KhatmahPlan): KhatmahPlan['position'] {
+  const sa = a.positionAt ?? 0;
+  const sb = b.positionAt ?? 0;
+  if (sa !== sb) return (sa > sb ? a.position : b.position) ?? null;
+  /**
+   * NEITHER SIDE DATED — two plans from before `positionAt`, where a
+   * missing pin cannot be told from a pin nobody ever made. The old rule
+   * is the only honest one here: keep the pin, because "removal wins"
+   * would throw away every pin an un-updated device makes.
+   */
+  if (sa === 0) {
+    return ((b.position?.page ?? -1) > (a.position?.page ?? -1)
+      ? b.position
+      : a.position) ?? null;
+  }
+  // Both dated, in the same millisecond: a removal is the stronger claim,
+  // and two live pins are ordered by how far through the book they sit.
+  // Decided identically on both devices, which a "keep local" tie is not.
+  if (!a.position || !b.position) return null;
+  return b.position.page > a.position.page ? b.position : a.position;
+}
+
+/** The per-device day baseline, copied only when the device has one. */
+function dayStateOf(
+  plan: KhatmahPlan,
+): Pick<KhatmahPlan, 'dayStartDate' | 'dayStartPagesRead' | 'dayStartAyahsRead'> {
+  return {
+    ...(plan.dayStartDate !== undefined ? { dayStartDate: plan.dayStartDate } : {}),
+    ...(plan.dayStartPagesRead !== undefined
+      ? { dayStartPagesRead: plan.dayStartPagesRead }
+      : {}),
+    ...(plan.dayStartAyahsRead !== undefined
+      ? { dayStartAyahsRead: plan.dayStartAyahsRead }
+      : {}),
+  };
+}
+
+/**
+ * The plan without its day baseline — so that putting THIS device's back
+ * is a decision and not a coincidence of spread order. Absent here has to
+ * survive as absent: a device with no baseline must not inherit one from
+ * a peer whose day began somewhere else.
+ */
+function withoutDayState(plan: KhatmahPlan): KhatmahPlan {
+  const rest = { ...plan };
+  delete rest.dayStartDate;
+  delete rest.dayStartPagesRead;
+  delete rest.dayStartAyahsRead;
+  return rest;
+}
+
 export function mergeKhatmah(
   local: KhatmahPlan[],
   incoming: KhatmahPlan[],
@@ -269,15 +341,34 @@ export function mergeKhatmah(
       mine.abandonedAt != null && p.abandonedAt != null
         ? Math.min(mine.abandonedAt, p.abandonedAt)
         : (mine.abandonedAt ?? p.abandonedAt);
-    // The pinned position is a "where I am", so the further-through one is
-    // the later one; ties keep whichever the local device already had.
-    const position =
-      (p.position?.page ?? -1) > (mine.position?.page ?? -1)
-        ? p.position
-        : mine.position;
+    /**
+     * THE PIN IS WHOEVER SPOKE LAST, because taking one off is speaking.
+     *
+     * It used to be "the further-through page wins", which reads as a
+     * rule about progress and is really a rule that cannot say NO. A pin
+     * the reader cleared is a `null` with no page in it, so the other
+     * device's pin beat it every round; and since `khatmahCurrentPage`
+     * answers with the pinned page while a pin is set, a plan read well
+     * past its pin was dragged back to it and "Continue khatmah" kept
+     * opening ground the reader had finished with. Reading past a pin
+     * spends it, so this arrived without anyone touching anything — the
+     * two halves of the report of 2026-09-20, one cause.
+     *
+     * `positionAt` dates both halves of the act (see `KhatmahPlan`), and
+     * a dated claim beats an undated one: only a dated side can say "no
+     * pin", and a device old enough to send none converges as soon as it
+     * is updated. Equal stamps are not a tie to keep locally — that
+     * would make the merge depend on which device ran it — so they are
+     * decided the same way on both: a removal beats a pin, and between
+     * two pins the further-through one wins, which is the old rule doing
+     * the only job it was ever right for.
+     */
+    const pinStamp = Math.max(mine.positionAt ?? 0, p.positionAt ?? 0);
+    const position = pickPin(mine, p);
+    const hadPin = 'position' in mine || 'position' in p;
     byId.set(p.id, {
-      ...mine,
-      ...p,
+      ...withoutDayState(mine),
+      ...withoutDayState(p),
       startedAt: Math.min(mine.startedAt, p.startedAt),
       pagesRead: pagesReadOut,
       ...(ayahsRead !== undefined ? { ayahsRead } : {}),
@@ -291,7 +382,41 @@ export function mergeKhatmah(
       ...(mine.done || p.done ? { done: doneRanges } : {}),
       // Same rule: a pair that never claimed anything must not gain a key.
       ...(marks.length > 0 ? { marks } : {}),
-      ...(position !== undefined ? { position } : {}),
+      // Only when one of them actually carried the key. A pair that
+      // never pinned anything must not come out of the merge with a
+      // pin-shaped null on it, or a snapshot merged with itself stops
+      // equalling itself.
+      ...(hadPin ? { position } : {}),
+      ...(pinStamp > 0 ? { positionAt: pinStamp } : {}),
+      /**
+       * THE DAY'S BASELINE IS THIS DEVICE'S, always.
+       *
+       * `dayStartDate` and the two numbers beside it answer "how much of
+       * this has happened since MY day began" — a local clock, a local
+       * calendar day, and a snapshot taken when this device first looked
+       * today. The spread above handed all three to whichever side was
+       * incoming, so a phone that had not been opened since last week
+       * reset the Mac's "today" to last week's baseline and today's
+       * reading appeared to jump; merging the other way round gave the
+       * other answer, which is the same bug wearing its other face — the
+       * merge was not commutative in these fields at all.
+       *
+       * They are not synced state. They stay whatever this device said,
+       * including staying ABSENT if it had none, and `withDaySnapshot`
+       * re-takes them on the next local write anyway.
+       */
+      ...dayStateOf(mine),
+      /**
+       * Set once, when the plan is made, and never edited — so the two
+       * sides agree and this only has to be DECIDED, not resolved. Max
+       * and min respectively, because a rule that reads the same on both
+       * devices is the whole requirement: a plan cannot come out of a
+       * merge one length here and another there.
+       */
+      targetDays: Math.max(mine.targetDays, p.targetDays),
+      ...(mine.fromPage != null || p.fromPage != null
+        ? { fromPage: Math.min(mine.fromPage ?? 0, p.fromPage ?? 0) }
+        : {}),
     });
   }
   return [...byId.values()].sort((a, b) => a.startedAt - b.startedAt);
@@ -328,8 +453,43 @@ export function mergeQuran(local: QuranState, incoming: QuranState): QuranState 
     const mine = bookmarks.get(b.id);
     if (!mine || stamp(b) > stamp(mine)) bookmarks.set(b.id, b);
   }
+  /**
+   * AND THEN THE REMOVALS, which the union above cannot express.
+   *
+   * A bookmark deleted on one device was simply absent from its
+   * snapshot, and absence is exactly what a union ignores: the other
+   * device still carried the row, so the delete undid itself on the next
+   * round — the khatmah-plan bug, the removed-peer bug and the cleared
+   * sunnah day, one more time (reported 2026-09-20). The removals travel
+   * as dated facts and are applied after the union, so the last thing
+   * the reader did about a bookmark is what holds.
+   *
+   * `>=` on the stamp, not `>`: a removal is written a millisecond past
+   * the copy it buries (`removeBookmark`), and a bookmark that is NOT
+   * older than its removal is a re-make, which survives.
+   */
+  const bookmarksRemoved = mergeRemovals(
+    local.bookmarksRemoved,
+    incoming.bookmarksRemoved,
+  );
+  const liveBookmarks = [...bookmarks.values()].filter(
+    b => !removedAfter(bookmarksRemoved, b.id, stamp(b)),
+  );
 
-  const starred = [...new Set([...local.starred, ...incoming.starred])].sort();
+  // Stars: the same union with the same blind spot, and the same answer.
+  // A star carries its own date now (`starsAt`), so an ayah starred again
+  // after being un-starred elsewhere keeps the newer claim.
+  const starsRemoved = mergeRemovals(local.starsRemoved, incoming.starsRemoved);
+  const starsAt: Record<string, number> = { ...(local.starsAt ?? {}) };
+  for (const [k, at] of Object.entries(incoming.starsAt ?? {})) {
+    if (!(starsAt[k] >= at)) starsAt[k] = at;
+  }
+  const starred = [...new Set([...local.starred, ...incoming.starred])]
+    .filter(k => !removedAfter(starsRemoved, k, starsAt[k] ?? 0))
+    .sort();
+  for (const k of Object.keys(starsAt)) {
+    if (!starred.includes(k)) delete starsAt[k];
+  }
 
   const mineAt = local.lastRead?.updatedAt ?? 0;
   const theirsAt = incoming.lastRead?.updatedAt ?? 0;
@@ -361,8 +521,13 @@ export function mergeQuran(local: QuranState, incoming: QuranState): QuranState 
   return {
     version: 1,
     lastRead: theirsIsNewer ? incoming.lastRead : local.lastRead,
-    bookmarks: [...bookmarks.values()].sort((a, b) => a.createdAt - b.createdAt),
+    bookmarks: liveBookmarks.sort((a, b) => a.createdAt - b.createdAt),
     starred,
+    // Present only when there is something to say, so two blobs that
+    // never removed anything merge to one that has no such key either.
+    ...(bookmarksRemoved.length > 0 ? { bookmarksRemoved } : {}),
+    ...(starsRemoved.length > 0 ? { starsRemoved } : {}),
+    ...(Object.keys(starsAt).length > 0 ? { starsAt } : {}),
     khatmah: mergeKhatmah(local.khatmah, incoming.khatmah),
     prefs: theirPrefsAreNewer ? incoming.prefs : local.prefs,
     // The stamp travels with the choice, or the loser's own next sync

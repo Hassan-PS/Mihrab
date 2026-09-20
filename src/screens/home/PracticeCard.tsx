@@ -49,7 +49,10 @@ function PracticeCardImpl() {
     let first: string | null = null;
     for (const e of journal)
       if (first === null || e.date < first) first = e.date;
-    for (const f of fasts) if (first === null || f.date < first) first = f.date;
+    for (const f of fasts) {
+      if (f.cleared === true) continue;
+      if (first === null || f.date < first) first = f.date;
+    }
     return first;
   }, [journal, fasts]);
 
@@ -83,7 +86,8 @@ function PracticeCardImpl() {
     () =>
       buildHeatmap(
         scoreByDay(journal),
-        new Set(fasts.filter(f => f.completed).map(f => f.date)),
+        // Cleared rows are deletions on their way to the other devices.
+        new Set(fasts.filter(f => f.completed && f.cleared !== true).map(f => f.date)),
         new Date(),
         weeksToCover(earliest) + extraWeeks,
         sunnah,

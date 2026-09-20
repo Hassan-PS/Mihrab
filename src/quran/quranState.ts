@@ -29,12 +29,12 @@ import { islamicDayKey } from '../hijri/islamicDay';
 import {
   addRange,
   applyMarks,
+  compactMarks,
   contiguousFrom,
   firstMissingFrom,
   highestCovered,
   normalizeRanges,
   rangesCover,
-  marksDenyAny,
   rangesEqual,
   subtractRange,
   type AyahMark,
@@ -199,6 +199,27 @@ export type KhatmahPlan = {
   /** Explicit user-pinned position ("I am here"), shown on the mushaf
    *  in the reserved khatmah color. Overrides the derived page. */
   position?: { surah: number; ayah: number; page: number } | null;
+  /**
+   * WHEN THE PIN WAS LAST SET **OR TAKEN OFF** — because taking it off is
+   * a thing the reader did, and it has to travel (reported 2026-09-20).
+   *
+   * The pin used to merge by "furthest page wins", which cannot express a
+   * removal: a cleared pin is a `null`, `null` has no page, and any pin
+   * still sitting on the other device beat it — every round. Two symptoms,
+   * one cause. The pin the reader took off came back; and since
+   * `khatmahCurrentPage` answers with the pinned page while a pin is set,
+   * a plan that had been read well past its pin was dragged back to it, so
+   * "Continue khatmah" kept opening a page the reader had finished with.
+   * Reading past a pin spends it (`position: null` in `recordKhatmahProgress`),
+   * which made the second symptom arrive without anyone touching anything.
+   *
+   * So the pin is a CLAIM with a date on it, like the khatmah's own
+   * tombstone and the un-marks beside it: whichever device spoke last
+   * wins, and "no pin" is something a device can say. Absent on plans
+   * written before this existed; the merge falls back to the old rule
+   * only when NEITHER side carries a stamp.
+   */
+  positionAt?: number;
   /** `pagesRead` snapshot at the start of the local day (yyyy-mm-dd) —
    *  lets "reset today's reading" rewind only today's progress. */
   dayStartPagesRead?: number;
@@ -408,7 +429,96 @@ export type QuranState = {
    * has never knowingly chosen.
    */
   prefsUpdatedAt?: number;
+  /**
+   * BOOKMARKS THE READER TOOK AWAY, with the time they did it.
+   *
+   * A deleted bookmark used to be an absence, and an absence loses every
+   * argument a union has: the other device still had the row, and the
+   * merge — which unites by id — could not tell "deleted here" from
+   * "made there". So it came back, every round. The same shape as the
+   * khatmah plan that resurrected itself (`abandonedAt`), the peer that
+   * un-removed itself (`removedPeers.ts`) and the cleared sunnah day, and
+   * the same answer: the removal is a fact with a date on it, and it
+   * travels.
+   *
+   * A removal only beats a bookmark OLDER than it, so re-making one —
+   * which mints a new id anyway — and editing one on the other device
+   * after the delete both survive. Pruned at ninety days by
+   * `coerceQuranState`, like every other tombstone here.
+   */
+  bookmarksRemoved?: Removal[];
+  /** Stars the reader took off — same reasoning as `bookmarksRemoved`. */
+  starsRemoved?: Removal[];
+  /**
+   * WHEN EACH STAR WAS PUT ON.
+   *
+   * `starred` is a bare list of keys merged by union, so it cannot be
+   * ordered against a removal on its own: without this, re-starring an
+   * ayah after un-starring it on the other device would lose to the
+   * older removal for ever. A star made before this field existed reads
+   * as 0 — older than any removal, which is the truthful answer for a
+   * device that never recorded when it starred anything.
+   */
+  starsAt?: Record<string, number>;
 };
+
+/** Something the reader took away, and when. */
+export type Removal = { id: string; at: number };
+
+/** The window a removal has to reach every device — the repo's ninety days. */
+export const REMOVAL_TTL_DAYS = 90;
+/** At most this many removals travel in the blob, newest kept. */
+export const REMOVAL_LIMIT = 256;
+
+/**
+ * Both sides' removals, each id once, keeping the LATEST claim for it.
+ *
+ * Latest rather than earliest: a row removed, re-made and removed again
+ * is gone, and the second removal is the one that says so past the
+ * re-making. Commutative and idempotent, which is what the merge needs.
+ */
+export function mergeRemovals(
+  a: readonly Removal[] = [],
+  b: readonly Removal[] = [],
+  now: number = Date.now(),
+): Removal[] {
+  const byId = new Map<string, number>();
+  for (const r of [...a, ...b]) {
+    const had = byId.get(r.id);
+    if (had === undefined || r.at > had) byId.set(r.id, r.at);
+  }
+  const cutoff = now - REMOVAL_TTL_DAYS * 24 * 60 * 60 * 1000;
+  return [...byId.entries()]
+    .filter(([, at]) => at >= cutoff)
+    .map(([id, at]) => ({ id, at }))
+    .sort((x, y) => x.at - y.at || (x.id < y.id ? -1 : 1))
+    .slice(-REMOVAL_LIMIT);
+}
+
+/** A removal newer than the thing it removes wins; anything else loses. */
+export function removedAfter(
+  removals: readonly Removal[],
+  id: string,
+  stamp: number,
+): boolean {
+  const at = removals.find(r => r.id === id)?.at;
+  return at !== undefined && at >= stamp;
+}
+
+function coerceRemovals(v: unknown): Removal[] {
+  if (!Array.isArray(v)) return [];
+  const out: Removal[] = [];
+  for (const item of v) {
+    if (!item || typeof item !== 'object') continue;
+    const r = item as Record<string, unknown>;
+    if (typeof r.id !== 'string' || !r.id) continue;
+    if (typeof r.at !== 'number' || !Number.isFinite(r.at)) continue;
+    out.push({ id: r.id, at: r.at });
+  }
+  // The same prune the merge does, so a blob on disk cannot grow past
+  // what a merge would have kept.
+  return mergeRemovals(out, []);
+}
 
 export const DEFAULT_QURAN_STATE: QuranState = {
   version: 1,
@@ -535,6 +645,15 @@ function coerceKhatmah(v: unknown): KhatmahPlan | null {
       out.position = { surah, ayah, page };
     }
   }
+  /**
+   * Kept even when the pin itself is gone — that pairing IS the claim
+   * "there is no pin, and here is when I said so". A stamp with no
+   * position is what a cleared pin looks like on the wire, and dropping
+   * it would put the pin back on the next merge. See `positionAt`.
+   */
+  if (typeof r.positionAt === 'number' && Number.isFinite(r.positionAt)) {
+    out.positionAt = r.positionAt;
+  }
   // One short of the book: see `planFrom`.
   const fp = int(r.fromPage, 0, 603);
   if (fp !== null && fp > 0) out.fromPage = fp;
@@ -559,11 +678,12 @@ function coerceKhatmah(v: unknown): KhatmahPlan | null {
       // The same ninety days the other tombstones keep. A claim older
       // than that has had every chance to reach every device.
       .filter(m => m[2] >= cutoff)
-      .sort((a, b) => a[2] - b[2] || a[0] - b[0])
-      // Bounded: the newest are the ones that still decide anything, and
-      // an unbounded log would grow in a blob that syncs whole.
-      .slice(-KHATMAH_MARK_LIMIT);
-    if (marks.length > 0) out.marks = marks;
+      .sort((a, b) => a[2] - b[2] || a[0] - b[0]);
+    // Resolved as it is read, so a log that arrived from a merge — two
+    // devices' claims unioned, overlapping — is stored as the verdicts it
+    // amounts to. The cap is a backstop behind that; see `compactMarks`.
+    const compacted = compactMarks(marks, TOTAL_AYAHS).slice(-KHATMAH_MARK_LIMIT);
+    if (compacted.length > 0) out.marks = compacted;
   }
   if (typeof r.dayStartDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.dayStartDate)) {
     out.dayStartDate = r.dayStartDate;
@@ -639,6 +759,15 @@ function coerceFollowDefault(v: unknown): QuranPrefs['bookmarkFollowDefault'] {
 function mergeStored(raw: unknown): QuranState {
   if (!raw || typeof raw !== 'object') return DEFAULT_QURAN_STATE;
   const r = raw as Partial<QuranState>;
+  const removedBookmarks = coerceRemovals(r.bookmarksRemoved);
+  const removedStars = coerceRemovals(r.starsRemoved);
+  const starsAt: Record<string, number> = {};
+  if (r.starsAt && typeof r.starsAt === 'object') {
+    for (const [k, v] of Object.entries(r.starsAt as Record<string, unknown>)) {
+      if (!/^\d{1,3}:\d{1,3}$/.test(k)) continue;
+      if (typeof v === 'number' && Number.isFinite(v) && v > 0) starsAt[k] = v;
+    }
+  }
   return {
     version: 1,
     lastRead: coerceLastRead(r.lastRead),
@@ -646,6 +775,9 @@ function mergeStored(raw: unknown): QuranState {
       ? r.bookmarks
           .map(coerceBookmark)
           .filter((b): b is QuranBookmark => b !== null)
+          // A bookmark a tombstone has already buried never comes back
+          // out of the blob, whichever order the two were written in.
+          .filter(b => !removedAfter(removedBookmarks, b.id, b.updatedAt ?? b.createdAt))
       : [],
     starred: Array.isArray(r.starred)
       ? [
@@ -655,7 +787,7 @@ function mergeStored(raw: unknown): QuranState {
                 typeof s === 'string' && /^\d{1,3}:\d{1,3}$/.test(s),
             ),
           ),
-        ]
+        ].filter(k => !removedAfter(removedStars, k, starsAt[k] ?? 0))
       : [],
     khatmah: Array.isArray(r.khatmah)
       ? r.khatmah.map(coerceKhatmah).filter((k): k is KhatmahPlan => k !== null)
@@ -715,6 +847,12 @@ function mergeStored(raw: unknown): QuranState {
     ...(typeof r.prefsUpdatedAt === 'number' && r.prefsUpdatedAt > 0
       ? { prefsUpdatedAt: r.prefsUpdatedAt }
       : {}),
+    // Same rule for the tombstones: present when there are any, absent
+    // when there are none, so a blob that never removed anything stays
+    // exactly the blob it was.
+    ...(removedBookmarks.length > 0 ? { bookmarksRemoved: removedBookmarks } : {}),
+    ...(removedStars.length > 0 ? { starsRemoved: removedStars } : {}),
+    ...(Object.keys(starsAt).length > 0 ? { starsAt } : {}),
   };
 }
 
@@ -1051,12 +1189,40 @@ export function ayahKey(surah: number, ayah: number): string {
 
 export function toggleStar(surah: number, ayah: number): void {
   const key = ayahKey(surah, ayah);
-  updateQuranState(prev => ({
-    ...prev,
-    starred: prev.starred.includes(key)
-      ? prev.starred.filter(k => k !== key)
-      : [...prev.starred, key],
-  }));
+  updateQuranState(prev => {
+    const on = prev.starred.includes(key);
+    /**
+     * BOTH HALVES OF THE TOGGLE ARE DATED (see `starsRemoved`).
+     *
+     * The list of stars merges by union, and a union cannot say "not
+     * starred": take a star off here and the other device's list put it
+     * straight back. The removal is a dated fact now — and so is the
+     * star itself, or re-starring an ayah would lose to the removal it
+     * came after, for ever.
+     *
+     * One clock for the pair, nudged past whichever of the two is newer,
+     * so a star and the un-star of it cannot land on the same
+     * millisecond and be replayed in the wrong order elsewhere.
+     */
+    const at = Math.max(
+      Date.now(),
+      (prev.starsAt?.[key] ?? 0) + 1,
+      (prev.starsRemoved?.find(r => r.id === key)?.at ?? 0) + 1,
+    );
+    const starsAt = { ...(prev.starsAt ?? {}) };
+    if (on) delete starsAt[key];
+    else starsAt[key] = at;
+    return {
+      ...prev,
+      starred: on ? prev.starred.filter(k => k !== key) : [...prev.starred, key],
+      ...(Object.keys(starsAt).length > 0 ? { starsAt } : {}),
+      ...(on
+        ? { starsRemoved: mergeRemovals(prev.starsRemoved, [{ id: key, at }]) }
+        : prev.starsRemoved
+          ? { starsRemoved: prev.starsRemoved.filter(r => r.id !== key) }
+          : {}),
+    };
+  });
 }
 
 export function isStarred(s: QuranState, surah: number, ayah: number): boolean {
@@ -1117,15 +1283,32 @@ export function addBookmark(
     const session = getQuranState().bookmarks.find(b => b.id === owner.id);
     if (session?.follows && withinBookmarkReach(session, { surah, page })) {
       const at = stampAfter(session);
-      updateQuranState(prev => ({
-        ...prev,
-        bookmarks: [
-          ...prev.bookmarks.filter(
-            b => b.id !== session.id && !(b.surah === surah && b.ayah === ayah),
-          ),
-          { ...session, surah, ayah, page, color, updatedAt: at },
-        ],
-      }));
+      updateQuranState(prev => {
+        // A pin that gave way is a pin the reader no longer has, and on
+        // the other device it is still there — one bookmark per ayah has
+        // to be true after the sync too, not just here. See
+        // `bookmarksRemoved`.
+        const gaveWay = prev.bookmarks.filter(
+          b => b.id !== session.id && b.surah === surah && b.ayah === ayah,
+        );
+        return {
+          ...prev,
+          bookmarks: [
+            ...prev.bookmarks.filter(
+              b => b.id !== session.id && !(b.surah === surah && b.ayah === ayah),
+            ),
+            { ...session, surah, ayah, page, color, updatedAt: at },
+          ],
+          ...(gaveWay.length > 0
+            ? {
+                bookmarksRemoved: mergeRemovals(
+                  prev.bookmarksRemoved,
+                  gaveWay.map(b => ({ id: b.id, at: stampAfter(b) })),
+                ),
+              }
+            : {}),
+        };
+      });
       // Put here on purpose, so it is drawn again.
       noteReadingPlaced();
       return;
@@ -1159,12 +1342,26 @@ export function addBookmark(
       replaced?.follows || wants
         ? { ...base, follows: true, updatedAt: base.updatedAt ?? now }
         : base;
+    // Same rule as above: anything else that was sitting on this ayah has
+    // given way, and the other device has to be told rather than left to
+    // hand it back.
+    const gaveWay = prev.bookmarks.filter(
+      b => b.id !== next.id && b.surah === surah && b.ayah === ayah,
+    );
     return {
       ...prev,
       bookmarks: [
         ...prev.bookmarks.filter(b => !(b.surah === surah && b.ayah === ayah)),
         next,
       ],
+      ...(gaveWay.length > 0
+        ? {
+            bookmarksRemoved: mergeRemovals(
+              prev.bookmarksRemoved,
+              gaveWay.map(b => ({ id: b.id, at: stampAfter(b) })),
+            ),
+          }
+        : {}),
     };
   });
   /**
@@ -1197,6 +1394,22 @@ export function removeBookmark(id: string): void {
   updateQuranState(prev => ({
     ...prev,
     bookmarks: prev.bookmarks.filter(b => b.id !== id),
+    /**
+     * The row goes; the REMOVAL stays, dated. Dropping the bookmark and
+     * saying nothing else is what let the other device hand it back on
+     * the next round — see `bookmarksRemoved`. Stamped past the copy it
+     * buries, so a bookmark edited in the same millisecond somewhere else
+     * does not survive on a tie.
+     */
+    bookmarksRemoved: mergeRemovals(prev.bookmarksRemoved, [
+      {
+        id,
+        at: Math.max(
+          Date.now(),
+          (prev.bookmarks.find(b => b.id === id)?.updatedAt ?? 0) + 1,
+        ),
+      },
+    ]),
   }));
 }
 
@@ -1655,24 +1868,31 @@ export function recordKhatmahProgress(
         ? addRange(khatmahDone(active), turnedFrom, credited, TOTAL_AYAHS)
         : khatmahDone(active);
     /**
-     * READING THAT CROSSES SOMETHING THE READER DENIED MUST SAY SO —
-     * AND MUST SAY IT ONLY ABOUT THE PAGES IT ACTUALLY CROSSED.
+     * READING IS A DATED CLAIM TOO — AND ONLY ABOUT THE PAGES IT CROSSED.
      *
-     * Page turns are not logged; the union carries them (`AyahMark`).
-     * The exception is reading back over a page that was un-marked,
-     * because "not read" is a dated claim and without a newer one the
-     * other way the next merge replays it.
+     * It used to log one only when the reading crossed something this
+     * device had denied, on the reasoning that the union carries the
+     * rest. The union does carry it, and carries it UNDATED, which is
+     * where the "khatmah dragged back to its old point" report came from:
+     * a stretch un-marked on the phone on Monday and read on the Mac on
+     * Tuesday merged as Monday's denial replayed over Tuesday's reading,
+     * every round, because nothing said Tuesday was later. The reading
+     * this device just did is a fact with a time on it, exactly like the
+     * un-mark it has to out-rank, so it is logged like one.
      *
      * The width matters more than it looks. Crediting runs from the
      * plan's start, so a claim over the credited span would say "all of
      * this is read" and erase every skipped page behind the reader — one
      * page turn after an un-mark and the hole closed itself. The pages
      * turned past are what the reader can honestly claim.
+     *
+     * The log does not grow a claim per turn: `compactMarks` resolves the
+     * run of turns back into the stretch they amount to.
      */
-    const crosses =
-      credited >= turnedFrom &&
-      marksDenyAny(active.marks ?? [], turnedFrom, credited);
-    const marks = crosses ? withMark(active, turnedFrom, credited, 1) : active.marks;
+    const marks =
+      credited >= turnedFrom
+        ? withMark(active, turnedFrom, credited, 1)
+        : active.marks;
     const next = settled(active, filled, marks);
     // By CONTENT, not identity: every range operation builds a new array,
     // and a turn that re-reads credited ground must not persist, re-render
@@ -1706,11 +1926,13 @@ export function recordKhatmahProgress(
               // `finishKhatmahPortion` spends one inside the portion it
               // finishes. Tracking goes back to being derived from what has
               // been read, which is where it can move.
-              position:
+              ...pinned(
+                k,
                 k.position &&
-                ayahIndexOf(k.position.surah, k.position.ayah) <= done
+                  ayahIndexOf(k.position.surah, k.position.ayah) <= done
                   ? null
                   : k.position,
+              ),
               completedAt: done >= TOTAL_AYAHS ? Date.now() : null,
             }
           : k,
@@ -2146,7 +2368,7 @@ export function setKhatmahPosition(
         k.id === active.id
           ? {
               ...withDaySnapshot(k),
-              position: { surah, ayah, page },
+              ...pinned(k, { surah, ayah, page }),
               // Pages before the pinned AYAH count as read. Derived from
               // the ayah, not the page, so pinning in one riwayah and
               // reading in the other agree.
@@ -2185,7 +2407,7 @@ export function clearKhatmahPosition(): void {
   updateQuranState(prev => ({
     ...prev,
     khatmah: prev.khatmah.map(k =>
-      k.completedAt == null ? { ...k, position: null } : k,
+      k.completedAt == null ? { ...k, ...pinned(k, null) } : k,
     ),
   }));
 }
@@ -2222,11 +2444,13 @@ export function resetKhatmahToday(): void {
               // Drop a pin that now sits ahead of where the rewind left
               // us — compared as ayahs, since the pin's page may belong
               // to the other muṣḥaf.
-              position:
+              ...pinned(
+                k,
                 k.position &&
-                ayahIndexOf(k.position.surah, k.position.ayah) > baseAyahs + 1
+                  ayahIndexOf(k.position.surah, k.position.ayah) > baseAyahs + 1
                   ? null
                   : k.position,
+              ),
               completedAt: null,
             }
           : k,
@@ -2258,7 +2482,7 @@ export function resetKhatmahAll(): void {
                 doneRewound(k, ayahs),
                 withMark(k, ayahs + 1, TOTAL_AYAHS, 0),
               ),
-              position: null,
+              ...pinned(k, null),
               dayStartDate: localYmd(),
               dayStartPagesRead: from,
               dayStartAyahsRead: ayahs,
@@ -2526,7 +2750,26 @@ function withMarks(
     next.push([from, to, at, read]);
     at += 1;
   }
-  return next.slice(-KHATMAH_MARK_LIMIT);
+  /**
+   * Resolved on the way in, not trimmed on the way out. Page turns are
+   * claims now (see `AyahMark`), so an unresolved log would grow by one
+   * per turn and a blind `slice` would drop the oldest — which is where
+   * the un-marks live. `compactMarks` keeps every verdict and only the
+   * claims still deciding one; the cap below is a backstop it should
+   * never reach.
+   */
+  const compacted = compactMarks(next, TOTAL_AYAHS).slice(-KHATMAH_MARK_LIMIT);
+  /**
+   * THE SAME LOG IS THE SAME OBJECT.
+   *
+   * Re-reading ground this device already claimed compacts back to the
+   * claim it already held — the new turn is absorbed into it, at the
+   * earlier time. Handing back a fresh array for that would make every
+   * turn over credited pages a state write, and `recordKhatmahProgress`
+   * ends on an identity check precisely so that a turn which changes
+   * nothing re-renders nothing.
+   */
+  return sameMarks(compacted, have) ? plan.marks : compacted;
 }
 
 function withMark(
@@ -2536,6 +2779,48 @@ function withMark(
   read: 0 | 1,
 ): AyahMark[] | undefined {
   return withMarks(plan, [[from, to, read]]);
+}
+
+function sameMarks(a: readonly AyahMark[], b: readonly AyahMark[]): boolean {
+  return (
+    a.length === b.length &&
+    a.every((m, i) => m[0] === b[i][0] && m[1] === b[i][1] && m[2] === b[i][2] && m[3] === b[i][3])
+  );
+}
+
+type Pin = KhatmahPlan['position'];
+
+function samePin(a: Pin, b: Pin): boolean {
+  if (!a || !b) return !a && !b;
+  return a.surah === b.surah && a.ayah === b.ayah;
+}
+
+/**
+ * THE PIN AND THE DATE ON IT, written together or not at all.
+ *
+ * Every writer that moves the pin — a reader pinning one, reading past
+ * one, clearing one, rewinding over one — goes through here, because a
+ * pin whose stamp was forgotten is exactly the pin that comes back from
+ * the other device (see `positionAt`). Unchanged pins keep their stamp:
+ * re-stamping a value nobody touched would let a device that merely
+ * opened the reader talk over a removal made elsewhere.
+ *
+ * The clock is nudged past the pin's own stamp for the same reason
+ * `withMarks` nudges a claim past the last one: two acts in the same
+ * millisecond — a pin and the clear that a page turn makes of it — must
+ * still be orderable, here and on the device that receives them.
+ */
+function pinned(plan: KhatmahPlan, next: Pin): Pick<KhatmahPlan, 'position' | 'positionAt'> {
+  if (samePin(plan.position ?? null, next ?? null)) {
+    return {
+      position: plan.position ?? null,
+      ...(plan.positionAt != null ? { positionAt: plan.positionAt } : {}),
+    };
+  }
+  return {
+    position: next ?? null,
+    positionAt: Math.max(Date.now(), (plan.positionAt ?? 0) + 1),
+  };
 }
 
 /**
@@ -2670,11 +2955,12 @@ export function finishKhatmahPortion(): void {
               ...next,
               // A pin inside the portion just read is spent; leaving it
               // would send "continue" backwards into finished ground.
-              position:
-                k.position &&
-                ayahIndexOf(k.position.surah, k.position.ayah) <= to
+              ...pinned(
+                k,
+                k.position && ayahIndexOf(k.position.surah, k.position.ayah) <= to
                   ? null
                   : k.position,
+              ),
               completedAt: rangesCover(next.done, khatmahStartAyah(k), TOTAL_AYAHS)
                 ? (k.completedAt ?? Date.now())
                 : null,
@@ -2714,11 +3000,12 @@ export function stepKhatmahBack(): void {
               dayStartDate: today,
               dayStartAyahsRead: to,
               dayStartPagesRead: pages,
-              position:
-                k.position &&
-                ayahIndexOf(k.position.surah, k.position.ayah) > to + 1
+              ...pinned(
+                k,
+                k.position && ayahIndexOf(k.position.surah, k.position.ayah) > to + 1
                   ? null
                   : k.position,
+              ),
               completedAt: null,
             }
           : k,

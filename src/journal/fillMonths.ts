@@ -104,7 +104,8 @@ export function dayIsUntouched(
   // so it is untouched again and the fill may offer it. The reset in issue
   // #13 exists precisely so a day can go back to having nothing on it.
   for (const e of entries) if (e.date === date && isLogged(e)) return false;
-  for (const f of fasts) if (f.date === date) return false;
+  // A cleared row is a deletion travelling, not a day the reader touched.
+  for (const f of fasts) if (f.date === date && f.cleared !== true) return false;
   return true;
 }
 

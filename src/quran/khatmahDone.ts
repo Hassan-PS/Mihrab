@@ -207,8 +207,18 @@ export function countWithin(
  * union in time order, so the last thing the reader actually said about
  * a page is what the page says — whichever device they said it on.
  *
- * Page turns do NOT log. They extend the set, which the union already
- * carries, and logging them would grow the blob for nothing.
+ * PAGE TURNS LOG TOO, since 2026-09-20 — they used to not, on the
+ * reasoning that the union already carries them. It does, but undated:
+ * the union says WHETHER a page was read and never WHEN, so a claim from
+ * the other device always sounded newer than reading that in fact came
+ * after it. Un-mark a stretch on the phone on Monday, read it on the Mac
+ * on Tuesday, sync: Monday's denial replayed over Tuesday's reading and
+ * the progress fell back to the first gap — every round, until the claim
+ * aged out. That is the "khatmah dragged back to its old point" report,
+ * and dating the reading is what orders the two against each other.
+ *
+ * The log stays small because it is COMPACTED rather than appended to
+ * for ever: see `compactMarks`.
  */
 export type AyahMark = readonly [
   from: number,
@@ -251,14 +261,64 @@ export function applyMarks(
   return out;
 }
 
-/** Does any un-mark claim overlap this stretch? */
-export function marksDenyAny(
+/**
+ * THE CLAIM LOG, RESOLVED — the same answer in as few claims as possible.
+ *
+ * Dating page turns would otherwise mean a claim per turn, and a log that
+ * grows by twenty entries a day both fills the sealed file and pushes the
+ * un-marks — the claims that actually need to survive — off the end of
+ * the cap. So the log is resolved instead of trimmed: later claims cut
+ * earlier ones out of the regions they cover, which leaves one dated
+ * interval per stretch the reader has actually spoken about differently.
+ * A khatmah read front to back with one page un-marked in it compacts to
+ * three claims and stays there.
+ *
+ * TWO RULES MAKE IT SAFE:
+ *
+ *   • Coverage never changes. Every ayah some claim spoke about is still
+ *     spoken about afterwards, with the same verdict — so replaying the
+ *     compacted log over any set gives what the full log gave.
+ *
+ *   • Neighbours that agree are joined at the EARLIER time, never the
+ *     later one. Joining at the later time would let a page turn made
+ *     today re-assert "read" over ground claimed days ago, and quietly
+ *     undo an un-mark another device made in between — the bug this file
+ *     exists to prevent, arriving through the compaction instead. The
+ *     earlier time can only ever lose to a claim it truly predates.
+ */
+export function compactMarks(
   marks: readonly AyahMark[],
-  from: number,
-  to: number,
-): boolean {
-  return marks.some(m => m[3] === 0 && m[1] >= from && m[0] <= to);
+  total: number,
+): AyahMark[] {
+  // Oldest first, so a later claim can cut the ones under it.
+  const ordered = [...marks].sort((x, y) => x[2] - y[2] || x[0] - y[0]);
+  let resolved: AyahMark[] = [];
+  for (const m of ordered) {
+    const [from, to] = m;
+    if (to < from) continue;
+    const next: AyahMark[] = [];
+    for (const held of resolved) {
+      // The parts of an older claim this one does not cover survive, as
+      // their own intervals, still carrying their own date.
+      if (held[0] < from) next.push([held[0], Math.min(held[1], from - 1), held[2], held[3]]);
+      if (held[1] > to) next.push([Math.max(held[0], to + 1), held[1], held[2], held[3]]);
+    }
+    next.push([Math.max(0, from), Math.min(total, to), m[2], m[3]]);
+    resolved = next;
+  }
+  resolved.sort((x, y) => x[0] - y[0] || x[2] - y[2]);
+  const joined: AyahMark[] = [];
+  for (const m of resolved) {
+    const last = joined[joined.length - 1];
+    if (last && last[3] === m[3] && m[0] <= last[1] + 1) {
+      joined[joined.length - 1] = [last[0], Math.max(last[1], m[1]), Math.min(last[2], m[2]), m[3]];
+      continue;
+    }
+    joined.push(m);
+  }
+  return joined.sort((x, y) => x[2] - y[2] || x[0] - y[0]);
 }
+
 
 /**
  * The furthest ayah covered — how far the reader has actually got,

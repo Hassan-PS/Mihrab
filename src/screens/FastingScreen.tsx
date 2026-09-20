@@ -28,6 +28,7 @@ import {
   computeFastStats,
   isRecommendedVoluntaryFastDay,
   ramadanDayNumber,
+  liveFasts,
   upsertFastEntry,
   type FastEntry,
 } from '../fasting/fasting';
@@ -158,7 +159,13 @@ export function FastingScreen() {
   const hijri = useMemo(() => gregorianToHijri(now), [now]);
   const inRamadan = isRamadan(hijri);
   const ramadanDay = ramadanDayNumber(now);
-  const todayEntry = entries.find(e => e.date === todayKey);
+  /**
+   * What the screen shows is the LIVE rows: a deleted day is kept in the
+   * blob as a dated tombstone so the deletion can reach the other devices
+   * (`FastEntry.cleared`), and it is not a fast that happened.
+   */
+  const live = useMemo(() => liveFasts(entries), [entries]);
+  const todayEntry = live.find(e => e.date === todayKey);
   const stats = useMemo(() => computeFastStats(entries, now), [entries, now]);
   const isRecommended = useMemo(
     () => isRecommendedVoluntaryFastDay(now),
@@ -192,9 +199,9 @@ export function FastingScreen() {
   // user gets a complete history surface mirroring the journal layout.
   const allLoggedDates = useMemo(() => {
     const seen = new Set<string>();
-    for (const e of entries) seen.add(e.date);
+    for (const e of live) seen.add(e.date);
     return Array.from(seen).sort().reverse();
-  }, [entries]);
+  }, [live]);
 
   const onToggleToday = useCallback(() => {
     const type = inRamadan ? 'ramadan' : 'voluntary';
@@ -339,7 +346,7 @@ export function FastingScreen() {
             {Array.from({ length: 30 }, (_, i) => {
               const day = i + 1;
               const dateKey = ramadanDateKeyForDay(day, hijri.year);
-              const entry = entries.find(e => e.date === dateKey);
+              const entry = live.find(e => e.date === dateKey);
               const isToday = day === ramadanDay;
               return (
                 <View
@@ -469,7 +476,7 @@ export function FastingScreen() {
       ) : (
         <Group>
           {allLoggedDates.map(date => {
-            const entry = entries.find(e => e.date === date);
+            const entry = live.find(e => e.date === date);
             if (!entry) return null;
             return (
               <Row

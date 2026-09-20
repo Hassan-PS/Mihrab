@@ -349,6 +349,77 @@ describe('where you left off in the Quran', () => {
       expect(khatmah[0].position).toEqual({ surah: 5, ayah: 12, page: 96 });
     }
   });
+
+  /**
+   * THE OTHER HALF OF THAT: what one device took AWAY (2026-09-20).
+   *
+   * The test above is the union doing its job. This is the case the union
+   * cannot answer on its own — a pin taken off, a bookmark deleted, a star
+   * removed — where "absent here, present there" used to read as "made
+   * there" and the removal undid itself on the next round. Whole rounds,
+   * real files, three of them, so a removal that only survives until the
+   * next write would be caught.
+   */
+  it('and a pin taken off, a bookmark deleted and a star removed all stay gone', async () => {
+    const folder = memoryFolder();
+    await pairBFromA();
+
+    const shared = {
+      id: 'khatmah-1',
+      startedAt: 1_755_000_000_000,
+      targetDays: 30,
+      completedAt: null,
+    };
+    const now = Date.now();
+    // B is the device that is BEHIND and still holds all three rows.
+    mockDevices.B.plain.set(
+      QURAN_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        bookmarks: [
+          { id: 'b1', surah: 2, ayah: 255, page: 42, color: 'emerald', createdAt: now - 7_200_000 },
+        ],
+        starred: ['2:255'],
+        khatmah: [
+          {
+            ...shared,
+            pagesRead: 40,
+            position: { surah: 2, ayah: 30, page: 40 },
+            positionAt: now - 7_200_000,
+          },
+        ],
+        prefs: {},
+      }),
+    );
+    // A read past the pin and cleared all three, afterwards.
+    mockDevices.A.plain.set(
+      QURAN_STORAGE_KEY,
+      JSON.stringify({
+        version: 1,
+        bookmarks: [],
+        bookmarksRemoved: [{ id: 'b1', at: now - 60_000 }],
+        starred: [],
+        starsRemoved: [{ id: '2:255', at: now - 60_000 }],
+        khatmah: [{ ...shared, pagesRead: 96, position: null, positionAt: now - 60_000 }],
+        prefs: {},
+      }),
+    );
+
+    await as('B', () => syncWithFolder(folder));
+    await as('A', () => syncWithFolder(folder));
+    await as('B', () => syncWithFolder(folder));
+    await as('A', () => syncWithFolder(folder));
+
+    for (const which of ['A', 'B'] as const) {
+      const state = quranOf(which);
+      const khatmah = state.khatmah as Array<Record<string, unknown>>;
+      expect(khatmah[0].position ?? null).toBeNull();
+      // …and the reading the pin was dragging them back to is still there.
+      expect(khatmah[0].pagesRead).toBe(96);
+      expect(state.bookmarks).toEqual([]);
+      expect(state.starred).toEqual([]);
+    }
+  });
 });
 
 describe('a folder that will not list itself', () => {
