@@ -51,6 +51,7 @@ import {
 } from './quran/quranState';
 import { reconcileMushafAssets } from './quran/mushafAssets';
 import { clearStaleDownloadNotification } from './quran/downloadNotification';
+import { startDownloadResumeWatch } from './quran/quranDownloadResume';
 import { startAutoSync } from './sync/autoSync';
 import {
   dayTzFingerprint,
@@ -311,6 +312,17 @@ export function AppNavigationRoot() {
   useEffect(() => {
     void clearStaleDownloadNotification();
   }, []);
+
+  /**
+   * Pick a download back up when the wifi comes back — issue #55.
+   *
+   * Here for the same reason as the line above: this is where the app
+   * decides what a fresh process owes a download that a dead one left
+   * behind. It reads a note off the disk, so it also covers the case the
+   * bar above cannot — the process that died while the phone was out of
+   * range, which is most of them.
+   */
+  useEffect(() => startDownloadResumeWatch(), []);
 
   // Write anything tapped on the Log Today widget into the journal.
   //

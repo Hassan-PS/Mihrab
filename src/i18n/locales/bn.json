@@ -48,7 +48,8 @@
     "cancelled": "বাতিল করা হয়েছে।",
     "listJoin": " ও ",
     "confirmDelete": "মুছতে আবার চাপুন",
-    "learnMore": "আরও জানুন"
+    "learnMore": "আরও জানুন",
+    "dismiss": "খারিজ করুন"
   },
   "home": {
     "loadingPrayer": "নামাজের সময় লোড হচ্ছে...",
@@ -1292,7 +1293,12 @@
     "khatmahPacingSettingsTitle": "খতম",
     "khatmahPacingHelp": "খতম হয় একটি দৈর্ঘ্য ধরে ভাগ হয় — তখন অংশগুলো আপনার জন্য অপেক্ষা করে — অথবা একটি তারিখ ধরে, যা বাকি দিনগুলোর উপর অবশিষ্ট অংশ নতুন করে ভাগ করে। যেকোনো সময় এক থেকে অন্যটিতে যেতে পারেন; আপনার পড়া কিছুই এতে বদলায় না।",
     "khatmahPacingNone": "কুরআন পাতায় একটি খতম শুরু করুন, তারপর এখানে বদলাতে পারবেন কীভাবে ভাগ হবে — দিনের সংখ্যা, নাকি শেষ করার তারিখ।",
-    "khatmahDays_one": "{{count}} দিন"
+    "khatmahDays_one": "{{count}} দিন",
+    "downloadStoppedTitle": "ডাউনলোড থেমে গেছে",
+    "downloadStoppedBodyAyahs": "{{total}}টির মধ্যে {{done}}টি আয়াত রাখা হয়েছে। চালিয়ে যেতে ট্যাপ করুন, বা Wi-Fi-তে এটি নিজেই আবার শুরু হবে।",
+    "downloadStoppedBodyPages": "{{total}}টির মধ্যে {{done}}টি পৃষ্ঠা রাখা হয়েছে। চালিয়ে যেতে ট্যাপ করুন, বা Wi-Fi-তে এটি নিজেই আবার শুরু হবে।",
+    "downloadStoppedStrip": "{{name}} {{pct}}%-এ থেমেছে · রাখা হয়েছে",
+    "listenResumeReciter": "{{name}}-এর বাকি অংশ ডাউনলোড করুন"
   },
   "reading": {
     "textSize": "লেখার আকার",

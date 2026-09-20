@@ -48,7 +48,8 @@
     "cancelled": "Avbruten.",
     "listJoin": " & ",
     "confirmDelete": "Tryck igen för att ta bort",
-    "learnMore": "Läs mer"
+    "learnMore": "Läs mer",
+    "dismiss": "Avfärda"
   },
   "home": {
     "loadingPrayer": "Laddar bönetider…",
@@ -1292,7 +1293,12 @@
     "khatmahPacingSettingsTitle": "Khatmah",
     "khatmahPacingHelp": "En khatmah läggs upp antingen efter en längd — portionerna väntar på dig — eller efter ett datum, som delar om det som återstår över de dagar som är kvar. Du kan byta mellan de två när som helst; inget du redan läst påverkas.",
     "khatmahPacingNone": "Starta en khatmah i Koran-fliken, så kan du ändra hur den läggs upp här — ett antal dagar, eller ett datum att bli klar till.",
-    "khatmahDays_one": "{{count}} dag"
+    "khatmahDays_one": "{{count}} dag",
+    "downloadStoppedTitle": "Nedladdningen stannade",
+    "downloadStoppedBodyAyahs": "{{done}} av {{total}} verser är kvar. Tryck för att fortsätta, annars återupptas den av sig själv på Wi-Fi.",
+    "downloadStoppedBodyPages": "{{done}} av {{total}} sidor är kvar. Tryck för att fortsätta, annars återupptas den av sig själv på Wi-Fi.",
+    "downloadStoppedStrip": "{{name}} stannade vid {{pct}} % · sparat",
+    "listenResumeReciter": "Ladda ner resten av {{name}}"
   },
   "reading": {
     "textSize": "Textstorlek",

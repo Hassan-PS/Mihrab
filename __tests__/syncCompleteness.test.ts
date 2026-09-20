@@ -174,6 +174,13 @@ const STAYS: Record<string, string> = {
     'URI or an iOS security-scoped bookmark, and both are meaningless on ' +
     'any other device. Carrying it would point a phone at a directory it ' +
     'has no permission for, or at somebody else’s',
+  'mihrab.quran.download.pending':
+    'names a download this PHONE stopped part way through, so the app can ' +
+    'offer to pick it up (issue #55). It is a fact about one device’s ' +
+    'disk: the files it refers to are here and nowhere else, and carried ' +
+    'to a tablet it would offer to resume a reciter that tablet has never ' +
+    'downloaded a byte of — a gigabyte fetched because another device ' +
+    'lost its wifi',
   MHRB: 'the pairing code prefix, not a store',
   'mihrab-': 'the sync filename prefix, not a store',
   'prayerapp.unprotected.':

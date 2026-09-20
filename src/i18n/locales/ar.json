@@ -48,7 +48,8 @@
     "cancelled": "أُلغي.",
     "listJoin": " و",
     "confirmDelete": "اضغط مرة أخرى للحذف",
-    "learnMore": "اعرف المزيد"
+    "learnMore": "اعرف المزيد",
+    "dismiss": "إخفاء"
   },
   "home": {
     "loadingPrayer": "جارٍ تحميل أوقات الصلاة…",
@@ -1292,7 +1293,12 @@
     "khatmahPacingSettingsTitle": "ختمة",
     "khatmahPacingHelp": "تُوزَّع الختمة إما على مدة — فالأوراد تنتظرك — وإما على تاريخ، فيُعاد تقسيم ما تبقّى على الأيام الباقية. يمكنك الانتقال بينهما في أي وقت؛ ولا يتأثر شيء مما قرأته.",
     "khatmahPacingNone": "ابدأ ختمة من صفحة القرآن، ثم يمكنك هنا تغيير طريقة توزيعها — عدد من الأيام أو تاريخ للختم قبله.",
-    "khatmahDays_one": "{{count}} يوم"
+    "khatmahDays_one": "{{count}} يوم",
+    "downloadStoppedTitle": "توقّف التنزيل",
+    "downloadStoppedBodyAyahs": "تم الاحتفاظ بـ {{done}} من {{total}} آية. اضغط للمتابعة، أو ستُستأنف من تلقاء نفسها عبر Wi-Fi.",
+    "downloadStoppedBodyPages": "تم الاحتفاظ بـ {{done}} من {{total}} صفحة. اضغط للمتابعة، أو ستُستأنف من تلقاء نفسها عبر Wi-Fi.",
+    "downloadStoppedStrip": "{{name}} توقّف عند {{pct}}٪ · محفوظ",
+    "listenResumeReciter": "تنزيل بقية {{name}}"
   },
   "reading": {
     "textSize": "حجم النص",

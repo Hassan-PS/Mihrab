@@ -341,10 +341,21 @@ export async function finishDownloadNotification(input: {
   complete: boolean;
   cancelled: boolean;
   failed: number;
+  /**
+   * The files had stopped arriving — issue #55. A third ending, and the
+   * only one that is not a report about the download: it is a report
+   * about the network, so it says what is kept and where to pick it up
+   * rather than counting failures at somebody who has lost their wifi.
+   */
+  interrupted?: boolean;
   doneTitle?: string;
   doneBody?: string;
   incompleteTitle?: string;
   incompleteBody?: string;
+  stoppedTitle?: string;
+  stoppedBody?: string;
+  /** Where a tap lands — `notificationRoute` resolves it. */
+  route?: string;
 }): Promise<void> {
   lastPercent = -1;
   if (!supported()) return;
@@ -352,15 +363,24 @@ export async function finishDownloadNotification(input: {
     await tearDownProgress();
     if (input.cancelled) return;
     await ensureChannel();
+    const stopped = !input.complete && input.interrupted === true;
     await notifee.displayNotification({
       id: DONE_ID,
       title: input.complete
         ? (input.doneTitle ?? i18n.t('quran.downloadDoneTitle'))
-        : (input.incompleteTitle ?? i18n.t('quran.downloadIncompleteTitle')),
+        : stopped
+          ? (input.stoppedTitle ?? i18n.t('quran.downloadStoppedTitle'))
+          : (input.incompleteTitle ?? i18n.t('quran.downloadIncompleteTitle')),
       body: input.complete
         ? (input.doneBody ?? i18n.t('quran.downloadDoneBody'))
-        : (input.incompleteBody ??
-          i18n.t('quran.downloadIncompleteBody', { count: input.failed })),
+        : stopped
+          ? (input.stoppedBody ?? i18n.t('quran.downloadStoppedTitle'))
+          : (input.incompleteBody ??
+            i18n.t('quran.downloadIncompleteBody', { count: input.failed })),
+      // What a tap opens. Without it the tap opened the app and left the
+      // reader wherever they were, which is precisely what #55 reports
+      // as "nothing happened".
+      data: input.route ? { route: input.route } : undefined,
       android: {
         channelId: CHANNEL_ID,
         smallIcon: 'ic_stat_prayer',

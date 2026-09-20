@@ -57,6 +57,15 @@ export const ROUTE_SURAH = 'surah';
 export const ROUTE_DHIKR = 'dhikr';
 /** The morning or evening adhkār reminder — #39. */
 export const ROUTE_DUA_CATEGORY = 'duaCategory';
+/**
+ * A download that stopped with files still to fetch — #55.
+ *
+ * The reporter tapped the notification and nothing happened, which is
+ * what every notification did before #27 and what this one still did
+ * after it. Manage downloads is where the Resume button lives, so that
+ * is where the tap goes.
+ */
+export const ROUTE_QURAN_DOWNLOADS = 'quranDownloads';
 
 function positiveInt(value: unknown): number | null {
   const n = Number(value);
@@ -85,6 +94,11 @@ export async function notificationRoute(
   if (data.route === ROUTE_AYAH_OF_DAY || (surah && ayah && !data.route)) {
     if (!surah || !ayah) return null;
     return readUrl(surah, `scrollToAyah=${ayah}`);
+  }
+
+  // Manage downloads, where a stopped download can be picked up — #55.
+  if (data.route === ROUTE_QURAN_DOWNLOADS) {
+    return `${MIHRAB_SCHEME}downloads`;
   }
 
   // A surah, opened at its beginning, in whichever reader they were last

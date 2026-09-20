@@ -48,7 +48,8 @@
     "cancelled": "已取消。",
     "listJoin": " 与 ",
     "confirmDelete": "再次点按以删除",
-    "learnMore": "了解更多"
+    "learnMore": "了解更多",
+    "dismiss": "关闭"
   },
   "home": {
     "loadingPrayer": "正在加载祈祷时间...",
@@ -1292,7 +1293,12 @@
     "khatmahPacingSettingsTitle": "古兰经完读",
     "khatmahPacingHelp": "完读计划可以按时长来分配 — 份额会等着你 — 也可以按日期，剩下的部分会在余下的天数里重新分配。你随时可以在两者之间切换，已读的内容不会受影响。",
     "khatmahPacingNone": "先在古兰经页面开始一次完读计划，之后就可以在这里更改进度安排 — 按天数，或按读完的日期。",
-    "khatmahDays_one": "{{count}} 天"
+    "khatmahDays_one": "{{count}} 天",
+    "downloadStoppedTitle": "下载已停止",
+    "downloadStoppedBodyAyahs": "{{total}} 节中的 {{done}} 节已保留。点按可继续，或在 Wi-Fi 下自动续传。",
+    "downloadStoppedBodyPages": "{{total}} 页中的 {{done}} 页已保留。点按可继续，或在 Wi-Fi 下自动续传。",
+    "downloadStoppedStrip": "{{name}} 在 {{pct}}% 停止 · 已保留",
+    "listenResumeReciter": "下载{{name}}的剩余部分"
   },
   "reading": {
     "textSize": "文字大小",

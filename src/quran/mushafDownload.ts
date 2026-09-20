@@ -18,6 +18,7 @@
  *     it is gone.
  */
 import ReactNativeBlobUtil from 'react-native-blob-util';
+import type { DownloadOutcome } from './contentNetwork';
 
 /**
  * `fs.mkdir` is NOT recursive — creating `<Documents>/quran/fonts/v2`
@@ -88,7 +89,11 @@ export type MushafDownloadProgress = {
 };
 
 export type MushafDownloadHandle = {
-  /** Resolves `true` when every page is on disk, `false` if cancelled or incomplete. */
-  promise: Promise<boolean>;
+  /**
+   * How the run ended: every page on disk, or missing some — and, when
+   * some are missing, whether the files had stopped arriving altogether.
+   * See `DownloadOutcome`; issue #55 for why that third answer exists.
+   */
+  promise: Promise<DownloadOutcome>;
   cancel: () => void;
 };

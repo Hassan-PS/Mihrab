@@ -44,9 +44,11 @@ import type {
   MushafDownloadProgress,
 } from './mushafDownload';
 import { downloadAllPageFonts } from './mushafFontStore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   downloadAyahs,
   downloadSurahAudio,
+  reciterAudioStats,
   totalAyahCount,
   downloadReciterAudio,
 } from './audio/audioStore';
@@ -57,6 +59,7 @@ import {
   finishDownloadNotification,
   publishDownloadProgress,
 } from './downloadNotification';
+import { ROUTE_QURAN_DOWNLOADS } from '../notifications/notificationRoute';
 import i18n from '../i18n';
 
 /**
@@ -101,6 +104,18 @@ export type QuranDownloadState = {
     complete: boolean;
     cancelled: boolean;
     failed: number;
+    /**
+     * It stopped because the files had stopped arriving — issue #55.
+     *
+     * The difference between "this download failed" and "this download
+     * is waiting for your wifi", which is the difference the reporter
+     * was on the wrong side of. Everything already fetched is on disk
+     * either way; this says whether coming back is the answer.
+     */
+    interrupted: boolean;
+    /** Where it had got to, so a screen can say so without a disk read. */
+    done: number;
+    total: number;
   } | null;
 };
 
@@ -198,6 +213,9 @@ function notificationText(job: QuranDownloadJob) {
       incompleteTitle: i18n.t('quran.audioDownloadIncompleteTitle'),
       incompleteBody: (failed: number) =>
         i18n.t('quran.audioDownloadIncompleteBody', { count: failed }),
+      stoppedTitle: i18n.t('quran.downloadStoppedTitle'),
+      stoppedBody: (done: number, total: number) =>
+        i18n.t('quran.downloadStoppedBodyAyahs', { done, total }),
     };
   }
   if (job.kind === 'audio') {
@@ -216,6 +234,9 @@ function notificationText(job: QuranDownloadJob) {
       incompleteTitle: i18n.t('quran.audioDownloadIncompleteTitle'),
       incompleteBody: (failed: number) =>
         i18n.t('quran.audioDownloadIncompleteBody', { count: failed }),
+      stoppedTitle: i18n.t('quran.downloadStoppedTitle'),
+      stoppedBody: (done: number, total: number) =>
+        i18n.t('quran.downloadStoppedBodyAyahs', { done, total }),
     };
   }
   return {
@@ -227,6 +248,9 @@ function notificationText(job: QuranDownloadJob) {
     incompleteTitle: i18n.t('quran.downloadIncompleteTitle'),
     incompleteBody: (failed: number) =>
       i18n.t('quran.downloadIncompleteBody', { count: failed }),
+    stoppedTitle: i18n.t('quran.downloadStoppedTitle'),
+    stoppedBody: (done: number, total: number) =>
+      i18n.t('quran.downloadStoppedBodyPages', { done, total }),
   };
 }
 
@@ -320,26 +344,166 @@ export function startQuranDownload(job: QuranDownloadJob): boolean {
 
   handle = begin(job);
 
-  void handle.promise.then(complete => {
+  void handle.promise.then(outcome => {
     const failed = state.progress.failed;
+    const { done, total } = state.progress;
     const text = notificationText(job);
+    const interrupted = outcome.interrupted && !cancelledByUser;
     handle = null;
     publish({
       running: null,
       progress: state.progress,
-      last: { job, complete, cancelled: cancelledByUser, failed },
+      last: {
+        job,
+        complete: outcome.complete,
+        cancelled: cancelledByUser,
+        failed,
+        interrupted,
+        done,
+        total,
+      },
     });
+    /**
+     * WHAT IS WORTH COMING BACK TO, remembered across launches.
+     *
+     * The state above dies with the process, and the process is exactly
+     * what dies while a phone sits in a pocket with no wifi. Without a
+     * note on disk, a reader who reopens the app is back to a reciter
+     * row that offers only Delete — which is issue #55 with one extra
+     * step. Cleared on a run that completed or was cancelled, because
+     * neither is something to resume.
+     */
+    if (interrupted) void rememberPendingJob(job);
+    else void forgetPendingJob();
     void finishDownloadNotification({
-      complete,
+      complete: outcome.complete,
       cancelled: cancelledByUser,
       failed,
+      interrupted,
       doneTitle: text.doneTitle,
       doneBody: text.doneBody,
       incompleteTitle: text.incompleteTitle,
       incompleteBody: text.incompleteBody(failed),
+      stoppedTitle: text.stoppedTitle,
+      stoppedBody: text.stoppedBody(done, total),
+      route: ROUTE_QURAN_DOWNLOADS,
     });
   });
   return true;
+}
+
+/**
+ * ── COMING BACK TO A DOWNLOAD THAT STOPPED — issue #55 ────────────────
+ *
+ * There is nothing to rewind and no byte range to negotiate: these
+ * downloads are thousands of small files and a file already on disk is
+ * skipped (`runAyahQueue`). Resuming is therefore the same call again,
+ * and the only thing that was ever missing was a way to make it.
+ *
+ * Two sources for "there is something to resume", and they answer
+ * different questions. `state.last` is this session's: precise, knows how
+ * far it got, gone when the process is. The note on disk is the one that
+ * survives the pocket, and is what the reader meets when they open the
+ * app on the train home.
+ */
+export function resumableJob(): QuranDownloadJob | null {
+  if (state.running) return null;
+  const last = state.last;
+  if (last && last.interrupted) return last.job;
+  return pendingJob;
+}
+
+/** Start the job that stopped, if there is one. Returns whether it did. */
+export function resumeQuranDownload(): boolean {
+  const job = resumableJob();
+  return job ? startQuranDownload(job) : false;
+}
+
+/**
+ * Forget the stopped run — the reader said no, or dealt with it another
+ * way. The files stay; only the offer goes.
+ */
+export function dismissResumableJob(): void {
+  pendingJob = null;
+  void forgetPendingJob();
+  if (state.last?.interrupted) {
+    publish({ ...state, last: { ...state.last, interrupted: false } });
+  }
+}
+
+/**
+ * The note on disk. Device-local by nature — it is about this phone's
+ * files — so it is a plain key rather than anything the sync blob carries.
+ */
+const PENDING_KEY = 'mihrab.quran.download.pending';
+let pendingJob: QuranDownloadJob | null = null;
+
+function validJob(value: unknown): QuranDownloadJob | null {
+  if (!value || typeof value !== 'object') return null;
+  const job = value as Record<string, unknown>;
+  if (job.kind === 'fonts') return { kind: 'fonts' };
+  if (typeof job.reciterId !== 'string' || !job.reciterId) return null;
+  if (job.kind === 'audio') return { kind: 'audio', reciterId: job.reciterId };
+  if (job.kind === 'surah' && typeof job.surah === 'number') {
+    // WITHOUT the refs. They were the gap as it stood an hour ago, and
+    // the reader may have listened since; the queue re-reads the disk and
+    // skips what is there, which is the same answer made of facts.
+    return { kind: 'surah', reciterId: job.reciterId, surah: job.surah };
+  }
+  return null;
+}
+
+async function rememberPendingJob(job: QuranDownloadJob): Promise<void> {
+  pendingJob = job;
+  try {
+    const stored =
+      job.kind === 'surah' ? { kind: job.kind, reciterId: job.reciterId, surah: job.surah } : job;
+    await AsyncStorage.setItem(PENDING_KEY, JSON.stringify(stored));
+  } catch {
+    // The offer is then only as durable as the process, which is the
+    // behaviour without this note at all — not a reason to fail a run.
+  }
+}
+
+async function forgetPendingJob(): Promise<void> {
+  pendingJob = null;
+  try {
+    await AsyncStorage.removeItem(PENDING_KEY);
+  } catch {
+    /* a note that will not go away is harmless: the job is startable */
+  }
+}
+
+/**
+ * Read the note. Called once at startup, before anything asks.
+ *
+ * A job whose files are all there by now — the reader finished it on the
+ * other device, or deleted the reciter — is dropped rather than offered:
+ * `startQuranDownload` on a complete reciter would walk 6,236 files to do
+ * nothing, and the offer would be a lie about work remaining.
+ */
+export async function hydrateResumableJob(): Promise<QuranDownloadJob | null> {
+  try {
+    const raw = await AsyncStorage.getItem(PENDING_KEY);
+    if (!raw) return null;
+    const job = validJob(JSON.parse(raw));
+    if (!job) {
+      await forgetPendingJob();
+      return null;
+    }
+    if (job.kind === 'audio') {
+      const stats = await reciterAudioStats(job.reciterId);
+      if (stats.complete || stats.files === 0) {
+        await forgetPendingJob();
+        return null;
+      }
+    }
+    pendingJob = job;
+    publish({ ...state });
+    return job;
+  } catch {
+    return null;
+  }
 }
 
 /** Stop it. Whatever landed on disk stays there and is usable. */
@@ -354,6 +518,7 @@ export function resetQuranDownloadState(): void {
   handle = null;
   cancelledByUser = false;
   lastPublishedPct = -1;
+  pendingJob = null;
   listeners.clear();
   state = { running: null, progress: EMPTY_PROGRESS, last: null };
 }

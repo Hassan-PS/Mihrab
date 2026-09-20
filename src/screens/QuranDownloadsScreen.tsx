@@ -47,10 +47,14 @@ import {
   fontStoreStats,
 } from '../quran/mushafFontStore';
 import { MUSHAF_TOTAL_PAGES } from '../quran/mushafImages';
-import { deleteReciterAudio } from '../quran/audio/audioStore';
+import {
+  deleteReciterAudio,
+  totalAyahCount,
+} from '../quran/audio/audioStore';
 import {
   cancelQuranDownload,
   quranDownloadState,
+  startQuranDownload,
   subscribeQuranDownload,
   type QuranDownloadState,
 } from '../quran/quranDownloadManager';
@@ -65,7 +69,12 @@ import { RIWAYAT } from '../quran/riwayat';
 import { RADIUS, SPACING } from '../theme/tokens';
 import { TYPE } from '../theme/typography';
 
-type ReciterUsage = { reciterId: string; bytes: number };
+type ReciterUsage = {
+  reciterId: string;
+  bytes: number;
+  /** Ayah files on disk, so the row can say what is missing — #55. */
+  files: number;
+};
 
 function formatBytes(bytes: number): string {
   if (bytes <= 0) return '0 MB';
@@ -119,8 +128,17 @@ export function QuranDownloadsScreen() {
             .lstat(`${base}/${dir}`)
             .catch(() => []);
           let sum = 0;
-          for (const f of files) sum += Number(f.size) || 0;
-          if (sum > 0) out.push({ reciterId: dir, bytes: sum });
+          let count = 0;
+          for (const f of files) {
+            const size = Number(f.size) || 0;
+            sum += size;
+            // The same floor the downloader believes in, so "on disk"
+            // means one thing on both sides of this screen.
+            if (String(f.filename ?? '').endsWith('.mp3') && size > 1000) {
+              count += 1;
+            }
+          }
+          if (sum > 0) out.push({ reciterId: dir, bytes: sum, files: count });
         }
       }
       out.sort((a, b) => b.bytes - a.bytes);
@@ -184,6 +202,13 @@ export function QuranDownloadsScreen() {
     sub: string,
     bytes: number,
     onDelete: () => void,
+    /**
+     * The rest of it, for a download that is part way — issue #55. Only
+     * where there IS a rest: a complete reciter has nothing to fetch, and
+     * an offer to continue a finished download is a button that walks
+     * six thousand files to do nothing.
+     */
+    onResume?: () => void,
   ) => (
     <View
       key={key}
@@ -198,6 +223,33 @@ export function QuranDownloadsScreen() {
       <Text style={[styles.rowBytes, { color: palette.muted }]}>
         {formatBytes(bytes)}
       </Text>
+      {onResume ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t(
+            'quran.listenDownloadResume',
+            'Continue downloading',
+          )}
+          hitSlop={8}
+          disabled={running != null}
+          onPress={onResume}
+          style={[
+            styles.deleteBtn,
+            {
+              borderColor: running ? 'transparent' : palette.border,
+              marginEnd: SPACING.sm,
+            },
+          ]}>
+          <Text
+            style={{
+              color: running ? palette.muted : palette.accentSolid,
+              fontWeight: '700',
+              fontSize: TYPE.label.fontSize,
+            }}>
+            {t('quran.listenDownloadResume', 'Continue downloading')}
+          </Text>
+        </Pressable>
+      ) : null}
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('common.delete', 'Delete')}
@@ -323,18 +375,34 @@ export function QuranDownloadsScreen() {
           )
         : null}
 
-      {audio.map(a =>
-        row(
+      {audio.map(a => {
+        const whole = a.files >= totalAyahCount();
+        return row(
           a.reciterId,
           findReciter(a.reciterId).name,
-          t('downloads.audioSub', 'Recitation audio'),
+          // What is actually there, not a flat "Recitation audio" — the
+          // difference between a complete reciter and one that stopped at
+          // 85% was invisible on this screen, and it is the difference
+          // the reader came here to act on (#55).
+          whole
+            ? t('downloads.audioSub', 'Recitation audio')
+            : t('quran.downloadProgressAyahs', {
+                defaultValue: '{{done}} of {{total}} ayahs',
+                done: a.files,
+                total: totalAyahCount(),
+              }),
           a.bytes,
           () =>
             confirmDelete(findReciter(a.reciterId).name, () =>
               deleteReciterAudio(a.reciterId),
             ),
-        ),
-      )}
+          whole
+            ? undefined
+            : () => {
+                startQuranDownload({ kind: 'audio', reciterId: a.reciterId });
+              },
+        );
+      })}
 
       {tafsirBytes > 0
         ? row(

@@ -48,7 +48,8 @@
     "cancelled": "Cancelled.",
     "listJoin": " & ",
     "confirmDelete": "Tap again to delete",
-    "learnMore": "Learn more"
+    "learnMore": "Learn more",
+    "dismiss": "Dismiss"
   },
   "home": {
     "loadingPrayer": "Loading prayer times…",
@@ -1292,7 +1293,12 @@
     "khatmahPacingSettingsTitle": "Khatmah",
     "khatmahPacingHelp": "A khatmah is paced either by a length — the portions wait for you — or by a date, which re-cuts what is left over the days that remain. You can move between the two at any point; nothing you have read is affected.",
     "khatmahPacingNone": "Start a khatmah on the Quran page and how it is paced — a number of days, or a date to finish by — can be changed here.",
-    "khatmahDays_one": "{{count}} day"
+    "khatmahDays_one": "{{count}} day",
+    "downloadStoppedTitle": "Download stopped",
+    "downloadStoppedBodyAyahs": "{{done}} of {{total}} ayahs kept. Tap to continue, or it resumes by itself on Wi-Fi.",
+    "downloadStoppedBodyPages": "{{done}} of {{total}} pages kept. Tap to continue, or it resumes by itself on Wi-Fi.",
+    "downloadStoppedStrip": "{{name}} stopped at {{pct}}% · kept",
+    "listenResumeReciter": "Download the rest of {{name}}"
   },
   "reading": {
     "textSize": "Text size",

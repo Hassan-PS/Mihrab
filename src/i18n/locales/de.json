@@ -48,7 +48,8 @@
     "cancelled": "Abgebrochen.",
     "listJoin": " & ",
     "confirmDelete": "Zum Löschen erneut tippen",
-    "learnMore": "Mehr erfahren"
+    "learnMore": "Mehr erfahren",
+    "dismiss": "Ausblenden"
   },
   "home": {
     "loadingPrayer": "Gebetszeiten werden geladen…",
@@ -1292,7 +1293,12 @@
     "khatmahPacingSettingsTitle": "Khatma",
     "khatmahPacingHelp": "Eine Khatma wird entweder nach einer Dauer eingeteilt — die Portionen warten auf dich — oder nach einem Datum, das den Rest auf die verbleibenden Tage neu verteilt. Du kannst jederzeit zwischen beiden wechseln; nichts von dem, was du gelesen hast, ändert sich dabei.",
     "khatmahPacingNone": "Starte eine Khatma im Koran-Tab, dann lässt sich hier ändern, wie sie eingeteilt wird — eine Anzahl Tage oder ein Datum, bis zu dem sie fertig sein soll.",
-    "khatmahDays_one": "{{count}} Tag"
+    "khatmahDays_one": "{{count}} Tag",
+    "downloadStoppedTitle": "Download angehalten",
+    "downloadStoppedBodyAyahs": "{{done}} von {{total}} Versen bleiben erhalten. Zum Fortsetzen tippen, oder es geht im WLAN von selbst weiter.",
+    "downloadStoppedBodyPages": "{{done}} von {{total}} Seiten bleiben erhalten. Zum Fortsetzen tippen, oder es geht im WLAN von selbst weiter.",
+    "downloadStoppedStrip": "{{name}} bei {{pct}} % gestoppt · erhalten",
+    "listenResumeReciter": "Rest von {{name}} herunterladen"
   },
   "reading": {
     "textSize": "Schriftgröße",

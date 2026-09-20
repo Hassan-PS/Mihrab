@@ -46,6 +46,50 @@ import { fetchWithRetry } from '../utils/fetchWithRetry';
  * tafsir is unavailable in a few seconds, while a 1.4 MB timings file on
  * a slow connection deserves a minute before anyone gives up on it.
  */
+/**
+ * HOW A DOWNLOAD ENDED — issue #55.
+ *
+ * A queue of six thousand files has three endings, not two, and the app
+ * used to have a word for only one of them. `complete` is every file on
+ * disk. The other two both leave files missing, and they are nothing
+ * alike:
+ *
+ *   • a handful of files would not come — a 404, a corrupt body, a
+ *     stretch of bad luck — and the rest of the book arrived. There is
+ *     something to report and nothing to wait for.
+ *
+ *   • the files stopped arriving ALTOGETHER, which is what a connection
+ *     going away looks like from inside a queue. Nothing is wrong with
+ *     the download; the network is gone, and it will be back.
+ *
+ * Telling the second one "failed" is the report in issue #55: a reader
+ * whose wifi dropped at 85% was shown a failure, and the only button
+ * their reciter had left was Delete. Every byte was still on disk.
+ *
+ * So a run says which ending it had, and `interrupted` is the one that
+ * means "come back to this" — see `quranDownloadManager`, which is what
+ * comes back to it.
+ */
+export type DownloadOutcome = {
+  /** Every file in the queue is on disk. */
+  complete: boolean;
+  /** It gave up early because the files had stopped arriving at all. */
+  interrupted: boolean;
+};
+
+/**
+ * Consecutive failures that mean the network, not the file.
+ *
+ * One file failing is a file; four workers each failing three times in a
+ * row, on files that have nothing in common but the minute they were
+ * tried in, is the connection. The number is small enough that a reader
+ * whose wifi drops stops within seconds rather than grinding through six
+ * thousand doomed fetches — each of which costs up to three attempts and
+ * a 60-second deadline — and large enough that a few scattered bad files
+ * never stop a run that is otherwise working.
+ */
+export const GIVE_UP_AFTER_CONSECUTIVE_FAILURES = 8;
+
 export const CONTENT_DEADLINES = {
   /** One ayah's MP3 — tens of kilobytes. Matches the streaming watchdog it stands in for. */
   ayahAudio: 60_000,

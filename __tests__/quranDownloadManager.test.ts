@@ -12,8 +12,16 @@
  * cannot both be in flight. They share a pipe, a disk and — on Android —
  * one foreground service, whose notification IS the service.
  */
+type Outcome = { complete: boolean; interrupted: boolean };
+
 const mockHandles: Array<{
   cancel: jest.Mock;
+  /**
+   * A run ends three ways, not two — issue #55. A boolean could not tell
+   * "some files would not come" from "the files stopped coming", which is
+   * the difference between a failure and a wifi that will be back.
+   */
+  settle: (outcome: Outcome) => void;
   resolve: (complete: boolean) => void;
   onProgress: (p: { done: number; total: number; failed: number }) => void;
   what: string;
@@ -23,13 +31,16 @@ function mockMakeHandle(
   what: string,
   onProgress?: (p: { done: number; total: number; failed: number }) => void,
 ) {
-  let resolve!: (complete: boolean) => void;
-  const promise = new Promise<boolean>(r => {
-    resolve = r;
+  let settle!: (outcome: Outcome) => void;
+  const promise = new Promise<Outcome>(r => {
+    settle = r;
   });
   const entry = {
     cancel: jest.fn(),
-    resolve,
+    settle,
+    // The old shorthand, kept because most of these tests are about
+    // ownership rather than endings: "it finished" and "it did not".
+    resolve: (complete: boolean) => settle({ complete, interrupted: false }),
     onProgress: onProgress ?? (() => {}),
     what,
   };
@@ -59,7 +70,13 @@ jest.mock('../src/quran/audio/audioStore', () => ({
     onProgress?: (p: { done: number; total: number; failed: number }) => void,
   ) => mockMakeHandle(`surah:${reciterId}:${surah}`, onProgress),
   totalAyahCount: () => 6236,
+  // What the note on disk is checked against when it is read back: a
+  // reciter that is complete by now has nothing to resume.
+  reciterAudioStats: (id: string) => Promise.resolve(mockStats[id] ?? { files: 0, bytes: 0, complete: false }),
 }));
+
+/** Per-reciter disk, for the hydrate tests. */
+const mockStats: Record<string, { files: number; bytes: number; complete: boolean }> = {};
 
 const mockPublish = jest.fn();
 const mockFinish = jest.fn();
@@ -68,11 +85,16 @@ jest.mock('../src/quran/downloadNotification', () => ({
   finishDownloadNotification: (...a: unknown[]) => mockFinish(...a),
 }));
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   cancelQuranDownload,
+  dismissResumableJob,
+  hydrateResumableJob,
   isJobRunning,
   quranDownloadState,
   resetQuranDownloadState,
+  resumableJob,
+  resumeQuranDownload,
   startQuranDownload,
   subscribeQuranDownload,
 } from '../src/quran/quranDownloadManager';
@@ -81,12 +103,19 @@ const FONTS = { kind: 'fonts' } as const;
 const HUSARY = { kind: 'audio', reciterId: 'husary' } as const;
 const ALAFASY = { kind: 'audio', reciterId: 'alafasy' } as const;
 
-beforeEach(() => {
+beforeEach(async () => {
   mockHandles.length = 0;
   mockPublish.mockClear();
   mockFinish.mockClear();
+  for (const id of Object.keys(mockStats)) delete mockStats[id];
+  await AsyncStorage.clear();
   resetQuranDownloadState();
 });
+
+/** Let the `.then` on the handle's promise, and its writes, settle. */
+async function settle(): Promise<void> {
+  for (let i = 0; i < 6; i++) await Promise.resolve();
+}
 
 describe('who owns the download', () => {
   it('keeps running when every subscriber has gone', () => {
@@ -124,6 +153,9 @@ describe('who owns the download', () => {
       complete: true,
       cancelled: false,
       failed: 0,
+      interrupted: false,
+      done: 604,
+      total: 604,
     });
     expect(mockFinish).toHaveBeenCalledWith(
       expect.objectContaining({ complete: true, cancelled: false, failed: 0 }),
@@ -377,5 +409,128 @@ describe('the flood a whole-Quran download makes', () => {
         mockHandles[1].onProgress({ done: 3118, total: 6236, failed: 0 });
         expect(seen).toContain(3118);
       });
+  });
+});
+
+/**
+ * ── PICKING A DOWNLOAD BACK UP — issue #55 ───────────────────────────
+ *
+ * The manager is where "it stopped" turns into "there is something to
+ * come back to". Two places have to agree about that: this session's
+ * state, which is precise and dies with the process, and a note on disk,
+ * which is what a phone that has been in a pocket since the wifi went
+ * wakes up with.
+ */
+describe('a download that stopped', () => {
+  it('is offered back, with how far it got', async () => {
+    startQuranDownload(ALAFASY);
+    mockHandles[0].onProgress({ done: 5300, total: 6236, failed: 12 });
+    mockHandles[0].settle({ complete: false, interrupted: true });
+    await settle();
+
+    const last = quranDownloadState().last!;
+    expect(last.interrupted).toBe(true);
+    expect(last.done).toBe(5300);
+    expect(last.total).toBe(6236);
+    expect(resumableJob()).toEqual(ALAFASY);
+    // And it is the same job, started again: the files on disk are the
+    // checkpoint, so there is nothing else to hand it.
+    expect(resumeQuranDownload()).toBe(true);
+    expect(quranDownloadState().running).toEqual(ALAFASY);
+  });
+
+  it('says "stopped" in the shade, not "failed", and says where to go', async () => {
+    startQuranDownload(ALAFASY);
+    mockHandles[0].onProgress({ done: 5300, total: 6236, failed: 12 });
+    mockHandles[0].settle({ complete: false, interrupted: true });
+    await settle();
+
+    expect(mockFinish).toHaveBeenCalledWith(
+      expect.objectContaining({
+        interrupted: true,
+        complete: false,
+        // The reporter tapped the failure notice and nothing happened.
+        route: 'quranDownloads',
+      }),
+    );
+  });
+
+  it('survives the process that was downloading it', async () => {
+    startQuranDownload(ALAFASY);
+    mockHandles[0].onProgress({ done: 5300, total: 6236, failed: 0 });
+    mockHandles[0].settle({ complete: false, interrupted: true });
+    await settle();
+
+    // A new launch: nothing in memory, and the note on disk is all there
+    // is. The reciter still has files and is not complete, so the offer
+    // stands.
+    mockStats.alafasy = { files: 5300, bytes: 1, complete: false };
+    resetQuranDownloadState();
+    expect(resumableJob()).toBeNull();
+    expect(await hydrateResumableJob()).toEqual(ALAFASY);
+    expect(resumableJob()).toEqual(ALAFASY);
+  });
+
+  it('is forgotten once it finishes', async () => {
+    startQuranDownload(ALAFASY);
+    mockHandles[0].settle({ complete: false, interrupted: true });
+    await settle();
+    startQuranDownload(ALAFASY);
+    mockHandles[1].settle({ complete: true, interrupted: false });
+    await settle();
+
+    expect(resumableJob()).toBeNull();
+    resetQuranDownloadState();
+    expect(await hydrateResumableJob()).toBeNull();
+  });
+
+  it('is forgotten when the person cancels it', async () => {
+    startQuranDownload(ALAFASY);
+    cancelQuranDownload();
+    // A cancelled run can still report that its queue gave up — the
+    // cancel is what ended it, and a cancel is never an interruption.
+    mockHandles[0].settle({ complete: false, interrupted: true });
+    await settle();
+
+    expect(quranDownloadState().last?.interrupted).toBe(false);
+    expect(resumableJob()).toBeNull();
+    resetQuranDownloadState();
+    expect(await hydrateResumableJob()).toBeNull();
+  });
+
+  it('and when the reader says no', async () => {
+    startQuranDownload(ALAFASY);
+    mockHandles[0].settle({ complete: false, interrupted: true });
+    await settle();
+    dismissResumableJob();
+
+    expect(resumableJob()).toBeNull();
+    resetQuranDownloadState();
+    expect(await hydrateResumableJob()).toBeNull();
+  });
+
+  it('is dropped if the reciter is whole or gone by the time it is read', async () => {
+    startQuranDownload(ALAFASY);
+    mockHandles[0].settle({ complete: false, interrupted: true });
+    await settle();
+
+    // Finished on the other device, or deleted here. Offering to resume
+    // it would walk 6,236 files to do nothing.
+    mockStats.alafasy = { files: 6236, bytes: 1, complete: true };
+    resetQuranDownloadState();
+    expect(await hydrateResumableJob()).toBeNull();
+
+    mockStats.alafasy = { files: 0, bytes: 0, complete: false };
+    expect(await hydrateResumableJob()).toBeNull();
+  });
+
+  it('never offers one while something is running', async () => {
+    startQuranDownload(ALAFASY);
+    mockHandles[0].settle({ complete: false, interrupted: true });
+    await settle();
+    startQuranDownload(FONTS);
+
+    expect(resumableJob()).toBeNull();
+    expect(resumeQuranDownload()).toBe(false);
   });
 });

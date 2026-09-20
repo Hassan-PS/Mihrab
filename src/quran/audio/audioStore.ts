@@ -14,7 +14,9 @@ import ReactNativeBlobUtil from 'react-native-blob-util';
 import {
   CONTENT_DEADLINES,
   fetchContentOnce,
+  GIVE_UP_AFTER_CONSECUTIVE_FAILURES,
   withDownloadDeadline,
+  type DownloadOutcome,
 } from '../contentNetwork';
 import { mkdirDeep } from '../mushafDownload';
 import { SURAHS } from '../quran';
@@ -88,7 +90,8 @@ export type AudioDownloadProgress = {
 };
 
 export type AudioDownloadHandle = {
-  promise: Promise<boolean>;
+  /** How it ended — see `DownloadOutcome`, and issue #55 for why three. */
+  promise: Promise<DownloadOutcome>;
   cancel: () => void;
 };
 
@@ -222,9 +225,16 @@ async function fetchAyahViaRNFetch(url: string, dest: string): Promise<void> {
  * download crawled and appeared to freeze in blocks."
  *
  * So the same cure. One streaming failure condemns the transport for the
- * rest of the session and everything after it goes straight to the
- * fallback; the next launch gives streaming another chance, in case it was
- * the network that was wrong rather than the device.
+ * rest of the RUN and everything after it goes straight to the fallback.
+ *
+ * The run, not the session — changed for issue #55. The commonest reason
+ * streaming fails is the connection going away, and a reader who walks
+ * out of wifi at 85% and taps Resume an hour later was being handed the
+ * slow transport for the rest of the day over a network that no longer
+ * exists. A new run is new evidence, so it gets the fast path again and
+ * condemns it again in one failure if it is still wrong. Playback's
+ * prefetch shares the flag and rides along with whatever the last run
+ * learned, which is the best evidence there is between runs.
  */
 let streamingAudioWorks = true;
 
@@ -349,9 +359,18 @@ function runAyahQueue(
   let cancelled = false;
   let done = 0;
   let failed = 0;
+  /**
+   * Failures with no success between them — the signal that it is the
+   * connection rather than the files (`GIVE_UP_AFTER_CONSECUTIVE_FAILURES`).
+   */
+  let inARow = 0;
+  let interrupted = false;
 
-  const run = async (): Promise<boolean> => {
-    if (total === 0) return false;
+  const run = async (): Promise<DownloadOutcome> => {
+    if (total === 0) return { complete: false, interrupted: false };
+    // A new run is new evidence about the transport; see the note on
+    // `streamingAudioWorks`.
+    streamingAudioWorks = true;
     await mkdirDeep(audioDir(reciterId));
 
     // ── THE WORDS COME WITH THE AUDIO — issue #30 ────────────────────
@@ -371,7 +390,7 @@ function runAyahQueue(
     await loadReciterTimings(reciterId).catch(() => null);
 
     const worker = async (): Promise<void> => {
-      while (!cancelled) {
+      while (!cancelled && !interrupted) {
         const next = pending.shift();
         if (next == null) return;
         const path = ayahAudioFilePath(reciterId, next.surah, next.ayah);
@@ -379,8 +398,25 @@ function runAyahQueue(
           if (!(await fileValid(path))) {
             await fetchAyahFile(reciter, next.surah, next.ayah, path);
           }
+          inARow = 0;
         } catch {
           failed += 1;
+          inARow += 1;
+          /**
+           * THE CONNECTION IS GONE — issue #55.
+           *
+           * Without this the queue walks the remaining six thousand
+           * files and fails each of them three times, which on a stalled
+           * connection is three sixty-second deadlines apiece: hours of
+           * a phone's radio to arrive at a number that was knowable in
+           * the first ten seconds. And the number it arrives at is
+           * "5,900 failed", which is how a download that was 85% done
+           * came to be reported as a failure.
+           *
+           * Stop, keep every byte, and say which ending this was. The
+           * files already on disk are the resume.
+           */
+          if (inARow >= GIVE_UP_AFTER_CONSECUTIVE_FAILURES) interrupted = true;
         } finally {
           done += 1;
           noteAudioProgress(done, total);
@@ -390,7 +426,12 @@ function runAyahQueue(
     };
 
     await Promise.all(Array.from({ length: WORKERS }, () => worker()));
-    return !cancelled && failed === 0;
+    return {
+      complete: !cancelled && !interrupted && failed === 0,
+      // Cancelling is a person; it is never an interruption to come back
+      // from, however it ended the queue.
+      interrupted: interrupted && !cancelled,
+    };
   };
 
   return {
@@ -409,7 +450,10 @@ export function downloadSurahAudio(
 ): AudioDownloadHandle {
   const meta = SURAHS.find(s => s.number === surah);
   if (!meta) {
-    return { promise: Promise.resolve(false), cancel: () => undefined };
+    return {
+      promise: Promise.resolve({ complete: false, interrupted: false }),
+      cancel: () => undefined,
+    };
   }
   const queue = Array.from({ length: meta.ayahCount }, (_, i) => ({
     surah,

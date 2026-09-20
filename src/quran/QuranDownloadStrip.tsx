@@ -29,9 +29,12 @@ import { useAppPalette } from '../hooks/useAppPalette';
 import { findReciter } from './audio/reciters';
 import {
   cancelQuranDownload,
+  dismissResumableJob,
   jobSurahName,
   quranDownloadState,
+  resumeQuranDownload,
   subscribeQuranDownload,
+  type QuranDownloadJob,
   type QuranDownloadState,
 } from './quranDownloadManager';
 import { SPACING } from '../theme/tokens';
@@ -72,7 +75,32 @@ export function QuranDownloadStripView({
   const { t } = useTranslation();
   const { palette } = useAppPalette();
   const job = run.running;
-  if (!job) return null;
+  /**
+   * A DOWNLOAD THAT STOPPED IS STILL SOMETHING THE READER HAS — #55.
+   *
+   * The strip used to render the running job or nothing, so the moment a
+   * connection went the only thing on screen about the download
+   * disappeared: no bar, no number, nothing to press. Told "it failed" by
+   * a notification and shown nothing by the app, the reporter's
+   * conclusion — that the 85% was gone and the only way forward was to
+   * delete and start again — was the reasonable one.
+   *
+   * So the strip stays, saying where it stopped, with the two answers
+   * that exist: pick it up, or let it go. The bytes are on disk either
+   * way; "let it go" only takes the offer away.
+   */
+  if (!job) {
+    const stopped = run.last;
+    if (!stopped || !stopped.interrupted) return null;
+    return (
+      <StoppedStrip
+        job={stopped.job}
+        done={stopped.done}
+        total={stopped.total}
+        top={top}
+      />
+    );
+  }
 
   const { done, total } = run.progress;
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
@@ -136,6 +164,95 @@ export function QuranDownloadStripView({
   );
 }
 
+/**
+ * The same strip, for a download that has stopped.
+ *
+ * Deliberately the same shape and the same place: it is the download the
+ * reader was already watching, in the state it is now in, rather than a
+ * new kind of message somewhere else. The bar is drawn where it got to,
+ * because that is the fact the report says nobody could see.
+ */
+function StoppedStrip({
+  job,
+  done,
+  total,
+  top,
+}: {
+  job: QuranDownloadJob;
+  done: number;
+  total: number;
+  top: number;
+}) {
+  const { t } = useTranslation();
+  const { palette } = useAppPalette();
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  const name =
+    job.kind === 'fonts'
+      ? t('downloads.mushaf', 'Mushaf pages')
+      : job.kind === 'audio'
+        ? findReciter(job.reciterId).name
+        : jobSurahName(job.surah);
+  return (
+    <View
+      style={[
+        styles.strip,
+        {
+          backgroundColor: palette.card,
+          borderBottomColor: palette.border,
+          paddingTop: top + STRIP_PADDING_TOP,
+        },
+      ]}>
+      <View style={styles.stripRow}>
+        <Text
+          style={[styles.stripLabel, { color: palette.muted }]}
+          numberOfLines={1}>
+          {t('quran.downloadStoppedStrip', {
+            defaultValue: '{{name}} stopped at {{pct}}% · kept',
+            name,
+            pct,
+          })}
+        </Text>
+        <View style={styles.stripActions}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t(
+              'quran.listenDownloadResume',
+              'Continue downloading',
+            )}
+            hitSlop={10}
+            onPress={() => resumeQuranDownload()}>
+            <Text
+              style={[styles.stripCancel, { color: palette.accentSolid }]}
+              numberOfLines={1}>
+              {t('quran.listenDownloadResume', 'Continue downloading')}
+            </Text>
+          </Pressable>
+          {/* The glyph, not the word: two verbs side by side on a phone
+              is where this row runs out of width, and the one that takes
+              the offer away is the one that can be a symbol. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('common.dismiss', 'Dismiss')}
+            hitSlop={10}
+            onPress={() => dismissResumableJob()}>
+            <Text style={[styles.stripCancel, { color: palette.muted }]}>
+              ✕
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+      <View style={[styles.stripTrack, { backgroundColor: palette.accentBg }]}>
+        <View
+          style={[
+            styles.stripFill,
+            { width: `${pct}%`, backgroundColor: palette.muted },
+          ]}
+        />
+      </View>
+    </View>
+  );
+}
+
 /** The strip's own breathing room above its row, dp. */
 const STRIP_PADDING_TOP = 6;
 
@@ -157,6 +274,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   stripCancel: { fontSize: TYPE.label.fontSize, fontWeight: '700' },
+  stripActions: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
   stripTrack: { height: 3, overflow: 'hidden' },
   stripFill: { height: '100%' },
 });

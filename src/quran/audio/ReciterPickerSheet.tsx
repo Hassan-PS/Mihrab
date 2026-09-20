@@ -255,8 +255,18 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
             ✓
           </Text>
         ) : null}
-        {/* The audio control. One row, one verb: fetch it, stop fetching
-            it, or delete it — never two of the three at once. */}
+        {/* The audio controls.
+            ── ISSUE #55 ────────────────────────────────────────────────
+            It used to be one verb, always: fetch it, stop fetching it, or
+            delete it, chosen by whether anything was on disk. Which meant
+            a reciter interrupted at 85% — ANY reciter with a single ayah
+            cached from an online listen — offered Delete and nothing
+            else. The reporter's words: "the only option seems to be to
+            delete the download and start again from 0%".
+            So a row that is PART way has two: fetch the rest, and delete.
+            A complete one still has one, because there is nothing left to
+            fetch, and a row that has never been touched still has one,
+            because there is nothing to delete. */}
         {running ? (
           <Pressable
             accessibilityRole="button"
@@ -268,6 +278,38 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
             <Text style={[styles.icon, { color: palette.text }]}>✕</Text>
           </Pressable>
         ) : stats ? (
+          <>
+            {/* The rest of it. Same arrow as a fresh download, because it
+                is the same call — the files on disk are skipped, which is
+                the whole of the resume story (`runAyahQueue`). */}
+            {!stats.complete ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('quran.listenResumeReciter', {
+                  defaultValue: 'Download the rest of {{name}}',
+                  name: item.name,
+                })}
+                disabled={busyElsewhere}
+                hitSlop={8}
+                onPress={() => startQuranDownload(job)}
+                style={[
+                  styles.iconBtn,
+                  {
+                    marginEnd: SPACING.xs,
+                    borderColor: busyElsewhere ? 'transparent' : palette.border,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.icon,
+                    { color: busyElsewhere ? palette.muted : palette.accentSolid },
+                  ]}
+                >
+                  ↓
+                </Text>
+              </Pressable>
+            ) : null}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={
@@ -303,6 +345,7 @@ export function ReciterPickerSheet({ visible, onClose }: Props) {
               <TrashGlyph color={String(palette.danger)} />
             )}
           </Pressable>
+          </>
         ) : (
           <Pressable
             accessibilityRole="button"

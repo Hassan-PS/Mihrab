@@ -48,7 +48,8 @@
     "cancelled": "Cancelado.",
     "listJoin": " y ",
     "confirmDelete": "Toca otra vez para eliminar",
-    "learnMore": "Más información"
+    "learnMore": "Más información",
+    "dismiss": "Descartar"
   },
   "home": {
     "loadingPrayer": "Cargando tiempos de oración…",
@@ -1292,7 +1293,12 @@
     "khatmahPacingSettingsTitle": "Khatmah",
     "khatmahPacingHelp": "Un jatma se reparte o bien por una duración — las porciones te esperan — o bien por una fecha, que vuelve a repartir lo que queda entre los días restantes. Puedes pasar de una a otra en cualquier momento; nada de lo que has leído se ve afectado.",
     "khatmahPacingNone": "Inicia una jatma en la pestaña del Corán y aquí podrás cambiar cómo se reparte — un número de días, o una fecha para terminar.",
-    "khatmahDays_one": "{{count}} día"
+    "khatmahDays_one": "{{count}} día",
+    "downloadStoppedTitle": "La descarga se detuvo",
+    "downloadStoppedBodyAyahs": "{{done}} de {{total}} aleyas se conservan. Toca para continuar, o se reanudará sola con Wi-Fi.",
+    "downloadStoppedBodyPages": "{{done}} de {{total}} páginas se conservan. Toca para continuar, o se reanudará sola con Wi-Fi.",
+    "downloadStoppedStrip": "{{name}} se detuvo al {{pct}} % · conservado",
+    "listenResumeReciter": "Descargar el resto de {{name}}"
   },
   "reading": {
     "textSize": "Tamaño del texto",

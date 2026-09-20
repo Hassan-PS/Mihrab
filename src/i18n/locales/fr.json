@@ -48,7 +48,8 @@
     "cancelled": "Annulé.",
     "listJoin": " et ",
     "confirmDelete": "Appuyez à nouveau pour supprimer",
-    "learnMore": "En savoir plus"
+    "learnMore": "En savoir plus",
+    "dismiss": "Ignorer"
   },
   "home": {
     "loadingPrayer": "Chargement des heures de prière…",
@@ -1292,7 +1293,12 @@
     "khatmahPacingSettingsTitle": "Khatma",
     "khatmahPacingHelp": "Une khatma est répartie soit par une durée — les portions vous attendent — soit par une date, qui redécoupe ce qui reste sur les jours restants. Vous pouvez passer de l’une à l’autre à tout moment ; rien de ce que vous avez lu n’est affecté.",
     "khatmahPacingNone": "Commencez une khatma dans l’onglet Coran, puis vous pourrez changer ici sa répartition — un nombre de jours, ou une date pour finir.",
-    "khatmahDays_one": "{{count}} jour"
+    "khatmahDays_one": "{{count}} jour",
+    "downloadStoppedTitle": "Téléchargement interrompu",
+    "downloadStoppedBodyAyahs": "{{done}} versets sur {{total}} sont conservés. Appuyez pour continuer, ou la reprise se fera d’elle-même en Wi-Fi.",
+    "downloadStoppedBodyPages": "{{done}} pages sur {{total}} sont conservées. Appuyez pour continuer, ou la reprise se fera d’elle-même en Wi-Fi.",
+    "downloadStoppedStrip": "{{name}} arrêté à {{pct}} % · conservé",
+    "listenResumeReciter": "Télécharger le reste de {{name}}"
   },
   "reading": {
     "textSize": "Taille du texte",

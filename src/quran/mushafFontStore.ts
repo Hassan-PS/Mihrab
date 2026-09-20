@@ -19,7 +19,9 @@ import ReactNativeBlobUtil from 'react-native-blob-util';
 import {
   CONTENT_DEADLINES,
   fetchContentOnce,
+  GIVE_UP_AFTER_CONSECUTIVE_FAILURES,
   withDownloadDeadline,
+  type DownloadOutcome,
 } from './contentNetwork';
 import { MUSHAF_TOTAL_PAGES } from './mushafImages';
 import { mkdirDeep } from './mushafDownload';
@@ -298,7 +300,8 @@ export function ensurePageFontFile(page: number): Promise<string | null> {
 export type FontDownloadProgress = { done: number; total: number; failed: number };
 
 export type FontDownloadHandle = {
-  promise: Promise<boolean>;
+  /** How it ended — see `DownloadOutcome`, and issue #55 for why three. */
+  promise: Promise<DownloadOutcome>;
   cancel: () => void;
 };
 
@@ -323,8 +326,11 @@ export function downloadAllPageFonts({
   let cancelled = false;
   let done = 0;
   let failed = 0;
+  /** See `GIVE_UP_AFTER_CONSECUTIVE_FAILURES`, and issue #55. */
+  let inARow = 0;
+  let interrupted = false;
 
-  const run = async (): Promise<boolean> => {
+  const run = async (): Promise<DownloadOutcome> => {
     await ensureStoreDir();
     stats.retries = 0;
     stats.failures = 0;
@@ -335,13 +341,20 @@ export function downloadAllPageFonts({
     for (let i = 1; i <= MUSHAF_TOTAL_PAGES; i++) queue.push(i);
 
     const worker = async (): Promise<void> => {
-      while (!cancelled) {
+      while (!cancelled && !interrupted) {
         const page = queue.shift();
         if (page == null) return;
         const path = await ensurePageFontFile(page);
         if (path == null) {
           failed += 1;
           stats.failures += 1;
+          inARow += 1;
+          // The connection, not the pages — the same reasoning as the
+          // audio queue, and the same ending. A hundred and eighty
+          // megabytes of book is a download people walk away from.
+          if (inARow >= GIVE_UP_AFTER_CONSECUTIVE_FAILURES) interrupted = true;
+        } else {
+          inARow = 0;
         }
         done += 1;
         onProgress?.({ done, total: MUSHAF_TOTAL_PAGES, failed });
@@ -350,9 +363,9 @@ export function downloadAllPageFonts({
     };
 
     await Promise.all(Array.from({ length: concurrency }, () => worker()));
-    const complete = !cancelled && failed === 0;
+    const complete = !cancelled && !interrupted && failed === 0;
     if (complete) knownComplete = true;
-    return complete;
+    return { complete, interrupted: interrupted && !cancelled };
   };
 
   return { promise: run(), cancel: () => { cancelled = true; } };

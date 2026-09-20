@@ -143,6 +143,13 @@ export const linking: LinkingOptions<RootStackParamList> = {
        * the other device with its code on screen.
        */
       Sync: 'sync',
+      /**
+       * mihrab://downloads
+       *
+       * Where a download that stopped is picked up again (#55), and so
+       * where the "download stopped" notification lands.
+       */
+      QuranDownloads: 'downloads',
       MonthTimes: 'month',
       /**
        * Absent on a Mac, where `RootNavigator` does not register the

@@ -48,7 +48,8 @@
     "cancelled": "Dibatalkan.",
     "listJoin": " & ",
     "confirmDelete": "Ketuk lagi untuk menghapus",
-    "learnMore": "Pelajari lebih lanjut"
+    "learnMore": "Pelajari lebih lanjut",
+    "dismiss": "Tutup"
   },
   "home": {
     "loadingPrayer": "Memuat waktu sholat…",
@@ -1292,7 +1293,12 @@
     "khatmahPacingSettingsTitle": "Khataman",
     "khatmahPacingHelp": "Khataman dibagi berdasarkan durasi — bagiannya menunggu Anda — atau berdasarkan tanggal, yang membagi ulang sisanya ke hari-hari yang tersisa. Anda bisa berpindah di antara keduanya kapan saja; tidak ada bacaan Anda yang terpengaruh.",
     "khatmahPacingNone": "Mulai khatam di halaman Al-Qur’an, lalu di sini Anda bisa mengubah pembagiannya — sejumlah hari, atau tanggal untuk menyelesaikannya.",
-    "khatmahDays_one": "{{count}} hari"
+    "khatmahDays_one": "{{count}} hari",
+    "downloadStoppedTitle": "Unduhan berhenti",
+    "downloadStoppedBodyAyahs": "{{done}} dari {{total}} ayat tersimpan. Ketuk untuk melanjutkan, atau akan dilanjutkan sendiri saat ada Wi-Fi.",
+    "downloadStoppedBodyPages": "{{done}} dari {{total}} halaman tersimpan. Ketuk untuk melanjutkan, atau akan dilanjutkan sendiri saat ada Wi-Fi.",
+    "downloadStoppedStrip": "{{name}} berhenti di {{pct}}% · tersimpan",
+    "listenResumeReciter": "Unduh sisa {{name}}"
   },
   "reading": {
     "textSize": "Ukuran teks",
