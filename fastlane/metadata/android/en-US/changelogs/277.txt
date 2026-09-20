@@ -1,0 +1,4 @@
+• Mac: the muṣḥaf no longer shows three page columns with the left one running under the index after switching back to it from another full-screen app.
+• Mac: the bar above the page is the colour of the page, and the surah name is centred over the page rather than over the window.
+• Mac and iPad: in fullscreen the surah name is shown in full again, instead of a letter and an ellipsis.
+• The left and right arrow keys turn pages again after searching in the index.
