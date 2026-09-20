@@ -330,7 +330,34 @@ if [ -f "$XC" ]; then
   case "$xc_rc" in
     0) pass "iOS: $xc_out" ;;
     3) pend "iOS: $xc_out" ;;
-    *) fail "iOS: $xc_out" ;;
+    # ── THE QUESTION IS WHETHER iOS SHIPPED, NOT WHICH ROUTE IT TOOK ──
+    #
+    # Two releases in a row (2.24.0, 2.24.1) ended on a red ✗ over an iOS
+    # channel that was fine. Xcode Cloud never started a run, release.sh
+    # fell back to `build-ios-appstore.sh`, the upload succeeded — and
+    # this check, which only knows how to ask Xcode Cloud, called the
+    # release failed. Worse, the remedy it printed (`resume && start`)
+    # would have built the same version a second time and uploaded a
+    # build number App Store Connect already had.
+    #
+    # A fallback the verifier does not know about is not a fallback; it
+    # is a second way to fail. So release.sh tells it: IOS_LOCAL_UPLOAD=1
+    # means "this run uploaded iOS from this Mac, and altool said it
+    # landed". The build then takes a few minutes to appear in the API,
+    # which is the whole reason the lookup above comes back empty — that
+    # is PENDING, not failure, and re-running this once processing
+    # finishes is what turns it into a ✓.
+    #
+    # It stays a hard fail when nothing uploaded, which is the case this
+    # gate exists for: 2.13.0 archived, errored on upload, and iPhone
+    # never got it while every other channel said the release was live.
+    *)
+      if [ "${IOS_LOCAL_UPLOAD:-0}" = "1" ]; then
+        pend "iOS: uploaded from this Mac (build $CODE) and not listed by App Store Connect yet — processing takes a few minutes, then: $0 $TAG"
+      else
+        fail "iOS: $xc_out"
+      fi
+      ;;
   esac
 else
   fail "scripts/xcode-cloud.py is missing — cannot tell whether iOS shipped"

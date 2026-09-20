@@ -18,6 +18,7 @@ import path from 'path';
 const ROOT = path.join(__dirname, '..');
 const py = readFileSync(path.join(ROOT, 'scripts', 'xcode-cloud.py'), 'utf8');
 const verify = readFileSync(path.join(ROOT, 'scripts', 'verify-release.sh'), 'utf8');
+const release = readFileSync(path.join(ROOT, 'scripts', 'release.sh'), 'utf8');
 
 describe('build runs are read newest first', () => {
   it('every buildRuns query sorts', () => {
@@ -71,7 +72,32 @@ describe('verify-release.sh asks the question properly', () => {
   });
 
   it('still fails the release on a genuine miss', () => {
-    expect(verify).toMatch(/\*\) fail "iOS: \$xc_out" ;;/);
+    expect(verify).toMatch(/fail "iOS: \$xc_out"/);
+  });
+
+  /**
+   * 2.24.0 and 2.24.1 both ended on a red ✗ over an iOS channel that had
+   * shipped: Xcode Cloud started no run, `release.sh` fell back to the
+   * local build, altool uploaded it, and this gate — which only knew how
+   * to ask Xcode Cloud — failed the release and printed a remedy that
+   * would have uploaded the same version twice.
+   */
+  it('knows about the route Xcode Cloud cannot see', () => {
+    // release.sh says so, and only when the upload actually succeeded.
+    const local = release.slice(release.indexOf('ios_local_build() {'));
+    const body = local.slice(0, local.indexOf('\n}'));
+    expect(body).toMatch(/export IOS_LOCAL_UPLOAD=1/);
+    expect(body.indexOf('export IOS_LOCAL_UPLOAD=1')).toBeGreaterThan(
+      body.indexOf('if "$ROOT/scripts/build-ios-appstore.sh"; then'),
+    );
+    // …and the verifier pends rather than fails on that route, because a
+    // freshly uploaded build takes minutes to appear in the API.
+    expect(verify).toMatch(/IOS_LOCAL_UPLOAD:-0.*=.*"1"/);
+    expect(verify).toMatch(/pend "iOS: uploaded from this Mac/);
+    // The pend has to sit INSIDE the same default branch as the fail, or
+    // a genuine miss stops being a failure.
+    const branch = verify.slice(verify.indexOf('    *)\n      if [ "${IOS_LOCAL_UPLOAD'));
+    expect(branch.slice(0, branch.indexOf('esac'))).toMatch(/fail "iOS: \$xc_out"/);
   });
 });
 

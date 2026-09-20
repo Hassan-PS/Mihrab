@@ -923,6 +923,10 @@ ios_local_build() {
   if "$ROOT/scripts/build-ios-appstore.sh"; then
     ok "iOS uploaded from this Mac — App Store Connect has the build"
     XC_STARTED=local
+    # The verifier asks Xcode Cloud whether iOS shipped, and Xcode Cloud
+    # has never heard of this upload. Tell it, or it fails a release that
+    # is fine — see the case block it reads this in.
+    export IOS_LOCAL_UPLOAD=1
     return 0
   fi
   warn "the local iOS build failed too — iOS has not shipped"
