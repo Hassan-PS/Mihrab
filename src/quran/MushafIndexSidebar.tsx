@@ -50,6 +50,25 @@ import { RADIUS, SPACING } from '../theme/tokens';
  */
 export const SIDEBAR_WIDTH = desktopSize(268);
 
+/**
+ * The muṣḥaf keeps a reader at least this wide beside the index. Below it
+ * the sidebar is worth less than the page it eats.
+ */
+export const SIDEBAR_MIN_READER = 620;
+
+/**
+ * Is there room for the index beside the reader in a content row this wide?
+ *
+ * Two places ask: the reader, which lays the sidebar out, and the muṣḥaf
+ * screen's header, which centres its title over the READER rather than the
+ * window and so has to know whether the sidebar took the leading edge. Two
+ * copies of `>= SIDEBAR_WIDTH + 620` would drift, and a header centred for
+ * a sidebar that is not there is worse than one that never moved.
+ */
+export function sidebarFits(contentWidth: number): boolean {
+  return contentWidth >= SIDEBAR_WIDTH + SIDEBAR_MIN_READER;
+}
+
 type Tab = 'surah' | 'juz' | 'marks';
 
 type Props = {

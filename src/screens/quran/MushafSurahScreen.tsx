@@ -33,6 +33,7 @@ import { useAppPalette } from '../../hooks/useAppPalette';
 import { isMacCatalyst } from '../../responsive/breakpoints';
 import type { SurahIndex } from '../../quran/quran';
 import { MushafReader } from '../../quran/MushafReader';
+import { SIDEBAR_WIDTH, sidebarFits } from '../../quran/MushafIndexSidebar';
 import {
   resolveRiwayah,
   riwayahById,
@@ -57,6 +58,7 @@ import { SessionDot, useSessionColor } from '../../quran/SessionDot';
 import { PageProgressMark, usePageProgress } from '../../quran/PageProgressMark';
 import { RiwayahPicker } from '../../quran/RiwayahPicker';
 import { SPACING } from '../../theme/tokens';
+import { isRtlLanguage } from '../../i18n/layoutDirection';
 
 const isIOS = Platform.OS === 'ios';
 
@@ -268,16 +270,86 @@ export function MushafSurahScreen({
      * edge, and the app's own chrome waits behind the back button.
      */
     const ink = dark ? '#f2f2f2' : '#1a1a1a';
+    /**
+     * THE TITLE IS CENTRED OVER THE PAGE, NOT OVER THE WINDOW (v2.24.1).
+     *
+     * The navigation bar spans the whole window and centres its title in
+     * itself. On a Mac (or a wide iPad) the index sidebar takes the
+     * leading ~SIDEBAR_WIDTH of the row beneath it, so the reader's own
+     * centre is half a sidebar further along — and "• An-Nisaa" sat
+     * visibly left of the page it names. Shift it by exactly that half,
+     * and only while the sidebar is actually up: same predicate as the
+     * reader, so the two can never disagree (`sidebarFits`).
+     *
+     * A transform rather than a padding: the title is a centred subview
+     * UIKit positions, and padding inside it moves the text within a box
+     * that stays where it was. Transforms are not mirrored by the tree's
+     * `direction: 'rtl'`, so the sign is chosen here — in Arabic the
+     * sidebar is on the trailing edge and the page centre moves left.
+     */
+    const sidebarUp = sidebarFits(headerW);
+    const isRtl = isRtlLanguage(i18n.language);
+    const titleShift = sidebarUp ? (isRtl ? -1 : 1) * (SIDEBAR_WIDTH / 2) : 0;
     const headerTitleRow = {
       flexDirection: 'row' as const,
       alignItems: 'center' as const,
       gap: desktopSize(6),
+      ...(titleShift !== 0 ? { transform: [{ translateX: titleShift }] } : null),
     };
+    /**
+     * THE BAR IS THE PAGE'S COLOUR ON A MAC — PAINTED, NOT CONFIGURED.
+     *
+     * `headerBlurEffect` is an iOS API and Catalyst is iOS by
+     * `Platform.OS`, so the Mac took the blur branch and drew the bar as a
+     * system material: a strip a shade lighter than the paper under it,
+     * with a hard edge across the top of the page. A desktop window has
+     * nothing to blur either — the content does not scroll under the bar
+     * the way a phone's does.
+     *
+     * `headerStyle.backgroundColor` does NOT fix it. The root navigator
+     * sets `headerTransparent` on iOS so the reader can reach the top of
+     * the window, and a translucent Catalyst bar ignores the colour: a
+     * build with the bar set to FLAT RED and `headerBlurEffect: 'none'`
+     * came out exactly as before, pixel for pixel. A `headerBackground`
+     * view does paint — the same experiment in green filled the strip
+     * edge to edge — so the colour is painted here rather than asked for.
+     *
+     * Two regions, because the bar spans the whole window and the window
+     * is not one surface: the muṣḥaf's index sits under the leading
+     * ~SIDEBAR_WIDTH of it. The transparent bar showed the sidebar
+     * through there, and it should keep looking that way; only the part
+     * over the page becomes the page. `left`/`right` rather than
+     * `start`/`end` because this is the physical side the sidebar is on,
+     * chosen by the layout direction (see the title shift above).
+     */
+    const barChrome = isMacCatalyst
+      ? {
+          headerStyle: { backgroundColor: 'transparent' },
+          headerBackground: () => (
+            <View style={{ flex: 1, backgroundColor: TONE_PAGE_BG[tone] }}>
+              {sidebarUp ? (
+                <View
+                  style={[
+                    {
+                      position: 'absolute' as const,
+                      top: 0,
+                      bottom: 0,
+                      width: SIDEBAR_WIDTH,
+                      backgroundColor: palette.bg,
+                    },
+                    isRtl ? { right: 0 } : { left: 0 },
+                  ]}
+                />
+              ) : null}
+            </View>
+          ),
+        }
+      : isIOS
+        ? { headerBlurEffect: (dark ? 'dark' : 'light') as 'dark' | 'light' }
+        : { headerStyle: { backgroundColor: TONE_PAGE_BG[tone] } };
     const pageChrome = quranHydrated
       ? {
-            ...(isIOS
-              ? { headerBlurEffect: (dark ? 'dark' : 'light') as 'dark' | 'light' }
-              : { headerStyle: { backgroundColor: TONE_PAGE_BG[tone] } }),
+            ...barChrome,
             headerTintColor: ink,
             headerTitleStyle: {
               color: ink,
@@ -504,6 +576,9 @@ export function MushafSurahScreen({
     navigation,
     surah,
     isArabic,
+    // Not `isArabic`: the title shift asks which way the LAYOUT runs, and
+    // Urdu is an RTL language this app ships in.
+    i18n.language,
     isFullscreen,
     readerTitle,
     pageProgress,
