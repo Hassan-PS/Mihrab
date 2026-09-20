@@ -37,12 +37,26 @@ export type SpreadGeometry = {
 };
 
 export type SpreadInputs = {
-  width: number;
-  height: number;
-  sideInset: number;
-  /** The index sidebar's width when it is shown, else 0. */
-  sidebarWidth: number;
-  navPad: number;
+  /**
+   * ── THE BOX THE PAGES GO IN IS MEASURED, NOT CALCULATED ─────────────
+   *
+   * This used to be `window.width - sideInset * 2 - sidebarWidth`, an
+   * arithmetic model of the list's viewport built out of the window's
+   * size and everything believed to be taking width out of it. The model
+   * is only ever as true as `useWindowDimensions`, and on Mac Catalyst
+   * that is not true at all: move the window to a second display and the
+   * hook keeps answering with the old one's size. The reader then laid a
+   * 2.4-metre-wide window out as though it were a portrait display —
+   * items a third too narrow, so a third page crept in past the two that
+   * belong on screen and ran under the sidebar, and the pairing itself
+   * came out wrong, so every column drew a full set of chrome.
+   *
+   * The height has been measured since this file was written (`listH`,
+   * and the paragraph at the top about laying a page out at a guess).
+   * The width is measured for the same reason: the viewport is a thing
+   * the layout engine knows exactly and nothing else has to model.
+   */
+  listW: number;
   /**
    * Measured list viewport, or 0 while unmeasured.
    *
@@ -52,22 +66,38 @@ export type SpreadInputs = {
    * subtracting it a second time opened.
    */
   listH: number;
+  /**
+   * The reader's whole content box, the index sidebar included — measured
+   * for the same reason. Pairing is a question about the window's shape,
+   * not the list's: the list is narrower than the window whenever the
+   * sidebar is out, and deciding "portrait" from it would collapse the
+   * spread on a window that has room for one.
+   */
+  boxW: number;
+  boxH: number;
+  navPad: number;
 };
 
-export function spreadPageWidth(
-  width: number,
-  sideInset: number,
-  sidebarWidth: number,
-): number {
-  return width - sideInset * 2 - sidebarWidth;
+/**
+ * One list item's width: the measured viewport, to the whole dp.
+ *
+ * Rounded for the same reason `availH` is — a sub-pixel wobble in a
+ * measured box must not fork the layout — and rounded HERE so that the
+ * live value and the settled one are rounded identically and
+ * `spreadGeometryFits` can compare them.
+ */
+export function spreadPageWidth(listW: number): number {
+  return Math.round(listW);
 }
 
 /** The geometry these inputs describe, or null while the list is unmeasured. */
 export function spreadGeometry(input: SpreadInputs): SpreadGeometry | null {
-  if (!(input.listH > 0)) return null;
+  if (!(input.listH > 0) || !(input.listW > 0) || !(input.boxW > 0)) {
+    return null;
+  }
   return {
-    pageWidth: spreadPageWidth(input.width, input.sideInset, input.sidebarWidth),
-    paired: input.width > input.height,
+    pageWidth: spreadPageWidth(input.listW),
+    paired: input.boxW > input.boxH,
     // Whole dp — a sub-pixel wobble in the measured viewport must not fork
     // the page's layout.
     availH: Math.round(

@@ -268,24 +268,50 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
    * which means "the page, nothing else". Portrait collapses it away: an
    * iPad portrait cannot hold a spread and a sidebar at a readable size.
    */
-  const showSidebar = !isFullscreen && width >= SIDEBAR_WIDTH + 620;
   /**
-   * One pager item = the list viewport, after the cutout inset AND after
-   * the sidebar (v2.8.5). The sidebar is a SIBLING in the row, so it takes
-   * its width out of the reader — an item sized to the whole window is
-   * that much too wide, and since the list is `inverted` the overflow
-   * lands on the leading edge: the left-hand page of every spread ran
-   * under the sidebar and was clipped mid-line.
+   * ── MEASURED, BECAUSE THE WINDOW'S OWN SIZE IS NOT RELIABLE ─────────
+   *
+   * `useWindowDimensions` is the app's answer to "how big is the window",
+   * and on Mac Catalyst it is wrong whenever the window is not where the
+   * hook last looked: drag it to a second display and it goes on
+   * reporting the first display's size indefinitely. A reader that sizes
+   * its pages from that number lays a wide landscape window out as a
+   * portrait one — which is the bug this replaced, and it looked like
+   * three pages jammed into a two-page window with the leftmost running
+   * under the sidebar and every column drawing its own chrome.
+   *
+   * So both boxes are taken from `onLayout`: `box` is the content row —
+   * the sidebar included, because pairing is a question about the whole
+   * window's shape — and `list` is the pager's own viewport, which is
+   * exactly one item wide by definition and needs no model of what took
+   * width out of it.
+   *
+   * The window is still the SEED, for the first frame only: `onLayout`
+   * has not run when the list mounts, and `initialScrollIndex` needs an
+   * item width that is not zero or the pager opens on page one. A frame
+   * at the window's guess, then the truth.
+   */
+  const [box, setBox] = useState({ w: 0, h: 0 });
+  const [list, setList] = useState({ w: 0, h: 0 });
+  const boxW = box.w || Math.max(0, width - sideInset * 2);
+  const boxH = box.h || Math.max(0, height - sideInset * 2);
+  const showSidebar = !isFullscreen && boxW >= SIDEBAR_WIDTH + 620;
+  /**
+   * One pager item = the list viewport (v2.24.1). Measured rather than
+   * derived: the sidebar is a SIBLING in the row and takes its width out
+   * of the reader, and an item sized to anything wider overflows — the
+   * list is `inverted`, so the overflow lands on the leading edge and the
+   * left-hand page of every spread ran under the sidebar, clipped
+   * mid-line (v2.8.5, fixed then by subtracting the sidebar, which was
+   * the same model one term better).
    */
   const pageWidth = spreadPageWidth(
-    width,
-    sideInset,
-    showSidebar ? SIDEBAR_WIDTH : 0,
+    list.w || Math.max(0, boxW - (showSidebar ? SIDEBAR_WIDTH : 0)),
   );
 
   // The one internal branch: portrait window → single centred page per
   // item; landscape → a facing pair per item.
-  const paired = width > height;
+  const paired = boxW > boxH;
   const itemCount = paired ? spreadCount(totalPages) : totalPages;
 
   const indexForPage = useCallback(
@@ -300,8 +326,6 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
   );
 
   const listRef = useRef<FlatList<number>>(null);
-  // Raw: the geometry it feeds is what settles, not this on its own.
-  const [listH, setListH] = useState(0);
 
   const navPad =
     !isFullscreen && Platform.OS === 'ios' && !props.chromeCleared
@@ -312,12 +336,11 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
   // published once it has stopped moving — see spreadPageGeometry.ts.
   const geometry = useSettledSpreadGeometry(
     spreadGeometry({
-      width,
-      height,
-      sideInset,
-      sidebarWidth: showSidebar ? SIDEBAR_WIDTH : 0,
+      listW: list.w,
+      listH: list.h,
+      boxW: box.w,
+      boxH: box.h,
       navPad,
-      listH,
     }),
   );
   // A settled geometry from before a rotation names the old width and the
@@ -548,7 +571,16 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
         barStyle={toneIsDark(tone) ? 'light-content' : 'dark-content'}
         animated
       />
-      <View style={styles.body}>
+      <View
+        style={styles.body}
+        // Raw: the geometry these feed is what settles, not them on their
+        // own. Set only on a real change — `onLayout` fires on every
+        // re-layout, and a setState with the same numbers on each one is a
+        // render loop waiting for a reason.
+        onLayout={e => {
+          const { width: w, height: h } = e.nativeEvent.layout;
+          setBox(prev => (prev.w === w && prev.h === h ? prev : { w, h }));
+        }}>
       {showSidebar ? (
         <MushafIndexSidebar
           currentPage={currentPage}
@@ -567,7 +599,10 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
       <View style={styles.reader}>
       <View
         style={styles.listWrap}
-        onLayout={e => setListH(e.nativeEvent.layout.height)}>
+        onLayout={e => {
+          const { width: w, height: h } = e.nativeEvent.layout;
+          setList(prev => (prev.w === w && prev.h === h ? prev : { w, h }));
+        }}>
         <FlatList
           ref={listRef}
           data={data}

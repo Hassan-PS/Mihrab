@@ -9,6 +9,9 @@
  * truth. The geometry carries the shape it was computed for now, and a
  * column draws no page until the two agree.
  */
+import { readFileSync } from 'fs';
+import path from 'path';
+
 import React, { act } from 'react';
 import { create, type ReactTestRenderer } from 'react-test-renderer';
 import {
@@ -26,26 +29,29 @@ import {
   type SpreadInputs,
 } from '../src/quran/spreadPageGeometry';
 
-// iPad landscape, sidebar shown, chrome up.
+// iPad landscape, sidebar shown, chrome up. Every box is MEASURED: the
+// content row is the window less its cutout inset, and the list is that
+// row less the 240dp sidebar beside it.
 const landscape: SpreadInputs = {
-  width: 1180,
-  height: 820,
-  sideInset: 0,
-  sidebarWidth: 240,
-  navPad: 0,
+  listW: 940,
   listH: 760,
+  boxW: 1180,
+  boxH: 820,
+  navPad: 0,
 };
 const portrait: SpreadInputs = {
   ...landscape,
-  width: 820,
-  height: 1180,
-  sidebarWidth: 0,
+  listW: 820,
   listH: 1120,
+  boxW: 820,
+  boxH: 1180,
 };
 
 describe('spreadGeometry', () => {
   it('has no answer before the list is measured', () => {
     expect(spreadGeometry({ ...landscape, listH: 0 })).toBeNull();
+    expect(spreadGeometry({ ...landscape, listW: 0 })).toBeNull();
+    expect(spreadGeometry({ ...landscape, boxW: 0 })).toBeNull();
   });
 
   it('pairs pages in landscape and not in portrait', () => {
@@ -53,9 +59,33 @@ describe('spreadGeometry', () => {
     expect(spreadGeometry(portrait)!.paired).toBe(false);
   });
 
-  it('takes the sidebar and the cutout out of the item width', () => {
-    expect(spreadPageWidth(1180, 20, 240)).toBe(1180 - 40 - 240);
+  /**
+   * The item is the measured viewport and nothing else — no window size,
+   * no sidebar term, no cutout term. Those were an arithmetic model of
+   * this number, and on Mac Catalyst the window size the model started
+   * from went stale the moment the window moved to another display: the
+   * reader laid a wide landscape window out as a portrait one, a third
+   * page crept in past the two on screen, and the leftmost ran under the
+   * sidebar. A measured viewport cannot disagree with itself.
+   */
+  it('is the measured viewport, whatever the window says', () => {
+    expect(spreadPageWidth(940)).toBe(940);
     expect(spreadGeometry(landscape)!.pageWidth).toBe(940);
+  });
+
+  it('pairs on the content row, not on the list beside the sidebar', () => {
+    // A window with room for a spread AND a sidebar: the list alone is
+    // taller than it is wide, and pairing off that would collapse a
+    // spread the window has the room for.
+    const g = spreadGeometry({
+      ...landscape,
+      boxW: 1180,
+      boxH: 820,
+      listW: 700,
+      listH: 760,
+    })!;
+    expect(g.paired).toBe(true);
+    expect(g.pageWidth).toBe(700);
   });
 
   it('leaves the page the viewport less its own chrome', () => {
@@ -76,6 +106,12 @@ describe('spreadGeometry', () => {
   it('rounds to whole dp', () => {
     expect(spreadGeometryKey(spreadGeometry({ ...landscape, listH: 760.4 }))).toBe(
       spreadGeometryKey(spreadGeometry({ ...landscape, listH: 759.6 })),
+    );
+    // The width too, and rounded inside `spreadPageWidth` so the live
+    // value and the settled one round identically — `spreadGeometryFits`
+    // compares them for equality.
+    expect(spreadGeometryKey(spreadGeometry({ ...landscape, listW: 940.4 }))).toBe(
+      spreadGeometryKey(spreadGeometry({ ...landscape, listW: 939.6 })),
     );
   });
 });
@@ -168,11 +204,12 @@ describe('an iPad rotation', () => {
     const { seen, set, wait } = mount(landscape);
     wait(100);
     const before = published(seen).length;
-    // Window swaps; the sidebar collapses (portrait cannot hold it); the
-    // list re-measures — three renders, one page size.
-    set({ ...landscape, width: 820, height: 1180 });
+    // The content row re-measures; the sidebar collapses (portrait cannot
+    // hold it) so the list gets the width back; then the list itself
+    // re-measures — three renders, one page size.
+    set({ ...landscape, boxW: 820, boxH: 1180 });
     wait(16);
-    set({ ...landscape, width: 820, height: 1180, sidebarWidth: 0 });
+    set({ ...landscape, boxW: 820, boxH: 1180, listW: 820 });
     wait(16);
     set(portrait);
     wait(100);
@@ -195,5 +232,67 @@ describe('an iPad rotation', () => {
     expect(spreadGeometryFits(held, 820, false)).toBe(false);
     wait(100);
     expect(spreadGeometryFits(seen[seen.length - 1], 820, false)).toBe(true);
+  });
+});
+
+
+/**
+ * ── THE READER MUST NOT GO BACK TO ASKING THE WINDOW ──────────────────
+ *
+ * Reported on the Mac (2026-09-20): opening the khatmah, and swiping to
+ * the muṣḥaf from another full-screen Space, drew THREE page columns in a
+ * two-page window — the leftmost running under the index sidebar — with a
+ * full set of chrome on each, before the reader corrected itself.
+ *
+ * The item width was `window.width - sideInset * 2 - sidebarWidth`, an
+ * arithmetic model of the list's viewport. `useWindowDimensions` is the
+ * first term, and on Catalyst it lags a Space switch and a move between
+ * displays — so the model described a window that was not on screen: too
+ * narrow, so items no longer filled the viewport and the neighbouring
+ * spread showed past them, and portrait-shaped, so the pairing came out
+ * single-page and every column drew both the juz label and the night
+ * pill.
+ *
+ * `readerChromeStaysLive` is the same family of fault from six weeks
+ * earlier: a view holding the layout it was given at the old width
+ * because nothing in its inputs changed when the window did. The answer
+ * there was to key on the settled size; the answer here is to stop
+ * modelling the box at all and measure it.
+ *
+ * Asserted against the source, in the idiom of `mushafRenderChurn`: the
+ * property is about where a number COMES FROM, which a rendered tree
+ * cannot show once the number is correct either way.
+ */
+describe('the spread reader measures its box', () => {
+  const src = readFileSync(
+    path.join(__dirname, '..', 'src', 'quran', 'MushafSpreadReader.tsx'),
+    'utf8',
+  );
+
+  it('takes the item width from the measured list, not the window', () => {
+    expect(src).toMatch(/spreadPageWidth\(\s*list\.w \|\|/);
+    // The old shape, in any spelling: the window's width with the sidebar
+    // and the cutout subtracted off it.
+    expect(src).not.toMatch(/spreadPageWidth\(\s*width,/);
+  });
+
+  it('pairs and shows the sidebar off the measured content row', () => {
+    expect(src).toMatch(/const paired = boxW > boxH;/);
+    expect(src).toMatch(/showSidebar =[\s\S]{0,40}boxW >= SIDEBAR_WIDTH \+ 620/);
+    expect(src).not.toMatch(/const paired = width > height;/);
+  });
+
+  it('feeds the geometry the measured boxes', () => {
+    expect(src).toMatch(/listW: list\.w,[\s\S]{0,80}boxW: box\.w,/);
+  });
+
+  /**
+   * `onLayout` fires on every re-layout, not only on a change. Writing
+   * state unconditionally from it is a render loop with a long fuse — it
+   * only shows up once something else re-renders the reader on a timer.
+   */
+  it('writes the measured boxes only when they actually change', () => {
+    const guards = src.match(/prev\.w === w && prev\.h === h \? prev :/g) ?? [];
+    expect(guards).toHaveLength(2);
   });
 });
