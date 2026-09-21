@@ -18,12 +18,14 @@ import {
   InteractionManager,
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Switch,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useKeyboardInset } from '../hooks/useKeyboardInset';
 import { useKeyboardAwareScroll } from '../hooks/useKeyboardAwareScroll';
@@ -142,6 +144,9 @@ function RowLine({ palette }: { palette: AppPalette }) {
 }
 
 export function QuranScreen() {
+  // For the Khatmah options dialog, which is centred between these rather
+  // than drawn from the top edge of the window.
+  const insets = useSafeAreaInsets();
   const quranWide = useBreakpoint() !== 'compact';
   const listCap = quranWide ? styles.listWide : null;
   const { t, i18n } = useTranslation();
@@ -1573,12 +1578,42 @@ export function QuranScreen() {
           accessibilityLabel={t('common.close', 'Close')}
           onPress={() => setKhatmahMenuVisible(false)}
         />
-        <View style={[styles.menuCard, { backgroundColor: palette.card }]}>
+        {/**
+         * CENTRED IN THE SAFE AREA, NOT PINNED TO A NUMBER.
+         *
+         * This card had no vertical anchor at all. When the anchor moved
+         * out of `menuCard` into `menuCardResting` — so the keyboard-lifted
+         * sheets could take one or the other — the other two dialogs were
+         * given it and this one was not, so it sat at the top of the
+         * window with its title drawn through the clock and the camera.
+         *
+         * Not `menuCardResting` either: "a quarter of the way down" is a
+         * guess about how tall the card is, and this one is the tallest in
+         * the app — five rows, two lines each, at whatever text size the
+         * reader has chosen. So it is centred between the status bar and
+         * the home indicator, and the rows scroll if they ever do not fit.
+         * `box-none` lets a tap beside the card reach the backdrop, which
+         * is what closes it.
+         */}
+        <View
+          pointerEvents="box-none"
+          style={[
+            styles.menuCentre,
+            {
+              paddingTop: insets.top + SPACING.lg,
+              paddingBottom: insets.bottom + SPACING.lg,
+            },
+          ]}>
+        <View style={[styles.menuCardCentred, { backgroundColor: palette.card }]}>
           <Text style={[styles.menuTitle, { color: palette.text }]}>
             {/* Not only resets any more: the date this plan is paced to
                 is changed from here too (issue #53). */}
             {t('quran.khatmahOptionsTitle', 'Khatmah options')}
           </Text>
+          <ScrollView
+            style={styles.menuRows}
+            contentContainerStyle={styles.menuRowsContent}
+            bounces={false}>
           {(
             [
               [
@@ -1659,6 +1694,7 @@ export function QuranScreen() {
               </Text>
             </Pressable>
           ))}
+          </ScrollView>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('common.cancel', 'Cancel')}
@@ -1668,6 +1704,7 @@ export function QuranScreen() {
               {t('common.cancel', 'Cancel')}
             </Text>
           </Pressable>
+        </View>
         </View>
       </Modal>
 
@@ -2175,6 +2212,23 @@ const styles = StyleSheet.create({
   // was pinned at both edges, and it stretched into a tall pale box with
   // its buttons floating in the middle of it.
   menuCardResting: { top: '25%' },
+  // The Khatmah options dialog: centred between the insets rather than
+  // pinned — see its render site.
+  menuCentre: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    // rtl-safe: symmetric on both edges, the same 24 the pinned cards use
+    paddingHorizontal: 24,
+  },
+  menuCardCentred: {
+    maxHeight: '100%',
+    borderRadius: RADIUS.lg,
+    padding: SPACING.lg,
+    gap: SPACING.md,
+  },
+  // Shrinks to its rows, and scrolls only when they outgrow the screen.
+  menuRows: { flexGrow: 0, flexShrink: 1 },
+  menuRowsContent: { gap: SPACING.md },
   menuTitle: { fontSize: TYPE.title3.fontSize, fontWeight: '700', marginBottom: SPACING.xs },
   menuRow: {
     borderWidth: StyleSheet.hairlineWidth,
