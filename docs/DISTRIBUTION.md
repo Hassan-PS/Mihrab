@@ -18,6 +18,11 @@ How Mihrab gets from a `git push` to a user's phone. Three independent channels 
        from a public tag         to the Play Console    `vX.Y.Z` tag → TestFlight
 ```
 
+Beside the three stores: **GitHub Releases** (what Obtainium installs) carries
+the `githubRelease` APK, published as `Mihrab-vX.Y.Z.apk` by `release.sh` —
+R8 on, ARM only, no Google libraries. It is no longer the F-Droid APK (it was
+up to 2.25.0; see the `github` flavor below).
+
 The Android `app/build.gradle` declares two product flavors (`fdroid` / `play`) plus a `beta` build type that sits next to release via `.beta` `applicationIdSuffix`. The iOS project has a single target that Xcode Cloud builds for both App Store and TestFlight.
 
 ---
@@ -178,8 +183,8 @@ silence. Ship the Mac afterwards by building the zip, `gh release upload`
 it onto the existing tag, then bumping the cask's version and sha against
 the *published* zip and pushing the tap.
 
-For beta tags, swap the Gradle commands for `assembleFdroidBeta` /
-`bundlePlayBeta` and mark the GitHub release as **prerelease** — the
+For beta tags, swap the Gradle commands for `assembleGithubBeta` (the
+APK on the GitHub release) / `bundlePlayBeta` and mark the GitHub release as **prerelease** — the
 script does production tags only.
 
 ---
@@ -514,17 +519,18 @@ After Xcode Cloud finishes the **Release** workflow:
 
 ## 5. GitHub releases (sideload + binary archive)
 
-Every tag gets a GitHub release with the F-Droid APK attached, so:
+Every tag gets a GitHub release with the `github`-flavor APK attached as `Mihrab-vX.Y.Z.apk` (the F-Droid APK up to 2.25.0), so:
 
-- Users on F-Droid have a fallback while F-Droid CI is building the upstream version.
 - Obtainium users (Android power-user app updater) can subscribe to GitHub Releases and auto-pull every new APK.
-- Reproducible-build verifiers can compare the GitHub-attached APK against the F-Droid-built APK byte-for-byte.
+- Anyone can sideload a signed build without a store.
+
+It is not byte-comparable with F-Droid's build: F-Droid signs with its own key and builds with R8 off, the GitHub APK is R8-minified, ARM-only and signed with the project key. `release.sh` does all of this; the commands below are what it runs.
 
 ```sh
 gh release create vX.Y.Z \
   --title "vX.Y.Z" \
   --notes "$(awk '/^## \[X.Y.Z\]/,/^## \[/' CHANGELOG.md | sed '$d')" \
-  android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+  /tmp/Mihrab-vX.Y.Z.apk   # copied from android/app/build/outputs/apk/github/release/app-github-release.apk
 ```
 
 For beta tags, add `--prerelease`.

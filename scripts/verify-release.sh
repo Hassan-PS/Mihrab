@@ -8,6 +8,7 @@
 #     asset URL starts returning 404, breaking `brew install` (v2.7.39)
 #   • cask version/sha256 drifting from the actually-published zip
 #   • a missing asset (APK or Catalyst zip) on the release
+#   • the wrong APK on the release — Obtainium installs whatever is there
 #
 # Run it at the end of EVERY release cut, and again after ANY retag or
 # release edit. Exits non-zero with a ✗ line on the first failure.
@@ -63,6 +64,52 @@ for url in "$ZIP_URL" "$APK_URL"; do
     fail "HTTP $code: $url"
   fi
 done
+
+# ── 3a. The APK AS SERVED is the GitHub build ───────────────────────────
+#
+# Obtainium installs whatever APK the release carries, and picks
+# unattended only when there is exactly one. After 2.25.0 that one is the
+# `github` flavor: ARM only, R8 on, nothing Google, signed with the key
+# every earlier GitHub APK carried — a different key and Android refuses
+# the update on every phone that already has the app.
+APK_COUNT=$(echo "${REL_JSON:-}" | python3 -c 'import json,sys
+try: print(sum(a["name"].endswith(".apk") for a in json.load(sys.stdin)["assets"]))
+except Exception: print(-1)')
+if [ "$APK_COUNT" = "1" ]; then
+  pass "exactly one APK on the release (Obtainium can pick it unattended)"
+else
+  fail "$APK_COUNT APKs on the release — Obtainium needs exactly one; remove the extra with gh release delete-asset $TAG <name> -R $REPO -y"
+fi
+APK_TMP=$(mktemp)
+if curl -sfL -o "$APK_TMP" "$APK_URL"; then
+  abis=$(unzip -Z1 "$APK_TMP" 'lib/*' 2>/dev/null | cut -d/ -f2 | sort -u | tr '\n' ' ')
+  if [ "$abis" = "arm64-v8a armeabi-v7a " ]; then
+    pass "published APK is ARM only (github flavor)"
+  else
+    fail "published APK carries ABIs '$abis' — expected arm64-v8a armeabi-v7a; is this the F-Droid build?"
+  fi
+  if unzip -p "$APK_TMP" 'classes*.dex' 2>/dev/null | strings | grep -qE 'Lcom/google/(android/gms|firebase|android/play/core)/'; then
+    fail "published APK contains Google Play Services / Firebase / Play Core classes"
+  else
+    pass "published APK carries no Google Play Services"
+  fi
+  RELEASE_CERT="e66c0dabc898856bd0f6057a8fe0aaa440fa1d04f0da5a213104f41f89e6f997"
+  SIGNER=$(ls "$HOME"/Library/Android/sdk/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1)
+  if [ -n "$SIGNER" ]; then
+    cert=$(JAVA_HOME="${JDK:-/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home}" \
+      "$SIGNER" verify --print-certs "$APK_TMP" 2>/dev/null | sed -n 's/.*certificate SHA-256 digest: //p' | head -1)
+    if [ "$cert" = "$RELEASE_CERT" ]; then
+      pass "published APK is signed with the release key"
+    else
+      fail "published APK signer is '${cert:-unverifiable}', not the release key — existing installs cannot update over it"
+    fi
+  else
+    pend "apksigner not found — signing key of the published APK not checked"
+  fi
+else
+  fail "could not download $APK_URL to inspect it"
+fi
+rm -f "$APK_TMP"
 
 # ── 4. Cask: version matches, sha256 matches the PUBLISHED zip ──────────
 if [ -f "$TAP" ]; then

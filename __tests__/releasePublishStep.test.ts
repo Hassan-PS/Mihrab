@@ -107,3 +107,21 @@ describe('the cask cannot be pushed stale', () => {
     expect(script).toMatch(/SHA=\$\(shasum -a 256 "\$TMPZIP"/);
   });
 });
+
+describe('the APK on GitHub is the github flavor, checked as served', () => {
+  it('release.sh publishes the github build, not the F-Droid one', () => {
+    expect(script).toContain(
+      'APK="$ROOT/android/app/build/outputs/apk/github/release/app-github-release.apk"',
+    );
+    expect(script).toMatch(/assembleGithubRelease[\s\S]*?arm64-v8a,armeabi-v7a/);
+    expect(script).toContain('github APK is ARM only');
+    expect(script).toContain('github APK carries no Google Play Services');
+  });
+
+  it('verify-release.sh inspects the downloaded APK, not the local one', () => {
+    expect(verify).toContain('exactly one APK on the release');
+    expect(verify).toContain('published APK is ARM only');
+    expect(verify).toContain('published APK carries no Google Play Services');
+    expect(verify).toContain('published APK is signed with the release key');
+  });
+});
