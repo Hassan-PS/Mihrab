@@ -34,7 +34,7 @@ import { useAppPalette } from '../../hooks/useAppPalette';
 import { isMacCatalyst } from '../../responsive/breakpoints';
 import type { SurahIndex } from '../../quran/quran';
 import { MushafReader } from '../../quran/MushafReader';
-import { SIDEBAR_WIDTH, sidebarFits } from '../../quran/MushafIndexSidebar';
+import { SIDEBAR_WIDTH, sidebarShown } from '../../quran/MushafIndexSidebar';
 import {
   resolveRiwayah,
   riwayahById,
@@ -220,7 +220,7 @@ export function MushafSurahScreen({
      * insets — cutout included — itself, so here it just gets the window.
      */
     // Before the stored blob is read, the tone is its default of paper, so
-    // this would paint the screen pure white and then flip to #101010 a
+    // this would paint the screen pure white and then flip to black a
     // moment later when the real preference arrives. Hold the app's own
     // background until we actually know — it is the colour already on
     // screen, so waiting shows as nothing at all, where guessing shows as a
@@ -258,7 +258,10 @@ export function MushafSurahScreen({
      * centre is half a sidebar further along — and "• An-Nisaa" sat
      * visibly left of the page it names. Shift it by exactly that half,
      * and only while the sidebar is actually up: same predicate as the
-     * reader, so the two can never disagree (`sidebarFits`).
+     * reader, so the two can never disagree (`sidebarShown` — which a
+     * phone answers no to at any width, since the phone reader has no
+     * index; a phone in landscape is wide enough to fit one and used to
+     * get the shift for a sidebar that was not there).
      *
      * A transform rather than a padding: the title is a centred subview
      * UIKit positions, and padding inside it moves the text within a box
@@ -266,7 +269,7 @@ export function MushafSurahScreen({
      * `direction: 'rtl'`, so the sign is chosen here — in Arabic the
      * sidebar is on the trailing edge and the page centre moves left.
      */
-    const sidebarUp = sidebarFits(headerW);
+    const sidebarUp = sidebarShown(headerW);
     const isRtl = isRtlLanguage(i18n.language);
     const titleShift = sidebarUp ? (isRtl ? -1 : 1) * (SIDEBAR_WIDTH / 2) : 0;
     const headerTitleRow = {

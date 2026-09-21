@@ -281,7 +281,7 @@ describe('the spread reader measures its box', () => {
     // The width rule itself lives with the sidebar now — the muṣḥaf's
     // header asks it too, to centre its title over the page rather than
     // the window (mushafHeaderOverPage.test.ts).
-    expect(src).toMatch(/showSidebar =[\s\S]{0,40}sidebarFits\(boxW\)/);
+    expect(src).toMatch(/showSidebar =[\s\S]{0,40}sidebarShown\(boxW\)/);
     expect(src).not.toMatch(/const paired = width > height;/);
   });
 

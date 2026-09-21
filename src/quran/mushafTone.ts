@@ -18,6 +18,7 @@
  * reads the old field exactly as before.
  */
 // tokens-ok: the mushaf is a print with its own three tones — paper, sepia, night — independent of the app palette
+import { PALETTE_OLED } from '../theme/tokens';
 import type { QuranPrefs } from './quranState';
 
 export type MushafTone = 'paper' | 'sepia' | 'night';
@@ -76,11 +77,24 @@ export function prefsForTone(
     : { mushafNightMode: false, mushafPaperTone: choice, mushafToneAuto: false };
 }
 
-/** The page's ground. */
+/**
+ * The page's ground.
+ *
+ * NIGHT IS THE OLED BLACK — `PALETTE_OLED`'s ground, not a near-black of
+ * its own. The night page was #101010 from 2.7, a shade the app's own
+ * dark theme (#141210) sat beside comfortably; but a reader who had set
+ * the app to pure black got a page that was visibly NOT, a grey slab in
+ * a black frame, and one who had not still wanted the page — the thing
+ * they stare at longest, in the dark — to let an OLED switch its pixels
+ * off. So the page takes the OLED variant whatever the app is set to:
+ * the ground is #000000 and the chrome standing on it (`TONE_CHROME`)
+ * takes that palette's lifted surface. The ink and the gold are still
+ * the print's own.
+ */
 export const TONE_PAGE_BG: Record<MushafTone, string> = {
   paper: '#ffffff',
   sepia: '#F3EBDB',
-  night: '#101010',
+  night: PALETTE_OLED.bg,
 };
 
 /** The ornament ink — medallions, the page number, the header labels. */
@@ -130,9 +144,11 @@ export const TONE_CHROME: Record<MushafTone, ToneChrome> = {
   night: {
     ink: '#f2f2f2',
     muted: '#9a9a9a',
-    control: '#1e1e1e',
+    // One step up the OLED ladder for a control on the black ground, and
+    // the ladder's lifted surface for the scrub bubble — see TONE_PAGE_BG.
+    control: '#211D19',
     accent: TONE_ORNAMENT.night,
-    card: '#181818',
+    card: PALETTE_OLED.surface,
   },
 };
 

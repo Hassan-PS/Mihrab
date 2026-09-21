@@ -16,7 +16,7 @@
 import fs from 'fs';
 import path from 'path';
 
-import { SIDEBAR_WIDTH, SIDEBAR_MIN_READER, sidebarFits } from '../src/quran/MushafIndexSidebar';
+import { SIDEBAR_WIDTH, SIDEBAR_MIN_READER, sidebarFits, sidebarShown } from '../src/quran/MushafIndexSidebar';
 
 const read = (p: string) =>
   fs.readFileSync(path.join(__dirname, '..', p), 'utf8');
@@ -31,12 +31,36 @@ describe('one rule for whether the sidebar is up', () => {
 
   it('is asked by the reader and by the header, never re-derived', () => {
     const reader = read('src/quran/MushafSpreadReader.tsx');
-    expect(reader).toContain('sidebarFits(boxW)');
+    expect(reader).toContain('sidebarShown(boxW)');
     // The old inline arithmetic is gone from both callers.
     expect(reader).not.toMatch(/SIDEBAR_WIDTH\s*\+\s*620/);
     const screen = read('src/screens/quran/MushafSurahScreen.tsx');
-    expect(screen).toContain('sidebarFits(headerW)');
+    expect(screen).toContain('sidebarShown(headerW)');
+    expect(screen).not.toMatch(/sidebarFits\(headerW\)/);
     expect(screen).not.toMatch(/SIDEBAR_WIDTH\s*\+\s*620/);
+  });
+
+  /**
+   * Reported from a phone in landscape: the surah name sat well right of
+   * centre. The window was wide enough for a sidebar, so the header moved
+   * the title half a sidebar along — but the phone reader never draws
+   * one. Room is not the same question as presence.
+   */
+  it('is never up on a phone, however wide the window turns', () => {
+    jest.isolateModules(() => {
+      jest.doMock('../src/responsive/deviceClass', () => ({ DEVICE_CLASS: 'phone' }));
+      const phone = require('../src/quran/MushafIndexSidebar') as typeof import('../src/quran/MushafIndexSidebar');
+      const wide = phone.SIDEBAR_WIDTH + phone.SIDEBAR_MIN_READER + 200;
+      expect(phone.sidebarFits(wide)).toBe(true); // room, yes …
+      expect(phone.sidebarShown(wide)).toBe(false); // … but no index to put in it
+      expect(phone.sidebarShown(2000)).toBe(false);
+    });
+  });
+
+  it('and is up on a large device exactly when it fits', () => {
+    // Jest's screen is 750×1334, which `deviceClass` reads as large.
+    expect(sidebarShown(SIDEBAR_WIDTH + SIDEBAR_MIN_READER)).toBe(true);
+    expect(sidebarShown(SIDEBAR_WIDTH + SIDEBAR_MIN_READER - 1)).toBe(false);
   });
 });
 

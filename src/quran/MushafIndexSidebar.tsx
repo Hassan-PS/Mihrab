@@ -39,6 +39,7 @@ import { claimReadingSession } from './readingSession';
 import { activeKhatmah } from './quranCardState';
 import { Chip } from '../components/controls';
 import { desktopSize } from '../responsive/desktop';
+import { DEVICE_CLASS } from '../responsive/deviceClass';
 import { usePagingKeySuspension } from './useKeyPaging';
 import { RADIUS, SPACING } from '../theme/tokens';
 
@@ -67,6 +68,23 @@ export const SIDEBAR_MIN_READER = 620;
  */
 export function sidebarFits(contentWidth: number): boolean {
   return contentWidth >= SIDEBAR_WIDTH + SIDEBAR_MIN_READER;
+}
+
+/**
+ * Is the index actually UP beside a reader this wide?
+ *
+ * `sidebarFits` is the room. This adds the one thing room does not know:
+ * a phone never draws the index at all — `MushafPhoneReader` has no
+ * sidebar, and a phone turned to landscape can be 900dp across and still
+ * be a phone. Both callers ask this one: the spread reader (where the
+ * class is always large, so it is the same answer) and the muṣḥaf
+ * screen's header, which centres its title over the page and had moved
+ * it half a sidebar along for a sidebar that was not there — "An-Nisaa"
+ * a hundred-odd points right of the page it named, in landscape, on
+ * every phone wider than the threshold.
+ */
+export function sidebarShown(contentWidth: number): boolean {
+  return DEVICE_CLASS !== 'phone' && sidebarFits(contentWidth);
 }
 
 type Tab = 'surah' | 'juz' | 'marks';

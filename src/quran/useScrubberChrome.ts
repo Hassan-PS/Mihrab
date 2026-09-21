@@ -31,7 +31,11 @@ export function usePagePalette(tone: MushafTone): AppPalette {
         {
           appearance,
           useSystemDynamicTheme,
-          pureBlackDark,
+          // A night page is the OLED black whatever the app is set to
+          // (`TONE_PAGE_BG`), so the theme rendered for it is the
+          // pure-black one — its surfaces are the ones that sit on that
+          // ground. The app's own setting still decides the app.
+          pureBlackDark: pureBlackDark || toneIsDark(tone),
           appAccentId,
           appAccentCustomHex,
           tintedSurfaces,

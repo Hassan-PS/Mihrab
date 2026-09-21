@@ -56,7 +56,7 @@ import { AyahActionSheet } from './mushaf/AyahActionSheet';
 import {
   MushafIndexSidebar,
   SIDEBAR_WIDTH,
-  sidebarFits,
+  sidebarShown,
 } from './MushafIndexSidebar';
 import { MushafPageScrubber } from './MushafPageScrubber';
 import { MiniPlayer } from './audio/MiniPlayer';
@@ -299,7 +299,7 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
   const [list, setList] = useState({ w: 0, h: 0 });
   const boxW = box.w || Math.max(0, width - sideInset * 2);
   const boxH = box.h || Math.max(0, height - sideInset * 2);
-  const showSidebar = !isFullscreen && sidebarFits(boxW);
+  const showSidebar = !isFullscreen && sidebarShown(boxW);
   /**
    * One pager item = the list viewport (v2.24.1). Measured rather than
    * derived: the sidebar is a SIBLING in the row and takes its width out
