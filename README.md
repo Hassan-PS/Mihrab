@@ -98,7 +98,7 @@
 |---|---|
 | **iOS** | [App Store](https://apps.apple.com/us/app/prayer-salah-times-qibla/id6762085256) |
 | **macOS (Homebrew)** | `brew install --cask hassan-ps/tap/mihrab` — native Mac Catalyst build from [GitHub Releases](https://github.com/Hassan-PS/Mihrab/releases) |
-| **Android APK** | [GitHub Releases](https://github.com/Hassan-PS/Mihrab/releases) → `app-fdroid-release.apk` (arm64) |
+| **Android APK** | [GitHub Releases](https://github.com/Hassan-PS/Mihrab/releases) → `Mihrab-vX.Y.Z.apk` (ARM phones, 32- and 64-bit) |
 | **Android (Obtainium)** | [Add to Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Hassan-PS/Mihrab) — auto-updates directly from GitHub Releases |
 | **Google Play** | [Google Play](https://play.google.com/store/apps/details?id=com.prayer_times) |
 | **F-Droid** | [f-droid.org/packages/com.prayer_times](https://f-droid.org/packages/com.prayer_times/) |
@@ -124,6 +124,7 @@ npm run android:bundlePlayRelease
 
 Outputs:
 - F-Droid APK: `android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk`
+- GitHub/Obtainium APK: `android/app/build/outputs/apk/github/release/app-github-release.apk` (`npm run android:assembleGithubRelease`)
 - Play AAB: `android/app/build/outputs/bundle/playRelease/app-play-release.aab`
 
 ### iOS

@@ -565,18 +565,28 @@ grep -q "version: '$VERSION'," "$ROOT/src/polish/releaseNotes.generated.ts" \
 ok "in-app changelog carries $VERSION ($CODE)"
 
 step "Android"
-# TWO INVOCATIONS, deliberately. The play and fdroid flavors have
+# SEPARATE INVOCATIONS, deliberately. The play and fdroid flavors have
 # different signing config and manifest merges, and building them in one
 # gradle run has produced an APK carrying the other flavor's settings.
 ( cd "$ROOT/android" && JAVA_HOME="$JDK" ./gradlew -q assemblePlayRelease bundlePlayRelease ) \
   || die "play build failed"
 ok "play APK + AAB"
+# The GitHub/Obtainium APK: its own flavor, R8 on, ARM only. Compiling
+# only the ABIs it packages keeps this run from building x86 twice for
+# nothing; the flavor's abiFilters is what guarantees the contents.
+( cd "$ROOT/android" && JAVA_HOME="$JDK" ./gradlew -q assembleGithubRelease \
+    -PreactNativeArchitectures=arm64-v8a,armeabi-v7a ) \
+  || die "github build failed"
+ok "github APK"
+# Still built, though nothing here publishes it: F-Droid builds its own
+# from the recipe, and this run proves the recipe's flavor compiles at
+# the tag before F-Droid's CI finds out.
 ( cd "$ROOT/android" && JAVA_HOME="$JDK" ./gradlew -q assembleFdroidRelease ) \
   || die "fdroid build failed"
 ok "fdroid APK"
 
 # Ask the artifact what it thinks it is, rather than trusting the stamp.
-APK="$ROOT/android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk"
+APK="$ROOT/android/app/build/outputs/apk/github/release/app-github-release.apk"
 AAB="$ROOT/android/app/build/outputs/bundle/playRelease/app-play-release.aab"
 AAPT=$(ls "$HOME"/Library/Android/sdk/build-tools/*/aapt2 2>/dev/null | sort -V | tail -1)
 if [ -n "$AAPT" ]; then
@@ -584,6 +594,16 @@ if [ -n "$AAPT" ]; then
   has "$badge" "versionCode='$CODE'"    || die "APK reports the wrong versionCode: $badge"
   has "$badge" "versionName='$VERSION'" || die "APK reports the wrong versionName: $badge"
   ok "APK badging confirms $VERSION ($CODE)"
+  # ARM only, and nothing Google. Checked on the artifact because a stray
+  # dependency or a dropped abiFilters line would change neither the
+  # build log nor the version — only the thing Obtainium users install.
+  abis=$(unzip -Z1 "$APK" 'lib/*' 2>/dev/null | cut -d/ -f2 | sort -u | tr '\n' ' ')
+  [ "$abis" = "arm64-v8a armeabi-v7a " ] || die "github APK carries ABIs '$abis', expected arm64-v8a armeabi-v7a"
+  ok "github APK is ARM only"
+  if unzip -p "$APK" 'classes*.dex' | strings | grep -qE 'Lcom/google/(android/gms|firebase|android/play/core)/'; then
+    die "github APK contains Google Play Services / Firebase / Play Core classes"
+  fi
+  ok "github APK carries no Google Play Services"
 fi
 
 if [ "${SKIP_CATALYST:-0}" = "1" ]; then
@@ -782,13 +802,13 @@ ok "$TAG pushed"
 #
 # `gh release create file#Label` sets a display LABEL, not the asset name —
 # the asset keeps the basename on disk. Uploading the gradle output
-# directly would publish `app-fdroid-release.apk`, and then every download
+# directly would publish `app-github-release.apk`, and then every download
 # URL anyone has ever been given 404s: the one in the release notes, the
 # one verify-release.sh checks, and the one F-Droid's recipe resolves.
 # Copy to the published name and upload that.
 STAGE=$(mktemp -d)
-cp "$APK" "$STAGE/Mihrab-v$VERSION-fdroid.apk" || die "cannot stage the APK"
-ASSETS="$STAGE/Mihrab-v$VERSION-fdroid.apk"
+cp "$APK" "$STAGE/Mihrab-v$VERSION.apk" || die "cannot stage the APK"
+ASSETS="$STAGE/Mihrab-v$VERSION.apk"
 if [ -n "$ZIP" ]; then
   cp "$ZIP" "$STAGE/" || die "cannot stage the zip"
   ASSETS="$ASSETS $STAGE/Mihrab-macOS-$VERSION.zip"
@@ -812,7 +832,7 @@ rm -rf "$STAGE"
 # Ask GitHub what it actually published, rather than assuming the upload
 # meant what we meant.
 PUBLISHED=$(gh release view "$TAG" -R "$REPO" --json assets --jq '.assets[].name' 2>/dev/null)
-has "$PUBLISHED" "Mihrab-v$VERSION-fdroid.apk" \
+has "$PUBLISHED" "Mihrab-v$VERSION.apk" \
   || die "the APK published under the wrong name: $PUBLISHED"
 if [ -n "$ZIP" ]; then
   has "$PUBLISHED" "Mihrab-macOS-$VERSION.zip" \

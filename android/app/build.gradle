@@ -52,8 +52,8 @@ react {
 
     /* Autolinking */
     autolinkLibrariesWithApp()
-    /* Match native-stack + F-Droid debug variant names */
-    debuggableVariants = ["playDebug", "fdroidDebug"]
+    /* Match native-stack + per-flavor debug variant names */
+    debuggableVariants = ["playDebug", "fdroidDebug", "githubDebug"]
 }
 
 // R8/Proguard is ON for the Play release (smaller APK / store expectation) but
@@ -95,10 +95,18 @@ def wantsPlayRelease = requestedTasks.any { t ->
      t == "assembleplaybeta"   || t == "bundleplaybeta") &&
     !t.contains("fdroid")
 }
+// The GitHub/Obtainium APK is signed with the same key as every earlier
+// GitHub release. A debug-signed one would install for nobody who already
+// has the app — Android refuses an update whose signature changed — so it
+// gets the same no-fallback rule as Play.
+def wantsGithubRelease = requestedTasks.any { t ->
+    t == "assemblegithubrelease" || t == "assemblegithubbeta"
+}
 // True when this invocation builds the F-Droid flavor. Used to trim R8 + release
 // lint for the F-Droid build only (keeps the Play build fully minified + linted).
 def wantsFdroid = requestedTasks.any { it.contains("fdroid") }
 def wantsPlayAny = requestedTasks.any { t -> t.contains("play") && !t.contains("fdroid") }
+def wantsGithubAny = requestedTasks.any { t -> t.contains("github") }
 /**
  * ONE INVOCATION CANNOT SERVE BOTH FLAVOURS, AND SILENTLY PICKING ONE SHIPPED
  * AN UNOPTIMIZED APP TO PLAY.
@@ -118,9 +126,9 @@ def wantsPlayAny = requestedTasks.any { t -> t.contains("play") && !t.contains("
  * that asks for both now stops rather than guessing: `android:releaseAll`
  * issues two separate Gradle invocations instead.
  */
-if (wantsFdroid && wantsPlayAny) {
+if (wantsFdroid && (wantsPlayAny || wantsGithubAny)) {
     throw new GradleException(
-        "Refusing to build the play and fdroid flavors in one Gradle invocation: " +
+        "Refusing to build the fdroid flavor together with play or github in one Gradle invocation: " +
         "minifyEnabled is per build type, so one of the two would silently get the " +
         "other's R8 setting — which is how an unminified bundle reached Play. " +
         "Run them separately, e.g. `./gradlew assemblePlayRelease bundlePlayRelease` " +
@@ -128,10 +136,10 @@ if (wantsFdroid && wantsPlayAny) {
     )
 }
 def enableProguardInReleaseBuilds = !wantsFdroid
-if (wantsPlayRelease && !hasReleaseSigningConfig) {
+if ((wantsPlayRelease || wantsGithubRelease) && !hasReleaseSigningConfig) {
     throw new GradleException(
-        "Play release/beta builds require android/keystore.properties with storeFile/storePassword/keyAlias/keyPassword. " +
-        "Refusing to fallback to debug signing for playRelease / playBeta."
+        "Play and GitHub release/beta builds require android/keystore.properties with storeFile/storePassword/keyAlias/keyPassword. " +
+        "Refusing to fallback to debug signing for play/github release or beta."
     )
 }
 
@@ -218,6 +226,32 @@ android {
         }
         fdroid {
             dimension "distribution"
+        }
+        /**
+         * The APK on GitHub Releases, which is what Obtainium installs.
+         *
+         * It used to be the F-Droid build, uploaded as-is — and that build
+         * is shaped by F-Droid's CI, not by what a phone needs: R8 off
+         * (their runner OOMs with it on), so the dex is twice Play's, and
+         * native code for all four ABIs, a third of it x86 that no phone
+         * running this app has. 84 MB for what Play delivers in ~36.
+         *
+         * Neither constraint applies here. Nothing Google is involved
+         * either way: Play Services left with the geolocation patch (it
+         * applies to every flavor) and billing left with the tip jar, so
+         * the Play and F-Droid APKs carry no `com.google.android.gms`,
+         * Firebase or Play Core classes at all. This flavor differs from
+         * `play` only in where "Rate Mihrab" points — GitHub, since an
+         * Obtainium user may have no Play Store — and in shipping ARM only.
+         *
+         * Same applicationId, same signing key as every earlier GitHub
+         * APK, so existing Obtainium installs update over it in place.
+         */
+        github {
+            dimension "distribution"
+            ndk {
+                abiFilters "arm64-v8a", "armeabi-v7a"
+            }
         }
     }
     signingConfigs {

@@ -33,11 +33,12 @@ describe('assets are published under the names people already have', () => {
   });
 
   it('copies the APK to its published name before uploading', () => {
-    // gradle emits app-fdroid-release.apk; the world expects
-    // Mihrab-vX.Y.Z-fdroid.apk.
-    expect(script).toMatch(/cp "\$APK" "\$STAGE\/Mihrab-v\$VERSION-fdroid\.apk"/);
+    // gradle emits app-github-release.apk; the world expects
+    // Mihrab-vX.Y.Z.apk (Mihrab-vX.Y.Z-fdroid.apk up to 2.25.0, when the
+    // Releases APK was still the F-Droid build).
+    expect(script).toMatch(/cp "\$APK" "\$STAGE\/Mihrab-v\$VERSION\.apk"/);
     expect(script).toMatch(
-      /gh release create[\s\S]*?\$STAGE\/Mihrab-v\$VERSION-fdroid\.apk/,
+      /gh release create[\s\S]*?\$STAGE\/Mihrab-v\$VERSION\.apk/,
     );
   });
 
@@ -49,9 +50,9 @@ describe('assets are published under the names people already have', () => {
 
   it('publishes exactly the names verify-release.sh looks for', () => {
     // The two scripts agreeing is the whole point; they disagreed once.
-    expect(verify).toContain('Mihrab-v$VERSION-fdroid.apk');
+    expect(verify).toContain('Mihrab-v$VERSION.apk');
     expect(verify).toContain('Mihrab-macOS-$VERSION.zip');
-    expect(script).toContain('Mihrab-v$VERSION-fdroid.apk');
+    expect(script).toContain('Mihrab-v$VERSION.apk');
     expect(script).toContain('Mihrab-macOS-$VERSION.zip');
   });
 });

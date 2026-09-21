@@ -239,7 +239,16 @@ setup from scratch.
 # → android/app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
 ```
 
-Then attach that APK to the GitHub release so users who want F-Droid binaries before the upstream build finishes can sideload.
+That APK is **not** what goes on GitHub Releases any more (it was, up to 2.25.0).
+
+### The `github` flavor (GitHub Releases / Obtainium)
+
+```sh
+./android/gradlew -p android assembleGithubRelease -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
+# → android/app/build/outputs/apk/github/release/app-github-release.apk
+```
+
+`release.sh` builds it and publishes it as `Mihrab-vX.Y.Z.apk`. It exists because the F-Droid APK is shaped by F-Droid's CI, not by phones: R8 off and all four ABIs made it 84 MB against Play's ~36 MB per device. The `github` flavor keeps R8 and resource shrinking on and packages `arm64-v8a` + `armeabi-v7a` only (`ndk.abiFilters`). Like every flavor it has no Google Play Services, Firebase or Play Core — `release.sh` checks the dex before publishing — and "Rate Mihrab" opens GitHub rather than the Play Store. Same applicationId and signing key as earlier GitHub APKs, so Obtainium installs update in place. Gradle refuses to build it (or play) in the same invocation as fdroid, and refuses to debug-sign it.
 
 ### What the `fdroid` flavor does differently
 

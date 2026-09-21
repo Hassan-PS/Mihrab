@@ -4,15 +4,20 @@ type PrayerBuildInfoNative = {
   distribution?: string;
 };
 
+export type AndroidDistribution = 'play' | 'fdroid' | 'github';
+
 /**
- * Android: `play` vs `fdroid` (F-Droid omits billing). iOS is not `android`.
+ * Android: which store (or none) the running APK came from — `play`,
+ * `fdroid`, or `github` (the Releases APK Obtainium installs). iOS reports
+ * `play`, which nothing on iOS reads.
  */
-export function getAndroidDistribution(): 'play' | 'fdroid' {
+export function getAndroidDistribution(): AndroidDistribution {
   if (Platform.OS !== 'android') {
     return 'play';
   }
   const m = NativeModules.PrayerBuildInfo as PrayerBuildInfoNative | undefined;
-  return m?.distribution === 'fdroid' ? 'fdroid' : 'play';
+  const d = m?.distribution;
+  return d === 'fdroid' || d === 'github' ? d : 'play';
 }
 
 /**

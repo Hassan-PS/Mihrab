@@ -8,6 +8,9 @@
  *   Android fdroid → the project's GitHub page — F-Droid has no ratings,
  *                    so stars/issues are the equivalent signal. Keeps the
  *                    F-Droid build 100% Google-free.
+ *   Android github → the same GitHub page. The Releases APK is what
+ *                    Obtainium installs, often on a phone with no Play
+ *                    Store, and it is not the Play listing's install.
  */
 import { Linking, NativeModules, Platform } from 'react-native';
 import { getAndroidDistribution } from '../distribution';
@@ -29,7 +32,7 @@ export async function rateApp(): Promise<void> {
     return; // module unavailable (should not happen) — silently no-op
   }
 
-  if (getAndroidDistribution() === 'fdroid') {
+  if (getAndroidDistribution() !== 'play') {
     await Linking.openURL(GITHUB_URL).catch(() => undefined);
     return;
   }
