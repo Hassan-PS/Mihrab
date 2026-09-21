@@ -3464,11 +3464,41 @@ export function khatmahPortion(
   const pace = khatmahPaceToday(plan, now);
   if (pace) {
     const today = deadlineDayNumber(plan.startedAt, plan.deadline!, now);
-    const len = Math.max(1, pace.to - pace.from + 1);
     const step = d - today;
     if (step <= 0) return { day: d, from: pace.from, to: pace.to };
-    const from = Math.min(TOTAL_AYAHS, pace.to + (step - 1) * len + 1);
-    return { day: d, from, to: Math.min(TOTAL_AYAHS, from + len - 1) };
+    /**
+     * LAID OUT IN PAGES, THE WAY THE CUT WILL BE. Tomorrow's cut is made
+     * tomorrow by `paceCut`: what is left then, in Ḥafṣ pages, over the
+     * days left then, from the page today's cut closes on. The same
+     * arithmetic here, assuming today's cut gets read and nothing else
+     * changes — so "Finish day 6 (tomorrow)", and the marker under it,
+     * name the ayah tomorrow's cut will actually close on. Today's LENGTH
+     * IN AYAHS counted on from today's end (which this used to do) lands
+     * a page or two off wherever the ayahs run long or short, and the
+     * marker then jumped when the day turned and the real cut was pinned.
+     */
+    let endPage = pagesThroughAyahs(pace.to, DEFAULT_RIWAYAH);
+    // Owed once today's cut is read: the book past it, plus the holes
+    // behind the reader that the pace already carries. From today's END,
+    // not from wherever the reader has got to — the days are laid out
+    // whole and stay put while they read on, so "day 6" names one place
+    // all day and a day read ahead is skipped, not re-cut under them.
+    let unread = Math.max(
+      0,
+      KHATMAH_TOTAL_PAGES - endPage + khatmahGapPages(plan, DEFAULT_RIWAYAH),
+    );
+    let daysLeft = daysToDeadline(plan.deadline!, now);
+    let from = pace.from;
+    let to = pace.to;
+    for (let k = 0; k < step; k++) {
+      daysLeft = Math.max(1, daysLeft - 1);
+      const share = Math.max(1, Math.ceil(unread / daysLeft));
+      from = Math.min(TOTAL_AYAHS, to + 1);
+      endPage = Math.min(KHATMAH_TOTAL_PAGES, endPage + share);
+      to = Math.max(from, Math.min(TOTAL_AYAHS, ayahsThroughHafsPage(endPage)));
+      unread = Math.max(0, unread - share);
+    }
+    return { day: d, from, to };
   }
   const from = planFrom(plan);
   return {

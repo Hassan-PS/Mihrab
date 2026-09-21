@@ -26,6 +26,8 @@ import {
   finishKhatmahPortion,
   khatmahPaceToday,
   khatmahPages,
+  khatmahPortion,
+  ayahsThroughPage,
   khatmahPerDayPages,
   khatmahBehindBy,
   khatmahUnreadAyahs,
@@ -391,6 +393,65 @@ describe('the finish button on a plan paced to a date', () => {
     expect(target.day).toBe(khatmahDay(after).portion.day + 1);
     expect(marker).toEqual(ayahAtIndex(target.to));
     expect(marker).not.toEqual(ayahAtIndex(todayEnd));
+  });
+
+  /**
+   * The pill and marker that mean tomorrow have to land where tomorrow's
+   * cut will: that cut is made in Ḥafṣ pages (`paceCut`), from the page
+   * today's closes on. Counting today's length in AYAHS on from there —
+   * what the projection used to do — put the marker a page or two off
+   * wherever the ayahs run long or short (an-Nisāʾ 169 for a day that
+   * would actually close the surah on 176), and it jumped when the day
+   * turned and the real cut was pinned.
+   */
+  it('marks tomorrow where tomorrow\'s cut will be pinned — in pages, not ayahs', () => {
+    const now = Date.now();
+    const by = ymd(now + 54 * DAY); // 55 days, 11 pages a day
+    startKhatmah(30, undefined, by);
+    const before = activeKhatmah(getQuranState())!;
+    const today = khatmahFinishTarget(before, now);
+    expect(today.to).toBe(ayahsThroughPage(11, 'hafs'));
+
+    // Tomorrow's portion, asked for today, closes on a page — the 22nd.
+    const projected = khatmahPortion(before, today.day + 1, now);
+    expect(projected.from).toBe(today.to + 1);
+    expect(projected.to).toBe(ayahsThroughPage(22, 'hafs'));
+    // Which is NOT where today's 83 ayahs counted on again would land.
+    expect(projected.to).not.toBe(today.to + (today.to - today.from + 1));
+
+    // Finish today: the pill moves to tomorrow, at that same ayah …
+    finishKhatmahPortion();
+    const after = activeKhatmah(getQuranState())!;
+    const target = khatmahFinishTarget(after, now);
+    expect(target).toEqual(projected);
+    expect(khatmahMarkerAyah(after, now)).toEqual(ayahAtIndex(projected.to));
+
+    // … and when the day turns, the cut pinned for it is that portion.
+    const pinned = khatmahPaceToday(after, now + DAY)!;
+    expect(pinned.from).toBe(projected.from);
+    expect(pinned.to).toBe(projected.to);
+  });
+
+  it('projects the day after tomorrow the same way, each from the last', () => {
+    const now = Date.now();
+    const by = ymd(now + 29 * DAY);
+    startKhatmah(30, undefined, by);
+    const plan = activeKhatmah(getQuranState())!;
+    const d1 = khatmahFinishTarget(plan, now);
+    const d2 = khatmahPortion(plan, d1.day + 1, now);
+    const d3 = khatmahPortion(plan, d1.day + 2, now);
+    expect(d2.from).toBe(d1.to + 1);
+    expect(d3.from).toBe(d2.to + 1);
+    expect(d3.to).toBeGreaterThan(d2.to);
+    // Every projected day closes on a Ḥafṣ page end.
+    for (const p of [d1, d2, d3]) {
+      const page = (require('../src/quran/pages') as { findPageForAyah: (s: number, a: number, r: string) => number })
+        .findPageForAyah(ayahAtIndex(p.to).surah, ayahAtIndex(p.to).ayah, 'hafs');
+      expect(ayahsThroughPage(page, 'hafs')).toBe(p.to);
+    }
+    // And the last day of the plan closes the book.
+    const last = khatmahPortion(plan, 30, now);
+    expect(last.to).toBe(KHATMAH_TOTAL_AYAHS);
   });
 
   it('skips a day already read ahead, rather than offering to finish it again', () => {
