@@ -99,7 +99,7 @@ function entryFor(reciterId: string, timings: TimingsMap | null): Entry {
   };
 }
 
-function getTimings(reciterId: string): Promise<TimingsMap | null> {
+export function getTimings(reciterId: string): Promise<TimingsMap | null> {
   const hit = cache.get(reciterId);
   if (hit && Date.now() < hit.expires) {
     remember(reciterId, hit);

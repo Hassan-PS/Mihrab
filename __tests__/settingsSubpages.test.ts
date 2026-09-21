@@ -106,7 +106,12 @@ describe('the pages nested under a section', () => {
       ),
     ].map(m => m[1]);
     expect(parents.length).toBeGreaterThan(0);
-    const rendered = pageSources + read('src/screens/settings/AboutCard.tsx');
+    // The rows live on the CARD a page draws, not the page: AboutCard and
+    // QuranCard render theirs.
+    const rendered =
+      pageSources +
+      read('src/screens/settings/AboutCard.tsx') +
+      read('src/screens/settings/QuranCard.tsx');
     for (const parent of parents) {
       expect(rendered).toContain(`<NestedPageRows parent="${parent}"`);
     }

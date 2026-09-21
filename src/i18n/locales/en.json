@@ -1303,7 +1303,15 @@
     "downloadStoppedBodyAyahs": "{{done}} of {{total}} ayahs kept. Tap to continue, or it resumes by itself on Wi-Fi.",
     "downloadStoppedBodyPages": "{{done}} of {{total}} pages kept. Tap to continue, or it resumes by itself on Wi-Fi.",
     "downloadStoppedStrip": "{{name}} stopped at {{pct}}% · kept",
-    "listenResumeReciter": "Download the rest of {{name}}"
+    "listenResumeReciter": "Download the rest of {{name}}",
+    "wordReaderTitle": "Word reader",
+    "wordReaderBlurb": "Hold a word in the mushaf to hear it on its own",
+    "wordReader": "Read a word on long press",
+    "wordReaderHelp": "In the mushaf, hold a finger on a word and nothing happens until you lift it: then that one word is read out. While holding, slide to another word to pick it instead. A long press no longer opens the verse — a tap still does.",
+    "wordReaderReciter": "Who reads the word",
+    "wordReaderReciterHelp": "Only reciters with word timings can read a single word, so only they are listed. Your recitation reciter is separate and can be anyone.",
+    "wordReaderOffline": "That word is not on this device yet, and there is no connection to fetch it.",
+    "wordReaderNoTiming": "No timing is known for that word, so it cannot be read on its own."
   },
   "reading": {
     "textSize": "Text size",

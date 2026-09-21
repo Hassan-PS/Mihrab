@@ -176,6 +176,8 @@ describe('two devices reading the same khatmah in different muṣḥafs', () => 
     bookmarkFollowDefault: 'fixed',
     keepAwake: true,
     readerKeepAwake: true,
+    wordReader: false,
+    wordReaderReciterId: '',
     hideMode: 'none',
     repeat: { eachAyah: 1, range: 1, pauseFactor: 0 },
     votdMode: 'translation',

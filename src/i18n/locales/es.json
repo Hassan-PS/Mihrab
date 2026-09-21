@@ -1303,7 +1303,15 @@
     "downloadStoppedBodyAyahs": "{{done}} de {{total}} aleyas se conservan. Toca para continuar, o se reanudará sola con Wi-Fi.",
     "downloadStoppedBodyPages": "{{done}} de {{total}} páginas se conservan. Toca para continuar, o se reanudará sola con Wi-Fi.",
     "downloadStoppedStrip": "{{name}} se detuvo al {{pct}} % · conservado",
-    "listenResumeReciter": "Descargar el resto de {{name}}"
+    "listenResumeReciter": "Descargar el resto de {{name}}",
+    "wordReaderTitle": "Lector de palabras",
+    "wordReaderBlurb": "Mantén pulsada una palabra del mushaf para oírla sola",
+    "wordReader": "Leer una palabra al mantener pulsado",
+    "wordReaderHelp": "En el mushaf, mantén el dedo sobre una palabra y no pasa nada hasta que lo levantes: entonces se lee esa palabra sola. Mientras mantienes, desliza a otra palabra para elegirla. Mantener pulsado ya no abre el versículo; un toque sí.",
+    "wordReaderReciter": "Quién lee la palabra",
+    "wordReaderReciterHelp": "Solo los recitadores con tiempos por palabra pueden leer una sola, así que solo ellos aparecen. Tu recitador de recitación es aparte y puede ser cualquiera.",
+    "wordReaderOffline": "Esa palabra aún no está en este dispositivo y no hay conexión para descargarla.",
+    "wordReaderNoTiming": "No se conoce el tiempo de esa palabra, así que no se puede leer sola."
   },
   "reading": {
     "textSize": "Tamaño del texto",

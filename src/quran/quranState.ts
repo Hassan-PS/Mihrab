@@ -440,6 +440,21 @@ export type QuranPrefs = {
    * the coffee cup happened to be left at.
    */
   readerKeepAwake: boolean;
+  /**
+   * THE WORD READER (additive): hold a word on the Ḥafṣ page and hear
+   * it, on its own, when the finger lifts — sliding to another word first
+   * if that is the one. Off by default: a long press has meant "open the
+   * ayah" since the reader was built, and this takes that gesture.
+   */
+  wordReader: boolean;
+  /**
+   * Who reads the word (additive). Its own choice, not the recitation's:
+   * only a reciter with word timings can read one word, and the
+   * recitation may be someone without them. Empty means "not chosen" —
+   * `wordReaderReciter()` then takes the recitation's reciter when timed,
+   * and the default reciter otherwise. Never a reciter without timings.
+   */
+  wordReaderReciterId: string;
   /** Memorization masking in translation view. */
   hideMode: 'none' | 'arabic' | 'translation';
   repeat: RepeatSettings;
@@ -626,6 +641,8 @@ export const DEFAULT_QURAN_STATE: QuranState = {
     bookmarkFollowDefault: 'follow',
     keepAwake: true,
     readerKeepAwake: true,
+    wordReader: false,
+    wordReaderReciterId: '',
     hideMode: 'none',
     repeat: { eachAyah: 1, range: 1, pauseFactor: 0 },
     votdMode: 'translation',

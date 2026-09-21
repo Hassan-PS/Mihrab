@@ -1303,7 +1303,15 @@
     "downloadStoppedBodyAyahs": "{{done}} dari {{total}} ayat tersimpan. Ketuk untuk melanjutkan, atau akan dilanjutkan sendiri saat ada Wi-Fi.",
     "downloadStoppedBodyPages": "{{done}} dari {{total}} halaman tersimpan. Ketuk untuk melanjutkan, atau akan dilanjutkan sendiri saat ada Wi-Fi.",
     "downloadStoppedStrip": "{{name}} berhenti di {{pct}}% · tersimpan",
-    "listenResumeReciter": "Unduh sisa {{name}}"
+    "listenResumeReciter": "Unduh sisa {{name}}",
+    "wordReaderTitle": "Pembaca kata",
+    "wordReaderBlurb": "Tahan sebuah kata di mushaf untuk mendengarnya sendiri",
+    "wordReader": "Baca satu kata saat ditekan lama",
+    "wordReaderHelp": "Di mushaf, tahan jari pada sebuah kata; tidak terjadi apa-apa sampai jari diangkat, lalu kata itu saja dibacakan. Sambil menahan, geser ke kata lain untuk memilihnya. Tekan lama tidak lagi membuka ayat — ketukan masih membukanya.",
+    "wordReaderReciter": "Siapa yang membaca kata",
+    "wordReaderReciterHelp": "Hanya qari dengan pewaktuan kata yang dapat membaca satu kata, jadi hanya mereka yang tercantum. Qari untuk tilawah terpisah dan boleh siapa saja.",
+    "wordReaderOffline": "Kata itu belum ada di perangkat ini dan tidak ada koneksi untuk mengambilnya.",
+    "wordReaderNoTiming": "Pewaktuan kata itu tidak diketahui, jadi tidak dapat dibaca sendiri."
   },
   "reading": {
     "textSize": "Ukuran teks",

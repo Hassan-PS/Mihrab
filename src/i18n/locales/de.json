@@ -1303,7 +1303,15 @@
     "downloadStoppedBodyAyahs": "{{done}} von {{total}} Versen bleiben erhalten. Zum Fortsetzen tippen, oder es geht im WLAN von selbst weiter.",
     "downloadStoppedBodyPages": "{{done}} von {{total}} Seiten bleiben erhalten. Zum Fortsetzen tippen, oder es geht im WLAN von selbst weiter.",
     "downloadStoppedStrip": "{{name}} bei {{pct}} % gestoppt · erhalten",
-    "listenResumeReciter": "Rest von {{name}} herunterladen"
+    "listenResumeReciter": "Rest von {{name}} herunterladen",
+    "wordReaderTitle": "Wortleser",
+    "wordReaderBlurb": "Ein Wort im Mushaf gedrückt halten, um es allein zu hören",
+    "wordReader": "Ein Wort bei langem Drücken vorlesen",
+    "wordReaderHelp": "Halte im Mushaf einen Finger auf ein Wort – nichts passiert, bis du ihn hebst: dann wird genau dieses Wort vorgelesen. Ziehe beim Halten zu einem anderen Wort, um stattdessen dieses zu wählen. Langes Drücken öffnet den Vers nicht mehr – ein Tippen weiterhin.",
+    "wordReaderReciter": "Wer das Wort liest",
+    "wordReaderReciterHelp": "Nur Rezitatoren mit Wortzeiten können ein einzelnes Wort lesen, darum werden nur sie aufgeführt. Dein Rezitator für die Rezitation ist davon getrennt und kann jeder sein.",
+    "wordReaderOffline": "Dieses Wort ist noch nicht auf dem Gerät, und es gibt keine Verbindung, um es zu laden.",
+    "wordReaderNoTiming": "Für dieses Wort ist keine Zeit bekannt, daher kann es nicht allein gelesen werden."
   },
   "reading": {
     "textSize": "Schriftgröße",

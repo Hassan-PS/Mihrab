@@ -27,6 +27,7 @@ import { LocationSettingsScreen } from './pages/LocationSettingsScreen';
 import { NotificationSettingsScreen } from './pages/NotificationSettingsScreen';
 import { PrayerTimesSettingsScreen } from './pages/PrayerTimesSettingsScreen';
 import { QuranSettingsScreen } from './pages/QuranSettingsScreen';
+import { WordReaderSettingsScreen } from './pages/WordReaderSettingsScreen';
 
 export type SettingsSubpageRoute = Extract<
   keyof RootStackParamList,
@@ -137,6 +138,14 @@ const ALL_SUBPAGES: readonly SettingsSubpage[] = [
     blurbKey: 'settings.sectionQuranBlurb',
     Icon: QuranIcon,
     component: QuranSettingsScreen,
+    children: [
+      {
+        route: 'SettingsWordReader',
+        titleKey: 'quran.wordReaderTitle',
+        blurbKey: 'quran.wordReaderBlurb',
+        component: WordReaderSettingsScreen,
+      },
+    ],
   },
   {
     route: 'SettingsAbout',

@@ -54,6 +54,7 @@ import {
   QuranDownloadStripView,
   useQuranDownloadRun,
 } from './QuranDownloadStrip';
+import { WordReaderNotice } from './WordReaderNotice';
 import { DEVICE_CLASS } from '../responsive/deviceClass';
 import { MushafPhoneReader } from './MushafPhoneReader';
 import { MushafSpreadReader } from './MushafSpreadReader';
@@ -310,11 +311,22 @@ export function MushafReader(props: Props) {
     ) : (
       <MushafSpreadReader {...readerProps} />
     );
-  if (!strip) return reader;
+  // The word reader's one line, over whichever reader this is — absent
+  // until there is something to say, so it costs the page nothing.
+  const notice = <WordReaderNotice />;
+  if (!strip) {
+    return (
+      <View style={styles.withStrip}>
+        {reader}
+        {notice}
+      </View>
+    );
+  }
   return (
     <View style={styles.withStrip}>
       {strip}
       {reader}
+      {notice}
     </View>
   );
 }

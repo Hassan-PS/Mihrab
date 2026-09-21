@@ -23,6 +23,7 @@ import {
 } from '../../quran/KhatmahPacingSheet';
 import { RiwayahPicker } from '../../quran/RiwayahPicker';
 import { hydrateRiwayahData, useRiwayahAvailability } from '../../quran/riwayahData';
+import { NestedPageRows } from './NestedPageRows';
 import {
   availableRiwayat,
   resolveRiwayah,
@@ -172,6 +173,10 @@ function QuranCardImpl() {
           }
         />
       </SettingsGroup>
+      {/* The word reader: its own page, because it is a switch AND a
+          reciter, and the reciter list is nine rows nobody needs to
+          scroll past on the way to anything else. */}
+      <NestedPageRows parent="SettingsQuran" />
       <SettingsGroup
         title={t('quran.khatmahPacingSettingsTitle', 'Khatmah')}
         footer={

@@ -609,11 +609,17 @@ export function downloadReciterAudio(
 }
 
 /**
- * Prefetch a single ayah MP3 for gapless playback — v2.7.28. Called by
- * the playback orchestrator for upcoming queue items so long listening
- * sessions turn local (no network gap between ayahs) after warmup.
- * Best-effort: one attempt with a 30 s watchdog; resolves the local
- * path or null.
+ * Prefetch a single ayah MP3 — for gapless playback (v2.7.28) and for the
+ * word reader, which needs the ayah on disk before it can play a slice.
+ * Called by the playback orchestrator for upcoming queue items so long
+ * listening sessions turn local (no network gap between ayahs) after
+ * warmup. Best-effort: resolves the local path or null.
+ *
+ * It goes through `fetchAyahFile` — the same three attempts and the same
+ * fall-back transport as the bulk download — because the streaming
+ * transport alone is what fails on a NAT that stalls long responses (the
+ * emulator's, some proxies'), and a prefetch that only ever tried that
+ * one route came back null on those networks every time.
  */
 export async function prefetchAyahAudio(
   reciterId: string,
@@ -624,23 +630,7 @@ export async function prefetchAyahAudio(
   try {
     if (await fileValid(path)) return path;
     await mkdirDeep(audioDir(reciterId));
-    const reciter = findReciter(reciterId);
-    const tmp = `${path}.part`;
-    const res = await withDownloadDeadline(
-      ReactNativeBlobUtil.config({ path: tmp, overwrite: true }).fetch(
-        'GET',
-        ayahAudioUrl(reciter, surah, ayah),
-      ),
-      CONTENT_DEADLINES.ayahPrefetch,
-      'prefetch',
-    );
-    const stat = await ReactNativeBlobUtil.fs.stat(tmp).catch(() => null);
-    if (res.info().status !== 200 || !stat || Number(stat.size) <= 1000) {
-      await ReactNativeBlobUtil.fs.unlink(tmp).catch(() => undefined);
-      return null;
-    }
-    await ReactNativeBlobUtil.fs.unlink(path).catch(() => undefined);
-    await ReactNativeBlobUtil.fs.mv(tmp, path);
+    await fetchAyahFile(findReciter(reciterId), surah, ayah, path);
     return path;
   } catch {
     return null;

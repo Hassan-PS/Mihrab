@@ -25,6 +25,7 @@ import MushafTextPage, {
   type AyahRef,
 } from './MushafTextPage';
 import MushafUnicodePage from './MushafUnicodePage';
+import { useWordReaderEnabled } from './audio/wordReader';
 import {
   getPageLayout,
   isFramedPage,
@@ -288,6 +289,9 @@ function GlyphPageSurface({
   const nightMode = toneIsDark(tone);
   const { family, failed } = useMushafPageFont(page, true, prefetchRadius);
   const layout = getPageLayout(page);
+  // Only the page-font surface: the word reader needs a word under the
+  // finger, and only these pages know where their words are.
+  const wordReader = useWordReaderEnabled();
 
   useEffect(() => {
     if (failed) onUnavailable?.(page);
@@ -378,6 +382,7 @@ function GlyphPageSurface({
       endInk={endInk}
       onWordPress={handleWordPress}
       onWordLongPress={handleWordLongPress}
+      wordReader={wordReader}
     />
   );
 

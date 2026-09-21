@@ -104,6 +104,7 @@ export type RootStackParamList = {
     | undefined;
   SettingsNotifications: undefined;
   SettingsQuran: undefined;
+  SettingsWordReader: undefined;
   SettingsAbout: undefined;
   /**
    * Pages nested under a section rather than under the index. They are

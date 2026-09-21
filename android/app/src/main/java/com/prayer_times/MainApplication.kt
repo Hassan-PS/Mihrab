@@ -28,6 +28,7 @@ class MainApplication : Application(), ReactApplication {
           add(MushafFontPackage())
           add(CustomAdhanPackage())
           add(SecureRandomPackage())
+          add(WordPlayerPackage())
           add(MihrabClipboardPackage())
           add(SyncFolderPackage())
           add(ScanQrPackage())

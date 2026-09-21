@@ -1303,7 +1303,15 @@
     "downloadStoppedBodyAyahs": "{{done}} versets sur {{total}} sont conservés. Appuyez pour continuer, ou la reprise se fera d’elle-même en Wi-Fi.",
     "downloadStoppedBodyPages": "{{done}} pages sur {{total}} sont conservées. Appuyez pour continuer, ou la reprise se fera d’elle-même en Wi-Fi.",
     "downloadStoppedStrip": "{{name}} arrêté à {{pct}} % · conservé",
-    "listenResumeReciter": "Télécharger le reste de {{name}}"
+    "listenResumeReciter": "Télécharger le reste de {{name}}",
+    "wordReaderTitle": "Lecteur de mots",
+    "wordReaderBlurb": "Maintenez un mot du mushaf pour l’entendre seul",
+    "wordReader": "Lire un mot par appui long",
+    "wordReaderHelp": "Dans le mushaf, gardez le doigt sur un mot : rien ne se passe tant que vous ne le levez pas ; alors ce mot seul est lu. En maintenant, glissez vers un autre mot pour le choisir à la place. L’appui long n’ouvre plus le verset — un simple appui le fait toujours.",
+    "wordReaderReciter": "Qui lit le mot",
+    "wordReaderReciterHelp": "Seuls les récitateurs disposant du minutage des mots peuvent lire un seul mot ; eux seuls sont donc listés. Votre récitateur pour la récitation est distinct et peut être n’importe qui.",
+    "wordReaderOffline": "Ce mot n’est pas encore sur cet appareil et aucune connexion ne permet de le récupérer.",
+    "wordReaderNoTiming": "Aucun minutage n’est connu pour ce mot : il ne peut pas être lu seul."
   },
   "reading": {
     "textSize": "Taille du texte",

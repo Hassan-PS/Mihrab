@@ -1303,7 +1303,15 @@
     "downloadStoppedBodyAyahs": "{{total}} ayetin {{done}} tanesi korundu. Devam etmek için dokunun, ya da Wi-Fi varken kendiliğinden sürer.",
     "downloadStoppedBodyPages": "{{total}} sayfanın {{done}} tanesi korundu. Devam etmek için dokunun, ya da Wi-Fi varken kendiliğinden sürer.",
     "downloadStoppedStrip": "{{name}} %{{pct}} iken durdu · korundu",
-    "listenResumeReciter": "{{name}} kaydının kalanını indir"
+    "listenResumeReciter": "{{name}} kaydının kalanını indir",
+    "wordReaderTitle": "Kelime okuyucu",
+    "wordReaderBlurb": "Mushafta bir kelimeyi basılı tutup tek başına dinleyin",
+    "wordReader": "Uzun basınca bir kelimeyi oku",
+    "wordReaderHelp": "Mushafta parmağınızı bir kelimenin üzerinde tutun; parmağınızı kaldırana kadar hiçbir şey olmaz, kaldırınca yalnızca o kelime okunur. Basılı tutarken başka bir kelimeye kaydırarak onu seçebilirsiniz. Uzun basmak artık ayeti açmaz; dokunmak açar.",
+    "wordReaderReciter": "Kelimeyi kim okur",
+    "wordReaderReciterHelp": "Tek bir kelimeyi yalnızca kelime zamanlaması olan okuyucular okuyabilir; bu yüzden yalnızca onlar listelenir. Tilavet okuyucunuz ayrıdır ve herkes olabilir.",
+    "wordReaderOffline": "Bu kelime henüz bu cihazda yok ve indirmek için bağlantı yok.",
+    "wordReaderNoTiming": "Bu kelimenin zamanlaması bilinmiyor, bu yüzden tek başına okunamıyor."
   },
   "reading": {
     "textSize": "Metin boyutu",

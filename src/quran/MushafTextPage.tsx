@@ -67,6 +67,7 @@ import type { AyahEndInk, AyahTint } from './ayahMarks';
 import { useActiveWordOn, wordCode } from './audio/activeWordStore';
 import { BasmalahRow, SurahBandRow } from './mushafOrnaments';
 import { FONTS } from '../theme/typography';
+import { WordReaderSurface } from './WordReaderSurface';
 
 /**
  * Height of one line as a multiple of the font size. Derived from the print:
@@ -139,6 +140,12 @@ export type MushafTextPageProps = {
   endInk?: AyahEndInk;
   onWordPress?: (ref: AyahRef, word: MushafWord) => void;
   onWordLongPress?: (ref: AyahRef, word: MushafWord) => void;
+  /**
+   * The word reader is on: a held finger picks a word, slides between
+   * them, and hears the one it lifts from (`WordReaderSurface`). A long
+   * press then belongs to it, not to `onWordLongPress`.
+   */
+  wordReader?: boolean;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -165,6 +172,7 @@ function MushafTextPage({
   endInk,
   onWordPress,
   onWordLongPress,
+  wordReader = false,
   style,
 }: MushafTextPageProps) {
   const layout = useMemo(() => getPageLayout(page), [page]);
@@ -191,9 +199,13 @@ function MushafTextPage({
 
   const handleLongPress = useCallback(
     (word: MushafWord) => {
+      // With the word reader on, the hold is the reader's — but the line
+      // still has to be TOLD a long press happened, or the release would
+      // count as a tap and open the ayah on top of the word being read.
+      if (wordReader) return;
       onWordLongPress?.({ surah: word.surah, ayah: word.ayah }, word);
     },
-    [onWordLongPress],
+    [onWordLongPress, wordReader],
   );
 
   if (!layout || fontSize <= 0) return null;
@@ -224,7 +236,7 @@ function MushafTextPage({
   // The plates are set by their own rules — see `lineSpaceEm`.
   const framed = isFramedPage(page);
 
-  return (
+  const lines = (
     <View style={[{ width }, style]}>
       {layout.lines.map((line, index) => (
         <LineView
@@ -243,6 +255,14 @@ function MushafTextPage({
         />
       ))}
     </View>
+  );
+  if (!wordReader) return lines;
+  return (
+    <WordReaderSurface
+      layout={layout}
+      geometry={{ width, fontSize, lineHeight, measureEm, framed }}>
+      {lines}
+    </WordReaderSurface>
   );
 }
 

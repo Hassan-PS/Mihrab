@@ -1303,7 +1303,15 @@
     "downloadStoppedBodyAyahs": "{{done}} av {{total}} verser är kvar. Tryck för att fortsätta, annars återupptas den av sig själv på Wi-Fi.",
     "downloadStoppedBodyPages": "{{done}} av {{total}} sidor är kvar. Tryck för att fortsätta, annars återupptas den av sig själv på Wi-Fi.",
     "downloadStoppedStrip": "{{name}} stannade vid {{pct}} % · sparat",
-    "listenResumeReciter": "Ladda ner resten av {{name}}"
+    "listenResumeReciter": "Ladda ner resten av {{name}}",
+    "wordReaderTitle": "Ordläsare",
+    "wordReaderBlurb": "Håll på ett ord i mushafen för att höra det ensamt",
+    "wordReader": "Läs ett ord vid långtryck",
+    "wordReaderHelp": "Håll ett finger på ett ord i mushafen – inget händer förrän du lyfter det: då läses just det ordet upp. Dra till ett annat ord medan du håller för att välja det i stället. Ett långtryck öppnar inte längre versen – ett tryck gör det fortfarande.",
+    "wordReaderReciter": "Vem läser ordet",
+    "wordReaderReciterHelp": "Bara recitatörer med ordtider kan läsa ett enskilt ord, så bara de visas här. Din recitatör för uppläsning är en annan inställning och kan vara vem som helst.",
+    "wordReaderOffline": "Det ordet finns inte på enheten än, och det finns ingen anslutning att hämta det med.",
+    "wordReaderNoTiming": "Ingen tid är känd för det ordet, så det kan inte läsas ensamt."
   },
   "reading": {
     "textSize": "Textstorlek",

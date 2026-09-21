@@ -1303,7 +1303,15 @@
     "downloadStoppedBodyAyahs": "{{total}} 节中的 {{done}} 节已保留。点按可继续，或在 Wi-Fi 下自动续传。",
     "downloadStoppedBodyPages": "{{total}} 页中的 {{done}} 页已保留。点按可继续，或在 Wi-Fi 下自动续传。",
     "downloadStoppedStrip": "{{name}} 在 {{pct}}% 停止 · 已保留",
-    "listenResumeReciter": "下载{{name}}的剩余部分"
+    "listenResumeReciter": "下载{{name}}的剩余部分",
+    "wordReaderTitle": "单词朗读",
+    "wordReaderBlurb": "长按穆斯哈夫中的一个词，单独听它的读音",
+    "wordReader": "长按时朗读一个词",
+    "wordReaderHelp": "在穆斯哈夫中按住一个词，抬起手指前什么都不会发生；抬起后，只朗读这一个词。按住时滑到另一个词即可改选。长按不再打开经文——轻点仍然可以。",
+    "wordReaderReciter": "由谁朗读",
+    "wordReaderReciterHelp": "只有带有逐词时间轴的诵读者才能朗读单个词，因此这里只列出他们。诵读所用的诵读者是另一项设置，可以是任何人。",
+    "wordReaderOffline": "该词尚未下载到本设备，且没有网络连接可供获取。",
+    "wordReaderNoTiming": "该词没有已知的时间轴，无法单独朗读。"
   },
   "reading": {
     "textSize": "文字大小",
