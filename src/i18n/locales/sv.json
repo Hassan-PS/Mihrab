@@ -100,7 +100,10 @@
     "yesterday": "Igår",
     "startReading": "Börja läsa",
     "startReadingHint": "Al-Fātiḥah, sida 1",
-    "timezoneShiftNotice": "Klockan har ställts om här ({{from}} → {{to}}). Bönetiderna har uppdaterats."
+    "timezoneShiftNotice": "Klockan har ställts om här ({{from}} → {{to}}). Bönetiderna har uppdaterats.",
+    "pullToRefresh": "Dra nedåt för att uppdatera",
+    "pullRelease": "Släpp för att uppdatera",
+    "pullRefreshing": "Uppdaterar dina bönetider…"
   },
   "errors": {
     "locationNeededTitle": "Plats krävs",
@@ -384,7 +387,8 @@
     "accentPickerUseOnce": "Använd utan att spara",
     "accentPickerAdjusted": "Flyttad till närmaste nyans som är läsbar mot den här bakgrunden.",
     "sectionAppearanceBlurbAndroid": "Tema, accentfärg, tidsformat, språk, widget",
-    "verdantAccentHelp": "Grönskande färgar varje yta i den här accenten."
+    "verdantAccentHelp": "Grönskande färgar varje yta i den här accenten.",
+    "refreshStoredHelp": "Hämtar den här månaden på nytt i stället för att fylla luckorna, så att felaktiga tider – till exempel efter en tidsomställning – ersätts i stället för att behållas."
   },
   "locationSetup": {
     "headline": "Ange din plats",

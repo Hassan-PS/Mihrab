@@ -100,7 +100,10 @@
     "yesterday": "Hier",
     "startReading": "Commencer la lecture",
     "startReadingHint": "Al-Fātiha, page 1",
-    "timezoneShiftNotice": "Ici, l’heure locale a changé ({{from}} → {{to}}). Les horaires de prière ont été actualisés."
+    "timezoneShiftNotice": "Ici, l’heure locale a changé ({{from}} → {{to}}). Les horaires de prière ont été actualisés.",
+    "pullToRefresh": "Tirez vers le bas pour actualiser",
+    "pullRelease": "Relâchez pour actualiser",
+    "pullRefreshing": "Actualisation de vos heures de prière…"
   },
   "errors": {
     "locationNeededTitle": "Emplacement nécessaire",
@@ -123,7 +126,7 @@
     "loadError": "Impossible de charger le mois.",
     "empty": "Aucune ligne à afficher.",
     "refreshData": "Actualiser les données stockées",
-    "refreshing": "Rafraîchissant...",
+    "refreshing": "Actualisation...",
     "monthsStored": "{{count}} mois stockés",
     "dayOfWeek": "Jour",
     "date": "Date",
@@ -384,7 +387,8 @@
     "accentPickerUseOnce": "Utiliser sans enregistrer",
     "accentPickerAdjusted": "Déplacée vers la nuance la plus proche qui reste lisible sur ce fond.",
     "sectionAppearanceBlurbAndroid": "Thème, couleur, format de l'heure, langue, widget",
-    "verdantAccentHelp": "Verdure colorie chaque surface avec cet accent."
+    "verdantAccentHelp": "Verdure colorie chaque surface avec cet accent.",
+    "refreshStoredHelp": "Récupère de nouveau ce mois-ci au lieu de combler les trous, afin que les horaires erronés — après un changement d’heure, par exemple — soient remplacés plutôt que conservés."
   },
   "locationSetup": {
     "headline": "Définissez votre emplacement",

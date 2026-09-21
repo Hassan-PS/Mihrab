@@ -100,7 +100,10 @@
     "yesterday": "Gestern",
     "startReading": "Mit dem Lesen beginnen",
     "startReadingHint": "Al-Fātiḥa, Seite 1",
-    "timezoneShiftNotice": "Hier wurden die Uhren umgestellt ({{from}} → {{to}}). Die Gebetszeiten wurden aktualisiert."
+    "timezoneShiftNotice": "Hier wurden die Uhren umgestellt ({{from}} → {{to}}). Die Gebetszeiten wurden aktualisiert.",
+    "pullToRefresh": "Zum Aktualisieren nach unten ziehen",
+    "pullRelease": "Zum Aktualisieren loslassen",
+    "pullRefreshing": "Gebetszeiten werden aktualisiert…"
   },
   "errors": {
     "locationNeededTitle": "Standort erforderlich",
@@ -123,7 +126,7 @@
     "loadError": "Monat konnte nicht geladen werden.",
     "empty": "Keine Zeilen zum Anzeigen.",
     "refreshData": "Gespeicherte Daten aktualisieren",
-    "refreshing": "Erfrischend...",
+    "refreshing": "Wird aktualisiert...",
     "monthsStored": "{{count}} Monate gespeichert",
     "dayOfWeek": "Tag",
     "date": "Datum",
@@ -384,7 +387,8 @@
     "accentPickerUseOnce": "Ohne Speichern verwenden",
     "accentPickerAdjusted": "Auf den nächsten Ton verschoben, der auf diesem Hintergrund lesbar bleibt.",
     "sectionAppearanceBlurbAndroid": "Thema, Akzent, Zeitformat, Sprache, Widget",
-    "verdantAccentHelp": "Smaragd färbt jede Fläche in diesem Akzent."
+    "verdantAccentHelp": "Smaragd färbt jede Fläche in diesem Akzent.",
+    "refreshStoredHelp": "Lädt diesen Monat neu, statt nur die Lücken zu füllen, sodass falsche Zeiten – etwa nach einer Zeitumstellung – ersetzt und nicht beibehalten werden."
   },
   "locationSetup": {
     "headline": "Legen Sie Ihren Standort fest",

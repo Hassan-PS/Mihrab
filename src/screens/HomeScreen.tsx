@@ -30,6 +30,12 @@ import {
 } from '../utils/resyncGate';
 import { usePrayerDay } from '../hooks/usePrayerDay';
 import { clearTimezoneShiftNotice } from '../prayer/timezoneShift';
+import { refreshStoredPrayerData } from '../prayer/refreshStoredData';
+import { getEffectiveDataProvider } from '../settings/effectiveProvider';
+import {
+  PullIndicator,
+  usePullToRefresh,
+} from './home/PullToRefresh';
 import { markFirstPaint, useAfterFirstPaint } from '../boot/firstPaint';
 import { usePrefetchSavedLocations } from '../hooks/usePrefetchSavedLocations';
 import { syncPrayerNotifications } from '../notifications/prayerNotifications';
@@ -283,6 +289,52 @@ export function HomeScreen() {
   const [tzNoticeDismissedAt, setTzNoticeDismissedAt] = useState<number | null>(
     null,
   );
+
+  /**
+   * PULL THE PAGE DOWN TO REFRESH THE TIMES.
+   *
+   * The same action as the month table's button and the row in Settings
+   * (`refreshStoredPrayerData`): re-download the published table, drop
+   * this month's stored rows and fetch them again. Not a re-render — a
+   * repair, for the case where what is stored is wrong rather than
+   * missing, which is what issue #56 turned out to be.
+   *
+   * Then `retry()`, because the cache being right is not the same as the
+   * screen showing it: the page is holding times it read before the
+   * refresh, and nothing else would go back for them.
+   *
+   * Never on Catalyst — a pull is a thumb (`PullToRefresh`).
+   */
+  const pullEnabled = !isMacCatalyst && state.phase === 'ready';
+  const refreshParams =
+    state.phase === 'ready'
+      ? {
+          provider: getEffectiveDataProvider(
+            settings.dataProviderAuto,
+            settings.dataProvider,
+            { latitude: state.latitude, longitude: state.longitude },
+          ),
+          latitude: state.latitude,
+          longitude: state.longitude,
+          calculationMethod: settings.calculationMethod,
+          school: settings.school,
+        }
+      : null;
+  const refreshParamsRef = useRef(refreshParams);
+  refreshParamsRef.current = refreshParams;
+  const onPullRefresh = useCallback(
+    async (report: (current: number, total: number) => void) => {
+      const params = refreshParamsRef.current;
+      if (!params) return;
+      await refreshStoredPrayerData(params, { onProgress: report });
+      retry(true);
+    },
+    [retry],
+  );
+  const pull = usePullToRefresh({
+    enabled: pullEnabled,
+    onRefresh: onPullRefresh,
+  });
   const timezoneShift =
     state.phase === 'ready' &&
     state.timezoneShift &&
@@ -1209,11 +1261,29 @@ export function HomeScreen() {
           <HeaderPlaybackBar surface={palette.bg} inline />
         </>
       ) : null}
+    <View style={styles.pullHost} {...pull.panHandlers}>
+    {/* Behind the page, and revealed only because the page has been
+        dragged off the top of it. */}
+    <PullIndicator
+      phase={pull.phase}
+      progress={pull.progress}
+      translateY={pull.translateY}
+      top={!isDashboard && !isMacCatalyst ? insets.top : 0}
+    />
+    <Animated.View
+      style={[styles.pullPage, { transform: [{ translateY: pull.translateY }] }]}>
     <ScrollView
       ref={scrollRef}
       // The phone tracks the offset for the status band; everywhere else
-      // the tab bar's own handler is all there is to run.
-      onScroll={!isDashboard && !isMacCatalyst ? onScroll : tabBarScroll.onScroll}
+      // the tab bar's own handler is all there is to run. The pull needs
+      // to know one thing from the same event — whether the page is at
+      // the top — because a drag down anywhere else is an ordinary
+      // scroll and must be left alone.
+      onScroll={e => {
+        pull.onScroll(e);
+        if (!isDashboard && !isMacCatalyst) onScroll(e);
+        else tabBarScroll.onScroll?.(e);
+      }}
       scrollEventThrottle={16}
       style={[styles.scroll, { backgroundColor: palette.bg }]}
       contentContainerStyle={[
@@ -1417,6 +1487,8 @@ export function HomeScreen() {
         onClose={() => setChangelogSince(null)}
       />
     </ScrollView>
+    </Animated.View>
+    </View>
     {/* Over the page, and only on the phone's full-bleed hero: the
         dashboard's card does not run under the status bar. */}
     {!isDashboard && !isMacCatalyst && !hasBanner ? (
@@ -1431,6 +1503,14 @@ export function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  /**
+   * The pull's frame. It clips: the page is translated DOWN inside it, so
+   * without this the last card slides past the tab bar rather than under
+   * it, and the indicator above the page would be drawn over the screen
+   * behind this one.
+   */
+  pullHost: { flex: 1, overflow: 'hidden' },
+  pullPage: { flex: 1 },
   // Expanded-width dashboard: fixed "today" main column + flexible tools
   // sidebar, so Home fills a wide window and fits without scrolling.
   dashRow: {

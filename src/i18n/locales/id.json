@@ -29,7 +29,7 @@
   "common": {
     "change": "Mengubah",
     "tryAgain": "Coba lagi",
-    "retry": "Mencoba kembali",
+    "retry": "Coba lagi",
     "continue": "Melanjutkan",
     "back": "Kembali",
     "play": "Putar",
@@ -100,7 +100,10 @@
     "yesterday": "Kemarin",
     "startReading": "Mulai membaca",
     "startReadingHint": "Al-Fatihah, halaman 1",
-    "timezoneShiftNotice": "Waktu setempat telah berubah ({{from}} → {{to}}). Waktu sholat sudah diperbarui."
+    "timezoneShiftNotice": "Waktu setempat telah berubah ({{from}} → {{to}}). Waktu sholat sudah diperbarui.",
+    "pullToRefresh": "Tarik ke bawah untuk menyegarkan",
+    "pullRelease": "Lepaskan untuk menyegarkan",
+    "pullRefreshing": "Memperbarui waktu salat Anda…"
   },
   "errors": {
     "locationNeededTitle": "Lokasi diperlukan",
@@ -384,7 +387,8 @@
     "accentPickerUseOnce": "Pakai tanpa menyimpan",
     "accentPickerAdjusted": "Dipindahkan ke corak terdekat yang tetap terbaca di latar ini.",
     "sectionAppearanceBlurbAndroid": "Tema, warna, format waktu, bahasa, widget",
-    "verdantAccentHelp": "Zamrud mewarnai setiap permukaan dengan aksen ini."
+    "verdantAccentHelp": "Zamrud mewarnai setiap permukaan dengan aksen ini.",
+    "refreshStoredHelp": "Mengambil ulang bulan ini alih-alih sekadar mengisi bagian yang kosong, sehingga waktu yang salah — misalnya setelah perubahan jam — diganti, bukan dipertahankan."
   },
   "locationSetup": {
     "headline": "Tetapkan lokasi Anda",

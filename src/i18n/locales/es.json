@@ -29,7 +29,7 @@
   "common": {
     "change": "Cambiar",
     "tryAgain": "Intentar otra vez",
-    "retry": "Rever",
+    "retry": "Reintentar",
     "continue": "Continuar",
     "back": "Atrás",
     "play": "Reproducir",
@@ -100,7 +100,10 @@
     "yesterday": "Ayer",
     "startReading": "Empezar a leer",
     "startReadingHint": "Al-Fátiha, página 1",
-    "timezoneShiftNotice": "Aquí ha cambiado la hora local ({{from}} → {{to}}). Los tiempos de oración se han actualizado."
+    "timezoneShiftNotice": "Aquí ha cambiado la hora local ({{from}} → {{to}}). Los tiempos de oración se han actualizado.",
+    "pullToRefresh": "Desliza hacia abajo para actualizar",
+    "pullRelease": "Suelta para actualizar",
+    "pullRefreshing": "Actualizando tus horarios de oración…"
   },
   "errors": {
     "locationNeededTitle": "Ubicación necesaria",
@@ -123,7 +126,7 @@
     "loadError": "No se pudo cargar el mes.",
     "empty": "No hay filas para mostrar.",
     "refreshData": "Actualizar datos almacenados",
-    "refreshing": "Refrescante...",
+    "refreshing": "Actualizando...",
     "monthsStored": "{{count}} meses almacenados",
     "dayOfWeek": "Día",
     "date": "Fecha",
@@ -384,7 +387,8 @@
     "accentPickerUseOnce": "Usar sin guardar",
     "accentPickerAdjusted": "Movido al tono más cercano que sigue siendo legible sobre este fondo.",
     "sectionAppearanceBlurbAndroid": "Tema, color, formato de hora, idioma, widget",
-    "verdantAccentHelp": "Verdor colorea cada superficie con este acento."
+    "verdantAccentHelp": "Verdor colorea cada superficie con este acento.",
+    "refreshStoredHelp": "Vuelve a descargar este mes en lugar de rellenar los huecos, de modo que los horarios incorrectos —tras un cambio de hora, por ejemplo— se sustituyen en vez de conservarse."
   },
   "locationSetup": {
     "headline": "Establece tu ubicación",

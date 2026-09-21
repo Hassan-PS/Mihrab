@@ -100,7 +100,10 @@
     "yesterday": "Yesterday",
     "startReading": "Start reading",
     "startReadingHint": "Al-Fātiḥah, page 1",
-    "timezoneShiftNotice": "The clocks here changed ({{from}} → {{to}}). Prayer times have been refreshed."
+    "timezoneShiftNotice": "The clocks here changed ({{from}} → {{to}}). Prayer times have been refreshed.",
+    "pullToRefresh": "Pull down to refresh",
+    "pullRelease": "Release to refresh",
+    "pullRefreshing": "Refreshing your times…"
   },
   "errors": {
     "locationNeededTitle": "Location needed",
@@ -384,7 +387,8 @@
     "accentPickerUseOnce": "Use without saving",
     "accentPickerAdjusted": "Moved to the nearest shade that stays readable on this background.",
     "sectionAppearanceBlurbAndroid": "Theme, accent, time format, language, widget",
-    "verdantAccentHelp": "Verdant colors every surface in this accent."
+    "verdantAccentHelp": "Verdant colors every surface in this accent.",
+    "refreshStoredHelp": "Fetches this month again rather than filling the gaps, so times that are wrong — after a change of clocks, say — are replaced rather than kept."
   },
   "locationSetup": {
     "headline": "Set your location",

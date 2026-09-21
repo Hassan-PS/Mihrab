@@ -91,18 +91,29 @@ describe('the banner that explains the hour', () => {
 });
 
 describe('"Refresh stored data" can now repair', () => {
-  it('drops the month in view before filling, and re-downloads the table', () => {
-    expect(month).toMatch(/refetchDatasetFor\(cacheParams\)/);
-    expect(month).toMatch(/refetchStoredMonths\(cacheParams, \[\s*\n?\s*monthKeyOf/);
+  // The action itself moved into `refreshStoredPrayerData` once three
+  // surfaces came to ask for it — the month button, a row in Settings and
+  // a pull on Home. Three copies of a three-step repair is three chances
+  // to drift.
+  const action = read('src', 'prayer', 'refreshStoredData.ts');
+
+  it('re-downloads the table, drops the month, then fills', () => {
+    const order = ['refetchDatasetFor', 'refetchStoredMonths', 'refreshPrayerDataCache'];
+    let at = -1;
+    for (const step of order) {
+      const next = action.indexOf(`await ${step}`);
+      expect(next).toBeGreaterThan(at);
+      at = next;
+    }
   });
 
-  it('and is bounded to that month, not a year of requests', () => {
-    const body = month.slice(
-      month.indexOf('const handleRefreshCache'),
-      month.indexOf('const handleRefreshCache') + 1800,
-    );
-    expect(body).toMatch(/monthKeyOf\(new Date\(viewYear, viewMonth, 1\)\)/);
-    expect(body).not.toMatch(/refetchStoredMonths\([^)]*12/);
+  it('and the month button asks for the month it is showing', () => {
+    expect(month).toMatch(/refreshStoredPrayerData\(cacheParams, \{/);
+    expect(month).toMatch(/month: new Date\(viewYear, viewMonth, 1\)/);
+  });
+
+  it('bounded to one month of re-fetching, not a year of requests', () => {
+    expect(action).toMatch(/refetchStoredMonths\(params, \[monthKeyOf\(month\)\]\)/);
   });
 });
 

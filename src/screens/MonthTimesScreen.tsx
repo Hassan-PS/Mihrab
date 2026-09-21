@@ -21,13 +21,8 @@ import { injectNightTimes } from '../utils/nightTimes';
 import { injectDaruriTimes } from '../prayer/daruriTimes';
 import { formatLocalDate } from '../utils/date';
 import { useAndroidSubScreenBack } from '../navigation/useAndroidSubScreenBack';
-import {
-  getCacheStatus,
-  monthKeyOf,
-  refetchStoredMonths,
-  refreshPrayerDataCache,
-} from '../prayer/prayerStorage';
-import { refetchDatasetFor } from '../prayer/timezoneShift';
+import { getCacheStatus } from '../prayer/prayerStorage';
+import { refreshStoredPrayerData } from '../prayer/refreshStoredData';
 import { ShareMonthScreen } from './ShareMonthScreen';
 import { MonthControls } from './month/MonthControls';
 import {
@@ -144,16 +139,10 @@ export function MonthTimesScreen() {
         calculationMethod: settings.calculationMethod,
         school: settings.school,
       };
-      await refetchDatasetFor(cacheParams);
-      await refetchStoredMonths(cacheParams, [
-        monthKeyOf(new Date(viewYear, viewMonth, 1)),
-      ]);
-      await refreshPrayerDataCache(
-        { provider: effectiveProvider, latitude: lat, longitude: lng,
-          calculationMethod: settings.calculationMethod, school: settings.school },
-        12,
-        (current, total) => setRefreshProgress({ current, total }),
-      );
+      await refreshStoredPrayerData(cacheParams, {
+        month: new Date(viewYear, viewMonth, 1),
+        onProgress: (current, total) => setRefreshProgress({ current, total }),
+      });
       updateCacheStatus();
       setRows(null);
       setLoading(true);

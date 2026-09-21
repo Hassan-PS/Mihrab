@@ -659,9 +659,30 @@ describe('dates at the edges of what a plan can be given', () => {
  * at midnight while the pill beside it rolls at maghrib.
  */
 describe('the day that starts at maghrib', () => {
+  /**
+   * AN EVENING, PINNED — not whenever the suite happens to run.
+   *
+   * These set maghrib to "an hour ago" and expect the day to have rolled.
+   * Run between midnight and one in the morning, an hour ago is YESTERDAY,
+   * and `islamicCivilDateAt` deliberately ignores a maghrib from another
+   * civil day — so the day did not roll, and both of these failed every
+   * night in that one-hour window. Caught at 00:57.
+   *
+   * The clock is the input to what is under test here, so it is given
+   * rather than borrowed: 21:00, which is when tarawih is and the hour
+   * this whole boundary exists for.
+   */
+  beforeEach(() => {
+    jest.useFakeTimers({
+      now: new Date(2026, 8, 18, 21, 0, 0).getTime(),
+      doNotFake: ['performance'],
+    });
+  });
+
   afterEach(() => {
     setTodaysMaghrib(null);
     _resetIslamicDay();
+    jest.useRealTimers();
   });
 
   it('cuts a new day at maghrib, from where the reader has got to', () => {

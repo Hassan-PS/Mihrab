@@ -100,7 +100,10 @@
     "yesterday": "أمس",
     "startReading": "ابدأ القراءة",
     "startReadingHint": "الفاتحة، الصفحة ١",
-    "timezoneShiftNotice": "تغيّر التوقيت المحلي هنا ({{from}} → {{to}}). تم تحديث أوقات الصلاة."
+    "timezoneShiftNotice": "تغيّر التوقيت المحلي هنا ({{from}} → {{to}}). تم تحديث أوقات الصلاة.",
+    "pullToRefresh": "اسحب للأسفل للتحديث",
+    "pullRelease": "أفلت للتحديث",
+    "pullRefreshing": "جارٍ تحديث أوقات صلاتك…"
   },
   "errors": {
     "locationNeededTitle": "الموقع مطلوب",
@@ -384,7 +387,8 @@
     "accentPickerUseOnce": "استخدمه دون حفظ",
     "accentPickerAdjusted": "نُقل إلى أقرب درجة تبقى مقروءة على هذه الخلفية.",
     "sectionAppearanceBlurbAndroid": "السمة واللون وصيغة الوقت واللغة والودجة",
-    "verdantAccentHelp": "النمط الأخضر يلوّن كل سطح بهذا التمييز."
+    "verdantAccentHelp": "النمط الأخضر يلوّن كل سطح بهذا التمييز.",
+    "refreshStoredHelp": "يعيد جلب هذا الشهر بالكامل بدلاً من سدّ الفجوات فقط، فتُستبدل الأوقات الخاطئة (بعد تغيير التوقيت مثلاً) بدل الإبقاء عليها."
   },
   "locationSetup": {
     "headline": "حدّد موقعك",

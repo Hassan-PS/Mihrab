@@ -160,7 +160,16 @@ describe('the bar can always be got back', () => {
     );
     expect(src).toContain('useTabBarScroll');
     expect(src).toMatch(/listener: tabBarScroll\.onScroll/);
-    // And on the dashboard, where there is no band, it is handed over whole.
-    expect(src).toMatch(/onScroll=\{!isDashboard && !isMacCatalyst \? onScroll : tabBarScroll\.onScroll\}/);
+    /**
+     * And on the dashboard, where there is no band, it is the handler
+     * that runs. The prop is a composed function now rather than a
+     * ternary between two handlers — the pull-to-refresh takes one thing
+     * from the same event (whether the page is at the top) — so what is
+     * pinned is that BOTH still run, which is the guarantee that was
+     * being made either way.
+     */
+    expect(src).toMatch(
+      /onScroll=\{e => \{[\s\S]{0,200}pull\.onScroll\(e\);[\s\S]{0,200}onScroll\(e\);[\s\S]{0,200}tabBarScroll\.onScroll\?\.\(e\);/,
+    );
   });
 });

@@ -100,7 +100,10 @@
     "yesterday": "Dün",
     "startReading": "Okumaya başla",
     "startReadingHint": "Fâtiha, sayfa 1",
-    "timezoneShiftNotice": "Buradaki saatler değişti ({{from}} → {{to}}). Namaz vakitleri yenilendi."
+    "timezoneShiftNotice": "Buradaki saatler değişti ({{from}} → {{to}}). Namaz vakitleri yenilendi.",
+    "pullToRefresh": "Yenilemek için aşağı çekin",
+    "pullRelease": "Yenilemek için bırakın",
+    "pullRefreshing": "Namaz vakitleriniz yenileniyor…"
   },
   "errors": {
     "locationNeededTitle": "Konum gerekli",
@@ -384,7 +387,8 @@
     "accentPickerUseOnce": "Kaydetmeden kullan",
     "accentPickerAdjusted": "Bu arka planda okunabilir kalan en yakın tona taşındı.",
     "sectionAppearanceBlurbAndroid": "Tema, vurgu rengi, saat biçimi, dil, widget",
-    "verdantAccentHelp": "Zümrüt her yüzeyi bu vurgu renginde boyar."
+    "verdantAccentHelp": "Zümrüt her yüzeyi bu vurgu renginde boyar.",
+    "refreshStoredHelp": "Boşlukları doldurmak yerine bu ayı yeniden indirir; böylece yanlış vakitler — örneğin saat değişiminden sonra — korunmak yerine değiştirilir."
   },
   "locationSetup": {
     "headline": "Konumunuzu ayarlayın",
