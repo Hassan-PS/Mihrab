@@ -36,14 +36,35 @@ export const ANDROID_UI_FONT = 'Roboto';
 
 type Wrappable = React.ComponentType<{ style?: unknown }>;
 
-function withDefaultFamily<T extends Wrappable>(Original: T, name: string): T {
+/**
+ * A Text nested inside another Text inherits its parent's family — that
+ * is how the muṣḥaf sets the riwayah face once on the line and colours
+ * each word in a span. Forcing Roboto on those spans would override the
+ * inheritance and drop the whole line to the system's Arabic fallback,
+ * so the default is applied to ROOT texts only; a nested one is left as
+ * written. `React.use` reads the context the same way Text itself does.
+ */
+function withDefaultFamily<T extends Wrappable>(
+  Original: T,
+  name: string,
+  nestedIn?: React.Context<boolean>,
+): T {
   const style = { fontFamily: ANDROID_UI_FONT };
-  const Wrapped = (props: { style?: unknown }) =>
-    React.createElement(Original, {
-      ...props,
-      style: props.style == null ? style : [style, props.style],
-    });
+  const Wrapped = (props: { style?: unknown }) => {
+    const nested = nestedIn ? React.use(nestedIn) : false;
+    return React.createElement(
+      Original,
+      nested ? props : { ...props, style: props.style == null ? style : [style, props.style] },
+    );
+  };
   Wrapped.displayName = name;
+  // The statics ride along: `TextInput.State.currentlyFocusedInput()` is
+  // the app's, and a wrapper without it would crash the first focused field.
+  for (const key of Object.keys(Original)) {
+    if (!(key in Wrapped)) {
+      (Wrapped as unknown as Record<string, unknown>)[key] = (Original as unknown as Record<string, unknown>)[key];
+    }
+  }
   return Wrapped as unknown as T;
 }
 
@@ -54,8 +75,11 @@ export function installAndroidUiFont(): void {
   const input = require('react-native/Libraries/Components/TextInput/TextInput') as {
     default: Wrappable;
   };
+  const ancestor = require('react-native/Libraries/Text/TextAncestorContext') as {
+    default: React.Context<boolean>;
+  };
   /* eslint-enable @typescript-eslint/no-require-imports */
-  text.default = withDefaultFamily(text.default, 'Text');
+  text.default = withDefaultFamily(text.default, 'Text', ancestor.default);
   input.default = withDefaultFamily(input.default, 'TextInput');
 }
 

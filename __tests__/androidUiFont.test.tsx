@@ -27,7 +27,7 @@ function load(os: 'android' | 'ios') {
     act(() => {
       tree = create(React.createElement(RN.Text, { style }, text));
     });
-    return tree!.toJSON() as { props: { style: unknown } };
+    return tree!.toJSON() as unknown as { props: { style: unknown } };
   };
   return { RN, before, render };
 }
@@ -42,7 +42,7 @@ describe('the Android UI font', () => {
   it('gives every Text the bundled family, behind whatever the style says', () => {
     const { RN, render } = load('android');
     const tree = render({ fontSize: 14 }, 'hi');
-    const flat = RN.StyleSheet.flatten(tree.props.style as never);
+    const flat = RN.StyleSheet.flatten(tree.props.style as never) as Record<string, unknown>;
     expect(flat.fontFamily).toBe('Roboto');
     expect(flat.fontSize).toBe(14);
   });
@@ -50,7 +50,40 @@ describe('the Android UI font', () => {
   it('never overrides an explicit family — Amiri stays Amiri', () => {
     const { RN, render } = load('android');
     const tree = render({ fontFamily: 'AmiriQuran' }, 'ا');
-    expect(RN.StyleSheet.flatten(tree.props.style as never).fontFamily).toBe('AmiriQuran');
+    expect((RN.StyleSheet.flatten(tree.props.style as never) as Record<string, unknown>).fontFamily).toBe('AmiriQuran');
+  });
+
+  it('leaves a nested span alone so it inherits the line\'s riwayah face', () => {
+    // The muṣḥaf sets UthmanicWarsh once on the line and colours each word
+    // in a nested Text; forcing Roboto on the span broke the whole line.
+    // Jest's Text mock does not publish the ancestor context the real one
+    // does (asserted below), so the test stands in for the outer Text.
+    const { RN } = load('android');
+    const React = require('react') as typeof import('react');
+    const Ancestor = (require('react-native/Libraries/Text/TextAncestorContext') as { default: React.Context<boolean> }).default;
+    const { act, create } = require('react-test-renderer') as typeof import('react-test-renderer');
+    let tree: ReturnType<typeof create> | undefined;
+    act(() => {
+      tree = create(
+        React.createElement(
+          Ancestor,
+          { value: true },
+          React.createElement(RN.Text, { style: { color: 'red' } }, 'كلمة'),
+        ),
+      );
+    });
+    const span = RN.StyleSheet.flatten((tree!.toJSON() as unknown as { props: { style: unknown } }).props.style as never) as Record<string, unknown>;
+    expect(span.fontFamily).toBeUndefined();
+    expect(span.color).toBe('red');
+    const real = read('node_modules', 'react-native', 'Libraries', 'Text', 'Text.js');
+    expect(real).toContain('<TextAncestorContext value={true}>');
+  });
+
+  it('keeps TextInput.State — the focused-field lookup — on the wrapper', () => {
+    const { RN } = load('android');
+    const TextInput = RN.TextInput as unknown as { State?: { currentlyFocusedInput: unknown }; displayName?: string };
+    expect(typeof TextInput.State?.currentlyFocusedInput).toBe('function');
+    expect(TextInput.displayName).toBe('TextInput');
   });
 
   it('is registered natively as a font XML with real weights', () => {
