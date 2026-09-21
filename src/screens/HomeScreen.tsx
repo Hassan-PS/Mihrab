@@ -33,7 +33,7 @@ import { clearTimezoneShiftNotice } from '../prayer/timezoneShift';
 import { refreshStoredPrayerData } from '../prayer/refreshStoredData';
 import { getEffectiveDataProvider } from '../settings/effectiveProvider';
 import {
-  PullIndicator,
+  PullToRefreshFrame,
   usePullToRefresh,
 } from './home/PullToRefresh';
 import { markFirstPaint, useAfterFirstPaint } from '../boot/firstPaint';
@@ -331,10 +331,9 @@ export function HomeScreen() {
     },
     [retry],
   );
-  const pull = usePullToRefresh({
-    enabled: pullEnabled,
-    onRefresh: onPullRefresh,
-  });
+  // A store, not state: it is the same object on every render, and nothing
+  // a pull does to it re-renders this screen (`PullToRefresh`).
+  const pull = usePullToRefresh(onPullRefresh);
   const timezoneShift =
     state.phase === 'ready' &&
     state.timezoneShift &&
@@ -1261,17 +1260,10 @@ export function HomeScreen() {
           <HeaderPlaybackBar surface={palette.bg} inline />
         </>
       ) : null}
-    <View style={styles.pullHost} {...pull.panHandlers}>
-    {/* Behind the page, and revealed only because the page has been
-        dragged off the top of it. */}
-    <PullIndicator
-      phase={pull.phase}
-      progress={pull.progress}
-      translateY={pull.translateY}
-      top={!isDashboard && !isMacCatalyst ? insets.top : 0}
-    />
-    <Animated.View
-      style={[styles.pullPage, { transform: [{ translateY: pull.translateY }] }]}>
+    <PullToRefreshFrame
+      store={pull}
+      enabled={pullEnabled}
+      top={!isDashboard && !isMacCatalyst ? insets.top : 0}>
     <ScrollView
       ref={scrollRef}
       // The phone tracks the offset for the status band; everywhere else
@@ -1487,8 +1479,7 @@ export function HomeScreen() {
         onClose={() => setChangelogSince(null)}
       />
     </ScrollView>
-    </Animated.View>
-    </View>
+    </PullToRefreshFrame>
     {/* Over the page, and only on the phone's full-bleed hero: the
         dashboard's card does not run under the status bar. */}
     {!isDashboard && !isMacCatalyst && !hasBanner ? (
@@ -1503,14 +1494,6 @@ export function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  /**
-   * The pull's frame. It clips: the page is translated DOWN inside it, so
-   * without this the last card slides past the tab bar rather than under
-   * it, and the indicator above the page would be drawn over the screen
-   * behind this one.
-   */
-  pullHost: { flex: 1, overflow: 'hidden' },
-  pullPage: { flex: 1 },
   // Expanded-width dashboard: fixed "today" main column + flexible tools
   // sidebar, so Home fills a wide window and fits without scrolling.
   dashRow: {

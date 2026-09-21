@@ -22,8 +22,11 @@ export const PULL_THRESHOLD = 72;
 /** The page cannot be dragged further than this, however hard it is pulled. */
 export const PULL_MAX = 120;
 
+/** How much of the finger's travel past the threshold the page follows. */
+export const PULL_DAMPING = 0.35;
+
 /**
- * The finger moves further than the page does.
+ * THE CURVE — the finger's travel in, the page's travel out.
  *
  * A one-to-one drag feels like the page has come loose; every pull-to-
  * refresh anybody has used pulls back against the finger, more so the
@@ -31,12 +34,38 @@ export const PULL_MAX = 120;
  * honest, because it is where the reader learns the gesture exists — and
  * heavily damped past it, so overshooting reads as "yes, that is enough"
  * rather than as more distance.
+ *
+ * ONE DEFINITION, TWO READERS. The page is moved by a native-driven
+ * `interpolate` over these ranges, on the UI thread, so it keeps up with
+ * the finger whatever the JavaScript thread is doing. The decision about
+ * whether a release refreshes is made in JavaScript by `pullDistance`
+ * below. If the two ever disagreed, the page would sit visibly past the
+ * threshold on a release that did nothing — so `pullDistance` IS this
+ * curve, read the same way, and a test holds them together.
+ */
+export const PULL_CURVE = {
+  inputRange: [
+    0,
+    PULL_THRESHOLD,
+    PULL_THRESHOLD + (PULL_MAX - PULL_THRESHOLD) / PULL_DAMPING,
+  ],
+  outputRange: [0, PULL_THRESHOLD, PULL_MAX],
+} as const;
+
+/**
+ * The page's travel for a finger's, by the same piecewise-linear reading
+ * `Animated.interpolate` makes of `PULL_CURVE` with `extrapolate: 'clamp'`.
  */
 export function pullDistance(dy: number): number {
-  if (dy <= 0) return 0;
-  if (dy <= PULL_THRESHOLD) return dy;
-  const past = dy - PULL_THRESHOLD;
-  return Math.min(PULL_MAX, PULL_THRESHOLD + past * 0.35);
+  const { inputRange: xs, outputRange: ys } = PULL_CURVE;
+  if (!(dy > xs[0])) return ys[0];
+  for (let i = 1; i < xs.length; i++) {
+    if (dy <= xs[i]) {
+      const t = (dy - xs[i - 1]) / (xs[i] - xs[i - 1]);
+      return ys[i - 1] + t * (ys[i] - ys[i - 1]);
+    }
+  }
+  return ys[ys.length - 1];
 }
 
 /**
@@ -77,28 +106,39 @@ export function releaseStarts(distance: number): boolean {
 export const PULL_RESTING = PULL_THRESHOLD;
 
 /**
- * Should this drag be treated as a pull rather than left to the scroll
- * view?
+ * ── WHICH DRAGS ARE A PULL ────────────────────────────────────────────
  *
- * Three conditions, all of them necessary. The page must be AT THE TOP,
- * or a pull-down is an ordinary scroll-up and stealing it would jam the
- * page. The drag must be downward, because upward at the top is nothing
- * at all. And it must be more vertical than horizontal, or a swipe across
- * the day carousel — which lives on this page — would drag the whole
- * screen down instead of turning the day.
+ * Three conditions, all of them necessary, and now said to the gesture
+ * handler natively rather than asked in JavaScript on every move:
+ *
+ *   • AT THE TOP — the handler is disabled anywhere else, or a pull-down
+ *     would be an ordinary scroll-up and stealing it would jam the page;
+ *   • DOWNWARD — it activates only once the finger has come
+ *     `PULL_CLAIM_SLOP` down, and fails the moment it goes that far up,
+ *     which hands an upward scroll straight back to the scroll view;
+ *   • NOT SIDEWAYS — it fails once the finger has gone `PULL_SIDEWAYS`
+ *     across, because the day carousel lives on this page and a swipe to
+ *     yesterday must turn the day, not drag the screen down.
+ *
+ * The offsets are in the shape `PanGestureHandler` takes them: a range the
+ * finger may move within without the handler deciding anything.
  */
-export function shouldClaimPull(input: {
-  atTop: boolean;
-  dy: number;
-  dx: number;
-}): boolean {
-  if (!input.atTop) return false;
-  if (input.dy <= PULL_CLAIM_SLOP) return false;
-  return Math.abs(input.dy) > Math.abs(input.dx) * 1.5;
-}
 
 /** Movement before a drag counts as a pull, in points. */
 export const PULL_CLAIM_SLOP = 8;
+
+/** Sideways movement that means "this is the carousel's". */
+export const PULL_SIDEWAYS = 20;
+
+/** No practical limit — the handler's offsets want a bound on both sides. */
+const FAR = 10_000;
+
+/** Activate once the finger is `PULL_CLAIM_SLOP` DOWN, and never upward. */
+export const PULL_ACTIVE_OFFSET_Y: [number, number] = [-FAR, PULL_CLAIM_SLOP];
+/** Give up once it is `PULL_CLAIM_SLOP` UP — the scroll view's gesture. */
+export const PULL_FAIL_OFFSET_Y: [number, number] = [-PULL_CLAIM_SLOP, FAR];
+/** Give up once it is `PULL_SIDEWAYS` across — the carousel's gesture. */
+export const PULL_FAIL_OFFSET_X: [number, number] = [-PULL_SIDEWAYS, PULL_SIDEWAYS];
 
 /** A progress bar's width, 0–1, for a fill of `current` out of `total`. */
 export function pullProgress(current: number, total: number): number {

@@ -37,19 +37,44 @@ describe('one action, asked for from three places', () => {
 });
 
 describe('the pull on Home', () => {
-  it('is wired to the page, above it and moving with it', () => {
-    expect(home).toContain('usePullToRefresh');
-    expect(home).toMatch(/<PullIndicator[\s\S]{0,200}translateY=\{pull\.translateY\}/);
-    expect(home).toMatch(/transform: \[\{ translateY: pull\.translateY \}\]/);
-    expect(home).toMatch(/\{\.\.\.pull\.panHandlers\}/);
+  it('moves the page on the UI thread, not through JavaScript', () => {
+    // The first version drove the pull from a PanResponder — every touch a
+    // round trip through the JS thread, which on Home is not idle. It was
+    // reported as very laggy, and it was.
+    // (Named in the file's history note, so it is the IMPORT that must go.)
+    expect(view).not.toMatch(/PanResponder[,\s]*\n?[^*]*from 'react-native'/);
+    expect(view).not.toMatch(/PanResponder\.create/);
+    expect(view).toContain('PanGestureHandler');
+    expect(view).toMatch(/translationY: store\.drag[\s\S]{0,60}useNativeDriver: true/);
+    // And the page's transform is the curve over that native value.
+    expect(view).toMatch(/transform: \[\{ translateY: store\.translate \}\]/);
+    expect(view).toMatch(/this\.drag\.interpolate\(/);
   });
 
-  it('knows when the page is at the top, from the scroll it shares', () => {
-    // The claim depends on it, and the scroll view is the only thing that
-    // knows — so the existing handler carries it rather than a second
-    // listener being bolted on.
+  it('never makes HomeScreen render while a pull is in progress', () => {
+    // HomeScreen holds a store, not state, and reads nothing from it that
+    // a pull changes. The two small components that DO read it subscribe
+    // themselves (`useSyncExternalStore`).
+    expect(home).toMatch(/const pull = usePullToRefresh\(onPullRefresh\)/);
+    expect(home).not.toMatch(/pull\.(phase|progress|translate)/);
+    const hook = view.slice(
+      view.indexOf('export function usePullToRefresh'),
+      view.indexOf('function usePull('),
+    );
+    expect(hook).not.toMatch(/useState/);
+    expect(view).toContain('useSyncExternalStore');
+  });
+
+  it('wraps the page as it is, so reaching the top does not render it', () => {
+    expect(home).toMatch(/<PullToRefreshFrame[\s\S]{0,160}store=\{pull\}/);
+    expect(home).toMatch(/<\/ScrollView>\s*\n\s*<\/PullToRefreshFrame>/);
+  });
+
+  it('is only a pull at the top, and the scroll view waits for it', () => {
+    expect(view).toMatch(/enabled=\{enabled && atTop && !running\}/);
+    expect(view).toMatch(/<NativeViewGestureHandler waitFor=\{pan\}>/);
     expect(home).toMatch(/pull\.onScroll\(e\)/);
-    expect(view).toMatch(/atTop\.current = e\.nativeEvent\.contentOffset\.y <= 0/);
+    expect(view).toMatch(/atTop: e\.nativeEvent\.contentOffset\.y <= 0/);
   });
 
   it('reloads the screen after repairing the cache', () => {
@@ -60,17 +85,11 @@ describe('the pull on Home', () => {
 
   it('is never on the Mac, where a pull is not a gesture anybody makes', () => {
     expect(home).toMatch(/pullEnabled = !isMacCatalyst/);
-    expect(view).toMatch(/panHandlers: enabled \? responder\.panHandlers : \{\}/);
   });
 
-  it('cannot be started twice, or taken away mid-refresh', () => {
-    expect(view).toMatch(/onMoveShouldSetPanResponder:[\s\S]{0,120}!running\.current/);
-    expect(view).toMatch(/onPanResponderTerminationRequest: \(\) => !running\.current/);
-  });
-
-  it('and puts the page back if the system takes the gesture', () => {
-    // A notification shade, an incoming call: not a release.
-    expect(view).toMatch(/onPanResponderTerminate: \(\) => \{\s*\n\s*if \(!running\.current\) settle\(0\)/);
+  it('treats the system taking the gesture as a cancel, not a release', () => {
+    // A notification shade, an incoming call.
+    expect(view).toMatch(/e\.nativeEvent\.state === State\.END/);
   });
 });
 
