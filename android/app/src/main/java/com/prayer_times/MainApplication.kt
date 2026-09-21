@@ -61,6 +61,13 @@ class MainApplication : Application(), ReactApplication {
    */
   private fun registerBundledFonts() {
     val manager = ReactFontManager.getInstance()
+    // The UI face: a font XML, so 400/500/700 and italic are real files
+    // (res/font/roboto.xml — and why the app carries its own Roboto).
+    try {
+      manager.addCustomFont(this, UI_FONT, R.font.roboto)
+    } catch (e: RuntimeException) {
+      Log.w("Mihrab", "could not register the UI font", e)
+    }
     for (family in BUNDLED_FONTS) {
       try {
         manager.addCustomFont(family, Typeface.createFromAsset(assets, "fonts/$family.ttf"))
@@ -73,6 +80,8 @@ class MainApplication : Application(), ReactApplication {
   }
 
   private companion object {
+    /** The family every Text asks for on Android — see src/theme/androidUiFont.ts. */
+    const val UI_FONT = "Roboto"
     /** File names in android/app/src/main/assets/fonts, without `.ttf`. */
     val BUNDLED_FONTS = listOf("Amiri", "AmiriQuran", "SurahNames", "MihrabMedallion")
   }

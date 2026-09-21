@@ -2,6 +2,10 @@
  * @format
  */
 
+// FIRST, before anything takes a reference to Text: on Android every Text
+// is given the app's own Roboto, so a phone's theme font cannot reach the
+// UI (issue #16). A no-op elsewhere.
+import './src/theme/androidUiFont';
 import 'react-native-gesture-handler';
 import { enableFreeze } from 'react-native-screens';
 import { AppRegistry } from 'react-native';

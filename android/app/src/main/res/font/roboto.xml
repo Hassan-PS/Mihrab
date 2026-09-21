@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Roboto, bundled — so the app's own UI face is the app's, not the theme's.
+
+  Android's default sans-serif is whatever the system says it is, and on
+  a Huawei running EMUI that is the user's THEME font: a themed phone
+  showed every label, time and button in a cursive serif, wider than the
+  layouts were drawn for, with the prayer times truncated to "04:…" and
+  the tabs to "Du…" (issue #16). A font loaded from the app's own
+  resources is not the system's to replace.
+
+  Registered as the family "Roboto" in MainApplication (a font XML, so the
+  five weights are real files rather than a synthesised bold), and given
+  to every Text on Android by src/theme/androidUiFont.ts. The 600 is an instance of the
+  variable font; the rest are the static cuts. Subset to Latin,
+  Cyrillic (the Russian UI) and the symbols the UI draws; anything else
+  falls back to the system as before. SIL OFL 1.1, no reserved name —
+  android/fonts/OFL-Roboto.txt.
+-->
+<font-family xmlns:android="http://schemas.android.com/apk/res/android">
+    <font android:fontStyle="normal" android:fontWeight="400" android:font="@font/roboto_regular" />
+    <font android:fontStyle="italic" android:fontWeight="400" android:font="@font/roboto_italic" />
+    <font android:fontStyle="normal" android:fontWeight="500" android:font="@font/roboto_medium" />
+    <font android:fontStyle="normal" android:fontWeight="600" android:font="@font/roboto_semibold" />
+    <font android:fontStyle="normal" android:fontWeight="700" android:font="@font/roboto_bold" />
+</font-family>

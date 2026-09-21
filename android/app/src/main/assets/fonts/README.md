@@ -51,3 +51,14 @@ Verifying
 
 Should render in Amiri's Naskh face. A fall back to the system face
 means the filename here and the string in `FONTS` have drifted apart.
+
+The Latin UI face
+-----------------
+
+Lives in `res/font/`, not here: `roboto.xml` and its five weights, registered
+as the family `Roboto` in `MainApplication.kt` and given to every `Text` on
+Android by `src/theme/androidUiFont.ts`. A font XML rather than an asset
+because React Native resolves an asset's weights by file-name suffix
+(`_bold`) and would synthesise the rest; the XML names a real file per
+weight. Why the app carries its own Roboto at all is in `roboto.xml`
+(issue #16 — EMUI theme fonts). Licence: `android/fonts/OFL-Roboto.txt`.
