@@ -953,4 +953,23 @@ Changed the release cycle itself:
   - `scripts/release.sh`
   - `scripts/verify-release.sh`
 
-**Lesson:** _(unfilled)_
+**Lesson:** the iOS gate change held, and only half of it said so.
+Nothing went red: `IOS_LOCAL_UPLOAD=1` reached `verify-release.sh`, and
+a release that shipped iOS from this Mac was not called failed. But the
+pending line it printed was Xcode Cloud's — "has not created a run for
+d6cce0a9 yet … re-run this check" — about a run that was never coming,
+rather than about the local upload that actually carried iOS. The `3)`
+branch should ask `IOS_LOCAL_UPLOAD` too, and name the route it is
+waiting on.
+
+The bigger thing is the trigger. A push to main has not started a run
+since #738 on 16 September: 2.23.0 needed a manual start, and 2.24.0,
+2.24.1 and 2.25.0 all fell back to the local build — this time "Starting
+one by hand" failed as well, with nothing in the log to say why. The
+local route works and is now the only one that does, and it depends on
+this one Mac and its signing profiles. Worth finding out why Xcode Cloud
+stopped listening before the day that Mac is not available.
+
+Smaller: Homebrew moved the default Java to JDK 27 on 15 September, and
+Gradle fails on it with an error that says only "27". `release.sh` pins
+Temurin 21 and never saw it; `npm run android:*` by hand does.
