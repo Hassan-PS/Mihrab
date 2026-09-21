@@ -19,6 +19,16 @@ export type ReleaseNote = {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    code: 278,
+    version: '2.25.0',
+    date: '2026-09-21',
+    notes: {
+      en: '• Khatmah by a date: choose when to finish, and each day\'s portion is worked out from what is left. Switch between days and a date at any time from the ⋯ menu.\n• Sync no longer brings back a khatmah marker you removed, or pulls your progress back.\n• A download cut off by the connection keeps what it has — continue it, or it resumes by itself on Wi-Fi.\n• When the clocks change where you are, prayer times refresh at once.\n• Pull down on Today to refresh the times.',
+      ar: '• الختمة بتاريخ: اختر متى تنتهي، ويُحسب ورد كل يوم مما بقي. بدّل بين عدد الأيام والتاريخ في أي وقت من قائمة ⋯.\n• لم تعد المزامنة تعيد علامة ختمة حذفتها، ولا ترجع تقدّمك إلى الوراء.\n• التنزيل الذي ينقطع بانقطاع الاتصال يحتفظ بما نزل — أكمله، أو يستأنف وحده على الواي فاي.\n• عند تغيير الساعة في مكانك تتحدّث أوقات الصلاة فورًا.\n• اسحب للأسفل في «اليوم» لتحديث الأوقات.',
+      sv: '• Khatmah till ett datum: välj när du vill bli klar, så räknas varje dags del ut från det som återstår. Byt mellan dagar och datum när som helst i ⋯-menyn.\n• Synkningen återställer inte längre en borttagen khatmah-markör och drar inte tillbaka dina framsteg.\n• En avbruten nedladdning behåller det som hunnit laddas — fortsätt den, eller låt den fortsätta av sig själv på wifi.\n• När klockan ställs om där du är uppdateras bönetiderna direkt.\n• Dra nedåt på Idag för att uppdatera tiderna.',
+    },
+  },
+  {
     code: 277,
     version: '2.24.1',
     date: '2026-09-20',

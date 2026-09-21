@@ -943,3 +943,14 @@ after you have decided to cut one.
 Ran clean on the first attempt.
 
 **Lesson:** none needed — clean run, no change to the cycle.
+
+## 2.25.0 (278) — 2026-09-21
+
+Ran clean on the first attempt.
+
+Changed the release cycle itself:
+
+  - `scripts/release.sh`
+  - `scripts/verify-release.sh`
+
+**Lesson:** _(unfilled)_

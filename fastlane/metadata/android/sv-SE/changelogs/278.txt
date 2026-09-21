@@ -1,0 +1,5 @@
+• Khatmah till ett datum: välj när du vill bli klar, så räknas varje dags del ut från det som återstår. Byt mellan dagar och datum när som helst i ⋯-menyn.
+• Synkningen återställer inte längre en borttagen khatmah-markör och drar inte tillbaka dina framsteg.
+• En avbruten nedladdning behåller det som hunnit laddas — fortsätt den, eller låt den fortsätta av sig själv på wifi.
+• När klockan ställs om där du är uppdateras bönetiderna direkt.
+• Dra nedåt på Idag för att uppdatera tiderna.

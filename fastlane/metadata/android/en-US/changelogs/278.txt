@@ -1,0 +1,5 @@
+• Khatmah by a date: choose when to finish, and each day's portion is worked out from what is left. Switch between days and a date at any time from the ⋯ menu.
+• Sync no longer brings back a khatmah marker you removed, or pulls your progress back.
+• A download cut off by the connection keeps what it has — continue it, or it resumes by itself on Wi-Fi.
+• When the clocks change where you are, prayer times refresh at once.
+• Pull down on Today to refresh the times.
