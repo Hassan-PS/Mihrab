@@ -459,13 +459,12 @@ export function MushafSurahScreen({
           }
         : {}),
       /**
-       * THE RECITATION SELECTOR SITS BY THE BACK ARROW.
+       * THE RIWAYAH SITS BY THE BACK ARROW.
        *
-       * The right side had grown to four controls — recitation, the
+       * The right side had grown to four controls — audio, the
        * translation switch, the riwayah and fullscreen — and the left
-       * held only the arrow. Recitation moved across: it is the control
-       * reached for most once a page is open, and the arrow's side has
-       * the room.
+       * held only the arrow. The riwayah (which muṣḥaf this is) moved
+       * across; audio stays with the view controls.
        *
        * `headerLeft` takes the system back control's slot rather than
        * sharing it, so the arrow is drawn here too (`TabBackButton`, the
@@ -488,20 +487,33 @@ export function MushafSurahScreen({
               color={ink}
             />
           ) : null}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('quran.playbackSettings', 'Recitation')}
-            // Unified sheet (v2.7.28): open the ayah panel scrolled to the
-            // recitation controls — everything lives in one place.
-            onPress={() => setAudioSheetSignal(s => s + 1)}
-            hitSlop={10}
-            style={{ paddingHorizontal: SPACING.xs }}>
-            {/* The mark alone (redesign plan §4); the word lives on in the
-                accessibility label. Painted in the page's ink, like the
-                title, so a night page does not put the app's dark green on
-                near-black. */}
-            <TilawahIcon color={ink} size={desktopSize(22)} />
-          </Pressable>
+          {riwayahChoiceExists() ? (
+            // Only here, because the translation reader draws its Arabic
+            // from the ayah database, which is Hafs. A control that
+            // appeared to change the script there would be lying.
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('quran.riwayahPickerOpen', {
+                defaultValue: 'Reading tradition: {{name}}. Tap to change.',
+                name: t(riwayahById(riwayah).nameKey, riwayahById(riwayah).arabic),
+              })}
+              onPress={() => setRiwayahPickerVisible(true)}
+              hitSlop={10}
+              style={{ paddingHorizontal: SPACING.xs }}>
+              {/* The muṣḥaf you are IN, with the caret that says there
+                  are others — see `RiwayahPicker` for why this stopped
+                  naming the next one instead. */}
+              <Text
+                style={{
+                  ...arabicTextStyle('body'),
+                  color: ink,
+                  fontSize: desktopSize(17),
+                  fontWeight: '700',
+                }}>
+                {`${riwayahById(riwayah).arabic} ▾`}
+              </Text>
+            </Pressable>
+          ) : null}
         </View>
       ),
       headerRight: () => (
@@ -533,34 +545,20 @@ export function MushafSurahScreen({
               <TranslationIcon color={ink} size={desktopSize(22)} />
             </Pressable>
           ) : null}
-          {riwayahChoiceExists() ? (
-            // The riwayah lives with the view controls, as asked — and only
-            // here, because the translation reader draws its Arabic from
-            // the ayah database, which is Hafs. A control that appeared to
-            // change the script there would be lying.
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('quran.riwayahPickerOpen', {
-                defaultValue: 'Reading tradition: {{name}}. Tap to change.',
-                name: t(riwayahById(riwayah).nameKey, riwayahById(riwayah).arabic),
-              })}
-              onPress={() => setRiwayahPickerVisible(true)}
-              hitSlop={10}
-              style={{ paddingHorizontal: SPACING.xs }}>
-              {/* The muṣḥaf you are IN, with the caret that says there
-                  are others — see `RiwayahPicker` for why this stopped
-                  naming the next one instead. */}
-              <Text
-                style={{
-                  ...arabicTextStyle('body'),
-                  color: ink,
-                  fontSize: desktopSize(17),
-                  fontWeight: '700',
-                }}>
-                {`${riwayahById(riwayah).arabic} ▾`}
-              </Text>
-            </Pressable>
-          ) : null}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('quran.playbackSettings', 'Recitation')}
+            // Unified sheet (v2.7.28): open the ayah panel scrolled to the
+            // recitation controls — everything lives in one place.
+            onPress={() => setAudioSheetSignal(s => s + 1)}
+            hitSlop={10}
+            style={{ paddingHorizontal: SPACING.xs }}>
+            {/* The mark alone (redesign plan §4); the word lives on in the
+                accessibility label. Painted in the page's ink, like the
+                title, so a night page does not put the app's dark green on
+                near-black. */}
+            <TilawahIcon color={ink} size={desktopSize(22)} />
+          </Pressable>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('quran.enterFullscreen', 'Enter fullscreen')}

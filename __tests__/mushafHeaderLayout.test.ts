@@ -1,7 +1,7 @@
 /**
- * The muṣḥaf header: recitation beside the back arrow, the view controls
- * on the right. The right side had grown to four controls; the left held
- * only the arrow.
+ * The muṣḥaf header: the riwayah beside the back arrow, audio with the
+ * view controls on the right. The right side had grown to four controls;
+ * the left held only the arrow.
  */
 import { readFileSync } from 'fs';
 import path from 'path';
@@ -14,15 +14,17 @@ const left = src.slice(src.indexOf('headerLeft: () =>'), src.indexOf('headerRigh
 const right = src.slice(src.indexOf('headerRight: () =>'));
 
 describe('the muṣḥaf header', () => {
-  it('puts the recitation control beside the back arrow', () => {
+  it('puts the riwayah beside the back arrow', () => {
     expect(left).toContain('<TabBackButton');
-    expect(left).toContain('<TilawahIcon');
-    expect(left.indexOf('<TabBackButton')).toBeLessThan(left.indexOf('<TilawahIcon'));
+    expect(left).toContain('riwayahChoiceExists()');
+    expect(left.indexOf('<TabBackButton')).toBeLessThan(left.indexOf('riwayahChoiceExists()'));
   });
 
-  it('keeps it off the crowded right side', () => {
-    expect(right).not.toContain('<TilawahIcon');
-    expect(right).toContain("t('quran.enterFullscreen'");
+  it('keeps audio on the right, where the riwayah was, before fullscreen', () => {
+    expect(right).not.toContain('riwayahChoiceExists()');
+    expect(left).not.toContain('<TilawahIcon');
+    expect(right).toContain('<TilawahIcon');
+    expect(right.indexOf('<TilawahIcon')).toBeLessThan(right.indexOf("t('quran.enterFullscreen'"));
   });
 
   it("draws the arrow only when there is somewhere to go back to, in the page's ink", () => {
