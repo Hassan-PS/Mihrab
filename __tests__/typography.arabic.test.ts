@@ -69,8 +69,10 @@ describe('the Android font assets', () => {
     .filter(name => name.endsWith('.ttf') || name.endsWith('.otf'))
     .sort();
 
-  test('are exactly the three bundled faces', () => {
-    expect(files).toEqual(['Amiri.ttf', 'AmiriQuran.ttf', 'SurahNames.ttf']);
+  test('are exactly the bundled faces', () => {
+    // MihrabMedallion: the ayah medallions as finished glyphs, Android
+    // only — issue #16, scripts/gen-medallion-font.py.
+    expect(files).toEqual(['Amiri.ttf', 'AmiriQuran.ttf', 'MihrabMedallion.ttf', 'SurahNames.ttf']);
   });
 
   test('hold no two copies of the same font', () => {

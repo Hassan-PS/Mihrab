@@ -18,6 +18,7 @@ Bundled files
 | `Amiri.ttf` | `'Amiri'` | `FONTS.arabicBody` — dua text, surah names, general Arabic |
 | `AmiriQuran.ttf` | `'AmiriQuran'` | `FONTS.arabicQuran` — ayah text only |
 | `SurahNames.ttf` | `'SurahNames'` | `src/quran/surahHeaderGlyph.ts` — the 114 name glyphs |
+| `MihrabMedallion.ttf` | `'MihrabMedallion'` | `ayahMark` in `src/quran/MushafUnicodePage.tsx` — one finished ayah medallion per number (1–286) at U+E000+n. Built from AmiriQuran's own outlines by `scripts/gen-medallion-font.py` (SIL OFL 1.1, not named Amiri). Android only — issue #16. |
 
 The same face is `Amiri-Regular.ttf` on iOS, where RN reads the
 PostScript family name ("Amiri") out of the file instead. Do not add a

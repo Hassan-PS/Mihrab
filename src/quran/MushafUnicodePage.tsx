@@ -117,6 +117,45 @@ export function ayahMarkText(ayah: number): string {
   return `${NBSP}${END_OF_AYAH}${easternNumerals(ayah)}`;
 }
 
+/**
+ * THE MEDALLION ON ANDROID IS ONE GLYPH, NOT A SHAPED PAIR — issue #16.
+ *
+ * Everything above is about keeping Android's shaper happy, and on a stock
+ * phone it is. On a Huawei nova running EMUI 14 — its own font engine, Bold
+ * text on — it was not, with the 2.14.1 fix in place: an empty rosette and
+ * the number beside it. Nothing an app sets reaches below an OEM's font
+ * engine, so the medallion stops depending on shaping at all.
+ *
+ * `MihrabMedallion.ttf` (scripts/gen-medallion-font.py) holds one finished
+ * glyph per ayah number, 1 to 286: AmiriQuran's own rosette with the
+ * font's own small digits placed inside it, mapped at U+E000 + n in the
+ * Private Use Area. Drawing one is a cmap lookup — no ligature, no
+ * positioning, nothing for an engine to get wrong — and no system font
+ * has a glyph there to substitute. The advance is the rosette's, so a line
+ * measures and justifies exactly as it did.
+ *
+ * Android only. CoreText and Chromium shape the pair correctly, and the
+ * shaped text is what those platforms have always drawn.
+ */
+export const MEDALLION_FONT = 'MihrabMedallion';
+const MEDALLION_PUA = 0xe000;
+const MEDALLION_MAX = 286;
+
+export function ayahMark(
+  ayah: number,
+  os: string = Platform.OS,
+): { text: string; fontFamily: string } {
+  if (os === 'android' && ayah >= 1 && ayah <= MEDALLION_MAX) {
+    return {
+      // The no-break space is in the medallion font too, at AmiriQuran's
+      // width, so the gap before the mark is unchanged.
+      text: `${NBSP}${String.fromCharCode(MEDALLION_PUA + ayah)}`,
+      fontFamily: MEDALLION_FONT,
+    };
+  }
+  return { text: ayahMarkText(ayah), fontFamily: FONTS.arabicQuran };
+}
+
 /** Surah-band and basmalah rows, in units of a text line. */
 const BAND_ROWS = 1.75;
 const BASMALAH_ROWS = 1.3;
@@ -803,10 +842,10 @@ function MushafUnicodePage({
                 <Text
                   style={{
                     color: endInk(ayah.surah, ayah.ayah) ?? colors.accent,
-                    fontFamily: FONTS.arabicQuran,
+                    fontFamily: ayahMark(ayah.ayah).fontFamily,
                   }}
                 >
-                  {ayahMarkText(ayah.ayah)}
+                  {ayahMark(ayah.ayah).text}
                 </Text>
                 {' '}
               </Text>
@@ -1148,10 +1187,10 @@ function PrintedPageBody({
                     <Text
                       style={{
                         color: token.ink ?? colors.accent,
-                        fontFamily: FONTS.arabicQuran,
+                        fontFamily: ayahMark(token.mark).fontFamily,
                       }}
                     >
-                      {ayahMarkText(token.mark)}
+                      {ayahMark(token.mark).text}
                     </Text>
                   ) : null}
                   {i < tokens.length - 1 ? (
