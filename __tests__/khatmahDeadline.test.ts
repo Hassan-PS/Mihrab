@@ -21,6 +21,7 @@ import {
   khatmahIsComplete,
   khatmahPaceOutgrown,
   khatmahFinishTarget,
+  khatmahMarkerAyah,
   khatmahReachAyah,
   finishKhatmahPortion,
   khatmahPaceToday,
@@ -40,6 +41,7 @@ import {
   type KhatmahPlan,
 } from '../src/quran/quranState';
 import { mergeKhatmah } from '../src/sync/merge';
+import { ayahAtIndex } from '../src/quran/ayahIndex';
 import { totalPagesForRiwayah } from '../src/quran/pages';
 import { setTodaysMaghrib, _resetIslamicDay } from '../src/hijri/islamicDay';
 import {
@@ -367,6 +369,41 @@ describe('the finish button on a plan paced to a date', () => {
     const twice = activeKhatmah(getQuranState())!;
     expect(khatmahReachAyah(twice)).toBeGreaterThanOrEqual(next.to);
     expect(khatmahDay(twice).extra).toBeGreaterThan(0);
+  });
+
+  /**
+   * Reported from a phone: day 5's portion finished on an-Nisāʾ 101,
+   * "done" pressed there, and the pill under that same ayah then read
+   * "Finish day 6 (tomorrow)" — the label had moved on to tomorrow while
+   * the marker it sits under had stayed on today's last ayah.
+   */
+  it('moves the marker with the pill: tomorrow is marked where tomorrow ends', () => {
+    const by = ymd(Date.now() + 29 * DAY);
+    startKhatmah(30, undefined, by);
+    const before = activeKhatmah(getQuranState())!;
+    const todayEnd = khatmahFinishTarget(before).to;
+    expect(khatmahMarkerAyah(before)).toEqual(ayahAtIndex(todayEnd));
+
+    finishKhatmahPortion();
+    const after = activeKhatmah(getQuranState())!;
+    const target = khatmahFinishTarget(after);
+    const marker = khatmahMarkerAyah(after)!;
+    expect(target.day).toBe(khatmahDay(after).portion.day + 1);
+    expect(marker).toEqual(ayahAtIndex(target.to));
+    expect(marker).not.toEqual(ayahAtIndex(todayEnd));
+  });
+
+  it('skips a day already read ahead, rather than offering to finish it again', () => {
+    const by = ymd(Date.now() + 29 * DAY);
+    startKhatmah(30, undefined, by);
+    const today = khatmahFinishTarget(activeKhatmah(getQuranState())!);
+    finishKhatmahPortion(); // today
+    finishKhatmahPortion(); // tomorrow, read ahead
+    const plan = activeKhatmah(getQuranState())!;
+    const target = khatmahFinishTarget(plan);
+    expect(target.day).toBe(today.day + 2);
+    expect(target.from).toBeGreaterThan(khatmahReachAyah(plan) - 1);
+    expect(khatmahMarkerAyah(plan)).toEqual(ayahAtIndex(target.to));
   });
 });
 

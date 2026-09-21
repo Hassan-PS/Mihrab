@@ -99,6 +99,7 @@ export function TabBackButton({
   onPress,
   label,
   inNativeHeader = false,
+  color,
 }: {
   /**
    * Somewhere other than Today. A tab that opens a page INSIDE itself —
@@ -116,6 +117,11 @@ export function TabBackButton({
    * on `BackArrow`.
    */
   inNativeHeader?: boolean;
+  /**
+   * The arrow's ink, when the bar is not the app's own colour — the
+   * muṣḥaf's header takes the page's tone, near-black at night.
+   */
+  color?: string;
 } = {}) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
@@ -135,7 +141,7 @@ export function TabBackButton({
           is a PlatformColor, and react-native-svg given one draws nothing
           — the arrow would simply not be there. */}
       <BackArrow
-        color={palette.textSolid}
+        color={color ?? palette.textSolid}
         rtl={inNativeHeader ? I18nManager.isRTL : appRtl}
       />
     </Pressable>

@@ -19,6 +19,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   Platform,
   Pressable,
+  StyleSheet,
   Text,
   useWindowDimensions,
   View,
@@ -28,6 +29,7 @@ import { TilawahIcon } from '../../quran/audio/PlaybackIcons';
 import { TranslationIcon } from '../../theme/icons';
 import { desktopSize } from '../../responsive/desktop';
 import { useSettledMeasure } from '../../quran/mushafReaderCore';
+import { TabBackButton } from '../../navigation/TabBackButton';
 import { useAppPalette } from '../../hooks/useAppPalette';
 import { isMacCatalyst } from '../../responsive/breakpoints';
 import type { SurahIndex } from '../../quran/quran';
@@ -456,6 +458,52 @@ export function MushafSurahScreen({
             ),
           }
         : {}),
+      /**
+       * THE RECITATION SELECTOR SITS BY THE BACK ARROW.
+       *
+       * The right side had grown to four controls — recitation, the
+       * translation switch, the riwayah and fullscreen — and the left
+       * held only the arrow. Recitation moved across: it is the control
+       * reached for most once a page is open, and the arrow's side has
+       * the room.
+       *
+       * `headerLeft` takes the system back control's slot rather than
+       * sharing it, so the arrow is drawn here too (`TabBackButton`, the
+       * app's own, as the translation reader does) — and only when there
+       * is somewhere to go back to, as the system's would be. The swipe
+       * and the hardware back do not go through it.
+       */
+      headerLeft: () => (
+        <View
+          // Keyed on the settled window size — see the note by `headerW`.
+          key={`left-${headerW}x${headerH}`}
+          style={[
+            headerSide.row,
+            navigation.canGoBack() ? null : headerSide.padStart,
+          ]}>
+          {navigation.canGoBack() ? (
+            <TabBackButton
+              onPress={() => navigation.goBack()}
+              inNativeHeader
+              color={ink}
+            />
+          ) : null}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('quran.playbackSettings', 'Recitation')}
+            // Unified sheet (v2.7.28): open the ayah panel scrolled to the
+            // recitation controls — everything lives in one place.
+            onPress={() => setAudioSheetSignal(s => s + 1)}
+            hitSlop={10}
+            style={{ paddingHorizontal: SPACING.xs }}>
+            {/* The mark alone (redesign plan §4); the word lives on in the
+                accessibility label. Painted in the page's ink, like the
+                title, so a night page does not put the app's dark green on
+                near-black. */}
+            <TilawahIcon color={ink} size={desktopSize(22)} />
+          </Pressable>
+        </View>
+      ),
       headerRight: () => (
         // Wider gaps on the Mac: these are pointer targets on a desktop,
         // not thumb targets on a tablet, and Catalyst has already scaled
@@ -468,24 +516,6 @@ export function MushafSurahScreen({
             gap: desktopSize(14),
             alignItems: 'center',
           }}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('quran.playbackSettings', 'Recitation')}
-            // Unified sheet (v2.7.28): open the ayah panel scrolled to the
-            // recitation controls — everything lives in one place.
-            onPress={() => setAudioSheetSignal(s => s + 1)}
-            hitSlop={10}
-            style={{ paddingHorizontal: SPACING.xs }}>
-            {/* The mark alone (redesign plan §4). It used to carry the
-                word "Audio" beside it, and the translation switch the
-                word "Tafsir": two labels in the header of a screen whose
-                whole point is the page. The icons are the player's own,
-                so they are already known by the time anyone looks for
-                them here; the words live on in the accessibility labels.
-                Painted in the page's ink, like the title, so a night page
-                does not put the app's dark green on near-black. */}
-            <TilawahIcon color={ink} size={desktopSize(22)} />
-          </Pressable>
           {onToggleMode ? (
             // Only when the verse-by-verse reader is switched on in
             // Settings → Quran. A header control for a reader that is not
@@ -621,3 +651,8 @@ export function MushafSurahScreen({
     </>
   );
 }
+
+const headerSide = StyleSheet.create({
+  row: { flexDirection: 'row', alignItems: 'center', gap: desktopSize(10) },
+  padStart: { paddingStart: SPACING.sm },
+});

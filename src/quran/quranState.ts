@@ -3714,14 +3714,24 @@ export function khatmahCurrentPortion(
 }
 
 /**
- * The ayah that closes the portion in hand — the one the page marks, and
- * the one whose pill finishes the day. Null once the book is finished.
+ * The ayah that closes the portion the finish pill acts on — the one the
+ * page marks, and the one the pill sits under. Null once the book is
+ * finished.
+ *
+ * THE SAME PORTION AS THE PILL'S LABEL (`khatmahFinishTarget`), not the
+ * portion in hand. On a deadline plan those part company the moment
+ * today's cut is read: the portion in hand stays today's, the pill moves
+ * on to tomorrow's — and with the marker still on today's last ayah the
+ * reader who had just pressed "Finish day 5" on it was shown "Finish
+ * day 6 (tomorrow)" on that very ayah, as if tomorrow ended where today
+ * did.
  */
 export function khatmahMarkerAyah(
   plan: KhatmahPlan,
+  now: number = Date.now(),
 ): { surah: number; ayah: number } | null {
   if (khatmahAyahsRead(plan) >= TOTAL_AYAHS) return null;
-  return ayahAtIndex(khatmahCurrentPortion(plan).to);
+  return ayahAtIndex(khatmahFinishTarget(plan, now).to);
 }
 
 /**
@@ -3808,9 +3818,19 @@ export function khatmahFinishTarget(
 ): KhatmahPortion {
   const portion = khatmahCurrentPortion(plan, now);
   if (!khatmahDeadline(plan)) return portion;
-  if (!rangesCover(khatmahDone(plan), portion.from, portion.to)) return portion;
-  if (portion.to >= TOTAL_AYAHS) return portion;
-  return khatmahPortion(plan, portion.day + 1, now);
+  // The first portion from today on that is not read yet: read ahead past
+  // tomorrow's cut as well and the pill (and the marker with it) means the
+  // day after, not a day already covered that pressing would do nothing
+  // for. Bounded by the plan's last day, which is where it stops.
+  const done = khatmahDone(plan);
+  const last = planDays(plan);
+  let at = portion;
+  while (rangesCover(done, at.from, at.to) && at.to < TOTAL_AYAHS && at.day < last) {
+    const next = khatmahPortion(plan, at.day + 1, now);
+    if (next.to <= at.to) break;
+    at = next;
+  }
+  return at;
 }
 
 export function finishKhatmahPortion(): void {
