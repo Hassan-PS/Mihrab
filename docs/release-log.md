@@ -988,4 +988,21 @@ Changed the release cycle itself:
   - `scripts/release.sh`
   - `scripts/verify-release.sh`
 
-**Lesson:** _(unfilled)_
+**Lesson:** Every stop was a gate doing its job before anything was
+public, and each one names a habit. (1) A native file added to the Xcode
+project by a script was never compiled on a Mac before the cut — jest
+and Android cannot see an iOS target — so the Catalyst step was the
+first compile of `WordPlayer.swift`, and it failed on the file
+reference, not the code. A new native module is not done until
+`build-catalyst.sh` or an iOS build has compiled it;
+`scripts/add-ios-module.rb` now names files from where they are. (2)
+`release.sh` was edited mid-release without running jest, and a test
+pins the wording that was edited: run jest after touching the cycle,
+every time. (3) The daily Habous refresh landed during the build and the
+push was rejected; the printed recovery used `reset --soft`, which
+leaves the stamps staged where `$REVERT` cannot undo them. It is a mixed
+reset plus `pull --rebase` now. And (4) `verify-release.sh` had lost its
+execute bit in 98911860 (a rewrite that did not keep the mode), so
+release.sh stopped at "Permission denied" after publishing — the gate
+was run by hand with `bash` and passed. The bit is back; a test now
+checks every script release.sh calls is executable.

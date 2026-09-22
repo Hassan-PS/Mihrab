@@ -128,3 +128,26 @@ describe('the APK on GitHub is the github flavor, checked as served', () => {
     expect(verify).toContain('published APK is signed with the release key');
   });
 });
+
+/**
+ * A script release.sh runs must be runnable. `verify-release.sh` lost its
+ * execute bit in a rewrite that did not keep the file mode, and 2.25.1
+ * stopped at "Permission denied" in the Verifying step — after the tag,
+ * the GitHub release and the tap were already public. The bit is what
+ * git stores, so it is what this checks.
+ */
+describe('every script the release runs is executable in git', () => {
+  it('has mode 100755 for each one release.sh calls by path', () => {
+    const { execSync } = require('child_process') as typeof import('child_process');
+    const called = [...new Set(script.match(/\$ROOT\/scripts\/[a-z-]+\.sh/g) ?? [])].map(p =>
+      p.replace('$ROOT/', ''),
+    );
+    expect(called.length).toBeGreaterThanOrEqual(3);
+    for (const file of called) {
+      const staged = execSync(`git ls-files -s ${file}`, { cwd: path.join(__dirname, '..') })
+        .toString()
+        .trim();
+      expect(`${file} ${staged.split(' ')[0]}`).toBe(`${file} 100755`);
+    }
+  });
+});
