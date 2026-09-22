@@ -789,9 +789,14 @@ fi
 # MAIN BEFORE THE TAG, always. A tag pushed while main is still local
 # names a commit nobody else can see, and this project does not move a
 # pushed tag — so the recovery is to merge around it for ever.
+# A MIXED reset, not --soft: --soft leaves the stamps STAGED, and
+# $REVERT restores from the index — so it put the stamped files straight
+# back and the rerun died on "working tree has tracked changes" (2.25.1,
+# where the daily Habous refresh landed during the build). The notes stay
+# on disk as untracked files, which is what the rerun wants.
 git push -q origin main || die "push to main failed — nothing tagged, nothing published.
-    Undo the local release commit and the stamps, then rerun:
-      git reset --soft HEAD~1 && $REVERT"
+    Undo the local release commit and the stamps, rebase, then rerun:
+      git reset -q HEAD~1 && $REVERT && git pull --rebase -q origin main"
 ok "main pushed"
 
 git tag -a "$TAG" -m "Mihrab $VERSION ($CODE)" || die "tag failed"

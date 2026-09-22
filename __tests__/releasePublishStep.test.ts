@@ -85,7 +85,10 @@ describe('a run that stops partway can be undone in one line', () => {
   });
 
   it('a failed push says how to undo the commit it just made', () => {
-    expect(script).toMatch(/push to main failed[\s\S]*?git reset --soft HEAD~1/);
+    // A MIXED reset: --soft left the stamps staged and $REVERT (which
+    // restores from the index) put them straight back (2.25.1).
+    expect(script).toMatch(/push to main failed[\s\S]*?git reset -q HEAD~1 && \$REVERT && git pull --rebase/);
+    expect(script).not.toMatch(/push to main failed[^\n]*\n[^\n]*\n[^\n]*reset --soft/);
   });
 });
 
