@@ -3734,7 +3734,30 @@ export function khatmahReachPortion(
   now: number = Date.now(),
 ): KhatmahPortion {
   const reach = khatmahReachAyah(plan);
-  if (reach >= TOTAL_AYAHS) return khatmahPortion(plan, planDays(plan), now);
+  const last = planDays(plan);
+  if (reach >= TOTAL_AYAHS) return khatmahPortion(plan, last, now);
+  /**
+   * ON A DEADLINE PLAN, WALK THE DAYS AS THEY ARE CUT. `khatmahPortionOf`
+   * numbers a day by the book's proportions — a sixtieth of it per day —
+   * which is the duration plan's rule and nothing to do with a plan cut
+   * from today's page outward. Asking it for the reach and then asking
+   * `khatmahPortion` for THAT day found a day that had no relation to
+   * where the reader stood: reading on past tomorrow's cut stalled at
+   * its end (the window it drew closed there), and a pin placed ahead
+   * of the calendar left the reader on a page the plan would not credit
+   * until the day turned. So: from today's cut, forward, the first day
+   * whose cut reaches the ayah the reader is about to read.
+   */
+  if (khatmahDeadline(plan)) {
+    const today = deadlineDayNumber(plan.startedAt, plan.deadline!, now);
+    let day = today;
+    let portion = khatmahPortion(plan, day, now);
+    while (portion.to < reach + 1 && day < last) {
+      day += 1;
+      portion = khatmahPortion(plan, day, now);
+    }
+    return portion;
+  }
   return khatmahPortion(plan, khatmahPortionOf(plan, reach + 1, now), now);
 }
 

@@ -273,7 +273,11 @@ export function applyMarks(
  * A khatmah read front to back with one page un-marked in it compacts to
  * three claims and stays there.
  *
- * TWO RULES MAKE IT SAFE:
+ * THE RULES THAT MAKE IT SAFE — and "safe" means: replayed beside ANY
+ * older copy of this same log that another device still holds, it gives
+ * what the full log would have given. A device's log is compacted; the
+ * peer's copy of it is not, or was compacted at another moment; the
+ * merge unions the two and replays them together.
  *
  *   • Coverage never changes. Every ayah some claim spoke about is still
  *     spoken about afterwards, with the same verdict — so replaying the
@@ -283,17 +287,39 @@ export function applyMarks(
  *     later one. Joining at the later time would let a page turn made
  *     today re-assert "read" over ground claimed days ago, and quietly
  *     undo an un-mark another device made in between — the bug this file
- *     exists to prevent, arriving through the compaction instead. The
- *     earlier time can only ever lose to a claim it truly predates.
+ *     exists to prevent, arriving through the compaction instead.
  *
- *   • …and only READING is joined that way. An un-mark is the claim that
+ *   • …but never DOWN PAST AN UN-MARK THE READING OVERRODE. A reader who
+ *     pins "I am here" at page 84 says two things: everything before is
+ *     read (at T), everything after is not (at T+1). Reading on from
+ *     page 84 is a claim at T+2, later than the denial, and it wins — on
+ *     this device. Joined with the pin's reading at the earlier T, the
+ *     whole run [1..104] carried the time T, and the peer that still
+ *     held the pin's denial at its full width [84..end, T+1] replayed it
+ *     on top: twenty pages read on the phone, gone, and the plan back
+ *     at the pin on both devices after every round (reported
+ *     2026-09-22). So a read is not joined to an older one when a denial
+ *     dated between the two overlaps it — that read keeps its own time,
+ *     which is the only time it can be said to have beaten the denial.
+ *
+ *   • …and so reading never CUTS an un-mark. It used to: a turn across
+ *     denied ground trimmed the denial down to what was still unread,
+ *     and the peer's copy kept the original width. The trimmed denial
+ *     was also the only record here that a denial had ever stood over
+ *     that ground — once it was read through entirely it vanished, and
+ *     the next compaction joined the reading down past it as if it had
+ *     never been made. A denial keeps its width and its date; the later
+ *     reading over it wins on replay exactly as it did in the full log,
+ *     and there are never many denials — un-marking is a thing a reader
+ *     does by hand. A later denial still cuts an earlier one.
+ *
+ *   • …and only READING is joined at all. An un-mark is the claim that
  *     cannot be re-made by carrying on reading, so weakening its date by
  *     a neighbour's is exactly the failure this whole mechanism exists to
  *     stop: un-mark one page on Monday and the next on Wednesday, and a
  *     join at Monday's time hands Tuesday's reading on the other device
  *     the second page back. Denials keep their own dates unless two of
- *     them were made in the same breath, and there are never many —
- *     un-marking is a thing a reader does by hand.
+ *     them were made in the same breath.
  */
 export function compactMarks(
   marks: readonly AyahMark[],
@@ -307,6 +333,12 @@ export function compactMarks(
     if (to < from) continue;
     const next: AyahMark[] = [];
     for (const held of resolved) {
+      // A denial stands at its full width under later reading — see the
+      // fourth rule. It is only cut by a later denial.
+      if (held[3] === 0 && m[3] === 1) {
+        next.push(held);
+        continue;
+      }
       // The parts of an older claim this one does not cover survive, as
       // their own intervals, still carrying their own date.
       if (held[0] < from) next.push([held[0], Math.min(held[1], from - 1), held[2], held[3]]);
@@ -315,24 +347,40 @@ export function compactMarks(
     next.push([Math.max(0, from), Math.min(total, to), m[2], m[3]]);
     resolved = next;
   }
-  resolved.sort((x, y) => x[0] - y[0] || x[2] - y[2]);
+  const denials = resolved.filter(x => x[3] === 0);
+  const reads = resolved.filter(x => x[3] === 1).sort((x, y) => x[0] - y[0] || x[2] - y[2]);
+  /**
+   * Would giving `read` the time `at` put it behind a denial it beat?
+   * True when a denial dated after `at` and before the read overlaps it.
+   */
+  const overridesDenialSince = (read: AyahMark, at: number): boolean =>
+    denials.some(
+      u => u[2] > at && u[2] < read[2] && u[0] <= read[1] && u[1] >= read[0],
+    );
   const joined: AyahMark[] = [];
-  for (const m of resolved) {
+  for (const m of reads) {
     const last = joined[joined.length - 1];
-    const touching = last && last[3] === m[3] && m[0] <= last[1] + 1;
-    const mayJoin = touching && (m[3] === 1 || last[2] === m[2]);
-    if (last && mayJoin) {
-      joined[joined.length - 1] = [
-        last[0],
-        Math.max(last[1], m[1]),
-        Math.min(last[2], m[2]),
-        m[3],
-      ];
-      continue;
+    if (last && m[0] <= last[1] + 1) {
+      const at = Math.min(last[2], m[2]);
+      const newer = last[2] > m[2] ? last : m;
+      if (!overridesDenialSince(newer, at)) {
+        joined[joined.length - 1] = [last[0], Math.max(last[1], m[1]), at, 1];
+        continue;
+      }
     }
     joined.push(m);
   }
-  return joined.sort((x, y) => x[2] - y[2] || x[0] - y[0]);
+  // Two denials made in the same breath are one denial.
+  const denialsJoined: AyahMark[] = [];
+  for (const m of denials.sort((x, y) => x[0] - y[0] || x[2] - y[2])) {
+    const last = denialsJoined[denialsJoined.length - 1];
+    if (last && m[0] <= last[1] + 1 && last[2] === m[2]) {
+      denialsJoined[denialsJoined.length - 1] = [last[0], Math.max(last[1], m[1]), last[2], 0];
+      continue;
+    }
+    denialsJoined.push(m);
+  }
+  return [...joined, ...denialsJoined].sort((x, y) => x[2] - y[2] || x[0] - y[0]);
 }
 
 

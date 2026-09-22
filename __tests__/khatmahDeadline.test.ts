@@ -28,6 +28,9 @@ import {
   khatmahPages,
   khatmahPortion,
   ayahsThroughPage,
+  khatmahTracksPage,
+  setKhatmahPosition,
+  khatmahCurrentPage,
   khatmahPerDayPages,
   khatmahBehindBy,
   khatmahUnreadAyahs,
@@ -44,6 +47,7 @@ import {
 } from '../src/quran/quranState';
 import { mergeKhatmah } from '../src/sync/merge';
 import { ayahAtIndex } from '../src/quran/ayahIndex';
+import { findPageForAyah } from '../src/quran/pages';
 import { totalPagesForRiwayah } from '../src/quran/pages';
 import { setTodaysMaghrib, _resetIslamicDay } from '../src/hijri/islamicDay';
 import {
@@ -344,6 +348,47 @@ describe('the deadline itself travels, and can be taken off', () => {
     const later = plan({ deadline: '2026-10-20', pacedAt: 7_000 });
     expect(mergeKhatmah([soon], [later])[0].deadline).toBe('2026-10-20');
     expect(mergeKhatmah([later], [soon])[0].deadline).toBe('2026-10-20');
+  });
+});
+
+describe('the page the reader is on is credited, wherever the calendar says they should be', () => {
+  beforeEach(() => {
+    jest.useFakeTimers({ now: new Date(2026, 8, 17, 10, 0, 0).getTime(), doNotFake: ['performance'] });
+    __resetQuranStateForTests();
+  });
+  afterEach(() => jest.useRealTimers());
+
+  const turn = (from: number, to: number) => {
+    for (let p = from; p < to; p++) {
+      jest.setSystemTime(Date.now() + 30_000);
+      recordKhatmahPageTurn(p, p + 1);
+    }
+  };
+
+  it('reading on past tomorrow\'s cut keeps crediting', () => {
+    // The credit window used to end at "the portion the reach is in",
+    // found by the DURATION plan's proportions — which on a plan cut from
+    // today outward is a day with no relation to the reader. Reading two
+    // days ahead stalled at tomorrow's cut; every page after was ignored.
+    startKhatmah(60, undefined, ymd(Date.now() + 55 * DAY));
+    turn(1, 40);
+    const plan = activeKhatmah(getQuranState())!;
+    expect(khatmahReachAyah(plan)).toBe(ayahsThroughPage(39, 'hafs'));
+    expect(khatmahCreditWindow(plan)[1]).toBeGreaterThan(khatmahReachAyah(plan));
+  });
+
+  it('and a pin placed ahead of the calendar is read from the same day', () => {
+    startKhatmah(60, undefined, ymd(Date.now() + 55 * DAY));
+    turn(1, 12);
+    const at = ayahAtIndex(800);
+    setKhatmahPosition(at.surah, at.ayah, findPageForAyah(at.surah, at.ayah, 'hafs'));
+    const pinned = activeKhatmah(getQuranState())!;
+    const page = khatmahCurrentPage(pinned);
+    expect(khatmahTracksPage(page)).toBe(true);
+    turn(page, page + 5);
+    expect(khatmahReachAyah(activeKhatmah(getQuranState())!)).toBe(
+      ayahsThroughPage(page + 4, 'hafs'),
+    );
   });
 });
 

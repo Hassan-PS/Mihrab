@@ -48,6 +48,19 @@ later one: joining at the later time would let a page turn made today
 re-assert ground claimed days ago and quietly undo another device's un-mark
 — the first blind spot, arriving through the compaction.
 
+But never **down past an un-mark the reading overrode** (2026-09-22). A
+"continue from here" pin is two claims — read before it at *T*, unread
+after it at *T+1* — and reading on from the pin is a claim at *T+2* that
+beats the denial. Joined to the pin's reading at *T*, the whole run
+carried *T*, and the peer that still held the pin's denial at its full
+width replayed it on top: twenty pages read on the phone, undone on both
+devices after every round. So a read keeps its own time when a denial
+dated between it and its neighbour overlaps it, and — because the trimmed
+denial was the only record that one had ever stood there — **reading
+never cuts an un-mark**; only a later un-mark does. The log is the same
+size for it: denials are made by hand, and there are never many. The test
+that walks both devices through it is `syncTwoDeviceProgress.test.ts`.
+
 ## The third: a field nobody decided
 
 `mergeKhatmah` built its result with `{...mine, ...incoming}` and then

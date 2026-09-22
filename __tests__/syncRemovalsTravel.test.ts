@@ -333,6 +333,83 @@ describe('the claim log is resolved, not appended to for ever', () => {
     );
     expect(joined).toEqual([[0, 19, 1_000, 1]]);
   });
+
+  /**
+   * …but never down past a denial the reading beat (2026-09-22). A pin
+   * at 527: read before, denied after. Reading on from 527 is later than
+   * the denial and wins — and joined to the pin's reading at the pin's
+   * time it would LOSE to the same denial on the device that still holds
+   * it at full width. So it keeps its own time, and the denial its width.
+   */
+  it('does not join a read down past a denial it overrode', () => {
+    const pin: AyahMark[] = [
+      [1, 526, 1_000, 1],
+      [527, 6236, 1_001, 0],
+    ];
+    const readOn: AyahMark[] = [
+      [527, 540, 2_000, 1],
+      [541, 560, 2_001, 1],
+    ];
+    const compacted = compactMarks([...pin, ...readOn], 6236);
+    expect(compacted).toEqual([
+      [1, 526, 1_000, 1],
+      [527, 6236, 1_001, 0],
+      [527, 560, 2_000, 1],
+    ]);
+    // Replayed beside the peer's uncompacted copy of the pin: what the
+    // phone read stays read.
+    const both = [...pin, ...compacted].sort((x, y) => x[2] - y[2] || x[0] - y[0]);
+    expect(applyMarks([], both, 6236)).toEqual([[1, 560]]);
+    // Reading straight on joins at its own earlier time, as before.
+    const more = compactMarks([...compacted, [561, 580, 3_000, 1]], 6236);
+    expect(more).toEqual([
+      [1, 526, 1_000, 1],
+      [527, 6236, 1_001, 0],
+      [527, 580, 2_000, 1],
+    ]);
+  });
+
+  it('keeps a denial whole under later reading, so a re-read cannot be folded past it', () => {
+    // Un-mark one page, read it again, read on. The denial used to be
+    // trimmed to nothing and vanish, and the next compaction joined the
+    // re-read down to the reading before it — behind the denial the peer
+    // still had. Now the denial stays, the re-read keeps its time.
+    const once = compactMarks(
+      [
+        [1, 100, 1_000, 1],
+        [50, 59, 2_000, 0],
+        [50, 59, 3_000, 1],
+        [101, 120, 4_000, 1],
+      ],
+      6236,
+    );
+    expect(once).toContainEqual([50, 59, 2_000, 0]);
+    expect(once).toContainEqual([50, 59, 3_000, 1]);
+    expect(compactMarks(once, 6236)).toEqual(once);
+    const peer: AyahMark[] = [
+      [1, 100, 1_000, 1],
+      [50, 59, 2_000, 0],
+    ];
+    const both = [...peer, ...once].sort((x, y) => x[2] - y[2] || x[0] - y[0]);
+    expect(applyMarks([], both, 6236)).toEqual([[1, 120]]);
+  });
+
+  it('a later denial still cuts an earlier one', () => {
+    const cut = compactMarks(
+      [
+        [500, 6236, 1_000, 0],
+        [1, 599, 2_000, 1],
+        [600, 6236, 2_001, 0],
+      ],
+      6236,
+    );
+    expect(cut).toEqual([
+      [500, 599, 1_000, 0],
+      [1, 599, 2_000, 1],
+      [600, 6236, 2_001, 0],
+    ]);
+    expect(applyMarks([], cut, 6236)).toEqual([[1, 599]]);
+  });
 });
 
 const quran = (over: Partial<QuranState>): QuranState => ({
