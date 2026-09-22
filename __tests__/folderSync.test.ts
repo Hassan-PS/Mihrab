@@ -80,7 +80,12 @@ import {
   type SyncFolder,
 } from '../src/sync/folderSync';
 import { JOURNAL_KEY, SUNNAH_KEY } from '../src/practice/practiceStore';
-import { QURAN_STORAGE_KEY } from '../src/quran/quranState';
+import {
+  QURAN_STORAGE_KEY,
+  __resetQuranStateForTests,
+  flushQuranStateForTests,
+  hydrateQuranState,
+} from '../src/quran/quranState';
 
 /** The shared folder: whatever software the user already trusts to move it. */
 function memoryFolder(): SyncFolder & { files: Map<string, string> } {
@@ -115,9 +120,15 @@ async function as<T>(which: 'A' | 'B', fn: () => Promise<T>): Promise<T> {
   forgetCachedPeers();
   forgetCachedRemovals();
   forgetCachedDeviceName();
+  // The Quran store is read live by a round, so each simulated device
+  // gets its own, hydrated from its own disk — and written back to it
+  // through the store's queue before the switch.
+  __resetQuranStateForTests();
+  await hydrateQuranState();
   try {
     return await fn();
   } finally {
+    await flushQuranStateForTests();
     forgetCachedIdentity();
     forgetCachedPeers();
     forgetCachedRemovals();

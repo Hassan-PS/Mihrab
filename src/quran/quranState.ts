@@ -43,6 +43,7 @@ import {
   firstMissingFrom,
   countWithin,
   highestCovered,
+  lastReadAt,
   normalizeRanges,
   rangesCover,
   rangesEqual,
@@ -847,13 +848,22 @@ function coerceKhatmah(v: unknown): KhatmahPlan | null {
       day !== null && day > localYmd(Date.now() + 24 * 60 * 60 * 1000);
     if (day !== null && !stale && from !== null && to !== null && to >= from) {
       out.pace = { day, from, to };
+      if (typeof pc.at === 'number' && Number.isFinite(pc.at) && pc.at > 0) {
+        out.pace.at = Math.trunc(pc.at);
+      }
     }
   }
   return out;
 }
 
 /** At most this many claims travel with a plan — newest kept. */
-const KHATMAH_MARK_LIMIT = 128;
+/**
+ * A backstop, not a budget. The log is one claim per page the plan has
+ * read plus its denials (`compactMarks`), so a plan that has read the
+ * whole book holds about six hundred; the cap only ever bites a log
+ * that has gone wrong, and takes the oldest claims first.
+ */
+const KHATMAH_MARK_LIMIT = 1024;
 
 function coerceMark(v: unknown): AyahMark | null {
   if (!Array.isArray(v) || v.length < 4) return null;
@@ -1074,6 +1084,20 @@ export function primeQuranState(raw: unknown): void {
   state = mergeStored(raw);
   hydrated = true;
   emit();
+}
+
+/**
+ * Adopt a blob AND write it, through this store's own queue.
+ *
+ * For a sync round: the merged result is what the store should hold
+ * next, and the write has to go through `persist` rather than straight
+ * to the key, or a page turned in the same instant — whose own write is
+ * already queued behind the mutex — would be overwritten by a slower
+ * write of the older result landing after it (see `writeData`).
+ */
+export function adoptQuranState(raw: unknown): void {
+  primeQuranState(raw);
+  persist();
 }
 
 /**
@@ -2352,7 +2376,7 @@ export function recordKhatmahProgress(
      */
     const marks =
       credited >= turnedFrom
-        ? withMark(active, turnedFrom, credited, 1)
+        ? withMark(active, turnedFrom, credited, 1, true)
         : active.marks;
     const next = settled(active, filled, marks);
     // By CONTENT, not identity: every range operation builds a new array,
@@ -2944,6 +2968,10 @@ export function resetKhatmahToday(): void {
     const active = prev.khatmah.find(isLivePlan);
     if (!active) return prev;
     const today = localYmd();
+    // No progress today — nothing to rewind. The REACH, not the
+    // contiguous run: with a hole behind the reader the run stops at the
+    // hole, and "nothing to rewind" rewound everything past it (caught
+    // by the two-device fuzz, 2026-09-22).
     const baseAyahs =
       active.dayStartDate === today
         ? (active.dayStartAyahsRead ??
@@ -2951,7 +2979,7 @@ export function resetKhatmahToday(): void {
             active.dayStartPagesRead ?? active.pagesRead,
             DEFAULT_RIWAYAH,
           ))
-        : khatmahAyahsRead(active); // no progress today — nothing to rewind
+        : khatmahReachAyah(active);
     const basePages = pagesThroughAyahs(baseAyahs);
     return {
       ...prev,
@@ -3161,7 +3189,7 @@ export function khatmahPaceToday(
     daysLeft: daysToDeadline(by, now),
     ayahsThroughPage: ayahsThroughHafsPage,
   });
-  return { day, from: cut.from, to: cut.to };
+  return { day, from: cut.from, to: cut.to, at: now };
 }
 
 /**
@@ -3314,7 +3342,30 @@ function paceStillFits(
   today: string,
 ): boolean {
   if (pace.day !== today) return false;
-  return pace.from <= khatmahReachAyah(plan) + 1;
+  const reach = khatmahReachAyah(plan);
+  if (pace.from > reach + 1) return false;
+  /**
+   * NOR A CUT MADE FROM A PLACE THE PLAN HAD ALREADY LEFT (2026-09-22).
+   *
+   * Two devices used without a sync between them each pin today's cut
+   * from their own reach, and the one that was behind — a Mac last
+   * opened days ago — cuts a day out of pages the phone read last week.
+   * Held as today's cut, on either device, it reads as a day already
+   * done, the reading actually done today counted as "extra", the pill
+   * moved on to tomorrow. The merge tells such a cut from a real one
+   * when it has both (`pickPace`); this is for the one it did not — the
+   * only cut of the day, arriving by sync, or this device's own, made
+   * from stale knowledge. The test is the same: the reading past the cut
+   * came AFTER it was cut (the day was cut and then read, and the cut
+   * stands, however far the reading went — that is what pinning is
+   * for), or it came BEFORE (the cut was stale the moment it was made,
+   * and the day is re-made from where the reading really stands). The
+   * log dates every page read; a cut from a build that did not date
+   * itself is kept, as it always was.
+   */
+  if (pace.to >= reach || pace.at === undefined) return true;
+  const readAt = lastReadAt(plan.marks, reach);
+  return readAt === undefined || readAt > pace.at;
 }
 
 /** The pace a deadline plan needs from today on, in Ḥafṣ pages a day. */
@@ -3585,10 +3636,35 @@ export function khatmahIsComplete(plan: KhatmahPlan): boolean {
 function withMarks(
   plan: KhatmahPlan,
   claims: ReadonlyArray<readonly [from: number, to: number, read: 0 | 1]>,
+  /**
+   * A page turn, as opposed to something the reader said by hand — a
+   * pin, a tap on a page, "finish today". See below.
+   */
+  turned = false,
 ): AyahMark[] | undefined {
-  const usable = claims.filter(([from, to]) => to >= from);
-  if (usable.length === 0) return plan.marks;
   const have = plan.marks ?? [];
+  /**
+   * A TURN OVER GROUND THE LOG ALREADY SAYS IS READ ADDS NOTHING.
+   *
+   * Flipping back through credited pages on the way somewhere is not a
+   * fresh reading of them, and logging it as one would both write state
+   * on every such turn and re-date the pages — which, replayed on the
+   * other device, would override an un-mark it had made of one of them
+   * in between. What the log says of them stands, at the time it said
+   * it. A turn that crosses anything currently denied is a new claim,
+   * because that is the one thing it changes.
+   *
+   * Only turns. A claim made BY HAND is the reader speaking — a pin says
+   * "everything before here is read" whatever this device's log thought
+   * — and it is recorded at its own time so that it also beats a denial
+   * the other device made in between and this one has not seen yet.
+   */
+  const saidRead = turned ? applyMarks([], have, TOTAL_AYAHS) : null;
+  const usable = claims.filter(
+    ([from, to, read]) =>
+      to >= from && !(saidRead && read === 1 && rangesCover(saidRead, from, to)),
+  );
+  if (usable.length === 0) return plan.marks;
   /**
    * MONOTONIC, because replay order IS the rule.
    *
@@ -3634,8 +3710,9 @@ function withMark(
   from: number,
   to: number,
   read: 0 | 1,
+  turned = false,
 ): AyahMark[] | undefined {
-  return withMarks(plan, [[from, to, read]]);
+  return withMarks(plan, [[from, to, read]], turned);
 }
 
 function sameMarks(a: readonly AyahMark[], b: readonly AyahMark[]): boolean {
@@ -4195,6 +4272,14 @@ export function khatmahPages(
 }
 
 /** Test-only: reset module state. */
+/** Test seam: wait for every queued write of this store to land. */
+export async function flushQuranStateForTests(): Promise<void> {
+  // The queue is filled a microtask after an update; let that pass, then
+  // wait for the chain.
+  await Promise.resolve();
+  await writeMutex;
+}
+
 export function __resetQuranStateForTests(): void {
   state = DEFAULT_QURAN_STATE;
   gapMemo = null;

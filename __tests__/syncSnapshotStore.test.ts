@@ -57,7 +57,20 @@ import {
   JOURNAL_KEY,
   SUNNAH_KEY,
 } from '../src/practice/practiceStore';
-import { QURAN_STORAGE_KEY, DEFAULT_QURAN_STATE } from '../src/quran/quranState';
+import {
+  QURAN_STORAGE_KEY,
+  DEFAULT_QURAN_STATE,
+  __resetQuranStateForTests,
+  activeKhatmah,
+  ayahsThroughPage,
+  flushQuranStateForTests,
+  getQuranState,
+  hydrateQuranState,
+  khatmahReachAyah,
+  recordKhatmahPageTurn,
+  startKhatmah,
+} from '../src/quran/quranState';
+import { durableEncryptedGet } from '../src/storage/durableWrite';
 
 const NOW = '2026-08-19T06:00:00.000Z';
 
@@ -108,7 +121,10 @@ function seedUsedPhone() {
   );
 }
 
-beforeEach(() => mockStore.clear());
+beforeEach(() => {
+  mockStore.clear();
+  __resetQuranStateForTests();
+});
 
 describe('collecting from the real stores', () => {
   it('reads all seven, decrypted', async () => {
@@ -272,5 +288,40 @@ describe('writeData', () => {
     expect(mockStore.has(SETTINGS_KEY)).toBe(true);
     expect(mockStore.has(LOCATION_KEY)).toBe(false);
     expect(mockStore.has(JOURNAL_KEY)).toBe(false);
+  });
+});
+
+/**
+ * A ROUND TAKES TIME, AND THE READER DOES NOT STOP. Files are listed,
+ * opened and decrypted while pages turn; the result the round computed
+ * from where the store stood when it began must not replace where the
+ * store has got to since. Reported as progress going backwards on sync.
+ */
+describe('a page turned during the round survives it', () => {
+  it('is merged into the result rather than replaced by it', async () => {
+    await hydrateQuranState();
+    startKhatmah(30);
+    for (let p = 1; p < 20; p++) recordKhatmahPageTurn(p, p + 1);
+    await flushQuranStateForTests();
+    // The peer's file: the same plan, a little behind.
+    const peer = JSON.parse(JSON.stringify(getQuranState()));
+    const snapshot = readSnapshot(buildSnapshot({ ...(await collectData()), quran: peer }, everything(), NOW));
+
+    // The round's reads are slow, and two pages are turned meanwhile.
+    (durableEncryptedGet as jest.Mock).mockImplementationOnce(async (k: string) => {
+      recordKhatmahPageTurn(20, 21);
+      recordKhatmahPageTurn(21, 22);
+      await new Promise(r => setTimeout(r, 5));
+      return mockStore.get(k) ?? null;
+    });
+    await applySnapshot(snapshot, everything());
+    await flushQuranStateForTests();
+
+    // Twenty-one pages read, not nineteen.
+    const after = activeKhatmah(getQuranState())!;
+    expect(khatmahReachAyah(after)).toBe(ayahsThroughPage(21, 'hafs'));
+    // And the disk agrees with the store.
+    const disk = JSON.parse(mockStore.get(QURAN_STORAGE_KEY)!);
+    expect(khatmahReachAyah(activeKhatmah(disk)!)).toBe(khatmahReachAyah(after));
   });
 });

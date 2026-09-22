@@ -293,6 +293,107 @@ describe('the day\'s cut travels', () => {
     expect(mergeKhatmah([today], [tomorrow])[0].pace!.day).toBe('2026-09-07');
     expect(mergeKhatmah([tomorrow], [today])[0].pace!.day).toBe('2026-09-07');
   });
+
+  /**
+   * TWO CUTS FROM TWO PLACES (2026-09-22). A Mac last opened days ago
+   * cuts today out of pages the phone read last week; the phone cuts
+   * today from where the reading really is. Earliest-wins took the Mac's,
+   * and the phone's day was "done" the moment it synced. The log tells
+   * the two apart: the ground between the cuts was read BEFORE the lower
+   * cut was made, so the lower cut was stale the moment it was made.
+   */
+  it('a cut made from a place the plan had left loses to the one made at the frontier', () => {
+    const lastWeek = at(2026, 8, 1, 12);
+    const thisMorning = at(2026, 8, 6, 8);
+    const done: [number, number][] = [[1, 1000]];
+    const marks = [[1, 1000, lastWeek, 1] as const];
+    const stale = {
+      ...base,
+      done,
+      ayahsRead: 1000,
+      marks: [...marks],
+      pace: { day: '2026-09-06', from: 201, to: 400, at: thisMorning + 60_000 },
+    };
+    const fresh = {
+      ...base,
+      done,
+      ayahsRead: 1000,
+      marks: [...marks],
+      pace: { day: '2026-09-06', from: 1001, to: 1200, at: thisMorning },
+    };
+    expect(mergeKhatmah([stale], [fresh])[0].pace).toEqual(fresh.pace);
+    expect(mergeKhatmah([fresh], [stale])[0].pace).toEqual(fresh.pace);
+  });
+
+  it('but the earlier of two cuts of the same frontier still wins, read past or not', () => {
+    // The phone cut the day at 8:00 and read its whole cut and on; the Mac
+    // opened at noon, synced, and cut from where the reading now stood.
+    // The ground between the two cuts was read AFTER the first cut: the
+    // first cut is where the day began.
+    const morning = at(2026, 8, 6, 8);
+    const first = {
+      ...base,
+      done: [[1, 300] as [number, number]],
+      ayahsRead: 300,
+      marks: [[1, 300, morning + 3_600_000, 1] as const],
+      pace: { day: '2026-09-06', from: 1, to: 200, at: morning },
+    };
+    const second = {
+      ...first,
+      pace: { day: '2026-09-06', from: 301, to: 500, at: morning + 4 * 3_600_000 },
+    };
+    expect(mergeKhatmah([first], [second])[0].pace).toEqual(first.pace);
+    expect(mergeKhatmah([second], [first])[0].pace).toEqual(first.pace);
+  });
+
+  it('the same cut made twice merges to one, whichever side runs the merge', () => {
+    const cut = { day: '2026-09-06', from: 1, to: 200 };
+    const a = { ...base, pace: { ...cut, at: 1_000 } };
+    const b = { ...base, pace: { ...cut, at: 2_000 } };
+    expect(mergeKhatmah([a], [b])[0].pace).toEqual(mergeKhatmah([b], [a])[0].pace);
+  });
+});
+
+describe('a lone cut that arrived by sync', () => {
+  const by = '2026-09-30';
+  const base = plan({ deadline: by, pacedAt: at(2026, 8, 1) });
+
+  it('is kept when the reading past it came after it — the day was cut, then read', () => {
+    const morning = at(2026, 8, 6, 8);
+    const p = {
+      ...base,
+      done: [[1, 300] as [number, number]],
+      ayahsRead: 300,
+      marks: [[1, 300, morning + 3_600_000, 1] as const],
+      pace: { day: '2026-09-06', from: 1, to: 200, at: morning },
+    };
+    expect(khatmahPaceToday(p, at(2026, 8, 6, 14))).toEqual(p.pace);
+  });
+
+  it('is re-made from the reading when the reading past it came before it — the cut was stale', () => {
+    const lastWeek = at(2026, 8, 1, 12);
+    const morning = at(2026, 8, 6, 8);
+    const p = {
+      ...base,
+      done: [[1, 1000] as [number, number]],
+      ayahsRead: 1000,
+      marks: [[1, 1000, lastWeek, 1] as const],
+      pace: { day: '2026-09-06', from: 201, to: 400, at: morning },
+    };
+    const cut = khatmahPaceToday(p, at(2026, 8, 6, 14))!;
+    expect(cut.from).toBe(1001);
+    expect(cut.to).toBeGreaterThan(1001);
+  });
+
+  it('is kept when it does not say when it was cut — a build before the stamp', () => {
+    const p = {
+      ...base,
+      done: [[1, 1000] as [number, number]],
+      ayahsRead: 1000,
+      pace: { day: '2026-09-06', from: 201, to: 400 },
+    };
+    expect(khatmahPaceToday(p, at(2026, 8, 6, 14))).toEqual(p.pace);
+  });
 });
 
 describe('the deadline itself travels, and can be taken off', () => {

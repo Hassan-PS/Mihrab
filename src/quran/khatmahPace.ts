@@ -48,6 +48,12 @@ export type KhatmahPace = {
   from: number;
   /** Last ayah of the day's portion. */
   to: number;
+  /**
+   * When it was cut, wall-clock ms. What lets two cuts of the same day
+   * from two devices that had not synced be told apart on the merge —
+   * see `pickPace`. Absent on a cut from a build before it.
+   */
+  at?: number;
 };
 
 /** `YYYY-MM-DD` as a local instant, taken at noon so no DST shift bites. */

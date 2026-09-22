@@ -49,8 +49,10 @@ import type { DhikrLog } from '../practice/practiceStore';
 import {
   applyMarks,
   contiguousFrom,
+  lastReadAt,
   mergeMarks,
   unionRanges,
+  type AyahMark,
 } from '../quran/khatmahDone';
 import {
   ayahsThroughPage,
@@ -292,13 +294,14 @@ function paceFor(
   a: KhatmahPlan,
   b: KhatmahPlan,
   deadline: string | undefined,
+  marks: readonly AyahMark[],
 ): KhatmahPlan['pace'] {
   if (!deadline) return undefined;
-  if (a.deadline === b.deadline) return pickPace(a, b);
+  if (a.deadline === b.deadline) return pickPace(a, b, marks);
   return (a.deadline === deadline ? a : b).pace;
 }
 
-function pickPacing(a: KhatmahPlan, b: KhatmahPlan): Pacing {
+function pickPacing(a: KhatmahPlan, b: KhatmahPlan, marks: readonly AyahMark[]): Pacing {
   const sa = a.pacedAt ?? 0;
   const sb = b.pacedAt ?? 0;
   /**
@@ -315,7 +318,7 @@ function pickPacing(a: KhatmahPlan, b: KhatmahPlan): Pacing {
         : a.deadline >= b.deadline
           ? a.deadline
           : b.deadline;
-    const pace = paceFor(a, b, deadline);
+    const pace = paceFor(a, b, deadline, marks);
     return {
       targetDays: Math.max(a.targetDays, b.targetDays),
       ...(deadline ? { deadline } : {}),
@@ -323,7 +326,7 @@ function pickPacing(a: KhatmahPlan, b: KhatmahPlan): Pacing {
     };
   }
   const win = strongerPacing(a, b);
-  const pace = paceFor(a, b, win.deadline);
+  const pace = paceFor(a, b, win.deadline, marks);
   return {
     targetDays: win.targetDays,
     ...(win.deadline ? { deadline: win.deadline } : {}),
@@ -338,13 +341,44 @@ function pickPacing(a: KhatmahPlan, b: KhatmahPlan): Pacing {
 }
 
 /** Today's cut, when the two devices hold different ones — see the note. */
-function pickPace(a: KhatmahPlan, b: KhatmahPlan): KhatmahPlan['pace'] {
+function pickPace(
+  a: KhatmahPlan,
+  b: KhatmahPlan,
+  marks: readonly AyahMark[],
+): KhatmahPlan['pace'] {
   if (!a.pace || !b.pace) return a.pace ?? b.pace;
   if (a.pace.day !== b.pace.day) return a.pace.day > b.pace.day ? a.pace : b.pace;
+  /**
+   * TWO CUTS THAT DO NOT TOUCH WERE MADE FROM TWO DIFFERENT PLACES, and
+   * the earliest opening (below) is only right when the place was the
+   * same. It is right when the second device opened the day a few pages
+   * into the first's cut — or after the first had read its whole cut
+   * and on: the ground between the two cuts was read TODAY, after the
+   * lower cut was made, and the lower cut is where the day began. It is
+   * wrong when the lower cut came from a device that had not heard how
+   * far the other had got: a Mac last opened days ago cuts a day out of
+   * pages the phone read last week, and taken as "today" it told the
+   * phone its day was already done and its own reading was extra
+   * (2026-09-22). The ground between the cuts tells the two apart: read
+   * after the lower cut was made, the lower cut is the day's start; read
+   * before it, the lower cut was stale the moment it was made. The log
+   * dates every page read, and the cut carries when it was cut.
+   */
+  const lower = a.pace.from <= b.pace.from ? a.pace : b.pace;
+  const higher = lower === a.pace ? b.pace : a.pace;
+  if (lower.to < higher.from - 1 && lower.at !== undefined) {
+    const readAt = lastReadAt(marks, higher.from - 1);
+    if (readAt !== undefined) return readAt > lower.at ? lower : higher;
+  }
   if (a.pace.from !== b.pace.from) {
     return a.pace.from < b.pace.from ? a.pace : b.pace;
   }
-  return a.pace.to <= b.pace.to ? a.pace : b.pace;
+  if (a.pace.to !== b.pace.to) return a.pace.to < b.pace.to ? a.pace : b.pace;
+  // The same cut made twice: the earlier making, and a dated one over an
+  // undated one — decided the same way on both devices.
+  if (a.pace.at === undefined) return b.pace;
+  if (b.pace.at === undefined) return a.pace;
+  return a.pace.at <= b.pace.at ? a.pace : b.pace;
 }
 
 /** The per-device day baseline, copied only when the device has one. */
@@ -498,7 +532,7 @@ export function mergeKhatmah(
      * merely absent, so the pair travels with `pacedAt` beside it and the
      * newest word wins, exactly as the pin does.
      */
-    const pacing = pickPacing(mine, p);
+    const pacing = pickPacing(mine, p, marks);
     const deadline = pacing.deadline;
     /**
      * AND THE DAY'S CUT TRAVELS WITH IT, atomically.

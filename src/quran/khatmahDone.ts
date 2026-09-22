@@ -262,64 +262,50 @@ export function applyMarks(
 }
 
 /**
- * THE CLAIM LOG, RESOLVED — the same answer in as few claims as possible.
+ * THE CLAIM LOG, RESOLVED — every claim still deciding something, at its
+ * own time, and nothing else.
  *
- * Dating page turns would otherwise mean a claim per turn, and a log that
- * grows by twenty entries a day both fills the sealed file and pushes the
- * un-marks — the claims that actually need to survive — off the end of
- * the cap. So the log is resolved instead of trimmed: later claims cut
- * earlier ones out of the regions they cover, which leaves one dated
- * interval per stretch the reader has actually spoken about differently.
- * A khatmah read front to back with one page un-marked in it compacts to
- * three claims and stays there.
+ * Later claims cut earlier ones out of the regions they cover, so the log
+ * holds one dated interval per stretch the reader last spoke about: a
+ * khatmah read front to back is one claim per page, a page un-marked in
+ * it is a denial beside them, and re-reading a page replaces its claim
+ * rather than adding one. Bounded by the pages of the book plus the
+ * denials, which are made by hand and are never many.
  *
- * THE RULES THAT MAKE IT SAFE — and "safe" means: replayed beside ANY
- * older copy of this same log that another device still holds, it gives
- * what the full log would have given. A device's log is compacted; the
- * peer's copy of it is not, or was compacted at another moment; the
- * merge unions the two and replays them together.
+ * ── WHY NOTHING IS JOINED ANY MORE (2026-09-22) ──────────────────────
  *
- *   • Coverage never changes. Every ayah some claim spoke about is still
- *     spoken about afterwards, with the same verdict — so replaying the
- *     compacted log over any set gives what the full log gave.
+ * Neighbouring reads used to be joined into one claim at the EARLIER of
+ * their times, on the reasoning that the earlier time "can only lose to
+ * a claim it truly predates". It cannot: a whole khatmah's reading
+ * collapsed into one claim dated at its first page turn, weeks back, and
+ * any denial made on another device after that date — a pin, an
+ * un-marked page, a rewind — beat every page this device read AFTER the
+ * denial but before the next sync, because the join had backdated them.
+ * Reported as "progress on my phone is reset on sync to whatever point
+ * the other device holds": the phone's own reading past a pin, folded
+ * into the pin's reading at the pin's time and undone by the pin's
+ * denial from the other device, every round. Joining at the LATER time
+ * fails the other way — a page turn made today re-asserts "read" over
+ * ground claimed days ago and undoes an un-mark another device made in
+ * between. A read's time is a fact about that read; there is no other
+ * time it can carry, so it keeps it. What IS joined is two claims made in
+ * the same breath — a fling that crossed three pages, the two halves of
+ * a pin — which share a time and lose nothing by it.
  *
- *   • Neighbours that agree are joined at the EARLIER time, never the
- *     later one. Joining at the later time would let a page turn made
- *     today re-assert "read" over ground claimed days ago, and quietly
- *     undo an un-mark another device made in between — the bug this file
- *     exists to prevent, arriving through the compaction instead.
+ * ── AND WHY READING NEVER CUTS A DENIAL ───────────────────────────────
  *
- *   • …but never DOWN PAST AN UN-MARK THE READING OVERRODE. A reader who
- *     pins "I am here" at page 84 says two things: everything before is
- *     read (at T), everything after is not (at T+1). Reading on from
- *     page 84 is a claim at T+2, later than the denial, and it wins — on
- *     this device. Joined with the pin's reading at the earlier T, the
- *     whole run [1..104] carried the time T, and the peer that still
- *     held the pin's denial at its full width [84..end, T+1] replayed it
- *     on top: twenty pages read on the phone, gone, and the plan back
- *     at the pin on both devices after every round (reported
- *     2026-09-22). So a read is not joined to an older one when a denial
- *     dated between the two overlaps it — that read keeps its own time,
- *     which is the only time it can be said to have beaten the denial.
+ * A denial keeps its width and its date under later reading; only a
+ * later denial cuts it. Cutting it by reads was harmless while the peer
+ * saw the same log, and the peer never does: it holds the denial at the
+ * width it was made, and a denial read through entirely here vanished
+ * from this log while still standing there. Kept whole, it replays here
+ * exactly as it does on the peer — under the later reading that beat it.
  *
- *   • …and so reading never CUTS an un-mark. It used to: a turn across
- *     denied ground trimmed the denial down to what was still unread,
- *     and the peer's copy kept the original width. The trimmed denial
- *     was also the only record here that a denial had ever stood over
- *     that ground — once it was read through entirely it vanished, and
- *     the next compaction joined the reading down past it as if it had
- *     never been made. A denial keeps its width and its date; the later
- *     reading over it wins on replay exactly as it did in the full log,
- *     and there are never many denials — un-marking is a thing a reader
- *     does by hand. A later denial still cuts an earlier one.
- *
- *   • …and only READING is joined at all. An un-mark is the claim that
- *     cannot be re-made by carrying on reading, so weakening its date by
- *     a neighbour's is exactly the failure this whole mechanism exists to
- *     stop: un-mark one page on Monday and the next on Wednesday, and a
- *     join at Monday's time hands Tuesday's reading on the other device
- *     the second page back. Denials keep their own dates unless two of
- *     them were made in the same breath.
+ * Two rules the merge rests on, both kept: coverage never changes (every
+ * ayah some claim spoke about is still spoken about afterwards, with the
+ * same verdict, so replaying the compacted log over any set gives what
+ * the full log gave), and replaying it BESIDE any older copy of the same
+ * log gives that too — which is what the peer will do with it.
  */
 export function compactMarks(
   marks: readonly AyahMark[],
@@ -329,60 +315,63 @@ export function compactMarks(
   const ordered = [...marks].sort((x, y) => x[2] - y[2] || x[0] - y[0]);
   let resolved: AyahMark[] = [];
   for (const m of ordered) {
-    const [from, to] = m;
+    const from = Math.max(1, m[0]);
+    const to = Math.min(total, m[1]);
     if (to < from) continue;
     const next: AyahMark[] = [];
     for (const held of resolved) {
-      // A denial stands at its full width under later reading — see the
-      // fourth rule. It is only cut by a later denial.
+      // No overlap: untouched.
+      if (held[1] < from || held[0] > to) {
+        next.push(held);
+        continue;
+      }
+      // A denial stands at its full width under later reading.
       if (held[3] === 0 && m[3] === 1) {
         next.push(held);
         continue;
       }
       // The parts of an older claim this one does not cover survive, as
       // their own intervals, still carrying their own date.
-      if (held[0] < from) next.push([held[0], Math.min(held[1], from - 1), held[2], held[3]]);
-      if (held[1] > to) next.push([Math.max(held[0], to + 1), held[1], held[2], held[3]]);
+      if (held[0] < from) next.push([held[0], from - 1, held[2], held[3]]);
+      if (held[1] > to) next.push([to + 1, held[1], held[2], held[3]]);
     }
-    next.push([Math.max(0, from), Math.min(total, to), m[2], m[3]]);
+    next.push([from, to, m[2], m[3]]);
     resolved = next;
   }
-  const denials = resolved.filter(x => x[3] === 0);
-  const reads = resolved.filter(x => x[3] === 1).sort((x, y) => x[0] - y[0] || x[2] - y[2]);
-  /**
-   * Would giving `read` the time `at` put it behind a denial it beat?
-   * True when a denial dated after `at` and before the read overlaps it.
-   */
-  const overridesDenialSince = (read: AyahMark, at: number): boolean =>
-    denials.some(
-      u => u[2] > at && u[2] < read[2] && u[0] <= read[1] && u[1] >= read[0],
-    );
+  // Claims made in the same breath — one time, touching, one verdict —
+  // are one claim. Nothing else is joined; see above.
+  resolved.sort((x, y) => x[3] - y[3] || x[2] - y[2] || x[0] - y[0]);
   const joined: AyahMark[] = [];
-  for (const m of reads) {
+  for (const m of resolved) {
     const last = joined[joined.length - 1];
-    if (last && m[0] <= last[1] + 1) {
-      const at = Math.min(last[2], m[2]);
-      const newer = last[2] > m[2] ? last : m;
-      if (!overridesDenialSince(newer, at)) {
-        joined[joined.length - 1] = [last[0], Math.max(last[1], m[1]), at, 1];
-        continue;
-      }
+    if (last && last[3] === m[3] && last[2] === m[2] && m[0] <= last[1] + 1) {
+      joined[joined.length - 1] = [last[0], Math.max(last[1], m[1]), last[2], last[3]];
+      continue;
     }
     joined.push(m);
   }
-  // Two denials made in the same breath are one denial.
-  const denialsJoined: AyahMark[] = [];
-  for (const m of denials.sort((x, y) => x[0] - y[0] || x[2] - y[2])) {
-    const last = denialsJoined[denialsJoined.length - 1];
-    if (last && m[0] <= last[1] + 1 && last[2] === m[2]) {
-      denialsJoined[denialsJoined.length - 1] = [last[0], Math.max(last[1], m[1]), last[2], 0];
-      continue;
-    }
-    denialsJoined.push(m);
-  }
-  return [...joined, ...denialsJoined].sort((x, y) => x[2] - y[2] || x[0] - y[0]);
+  return joined.sort((x, y) => x[2] - y[2] || x[0] - y[0]);
 }
 
+
+/**
+ * When `ayah` was last claimed READ, by the latest dated claim covering
+ * it — or undefined when none does, or the latest is a denial.
+ */
+export function lastReadAt(
+  marks: readonly AyahMark[] | undefined,
+  ayah: number,
+): number | undefined {
+  if (!marks) return undefined;
+  let at: number | undefined;
+  let latest = -1;
+  for (const [from, to, when, read] of marks) {
+    if (ayah < from || ayah > to || when < latest) continue;
+    latest = when;
+    at = read === 1 ? when : undefined;
+  }
+  return at;
+}
 
 /**
  * The furthest ayah covered — how far the reader has actually got,

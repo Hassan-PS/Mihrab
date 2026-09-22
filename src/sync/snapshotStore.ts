@@ -33,14 +33,17 @@ import {
   notifyPracticeChanged,
 } from '../practice/practiceStore';
 import {
+  adoptQuranState,
   coerceQuranState,
-  primeQuranState,
+  getQuranState,
+  hydrateQuranState,
+  isQuranHydrated,
   QURAN_STORAGE_KEY,
 } from '../quran/quranState';
 import { republishWidgetPayload } from '../widget/republishWidgetPayload';
 import { whileApplyingSnapshot } from './recordChanged';
 import { emptyData, type SnapshotData, type SyncSelection } from './snapshot';
-import { mergeData, summarise, type MergeSummary } from './merge';
+import { mergeData, mergeQuran, summarise, type MergeSummary } from './merge';
 import type { Snapshot } from './snapshot';
 
 /** Plaintext settings blob. Must match `KEY` in settings/storage.ts. */
@@ -95,13 +98,21 @@ export async function collectData(
       AsyncStorage.getItem(SETTINGS_KEY).catch(() => null),
       enc(LOCATION_KEY),
     ]);
+  /**
+   * THE QURAN STORE IS READ LIVE, not off the disk. It holds its state in
+   * memory and writes it a tick later through its own queue, so the key
+   * can lag a page turn — and a merge that took the lagging copy as the
+   * local side, then adopted the result, threw the turn away. Once
+   * hydrated, what the store holds is the truth; the disk is its shadow.
+   */
+  const liveQuran = isQuranHydrated() ? getQuranState() : null;
   const base = emptyData();
   return {
     prayers: parse(journal, coerceJournalEntries, base.prayers),
     fasting: parse(fasting, coerceFastEntries, base.fasting),
     dhikr: parse(dhikr, coerceDhikrLog, base.dhikr),
     sunnah: parse(sunnah, coerceSunnahLog, base.sunnah),
-    quran: parse(quran, coerceQuranState, base.quran),
+    quran: liveQuran ?? parse(quran, coerceQuranState, base.quran),
     settings: parse(settings, asObject, base.settings),
     location: parse(location, asObject, base.location),
   };
@@ -132,12 +143,7 @@ export async function writeData(
   if (touched.sunnah) {
     jobs.push(durableEncryptedSet(SUNNAH_KEY, JSON.stringify(next.sunnah)));
   }
-  if (touched.quran) {
-    jobs.push(
-      AsyncStorage.setItem(QURAN_STORAGE_KEY, JSON.stringify(next.quran)),
-    );
-  }
-  // ...and see below: the Quran store has to be told, not just the disk.
+  // The Quran store is written below, through the store, not here.
   if (touched.settings) {
     jobs.push(
       AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(next.settings)),
@@ -159,7 +165,22 @@ export async function writeData(
   // a restore that failed.
   if (touched.quran) {
     try {
-      primeQuranState(next.quran);
+      /**
+       * MERGED AGAIN WITH WHAT THE STORE HOLDS NOW, then adopted and
+       * written through the store's own queue.
+       *
+       * A round takes time — files listed, opened, decrypted — and a
+       * reader turning pages meanwhile has moved the store past the
+       * copy the round started from. Adopting the round's result as it
+       * stood replaced those turns with the older answer; and a write
+       * straight to the key raced the store's own queued write of them.
+       * The merge is idempotent and commutative, so folding the result
+       * into the live state costs nothing and loses nothing: whichever
+       * of the two knows more about a page wins, exactly as between two
+       * devices.
+       */
+      await hydrateQuranState();
+      adoptQuranState(mergeQuran(getQuranState(), next.quran));
     } catch (e) {
       console.warn('snapshotStore: could not adopt the restored Quran state', e);
     }

@@ -288,8 +288,12 @@ describe('the claim log is resolved, not appended to for ever', () => {
     );
   });
 
-  it('and says it in a handful of claims instead of sixty-one', () => {
-    expect(compactMarks(withHole, 6236).length).toBeLessThan(5);
+  it('says it in one claim per stretch the reader last spoke about', () => {
+    // Sixty turns and one denial: sixty-one claims, each at its own
+    // time — the two turns the denial cut are the parts it left — and
+    // never more than the pages read plus the denials.
+    expect(compactMarks(withHole, 6236)).toHaveLength(60 + 1);
+    expect(compactMarks([...turns, ...turns], 6236)).toHaveLength(60);
   });
 
   it('compacting twice changes nothing', () => {
@@ -321,27 +325,60 @@ describe('the claim log is resolved, not appended to for ever', () => {
     expect(merged).toEqual([[1, 9], [30, 100]]);
   });
 
-  it('joins neighbours at the EARLIER time, never the later one', () => {
-    // Joining at the later time would let today's page turn re-assert
-    // ground claimed days ago and quietly undo another device's un-mark.
-    const joined = compactMarks(
+  /**
+   * A read keeps its own time (2026-09-22). Neighbouring reads used to be
+   * joined at the earlier of their times, which backdated every page
+   * this device read after a denial the other device made in between —
+   * a pin, an un-mark, a rewind — and the denial then beat them on the
+   * merge. Joined at the later time they would instead have re-asserted
+   * ground claimed days ago over that same denial. Neither time is the
+   * read's, so neither is used.
+   */
+  it('does not join reads made at different times', () => {
+    const kept = compactMarks(
       [
         [0, 9, 1_000, 1],
         [10, 19, 5_000, 1],
       ],
       6236,
     );
-    expect(joined).toEqual([[0, 19, 1_000, 1]]);
+    expect(kept).toEqual([
+      [1, 9, 1_000, 1],
+      [10, 19, 5_000, 1],
+    ]);
+    // Beside a denial the other device made in between, each read is
+    // judged at its own time: the first loses to it, the second beats it.
+    const merged = applyMarks(
+      [],
+      [...kept, [0, 19, 3_000, 0] as AyahMark].sort((x, y) => x[2] - y[2]),
+      6236,
+    );
+    expect(merged).toEqual([[10, 19]]);
+  });
+
+  it('joins only claims made in the same breath', () => {
+    expect(
+      compactMarks(
+        [
+          [0, 9, 1_000, 1],
+          [10, 19, 1_000, 1],
+          [30, 39, 1_000, 1],
+        ],
+        6236,
+      ),
+    ).toEqual([
+      [1, 19, 1_000, 1],
+      [30, 39, 1_000, 1],
+    ]);
   });
 
   /**
-   * …but never down past a denial the reading beat (2026-09-22). A pin
-   * at 527: read before, denied after. Reading on from 527 is later than
-   * the denial and wins — and joined to the pin's reading at the pin's
-   * time it would LOSE to the same denial on the device that still holds
-   * it at full width. So it keeps its own time, and the denial its width.
+   * The reported case. A pin at 527: read before, denied after. Reading
+   * on from 527 is later than the denial and wins — and folded into the
+   * pin's reading at the pin's time it would LOSE to the same denial on
+   * the device that still holds it at full width.
    */
-  it('does not join a read down past a denial it overrode', () => {
+  it('keeps the reading past a pin at its own time, and the denial at its width', () => {
     const pin: AyahMark[] = [
       [1, 526, 1_000, 1],
       [527, 6236, 1_001, 0],
@@ -354,26 +391,17 @@ describe('the claim log is resolved, not appended to for ever', () => {
     expect(compacted).toEqual([
       [1, 526, 1_000, 1],
       [527, 6236, 1_001, 0],
-      [527, 560, 2_000, 1],
+      [527, 540, 2_000, 1],
+      [541, 560, 2_001, 1],
     ]);
-    // Replayed beside the peer's uncompacted copy of the pin: what the
-    // phone read stays read.
+    // Replayed beside the peer's copy of the pin: what was read stays read.
     const both = [...pin, ...compacted].sort((x, y) => x[2] - y[2] || x[0] - y[0]);
     expect(applyMarks([], both, 6236)).toEqual([[1, 560]]);
-    // Reading straight on joins at its own earlier time, as before.
-    const more = compactMarks([...compacted, [561, 580, 3_000, 1]], 6236);
-    expect(more).toEqual([
-      [1, 526, 1_000, 1],
-      [527, 6236, 1_001, 0],
-      [527, 580, 2_000, 1],
-    ]);
   });
 
-  it('keeps a denial whole under later reading, so a re-read cannot be folded past it', () => {
+  it('keeps a denial whole under later reading', () => {
     // Un-mark one page, read it again, read on. The denial used to be
-    // trimmed to nothing and vanish, and the next compaction joined the
-    // re-read down to the reading before it — behind the denial the peer
-    // still had. Now the denial stays, the re-read keeps its time.
+    // trimmed to nothing and vanish — while the peer still held it.
     const once = compactMarks(
       [
         [1, 100, 1_000, 1],
@@ -641,22 +669,22 @@ describe('the shape holds as the book is read', () => {
     startKhatmah(30);
   });
 
-  it('a whole khatmah of page turns does not grow the claim log', () => {
-    // Reading is a dated claim now, and a claim per page turn would be
-    // 604 of them in a blob that syncs whole — and would push the
-    // un-marks off the end of the cap, which is where the durability
-    // actually lives. The compaction is what stops that, so it is pinned
-    // here against the real writer rather than against a fixture.
+  it('a khatmah of page turns is one claim per page, and re-reading adds none', () => {
+    // Reading is a dated claim, one per page turned — at its own time,
+    // which is what lets it be ordered against a denial the other device
+    // makes (2026-09-22). Bounded by the pages of the book, not by the
+    // turns: flipping back through credited ground adds nothing, and the
+    // cap (a backstop) is well above a whole book plus its denials.
     for (let p = 1; p < 300; p++) recordKhatmahPageTurn(p, p + 1);
     const afterReading = activeKhatmah(getQuranState())!;
-    expect(afterReading.marks!.length).toBeLessThan(4);
+    expect(afterReading.marks!.length).toBe(299);
+    for (let p = 1; p < 300; p++) recordKhatmahPageTurn(p, p + 1);
+    expect(activeKhatmah(getQuranState())!.marks).toBe(afterReading.marks);
 
-    // Un-mark three scattered pages; each is its own dated denial and
-    // none of them is lost to the cap.
+    // Un-mark three scattered pages; each is its own dated denial.
     for (const page of [12, 140, 260]) toggleKhatmahPageDone(page);
     const marks = activeKhatmah(getQuranState())!.marks!;
     expect(marks.filter(m => m[3] === 0)).toHaveLength(3);
-    expect(marks.length).toBeLessThan(10);
 
     // Read on past them all; the denials stay denied, because nothing
     // this device did afterwards claimed those pages.
@@ -665,7 +693,8 @@ describe('the shape holds as the book is read', () => {
     for (const page of [12, 140, 260]) {
       expect(isKhatmahPageDone(later, page)).toBe(false);
     }
-    expect(later.marks!.length).toBeLessThan(10);
+    // Each denial replaced the read it cut, page for page.
+    expect(later.marks!.length).toBe(299 + 100);
   });
 
   it('and every writer that moves the pin leaves a date on it', () => {

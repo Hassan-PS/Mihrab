@@ -43,23 +43,39 @@ ordered if both are dated, so **reading is a dated claim now too**
 (`recordKhatmahProgress`), and the log stays small because `compactMarks`
 resolves it into the verdicts it amounts to instead of appending for ever.
 
-Neighbouring claims that agree are joined at the **earlier** time, never the
-later one: joining at the later time would let a page turn made today
-re-assert ground claimed days ago and quietly undo another device's un-mark
-— the first blind spot, arriving through the compaction.
+**Every read keeps its own time (2026-09-22).** Neighbouring reads used to
+be joined at the *earlier* of their times, on the reasoning that the
+earlier time can only lose to a claim it truly predates. It cannot: a whole
+khatmah's reading collapsed into one claim dated at its first page turn,
+and any denial made on the other device after that date — a "continue from
+here" pin, an un-marked page, a rewind — beat every page this device read
+*after* the denial but before the next sync, because the join had backdated
+them. Reported as "progress on my phone is reset on sync to whatever point
+the other device holds". Joining at the later time fails the other way
+round (today's page turn re-asserts ground claimed days ago over an un-mark
+made in between). So nothing is joined: the log is one claim per page read
+plus the denials, a later claim cuts an earlier one out of the ground it
+covers, a denial is never cut by reading (only by a later denial — the
+peer still holds it at the width it was made), and a page turn over ground
+the log already says is read adds nothing. A finished khatmah is about six
+hundred claims; the cap (1024) is a backstop.
 
-But never **down past an un-mark the reading overrode** (2026-09-22). A
-"continue from here" pin is two claims — read before it at *T*, unread
-after it at *T+1* — and reading on from the pin is a claim at *T+2* that
-beats the denial. Joined to the pin's reading at *T*, the whole run
-carried *T*, and the peer that still held the pin's denial at its full
-width replayed it on top: twenty pages read on the phone, undone on both
-devices after every round. So a read keeps its own time when a denial
-dated between it and its neighbour overlaps it, and — because the trimmed
-denial was the only record that one had ever stood there — **reading
-never cuts an un-mark**; only a later un-mark does. The log is the same
-size for it: denials are made by hand, and there are never many. The test
-that walks both devices through it is `syncTwoDeviceProgress.test.ts`.
+**Today's cut on a dated plan carries when it was cut** (`pace.at`). Two
+devices used on the same day without a sync between them each cut the day
+from their own reach, and the one that was behind cuts a day out of pages
+the other read last week. Earliest-wins — right when both cuts came from
+the same frontier — took the stale one, and the phone's day was "done" the
+moment it synced. The log tells the two apart: the ground between the cuts
+was read *before* the lower cut was made, so it was stale the moment it was
+made (`pickPace`); and a lone cut, adopted by a device that has not read
+today, is judged the same way (`paceStillFits`).
+
+The two-device fuzz (`syncTwoDeviceFuzz.test.ts`) walks all of this:
+random reading, finishes, pins, un-marks, rewinds and days on two devices
+syncing both ways, checking after every round that they agree, that what
+they agree on is the reader's latest word per ayah, that a device is never
+moved back by a peer that did nothing to its reading, and that today's cut
+is never a stale one.
 
 ## The third: a field nobody decided
 

@@ -122,11 +122,14 @@ describe('a stale device syncing with the phone', () => {
     const phone = activeKhatmah(getQuranState())!;
     const reach = khatmahReachAyah(phone);
     expect(reach).toBeGreaterThan(600);
-    // The reading past the pin is its own dated claim, later than the
-    // denial it beat — not folded into the pin's reading at the pin's
-    // time. Three claims, and the denial at its full width.
-    expect(phone.marks).toHaveLength(3);
-    expect(phone.marks).toContainEqual([527, 6236, expect.any(Number), 0]);
+    // The reading past the pin is its own dated claims, each later than
+    // the denial it beat — not folded into the pin's reading at the pin's
+    // time. And the denial stays at its full width.
+    const denial = phone.marks!.find(m => m[3] === 0)!;
+    expect(denial).toEqual([527, 6236, expect.any(Number), 0]);
+    for (const m of phone.marks!.filter(m => m[3] === 1 && m[0] >= 527)) {
+      expect(m[2]).toBeGreaterThan(denial[2]);
+    }
 
     syncFrom(peer);
     expect(khatmahReachAyah(activeKhatmah(getQuranState())!)).toBe(reach);
@@ -137,7 +140,6 @@ describe('a stale device syncing with the phone', () => {
     expect(khatmahReachAyah(activeKhatmah(theirs)!)).toBe(reach);
     syncFrom(theirs);
     expect(khatmahReachAyah(activeKhatmah(getQuranState())!)).toBe(reach);
-    expect(activeKhatmah(getQuranState())!.marks).toHaveLength(3);
   });
 
   /**
