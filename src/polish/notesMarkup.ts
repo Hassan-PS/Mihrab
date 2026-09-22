@@ -137,3 +137,22 @@ export function notePlainText(raw: string): string {
     )
     .join('\n');
 }
+
+/**
+ * The note as text to paste somewhere else — a store listing, a GitHub
+ * release, a message — under a line naming the release.
+ *
+ * Not `notePlainText`, which flattens a list into sentences to prove the
+ * parser drops nothing. This keeps the shape a reader would expect to
+ * paste: one line per paragraph, one "• " line per bullet, a blank line
+ * between blocks, and the `**` markers gone. It goes through the same
+ * parser the sheet draws with, so what is copied is what was shown.
+ */
+export function noteCopyText(heading: string, raw: string): string {
+  const blocks = parseNote(raw).map(b =>
+    b.kind === 'paragraph'
+      ? b.spans.map(s => s.text).join('')
+      : b.items.map(i => `• ${i.map(s => s.text).join('')}`).join('\n'),
+  );
+  return [heading, ...blocks].join('\n\n');
+}

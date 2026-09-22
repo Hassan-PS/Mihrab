@@ -1920,6 +1920,9 @@
     "title": "ما الجديد",
     "installed": "محراب {{version}}",
     "newBadge": "جديد",
-    "settingsHelp": "كل ما تغيّر، إصدارًا بعد إصدار."
+    "settingsHelp": "كل ما تغيّر، إصدارًا بعد إصدار.",
+    "copyNotes": "نسخ ملاحظات الإصدار {{version}}",
+    "copied": "تم النسخ",
+    "copyFailed": "تعذّر النسخ"
   }
 }

@@ -1920,6 +1920,9 @@
     "title": "کیا نیا ہے",
     "installed": "محراب {{version}}",
     "newBadge": "نیا",
-    "settingsHelp": "جو کچھ بدلا ہے، ورژن در ورژن۔"
+    "settingsHelp": "جو کچھ بدلا ہے، ورژن در ورژن۔",
+    "copyNotes": "{{version}} کے ریلیز نوٹس کاپی کریں",
+    "copied": "کاپی ہو گیا",
+    "copyFailed": "کاپی نہیں ہو سکا"
   }
 }

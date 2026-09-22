@@ -1920,6 +1920,9 @@
     "title": "Yang baru",
     "installed": "Mihrab {{version}}",
     "newBadge": "Baru",
-    "settingsHelp": "Semua yang berubah, rilis demi rilis."
+    "settingsHelp": "Semua yang berubah, rilis demi rilis.",
+    "copyNotes": "Salin catatan rilis {{version}}",
+    "copied": "Disalin",
+    "copyFailed": "Tidak dapat menyalin"
   }
 }

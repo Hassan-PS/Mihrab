@@ -1920,6 +1920,9 @@
     "title": "Nyheter",
     "installed": "Mihrab {{version}}",
     "newBadge": "Nytt",
-    "settingsHelp": "Allt som har ändrats, version för version."
+    "settingsHelp": "Allt som har ändrats, version för version.",
+    "copyNotes": "Kopiera versionsinformationen för {{version}}",
+    "copied": "Kopierat",
+    "copyFailed": "Kunde inte kopiera"
   }
 }

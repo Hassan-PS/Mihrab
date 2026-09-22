@@ -71,6 +71,17 @@ jest.mock('../src/responsive/breakpoints', () => ({
   useBreakpoint: () => 'compact',
 }));
 
+// "Show data statistics" — the switch that turns the copy buttons on.
+const mockSettings = { showDataStats: false };
+jest.mock('../src/context/PrayerSettingsContext', () => ({
+  usePrayerSettingsOrDefaults: () => ({ settings: mockSettings }),
+}));
+
+const mockCopy = jest.fn(async (_text: string) => 'copied-quietly' as const);
+jest.mock('../src/sync/clipboard', () => ({
+  copyToClipboard: (text: string) => mockCopy(text),
+}));
+
 const { ChangelogSheet } = require('../src/polish/ChangelogSheet');
 // From i18n/, where the reasoning for the value lives. Imported rather
 // than written out: a `'right'` typed here would still match if the
@@ -275,5 +286,72 @@ describe('a note in the other direction from the layout', () => {
       expect(kids[0]).toBe(LRI);
       expect(kids[kids.length - 1]).toBe(PDI);
     }
+  });
+});
+
+/**
+ * A copy button per release, for whoever keeps the releases — and only
+ * with "Show data statistics" on, which is where the diagnostics live.
+ */
+describe('copying a release\'s notes', () => {
+  const copyButtons = (tree: ReactTestRenderer) =>
+    tree.root.findAll(
+      (n: Node) =>
+        n.props.accessibilityRole === 'button' &&
+        typeof n.props.accessibilityLabel === 'string' &&
+        (n.props.accessibilityLabel as string).startsWith('whatsNew.copyNotes') &&
+        typeof n.props.onPress === 'function',
+    );
+
+  afterEach(() => {
+    mockSettings.showDataStats = false;
+    mockCopy.mockClear();
+  });
+
+  it('offers nothing while data statistics is off', () => {
+    expect(copyButtons(render(null))).toHaveLength(0);
+  });
+
+  it('offers one per release once it is on', () => {
+    mockSettings.showDataStats = true;
+    const tree = render(null);
+    const shown = CHANGELOG.filter(
+      (r: { version: string }) => texts(tree).includes(r.version),
+    );
+    expect(shown.length).toBeGreaterThan(1);
+    expect(copyButtons(tree)).toHaveLength(shown.length);
+  });
+
+  it('copies that release\'s notes, as shown, under its name', async () => {
+    mockSettings.showDataStats = true;
+    const tree = render(null);
+    const [first] = copyButtons(tree);
+    await act(async () => {
+      await (first.props.onPress as () => Promise<void>)();
+    });
+    expect(mockCopy).toHaveBeenCalledTimes(1);
+    const copied = mockCopy.mock.calls[0][0];
+    const installed = CHANGELOG.find((r: { version: string }) => r.version === INSTALLED);
+    expect(copied.startsWith(`whatsNew.installed`) || copied.startsWith(`Mihrab ${INSTALLED}`)).toBe(true);
+    // Every line of the installed release's note is in it, bullets kept,
+    // markers gone.
+    const lines = installed.notes.en
+      .split('\n')
+      .map((l: string) => l.trim())
+      .filter(Boolean);
+    for (const line of lines) {
+      expect(copied).toContain(line.replace(/^[•\-*–]\s+/, '• ').replace(/\*\*/g, ''));
+    }
+    // And it says so.
+    expect(texts(tree)).toContain('Copied');
+  });
+});
+
+describe('noteCopyText', () => {
+  const { noteCopyText } = require('../src/polish/notesMarkup');
+  it('keeps the blocks and the bullets, and drops the bold markers', () => {
+    expect(
+      noteCopyText('Mihrab 9.9.9', 'Intro line\n\n• **One** thing\n- another\n\nClosing'),
+    ).toBe('Mihrab 9.9.9\n\nIntro line\n\n• One thing\n• another\n\nClosing');
   });
 });

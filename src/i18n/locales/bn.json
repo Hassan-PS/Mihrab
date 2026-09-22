@@ -1920,6 +1920,9 @@
     "title": "নতুন কী",
     "installed": "মিহরাব {{version}}",
     "newBadge": "নতুন",
-    "settingsHelp": "যা যা বদলেছে, সংস্করণ ধরে ধরে।"
+    "settingsHelp": "যা যা বদলেছে, সংস্করণ ধরে ধরে।",
+    "copyNotes": "{{version}}-এর রিলিজ নোট কপি করুন",
+    "copied": "কপি হয়েছে",
+    "copyFailed": "কপি করা যায়নি"
   }
 }

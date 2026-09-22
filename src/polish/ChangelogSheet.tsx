@@ -31,7 +31,7 @@
  * the window, so there is always a strip of dimmed page above it saying
  * what it is on top of.
  */
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   FlatList,
   Pressable,
@@ -51,7 +51,10 @@ import { isRtlLanguage } from '../i18n/layoutDirection';
 import { foreignText, LRI, PDI } from '../i18n/foreignText';
 import { RADIUS, SPACING } from '../theme/tokens';
 import { TYPE, typeStyle } from '../theme/typography';
-import { parseNote, type NoteBlock, type Span } from './notesMarkup';
+import { noteCopyText, parseNote, type NoteBlock, type Span } from './notesMarkup';
+import { usePrayerSettingsOrDefaults } from '../context/PrayerSettingsContext';
+import { copyToClipboard } from '../sync/clipboard';
+import { CheckIcon, CopyIcon } from '../theme/icons';
 import {
   CHANGELOG,
   compareVersions,
@@ -270,14 +273,95 @@ type Props = {
   since?: string | null;
 };
 
+/**
+ * COPY THIS RELEASE'S NOTES — for whoever keeps the release, not for
+ * everyone who reads it.
+ *
+ * The notes go out to Play, GitHub, the App Store and replies on issues,
+ * and the one place they are all laid out, dated and translated, is this
+ * sheet. So a copy button per release — but only behind "Show data
+ * statistics", the diagnostic switch that is itself hidden behind five
+ * taps on the version: a reader has no use for it, and a copy icon on
+ * every release is chrome they would have to read past.
+ *
+ * What is copied is the note as this sheet shows it, in the note's own
+ * language, under the release's name (`noteCopyText`). The icon turns to
+ * a tick for two seconds when it lands; Android 13 and up says "Copied"
+ * itself, so the word is only added where the system said nothing.
+ */
+function CopyNotesButton({
+  version,
+  text,
+}: {
+  version: string;
+  text: string;
+}) {
+  const { t } = useTranslation();
+  const { palette } = useAppPalette();
+  const [state, setState] = useState<'idle' | 'copied' | 'announced' | 'failed'>('idle');
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
+  );
+  const onPress = useCallback(async () => {
+    const result = await copyToClipboard(text);
+    setState(
+      result === 'failed' ? 'failed' : result === 'copied-quietly' ? 'copied' : 'announced',
+    );
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => setState('idle'), 2000);
+  }, [text]);
+
+  const done = state === 'copied' || state === 'announced';
+  const word =
+    state === 'copied'
+      ? t('whatsNew.copied', 'Copied')
+      : state === 'failed'
+        ? t('whatsNew.copyFailed', "Couldn't copy")
+        : null;
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t('whatsNew.copyNotes', {
+        defaultValue: 'Copy release notes for {{version}}',
+        version,
+      })}
+      onPress={onPress}
+      hitSlop={10}
+      style={({ pressed }) => [styles.copy, pressed ? styles.pressed : null]}>
+      {word ? (
+        <Text
+          accessibilityLiveRegion="polite"
+          style={[
+            typeStyle('footnote'),
+            { color: state === 'failed' ? palette.danger : palette.accentSolid },
+          ]}>
+          {word}
+        </Text>
+      ) : null}
+      {done ? (
+        <CheckIcon size={18} color={palette.accentSolid} />
+      ) : (
+        <CopyIcon size={18} color={palette.muted} />
+      )}
+    </Pressable>
+  );
+}
+
 function ReleaseRow({
   release,
   isNew,
   language,
+  copyable,
 }: {
   release: ReleaseNote;
   isNew: boolean;
   language: string;
+  /** Show the copy button — "Show data statistics" is on. */
+  copyable: boolean;
 }) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
@@ -287,6 +371,10 @@ function ReleaseRow({
   );
   const blocks = useMemo(() => parseNote(note.text), [note.text]);
   const date = dateLabel(release.date, language);
+  const heading = t('whatsNew.installed', {
+    defaultValue: 'Mihrab {{version}}',
+    version: release.version,
+  });
 
   return (
     <View style={styles.release}>
@@ -307,6 +395,12 @@ function ReleaseRow({
             {date}
           </Text>
         ) : null}
+        {copyable ? (
+          <CopyNotesButton
+            version={release.version}
+            text={noteCopyText(heading, note.text)}
+          />
+        ) : null}
       </View>
       <NoteBody blocks={blocks} language={note.language} reader={language} />
     </View>
@@ -320,6 +414,7 @@ export function ChangelogSheet({ visible, onClose, since = null }: Props) {
   const wide = useBreakpoint() !== 'compact';
   const installed = getInstalledAppVersionName();
   const language = i18n.language;
+  const copyable = usePrayerSettingsOrDefaults().settings.showDataStats === true;
 
   /**
    * Everything the reader could possibly have, newest first.
@@ -348,9 +443,10 @@ export function ChangelogSheet({ visible, onClose, since = null }: Props) {
         release={item}
         isNew={unseen.has(item.version)}
         language={language}
+        copyable={copyable}
       />
     ),
-    [unseen, language],
+    [unseen, language, copyable],
   );
 
   // A sheet with an empty list is a header and a button. Nothing calls it
@@ -456,6 +552,13 @@ const styles = StyleSheet.create({
   release: { paddingVertical: SPACING.lg, gap: SPACING.md },
   head: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   spacer: { flex: 1 },
+  copy: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    minHeight: 32,
+    paddingStart: SPACING.sm,
+  },
   pill: {
     paddingHorizontal: SPACING.sm,
     paddingVertical: 2,

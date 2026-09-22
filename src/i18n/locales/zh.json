@@ -1920,6 +1920,9 @@
     "title": "新增内容",
     "installed": "Mihrab {{version}}",
     "newBadge": "新增",
-    "settingsHelp": "每个版本的改动，一览无遗。"
+    "settingsHelp": "每个版本的改动，一览无遗。",
+    "copyNotes": "复制 {{version}} 的更新说明",
+    "copied": "已复制",
+    "copyFailed": "无法复制"
   }
 }

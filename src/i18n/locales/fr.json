@@ -1920,6 +1920,9 @@
     "title": "Nouveautés",
     "installed": "Mihrab {{version}}",
     "newBadge": "Nouveau",
-    "settingsHelp": "Tout ce qui a changé, version après version."
+    "settingsHelp": "Tout ce qui a changé, version après version.",
+    "copyNotes": "Copier les notes de version {{version}}",
+    "copied": "Copié",
+    "copyFailed": "Impossible de copier"
   }
 }

@@ -1920,6 +1920,9 @@
     "title": "Yenilikler",
     "installed": "Mihrab {{version}}",
     "newBadge": "Yeni",
-    "settingsHelp": "Değişen her şey, sürüm sürüm."
+    "settingsHelp": "Değişen her şey, sürüm sürüm.",
+    "copyNotes": "{{version}} sürüm notlarını kopyala",
+    "copied": "Kopyalandı",
+    "copyFailed": "Kopyalanamadı"
   }
 }
