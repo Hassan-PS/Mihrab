@@ -19,6 +19,16 @@ export type ReleaseNote = {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    code: 279,
+    version: '2.25.1',
+    date: '2026-09-22',
+    notes: {
+      en: '• Word reader: hold a word in the muṣḥaf, slide to another if you like, and lift to hear that one word. Turn it on in Settings → Quran → Word reader.\n• The muṣḥaf\'s night page is true black.\n• Sync no longer undoes khatmah reading done on your other device.\n• Khatmah by a date: tomorrow\'s portion is marked where it really ends.\n• Android: the app keeps its own text with a system theme font, and the ayah number sits inside its rosette.',
+      ar: '• قارئ الكلمة: اضغط مطوّلًا على كلمة في المصحف، وحرّك إصبعك إلى غيرها إن شئت، ثم ارفعه لتسمعها وحدها. فعّله من الإعدادات ← القرآن ← قارئ الكلمة.\n• صفحة المصحف الليلية سوداء تمامًا.\n• لم تعد المزامنة تلغي ما قرأته من الختمة على جهازك الآخر.\n• الختمة بتاريخ: يُعلَّم ورد الغد حيث ينتهي فعلًا.\n• أندرويد: يحتفظ التطبيق بخطّه مع خط سمة النظام، ويستقر رقم الآية داخل زخرفته.',
+      sv: '• Ordläsare: håll fingret på ett ord i muṣḥafen, dra till ett annat om du vill, och släpp för att höra just det ordet. Slå på den i Inställningar → Koranen → Ordläsare.\n• Muṣḥafens nattsida är helt svart.\n• Synkningen ångrar inte längre khatmah-läsning från din andra enhet.\n• Khatmah till ett datum: morgondagens del markeras där den faktiskt slutar.\n• Android: appen behåller sin egen text med ett temateckensnitt, och versnumret hamnar inuti sin rosett.',
+    },
+  },
+  {
     code: 278,
     version: '2.25.0',
     date: '2026-09-21',

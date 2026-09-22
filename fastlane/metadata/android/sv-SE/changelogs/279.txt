@@ -1,0 +1,5 @@
+• Ordläsare: håll fingret på ett ord i muṣḥafen, dra till ett annat om du vill, och släpp för att höra just det ordet. Slå på den i Inställningar → Koranen → Ordläsare.
+• Muṣḥafens nattsida är helt svart.
+• Synkningen ångrar inte längre khatmah-läsning från din andra enhet.
+• Khatmah till ett datum: morgondagens del markeras där den faktiskt slutar.
+• Android: appen behåller sin egen text med ett temateckensnitt, och versnumret hamnar inuti sin rosett.

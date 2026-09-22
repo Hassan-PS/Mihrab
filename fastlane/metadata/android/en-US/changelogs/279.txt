@@ -1,0 +1,5 @@
+• Word reader: hold a word in the muṣḥaf, slide to another if you like, and lift to hear that one word. Turn it on in Settings → Quran → Word reader.
+• The muṣḥaf's night page is true black.
+• Sync no longer undoes khatmah reading done on your other device.
+• Khatmah by a date: tomorrow's portion is marked where it really ends.
+• Android: the app keeps its own text with a system theme font, and the ayah number sits inside its rosette.

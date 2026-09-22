@@ -973,3 +973,19 @@ stopped listening before the day that Mac is not available.
 Smaller: Homebrew moved the default Java to JDK 27 on 15 September, and
 Gradle fails on it with an error that says only "27". `release.sh` pins
 Temurin 21 and never saw it; `npm run android:*` by hand does.
+
+## 2.25.1 (279) — 2026-09-22
+
+Took 3 aborted attempt(s) before it ran clean:
+
+  - 1 catalyst build failed — /tmp/release-catalyst.log
+  - 1 jest failed — run 'NODE_ENV=test npx jest'
+  - 1 push to main failed — nothing tagged, nothing published.
+
+Changed the release cycle itself:
+
+  - `docs/DISTRIBUTION.md`
+  - `scripts/release.sh`
+  - `scripts/verify-release.sh`
+
+**Lesson:** _(unfilled)_
