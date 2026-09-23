@@ -440,7 +440,8 @@ const LineView = React.memo(function LineView({
   // the missing words that negative spacing cost.
   const gapStyle = { fontFamily: FONTS.arabicQuran, ...gapMetrics(spaceEm, fontSize) };
   // A gap inside a token — the space before a hizb or sajdah symbol — is
-  // budgeted by the build script at the nominal width, so draw it there.
+  // budgeted by the build script at the nominal quarter em inside the
+  // word's advance, so draw it there whatever the line's own gap is.
   const innerGapStyle = {
     fontFamily: FONTS.arabicQuran,
     ...gapMetrics(WORD_SPACE_EM, fontSize),

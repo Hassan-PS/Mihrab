@@ -12,6 +12,7 @@ import {
   MUSHAF_LINES_PER_PAGE,
   MUSHAF_LINE_BOX_SLACK_EM,
   MUSHAF_SPACE_ADVANCE_EM,
+  QPC_WORD_SPACE_EM,
   WORD_SPACE_EM,
   WORD_SPACE_CEILING_EM,
   WORD_SPACE_MAX_EM,
@@ -308,7 +309,7 @@ describe('mushaf line spacing', () => {
         if (lineGapCount(line) === 0) continue;
         const space = lineSpaceEm(line, measureEm);
         widest = Math.max(widest, space);
-        expect(space).toBeGreaterThanOrEqual(WORD_SPACE_MIN_EM - 1e-9);
+        expect(space).toBeGreaterThanOrEqual(QPC_WORD_SPACE_EM - 1e-9);
         expect(space).toBeLessThanOrEqual(WORD_SPACE_CEILING_EM + 1e-9);
         const width = lineWidthEm(line, measureEm);
         if (Math.abs(width - measureEm) > 1e-9) {
@@ -334,10 +335,14 @@ describe('mushaf line spacing', () => {
       const line = layout.lines[index - 1];
       expect(line.kind).toBe('ayah');
       if (line.kind !== 'ayah') continue;
-      // Each is an ordinary mid-surah line: the print sets it flush.
+      // Each is an ordinary mid-surah line: the print sets it flush. Against
+      // the print's own measure most of them no longer stand out at all —
+      // the old measure, inflated by the lines with the most gaps, is what
+      // made a line with few words look like it needed a void — but flush
+      // is flush either way.
       expect(line.centered).toBe(false);
       const space = lineSpaceEm(line, measureEm);
-      expect(space).toBeGreaterThan(WORD_SPACE_MAX_EM);
+      expect(space).toBeGreaterThanOrEqual(QPC_WORD_SPACE_EM);
       expect(lineWidthEm(line, measureEm)).toBeCloseTo(measureEm, 9);
     }
   });
@@ -355,14 +360,34 @@ describe('mushaf line spacing', () => {
     }
   });
 
-  it('sizes a page from what is drawn, not from the advances alone', () => {
-    // `layout.measure` is the widest line's ADVANCES. A line is drawn with a
-    // gap between every pair of words, so the drawn measure is always wider —
-    // sizing from the advances is what made full lines overflow their box.
-    for (const page of [3, 49, 200, 400, 604]) {
+  it('sizes an ordinary page from its widest line\'s advances, as the print does', () => {
+    // `layout.measure` is the widest line's ADVANCES, and the print adds
+    // nothing between that line's words (`QPC_WORD_SPACE_EM`): its gaps are
+    // the glyphs' own bearings. So the drawn measure IS the data's, and the
+    // page is set a seventh larger than the quarter-em measure set it.
+    for (const page of [3, 49, 125, 200, 400, 604]) {
+      const layout = getPageLayout(page)!;
+      expect(pageMeasureEm(layout)).toBeCloseTo(layout.measure, 9);
+    }
+    // The plates keep a nominal space in their measure: their lines are
+    // set wide in the print too.
+    for (const page of [1, 2]) {
       const layout = getPageLayout(page)!;
       expect(pageMeasureEm(layout)).toBeGreaterThan(layout.measure);
     }
+  });
+
+  it('adds only what the print adds: the widest line touching, the rest a hair', () => {
+    // Page 125 measured off the KFGQPC scan: line 15 (the widest advances)
+    // set with its words touching, line 14 with 0.038 em a gap.
+    const layout = getPageLayout(125)!;
+    const measureEm = pageMeasureEm(layout);
+    const lines = layout.lines.filter(l => l.kind === 'ayah');
+    const l15 = lines[14];
+    const l14 = lines[13];
+    if (l15.kind !== 'ayah' || l14.kind !== 'ayah') throw new Error('page 125');
+    expect(lineSpaceEm(l15, measureEm)).toBeCloseTo(0, 9);
+    expect(lineSpaceEm(l14, measureEm)).toBeCloseTo(0.038, 2);
   });
 
   it('draws every word of page 49 — the line-loses-its-tail regression', () => {
@@ -380,8 +405,8 @@ describe('mushaf line spacing', () => {
       if (!line.centered) {
         expect(Math.abs(width - measureEm)).toBeLessThan(1e-9);
         const space = lineSpaceEm(line, measureEm);
-        expect(space).toBeGreaterThanOrEqual(WORD_SPACE_MIN_EM);
-        expect(space).toBeLessThanOrEqual(WORD_SPACE_MAX_EM);
+        expect(space).toBeGreaterThanOrEqual(QPC_WORD_SPACE_EM);
+        expect(space).toBeLessThanOrEqual(WORD_SPACE_CEILING_EM);
       }
       expect(i).toBeLessThan(15);
     }

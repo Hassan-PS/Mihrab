@@ -91,16 +91,51 @@ export const MUSHAF_LINES_PER_PAGE = 15;
 // Line spacing
 //
 // `natural` is the sum of the glyph ADVANCES only — the QPC page fonts carry
-// no space glyph, so the gap between two words is entirely the renderer's to
-// supply. Everything below is the model for that gap, kept here (and free of
-// React Native) so a test can replay exactly what the reader draws.
+// no space glyph, so whatever is added between two words is the renderer's
+// to supply. The advances themselves carry the print's spacing as side
+// bearings, so for an ordinary line that is almost nothing (see
+// `QPC_WORD_SPACE_EM`). Everything below is the model for that gap, kept
+// here (and free of React Native) so a test can replay exactly what the
+// reader draws.
 // ---------------------------------------------------------------------------
 
 /**
- * Nominal word space, in ems. The print's own space is not recorded anywhere
- * in the data, so we take the page's tightest line — the one with the most
- * ink per gap — to be set at this space, which fixes the width of the printed
- * text block and therefore the space every other line needs.
+ * What a Ḥafṣ line adds between two words BEYOND what the page font's
+ * glyphs already carry, in ems: nothing.
+ *
+ * ── MEASURED, NOT CHOSEN ──────────────────────────────────────────────
+ *
+ * The print's word space is not recorded in the data, and for a long time
+ * a nominal quarter em was assumed for it: the page's tightest line was
+ * taken to be set at 0.25 em a gap, which put the measure at
+ * `max(natural + 0.25 × gaps)` and set every other line wider still.
+ *
+ * Then the print was measured (`scripts/mushaf/measure_print_spacing.py`
+ * over the KFGQPC scans, 2026-09-23). Fitting each line's ink width to
+ * `em × (natural + gaps × space)` across page 125 gives an em of 149 px
+ * and a space of 0.014 em; page 290 gives −0.03 em. The line whose
+ * advances are the widest (page 125 line 15, 15.823 em) is set with its
+ * words TOUCHING — gaps of one or two pixels — and the line with the
+ * narrowest (line 14, 15.441 em) gets the difference spread over its ten
+ * gaps, 0.038 em each. The visible gap between words, a median 0.11–0.13
+ * em, is the glyphs' own side bearings: the QCF fonts were cut from the
+ * print with its spacing inside the advances.
+ *
+ * So the measure of an ordinary page is its widest line's ADVANCES, the
+ * `measure` in the data, and the gap a line adds is only what closes the
+ * ~2% between its advances and that. The quarter em had made every page
+ * a seventh narrower than the print and every gap two to four times the
+ * print's, which is the difference a reader saw against Ayah.
+ */
+export const QPC_WORD_SPACE_EM = 0;
+
+/**
+ * Nominal word space, in ems, where the face carries none of its own:
+ * the Unicode riwāyāt (`MushafUnicodePage`, set in AmiriQuran with real
+ * spaces), the framed plates' centred lines, and the gap before a hizb or
+ * sajdah symbol inside a word, which the build budgets at the same
+ * quarter em (`INTERNAL_SPACE_EM` in `build_qcf_assets.py`) inside the
+ * word's advance.
  */
 export const WORD_SPACE_EM = 0.25;
 
@@ -307,7 +342,11 @@ export type MushafGapMetrics = { fontSize: number; letterSpacing: number };
 export function gapMetrics(spaceEm: number, fontSize: number): MushafGapMetrics {
   const target = Math.max(0, spaceEm) * fontSize;
   const scale = Math.min(1, Math.max(0, spaceEm) / MUSHAF_SPACE_ADVANCE_EM);
-  const gapFontSize = fontSize * scale;
+  // Never a font size of nothing: a gap solved to zero (the widest line of
+  // an ordinary page) still draws its space glyph, at a size the platform
+  // cannot mistake for "unset" — iOS reads 0 as the default size, which
+  // is a real gap. One dp of glyph is a third of a pixel of advance.
+  const gapFontSize = Math.max(1, fontSize * scale);
   return {
     fontSize: gapFontSize,
     // Zero when the glyph was shrunk to fit exactly; the surplus when the
@@ -353,13 +392,22 @@ export function pageMeasureEm(layout: MushafPageLayout): number {
 }
 
 function computePageMeasureEm(layout: MushafPageLayout): number {
+  // An ordinary page's measure is its widest line's advances — the print
+  // adds nothing between the words (`QPC_WORD_SPACE_EM`). The plates keep
+  // their nominal space: their lines are set wide in the print too.
+  const nominal = nominalSpaceEm(layout);
   let widest = 0;
   for (const line of layout.lines) {
     if (line.kind !== 'ayah') continue;
-    const drawn = line.natural + WORD_SPACE_EM * lineGapCount(line);
+    const drawn = line.natural + nominal * lineGapCount(line);
     if (drawn > widest) widest = drawn;
   }
   return widest > 0 ? widest : layout.measure;
+}
+
+/** The space a page's centred lines are set at, and its measure counts. */
+function nominalSpaceEm(layout: MushafPageLayout): number {
+  return isFramedPage(layout.page) ? WORD_SPACE_EM : QPC_WORD_SPACE_EM;
 }
 
 /**
@@ -387,7 +435,8 @@ export function pageBlockEm(layout: MushafPageLayout): number {
  * end: the reported bug.
  *
  * Every page was then measured. Ten lines across 177, 205, 400, 443, 511
- * and 604 ask for more than the band — 0.776 to 1.942 em — and every one
+ * and 604 asked for more than the band — 0.776 to 1.942 em against the
+ * quarter-em measure of the time, a quarter em less now — and every one
  * of them is an ORDINARY MID-SURAH LINE: none carries the `centered`
  * flag, none closes a surah, and the print sets all ten flush to the
  * measure. They ask for a wide gap only because the print set them with
@@ -410,7 +459,8 @@ export function lineSpaceEm(
 ): number {
   if (line.kind !== 'ayah') return WORD_SPACE_EM;
   const gaps = lineGapCount(line);
-  if (gaps === 0 || line.centered) return WORD_SPACE_EM;
+  const nominal = opts?.framed ? WORD_SPACE_EM : QPC_WORD_SPACE_EM;
+  if (gaps === 0 || line.centered) return nominal;
   const required = (measureEm - line.natural) / gaps;
   // The plates: unchanged. A line that cannot reach the measure inside the
   // band sits at the nominal space and is centred.
@@ -418,7 +468,11 @@ export function lineSpaceEm(
     if (required > WORD_SPACE_MAX_EM) return WORD_SPACE_EM;
     return required < WORD_SPACE_MIN_EM ? WORD_SPACE_MIN_EM : required;
   }
-  if (required < WORD_SPACE_MIN_EM) return WORD_SPACE_MIN_EM;
+  // An ordinary line: whatever closes the gap between its advances and
+  // the measure, which the print's own bearings then space. Never below
+  // the nominal, which is nothing — the widest line is set touching, as
+  // it is in the print.
+  if (required < nominal) return nominal;
   return Math.min(required, WORD_SPACE_CEILING_EM);
 }
 

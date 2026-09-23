@@ -85,11 +85,26 @@ added for in the first place.
 
 Only two things, and both are bounded:
 
-### 1. Word spacing, within a band
+### 1. Word spacing
 
 A line is spaced to fill the measure. The space is SOLVED for — the gap that
-makes `natural + gaps × space` equal the measure — and may only move inside
-`WORD_SPACE_MIN_EM … WORD_SPACE_MAX_EM`.
+makes `natural + gaps × space` equal the measure.
+
+**On an ordinary page that gap is almost nothing, because the print's word
+spacing is already inside the glyph advances.** Measured off the KFGQPC scans
+(`scripts/mushaf/measure_print_spacing.py`, 2026-09-23): fitting each line's ink width to
+`em × (natural + gaps × space)` gives a space of 0.014 em on page 125 and
+−0.03 em on page 290 — i.e. none. The widest line of a page is set with its
+words touching, and every other line adds only what closes the ~2% between its
+advances and that measure; the visible gap between words, a median 0.11–0.13
+em, is the glyphs' own side bearings. So an ordinary line's space runs from
+`QPC_WORD_SPACE_EM` (0) up to whatever the print asks, capped only by
+`WORD_SPACE_CEILING_EM` as a guard on the data. A quarter em had been assumed
+for years, which set every page a seventh narrower than the print and every
+gap two to four times its width.
+
+**On a framed plate (pages 1–2)** the space may only move inside
+`WORD_SPACE_MIN_EM … WORD_SPACE_MAX_EM`, around a nominal `WORD_SPACE_EM`:
 
 - Below the minimum, letterforms of adjacent words start to touch — the QPC
   calligraphy interlocks by design and needs room to read.
@@ -98,17 +113,19 @@ makes `natural + gaps × space` equal the measure — and may only move inside
   full justification was the cautionary case: 6.7 em of text dragged across a
   12 em plate.
 
-**If a line cannot reach the measure within that band, it is centred at its
-natural width rather than stretched further.** Short lines — the last line of
-a surah, the plate pages — are meant to be short.
+**If a plate's line cannot reach the measure within that band, it is centred
+at its natural width rather than stretched further.** Short lines — the last
+line of a surah, the plate pages — are meant to be short; a surah's closing
+line is centred at the page's nominal space on every page.
 
 ### 2. Overall scale
 
-The font size comes from the page's widest line **as drawn** — its advances
-plus a nominal space per gap, which is `pageMeasureEm()`, not the advance-only
-`measure` in the data — so that line spans the measure exactly. Every page then renders at the same physical width, which is
-why the text does not jump size as you turn pages, even though the 604 fonts
-are drawn at different design sizes.
+The font size comes from the page's widest line **as drawn** — `pageMeasureEm()`.
+On an ordinary page that is the advance-only `measure` in the data, since the
+print adds nothing between the words (§1); on a plate it is the advances plus
+the nominal space per gap. Every page then renders at the same physical width,
+which is why the text does not jump size as you turn pages, even though the
+604 fonts are drawn at different design sizes.
 
 ## Single page vs dual page
 
@@ -143,7 +160,7 @@ margin instead of scale.
 
 ## Where these live
 
-- `WORD_SPACE_MIN_EM` / `WORD_SPACE_MAX_EM`, `WORD_SPACE_EM`,
+- `QPC_WORD_SPACE_EM`, `WORD_SPACE_MIN_EM` / `WORD_SPACE_MAX_EM`, `WORD_SPACE_EM`,
   `MUSHAF_SPACE_ADVANCE_EM`, `MUSHAF_LINE_BOX_SLACK_EM` / `lineBoxSlackEm`,
   `MUSHAF_INK_*_EM`, `MUSHAF_PAGE_INSET_EM`, and the
   `pageMeasureEm` / `pageBlockEm` / `lineSpaceEm` / `lineWidthEm` /

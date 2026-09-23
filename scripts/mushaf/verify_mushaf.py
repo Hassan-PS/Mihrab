@@ -51,9 +51,12 @@ import sys
 
 # Must match src/quran/mushafLayout.ts — these checks are only meaningful if
 # they replay what the reader actually draws.
-WORD_SPACE_EM = 0.25
+QPC_WORD_SPACE_EM = 0.0  # an ordinary page adds nothing between words
+WORD_SPACE_EM = 0.25  # the plates' nominal space, and the in-word symbol gap
 WORD_SPACE_MIN_EM = 0.2
 WORD_SPACE_MAX_EM = 0.75
+WORD_SPACE_CEILING_EM = 2.0
+FRAMED_PAGES = {1, 2}
 # Reserved out of the page block so a line's box always fits inside it. A line
 # wider than its box does not clip on Android, it loses its last word.
 MUSHAF_LINE_BOX_SLACK_EM = 0.5
@@ -120,24 +123,35 @@ def check_content(pages: list[dict], txt_path: str) -> list[str]:
     return problems
 
 
-def line_space_em(natural: float, gaps: int, centered: bool, measure: float) -> float:
+def line_space_em(
+    natural: float, gaps: int, centered: bool, measure: float, framed: bool
+) -> float:
     """The space the reader sets this line at — `lineSpaceEm` in TypeScript."""
+    nominal = WORD_SPACE_EM if framed else QPC_WORD_SPACE_EM
     if gaps == 0 or centered:
-        return WORD_SPACE_EM
+        return nominal
     required = (measure - natural) / gaps
-    if required > WORD_SPACE_MAX_EM:
-        return WORD_SPACE_EM
-    return max(required, WORD_SPACE_MIN_EM)
+    if framed:
+        if required > WORD_SPACE_MAX_EM:
+            return WORD_SPACE_EM
+        return max(required, WORD_SPACE_MIN_EM)
+    return min(max(required, nominal), WORD_SPACE_CEILING_EM)
 
 
 def page_measure_em(page: dict) -> float:
-    """The page's measure as DRAWN — `pageMeasureEm` in TypeScript."""
+    """The page's measure as DRAWN — `pageMeasureEm` in TypeScript.
+
+    An ordinary page's measure is its widest line's advances: the print adds
+    nothing between the words (measured off the KFGQPC scans, see
+    QPC_WORD_SPACE_EM in mushafLayout.ts). The plates keep a nominal space.
+    """
+    nominal = WORD_SPACE_EM if page["p"] in FRAMED_PAGES else QPC_WORD_SPACE_EM
     widest = 0.0
     for ln in page["l"]:
         if ln["t"] != "a":
             continue
         gaps = len(ln["x"].split("|")) - 1
-        widest = max(widest, ln["n"] + WORD_SPACE_EM * gaps)
+        widest = max(widest, ln["n"] + nominal * gaps)
     return widest
 
 
@@ -147,21 +161,24 @@ def check_spacing(pages: list[dict]) -> list[str]:
     Two things must hold on every line, and the first one is the whole reason
     this check exists: a line drawn wider than the measure does not overflow
     the margin, it silently loses the word after the last gap that fits. The
-    second keeps the fidelity rules honest — the space may only move inside
-    the documented band, and a line that cannot reach the measure inside it is
-    left at the nominal space to be centred, not stretched further.
+    second keeps the fidelity rules honest — on a plate the space may only
+    move inside the documented band, and a line that cannot reach the measure
+    inside it is left at the nominal space to be centred, not stretched
+    further; on an ordinary page it is whatever the print asks, from nothing
+    up to the ceiling.
     """
     problems: list[str] = []
     for page in pages:
         measure = page_measure_em(page)
         if measure <= 0:
             continue
+        framed = page["p"] in FRAMED_PAGES
         flush = False
         for line_no, ln in enumerate(page["l"], 1):
             if ln["t"] != "a":
                 continue
             gaps = len(ln["x"].split("|")) - 1
-            space = line_space_em(ln["n"], gaps, ln.get("c") == 1, measure)
+            space = line_space_em(ln["n"], gaps, ln.get("c") == 1, measure, framed)
             width = ln["n"] + space * gaps
             if width > measure + 1e-9:
                 problems.append(
@@ -176,11 +193,17 @@ def check_spacing(pages: list[dict]) -> list[str]:
                     f"page {page['p']} line {line_no}: box {box:.4f} em overflows "
                     f"the page block"
                 )
-            in_band = WORD_SPACE_MIN_EM - 1e-9 <= space <= WORD_SPACE_MAX_EM + 1e-9
-            if not in_band and space != WORD_SPACE_EM:
+            if framed:
+                in_band = WORD_SPACE_MIN_EM - 1e-9 <= space <= WORD_SPACE_MAX_EM + 1e-9
+                if not in_band and space != WORD_SPACE_EM:
+                    problems.append(
+                        f"page {page['p']} line {line_no}: word space {space:.4f} em "
+                        "is neither inside the band nor the nominal space"
+                    )
+            elif not (QPC_WORD_SPACE_EM - 1e-9 <= space <= WORD_SPACE_CEILING_EM + 1e-9):
                 problems.append(
                     f"page {page['p']} line {line_no}: word space {space:.4f} em "
-                    "is neither inside the band nor the nominal space"
+                    "is outside what an ordinary line may add"
                 )
         if not flush:
             problems.append(f"page {page['p']}: no line reaches the measure")

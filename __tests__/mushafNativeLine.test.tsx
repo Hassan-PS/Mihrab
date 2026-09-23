@@ -124,23 +124,27 @@ describe('the page inset', () => {
     expect(fontSize * pageBlockEm(layout) + 2 * inset).toBeCloseTo(width, 6);
   });
 
-  it('sets the text larger than the old share of the width did', () => {
-    // On a 366dp phone: 10dp of column padding a side, then 3.5% of the
-    // block, then the half-em slack, cost the text an eighth of the
-    // screen. 4dp, ems and no slack cost it half that — the font is set
-    // about a tenth larger, which is the difference the comparison app
-    // showed.
+  it('sets the text a quarter larger than the old geometry did', () => {
+    // On a 366dp phone the old geometry spent 10dp of column padding a
+    // side, 3.5% of the block, the half-em slack, AND a quarter em between
+    // every pair of words on the widest line (the measure was
+    // `max(natural + 0.25 × gaps)`, not the print's advances). 4dp, ems,
+    // no slack and the print's own measure set the font about a quarter
+    // larger, which is the difference the comparison app showed.
     setNativeMushafLineAvailableForTests(true);
     const screen = 366;
     const now = pageFontSize(125, screen - 2 * 4, layout);
+    let oldMeasure = 0;
+    for (const line of layout.lines) {
+      if (line.kind !== 'ayah') continue;
+      oldMeasure = Math.max(oldMeasure, line.natural + 0.25 * lineGapCount(line));
+    }
     const before =
-      ((screen - 2 * 10) * (1 - 2 * 0.035)) /
-      (pageMeasureEm(layout) + MUSHAF_LINE_BOX_SLACK_EM);
-    expect(now / before).toBeGreaterThan(1.08);
-    expect(now / before).toBeLessThan(1.12);
-    // And the ink spans nine tenths of the screen, up from under seven eighths.
+      ((screen - 2 * 10) * (1 - 2 * 0.035)) / (oldMeasure + MUSHAF_LINE_BOX_SLACK_EM);
+    expect(now / before).toBeGreaterThan(1.2);
+    expect(now / before).toBeLessThan(1.3);
+    // And the ink spans nine tenths of the screen.
     expect((now * pageMeasureEm(layout)) / screen).toBeGreaterThan(0.92);
-    expect((before * pageMeasureEm(layout)) / screen).toBeLessThan(0.87);
   });
 
   it('keeps the plates and the Unicode pages on their old rule', () => {

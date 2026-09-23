@@ -12,6 +12,7 @@
  * These tests hold that line for the whole mushaf, not for a sample.
  */
 import {
+  MUSHAF_LINE_BOX_SLACK_EM,
   MUSHAF_SPACE_ADVANCE_EM,
   WORD_SPACE_EM,
   gapMetrics,
@@ -108,11 +109,18 @@ describe('every line of the mushaf', () => {
     expect(bad).toEqual([]);
   });
 
-  it('draws every gap at exactly the width the line was solved for', () => {
+  it('draws every gap at the width the line was solved for, never narrower', () => {
+    // A narrower gap is where words collide. A wider one is allowed only
+    // by the floor on the space glyph's size — a gap solved to (nearly)
+    // nothing still draws a 1dp glyph, a third of a pixel wide — and the
+    // box slack absorbs that many times over.
+    const floor = MUSHAF_SPACE_ADVANCE_EM * 1;
     for (const line of lines) {
       const g = gapMetrics(line.spaceEm, FONT_SIZE);
       const drawn = MUSHAF_SPACE_ADVANCE_EM * g.fontSize + g.letterSpacing;
-      expect(drawn).toBeCloseTo(line.spaceEm * FONT_SIZE, 6);
+      const solved = line.spaceEm * FONT_SIZE;
+      expect(drawn).toBeGreaterThanOrEqual(solved - 1e-6);
+      expect(drawn - solved).toBeLessThanOrEqual(floor + 1e-6);
     }
   });
 
@@ -139,7 +147,14 @@ describe('every line of the mushaf', () => {
         const g = gapMetrics(spaceEm, FONT_SIZE);
         const gapWidth = MUSHAF_SPACE_ADVANCE_EM * g.fontSize + g.letterSpacing;
         const drawn = line.natural * FONT_SIZE + gapWidth * lineGapCount(line);
-        expect(drawn).toBeLessThanOrEqual(measure * FONT_SIZE + 1e-6);
+        // Inside the BOX: the measure plus the slack the <Text> path keeps,
+        // which is what the floor on the gap glyph's size spends a hair of.
+        expect(drawn).toBeLessThanOrEqual(
+          (measure + MUSHAF_LINE_BOX_SLACK_EM) * FONT_SIZE + 1e-6,
+        );
+        expect(drawn - measure * FONT_SIZE).toBeLessThanOrEqual(
+          MUSHAF_SPACE_ADVANCE_EM * lineGapCount(line) + 1e-6,
+        );
       }
     }
   });
