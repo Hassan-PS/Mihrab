@@ -22,6 +22,7 @@
  * never needs, since it only ever shows a handful of pages.
  */
 import { riwayahById, type RiwayahId } from './riwayat';
+import { nativeMushafLineAvailable } from './native/MushafLineView';
 
 type RawSegment = [number, number, number, number] | [number, number, number, number, number];
 
@@ -163,6 +164,63 @@ export const MUSHAF_SPACE_ADVANCE_EM = 0.292;
 export const MUSHAF_LINE_BOX_SLACK_EM = 0.5;
 
 /**
+ * The slack the lines being drawn actually carry, in ems.
+ *
+ * The native line view (`native/MushafLineView.ts`) draws a line with the
+ * pen, and a pen does not break: a run a hair wider than its box lands a
+ * hair further left, and nothing is lost. Its box is the run itself, and
+ * the whole reserve goes back to the text. The `<Text>` path keeps the
+ * half em above, for the reason given there.
+ */
+export function lineBoxSlackEm(): number {
+  return nativeMushafLineAvailable() ? 0 : MUSHAF_LINE_BOX_SLACK_EM;
+}
+
+/**
+ * How far a line's ink reaches past its ends, in ems — past the FIRST
+ * glyph's advance on the right (the text is RTL), and before the LAST
+ * glyph's origin on the left.
+ *
+ * Measured over the raw fonts, line by line, by
+ * `scripts/mushaf/measure_ink_overshoot.py`: 0.3504 em on the right (page
+ * 146) and 0.1956 em on the left (page 12), a hair added. Mid-line the
+ * same swashes simply cross into the neighbouring word — the interlock
+ * the face was drawn for — so only the two ends need room, and every
+ * page keeps at least this much clear either side of its block
+ * (`MUSHAF_PAGE_INSET_EM`). Before this was measured the room was
+ * whatever half the box slack came to, 0.25 em, and the first word of
+ * page 146 lost the tail of its swash to the edge of its view.
+ */
+export const MUSHAF_INK_RIGHT_EM = 0.36;
+export const MUSHAF_INK_LEFT_EM = 0.2;
+
+/**
+ * The margin an ordinary page keeps either side of its text block, in ems
+ * of the page font.
+ *
+ * In ems, not a share of the width: the margin's job is to hold the ink
+ * that overshoots the line ends (`MUSHAF_INK_RIGHT_EM`), which scales
+ * with the font, and then to read as a margin — the print keeps about
+ * half an em, and the comparison everyone holds the app against keeps a
+ * little less. It used to be 3.5% of the block, which on a phone came to
+ * 0.57 em a side on top of the box slack, and the text was set that much
+ * smaller for it. Framed plates keep their own, wider rule (`pageInset`).
+ */
+export const MUSHAF_PAGE_INSET_EM = 0.4;
+
+/**
+ * The room a line's view needs beyond its box on each side, in dp, so the
+ * ink that overshoots the line ends is inside the view and so drawn.
+ */
+export function lineInkSidePadding(fontSize: number): { left: number; right: number } {
+  if (!(fontSize > 0)) return { left: 0, right: 0 };
+  return {
+    left: Math.ceil(MUSHAF_INK_LEFT_EM * fontSize),
+    right: Math.ceil(MUSHAF_INK_RIGHT_EM * fontSize),
+  };
+}
+
+/**
  * The QPC page fonts' vertical metrics, in ems: what the platform lays a
  * line out with (hhea ascent 1.2 / descent 0.6 — a handful of pages say
  * 1.1236 / 0.52, which only makes them safer), and how far the INK goes.
@@ -179,8 +237,9 @@ export const MUSHAF_LINE_BOX_SLACK_EM = 0.5;
  * fifth of an em of the deepest words was simply not drawn. Reported
  * 2026-09-03 as text cut off at the bottom of the line, on Android.
  *
- * Measured over the raw fonts (`head.yMax` / `head.yMin` of every page),
- * with a hair added; `rebuild_fonts_from_layout.py` is where to re-measure.
+ * Measured over the raw fonts, glyph by glyph, with a hair added;
+ * `scripts/mushaf/measure_ink_overshoot.py` is where to re-measure (it
+ * says 1.6172 / 0.7968 over the glyphs the layout draws).
  */
 export const MUSHAF_FONT_ASCENT_EM = 1.2;
 export const MUSHAF_FONT_DESCENT_EM = 0.6;
@@ -310,7 +369,7 @@ function computePageMeasureEm(layout: MushafPageLayout): number {
  * edge of the block. Nothing the renderer draws ever overflows its parent.
  */
 export function pageBlockEm(layout: MushafPageLayout): number {
-  return pageMeasureEm(layout) + MUSHAF_LINE_BOX_SLACK_EM;
+  return pageMeasureEm(layout) + lineBoxSlackEm();
 }
 
 /**

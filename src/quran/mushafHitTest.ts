@@ -11,7 +11,7 @@
  * box centred in the page.
  */
 import {
-  MUSHAF_LINE_BOX_SLACK_EM,
+  lineBoxSlackEm,
   lineGapCount,
   lineSpaceEm,
   type MushafPageLayout,
@@ -46,7 +46,7 @@ export function wordAtPoint(
   const spaceEm = lineSpaceEm(line, measureEm, { framed });
   const space = spaceEm * fontSize;
   const lineWidth = line.natural * fontSize + space * lineGapCount(line);
-  const boxWidth = lineWidth + fontSize * MUSHAF_LINE_BOX_SLACK_EM;
+  const boxWidth = lineWidth + fontSize * lineBoxSlackEm();
   const boxLeft = (width - boxWidth) / 2;
   const runRightEdge = boxLeft + (boxWidth - lineWidth) / 2 + lineWidth;
   const xFromRight = runRightEdge - x;

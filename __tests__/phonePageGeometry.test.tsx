@@ -10,6 +10,7 @@
 import React, { act } from 'react';
 import { create, type ReactTestRenderer } from 'react-test-renderer';
 import {
+  H_PADDING,
   geometryKey,
   phonePageGeometry,
   phonePageWidth,
@@ -34,7 +35,7 @@ describe('phonePageGeometry', () => {
   it('fits the page to the viewport in portrait', () => {
     const g = phonePageGeometry(portrait)!;
     expect(g.scrolling).toBe(false);
-    expect(g.textWidth).toBe(390 - 20);
+    expect(g.textWidth).toBe(390 - H_PADDING * 2);
     // navPad, the header reserve, and the small gap that is all a page
     // keeps at the foot now the medallion is gone.
     expect(g.viewportH).toBe(720 - 96 - 34 - 14);

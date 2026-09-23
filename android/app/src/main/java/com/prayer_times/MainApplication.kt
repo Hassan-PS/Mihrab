@@ -26,6 +26,7 @@ class MainApplication : Application(), ReactApplication {
           add(SystemThemePackage())
           add(MihrabLiveActivityPackage())
           add(MushafFontPackage())
+          add(MushafLinePackage())
           add(CustomAdhanPackage())
           add(SecureRandomPackage())
           add(WordPlayerPackage())

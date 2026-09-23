@@ -27,11 +27,13 @@ import MushafTextPage, {
 import MushafUnicodePage from './MushafUnicodePage';
 import { useWordReaderEnabled } from './audio/wordReader';
 import {
+  MUSHAF_PAGE_INSET_EM,
   getPageLayout,
   isFramedPage,
   lineInkPadding,
   pageBlockEm,
   pageMeasureEm,
+  type MushafPageLayout,
 } from './mushafLayout';
 import { DEFAULT_RIWAYAH, riwayahById, type RiwayahId } from './riwayat';
 import { toneIsDark, type MushafTone } from './mushafTone';
@@ -146,20 +148,51 @@ export function mushafPageColors(
 }
 
 /**
- * The inset a page keeps clear of the edge of its block.
+ * The inset a page keeps clear of the edge of its block, in dp.
  *
  * A justified line spans the measure exactly, so without an inset the
- * outermost glyph would sit hard against the edge of the screen. The print
- * keeps a margin; 3% of the block reads the same at any size.
+ * outermost glyph would sit hard against the edge of the screen — and the
+ * ink that overshoots the line ends (`MUSHAF_INK_RIGHT_EM`) would be cut
+ * by it. An ordinary page keeps `MUSHAF_PAGE_INSET_EM` of its own font a
+ * side: the font is sized so that the block plus two insets fills the
+ * width, which is one equation rather than a share of the width that
+ * shrinks the font it is supposed to be measured in.
+ *
  * Framed pages need more room: the text block sits inside a drawn double
  * rule, so its inset has to clear the rule AND its padding, not just the
- * screen edge.
- * The plate pages hold 7-8 lines in the space a normal page gives 15, so
- * they have vertical room to spare. Spending some of it on a wider text
- * block makes the opening pages read at a size that matches their weight.
+ * screen edge. The plate pages hold 7-8 lines in the space a normal page
+ * gives 15, so they have vertical room to spare; spending some of it on
+ * a wider text block makes the opening pages read at a size that matches
+ * their weight.
  */
-function pageInset(page: number, width: number): number {
-  return isFramedPage(page) ? width * 0.08 : width * 0.035;
+export function pageInset(
+  page: number,
+  width: number,
+  layout: MushafPageLayout | null,
+): number {
+  if (isFramedPage(page)) return width * 0.08;
+  // A page with no glyph layout — a Unicode riwayah, set in a bundled face
+  // whose ems are not the page font's — keeps a share of the width.
+  if (!layout) return width * 0.035;
+  const blockEm = pageBlockEm(layout);
+  if (!(blockEm > 0)) return width * 0.035;
+  return (width / (blockEm + 2 * MUSHAF_PAGE_INSET_EM)) * MUSHAF_PAGE_INSET_EM;
+}
+
+/**
+ * The size of the page font for a block this wide — the width the text is
+ * fitted to, less the inset, over the block's ems. The one place this is
+ * decided, so the line geometry the follow-scroll and the previews work
+ * from is the geometry the page is drawn at.
+ */
+export function pageFontSize(
+  page: number,
+  width: number,
+  layout: MushafPageLayout,
+): number {
+  const blockEm = pageBlockEm(layout);
+  if (!(blockEm > 0) || !(width > 0)) return 0;
+  return (width - 2 * pageInset(page, width, layout)) / blockEm;
 }
 
 /**
@@ -346,7 +379,7 @@ function GlyphPageSurface({
 
   const lineCount = layout?.lines.length ?? 15;
   const framed = isFramedPage(page);
-  const inset = pageInset(page, width);
+  const inset = pageInset(page, width, layout);
   const textWidth = width - inset * 2;
 
   if (!layout || !family) {
@@ -364,7 +397,7 @@ function GlyphPageSurface({
   // `textWidth / pageBlockEm`, in MushafTextPage), so the reserve can be
   // solved here without laying anything out.
   const fit = fitLinesWithInk(
-    textWidth / pageBlockEm(layout),
+    pageFontSize(page, width, layout),
     height - inset * (framed ? 1.2 : 0),
     lineCount,
   );
@@ -487,7 +520,7 @@ function UnicodePageSurface({
   const endInk = useMemo(() => ayahEndInk(readingPosition), [readingPosition]);
 
   const framed = isFramedPage(page);
-  const inset = pageInset(page, width);
+  const inset = pageInset(page, width, null);
   const textWidth = width - inset * 2;
   // The frame's rules and padding come out of the height the text is fitted
   // to, or the fit would size a page to a box the frame then shrinks.
@@ -628,11 +661,11 @@ export function mushafLineGeometry({
   if (!(textWidth > 0) || !(columnHeight > 0)) return null;
   const layout = getPageLayout(page);
   if (!layout) return null;
-  const blockEm = pageBlockEm(layout);
-  if (!(blockEm > 0)) return null;
+  const fontSize = pageFontSize(page, textWidth, layout);
+  if (!(fontSize > 0)) return null;
   const lineCount = layout.lines.length;
   if (lineCount < 1) return null;
-  const fit = fitLinesWithInk(textWidth / blockEm, columnHeight, lineCount);
+  const fit = fitLinesWithInk(fontSize, columnHeight, lineCount);
   return { top: fit.top, pitch: fit.lineHeight, lineCount };
 }
 

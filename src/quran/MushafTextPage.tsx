@@ -38,6 +38,15 @@
  * There are no bidi control characters in the paragraph. QPC numbers its
  * glyphs in reading order, so a right-to-left paragraph of bare tokens is
  * already correct; see `lineTokenStream`.
+ *
+ * ## Two ways to draw a line
+ *
+ * Where the build carries it, a line is drawn by the NATIVE LINE VIEW
+ * (`native/MushafLineView.ts`): the same pieces, handed to a canvas that
+ * puts the pen where the layout says and never breaks or clips. Its box
+ * is the run itself, so the slack above is not reserved and the page is
+ * set that much larger. The `<Text>` paragraph described above remains
+ * the fallback, and the lessons above are why it looks the way it does.
  */
 import React, { useCallback, useMemo } from 'react';
 import {
@@ -45,17 +54,21 @@ import {
   StyleSheet,
   Text,
   View,
+  processColor,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
 import {
-  MUSHAF_LINE_BOX_SLACK_EM,
+  MUSHAF_FONT_ASCENT_EM,
+  MUSHAF_FONT_DESCENT_EM,
   WORD_SPACE_EM,
   gapMetrics,
   getPageLayout,
   isFramedPage,
+  lineBoxSlackEm,
   lineGapCount,
   lineInkPadding,
+  lineInkSidePadding,
   lineSpaceEm,
   lineTokenStream,
   pageBlockEm,
@@ -68,6 +81,11 @@ import { useActiveWordOn, wordCode } from './audio/activeWordStore';
 import { BasmalahRow, SurahBandRow } from './mushafOrnaments';
 import { FONTS } from '../theme/typography';
 import { WordReaderSurface } from './WordReaderSurface';
+import {
+  MushafLineNative,
+  nativeMushafLineAvailable,
+  type MushafLineRun,
+} from './native/MushafLineView';
 
 /**
  * Height of one line as a multiple of the font size. Derived from the print:
@@ -309,6 +327,16 @@ function splitMark(entry: string | undefined): [string | null, string | null] {
 
 export default React.memo(MushafTextPage);
 
+/**
+ * A colour as the native line view takes it inside `runs`: the number
+ * `processColor` makes of it, since a view config processes only its
+ * top-level props. Transparent for a colour it cannot read.
+ */
+function rgba(colour: string): number {
+  const value = processColor(colour);
+  return typeof value === 'number' ? value : 0;
+}
+
 type LineViewProps = {
   line: MushafLine;
   /** The page's measure as drawn, in ems — what the font size derives from. */
@@ -391,8 +419,9 @@ const LineView = React.memo(function LineView({
   const lineWidth = line.natural * fontSize + space * lineGapCount(line);
   // The box the line is drawn in. The slack was reserved out of the page
   // block when the font size was chosen, so this is never wider than `width`
-  // — nothing overflows its parent, on either platform.
-  const boxWidth = lineWidth + fontSize * MUSHAF_LINE_BOX_SLACK_EM;
+  // — nothing overflows its parent, on either platform. Drawn natively the
+  // slack is nil and the box IS the run.
+  const boxWidth = lineWidth + fontSize * lineBoxSlackEm();
   const runRightEdge = (boxWidth - lineWidth) / 2 + lineWidth;
 
   const wordAt = (xFromRight: number): MushafWord | null => {
@@ -422,6 +451,103 @@ const LineView = React.memo(function LineView({
     wordTints ? splitMark(wordTints[index])[0] : null;
   const inkAt = (index: number): string | null =>
     wordTints ? splitMark(wordTints[index])[1] : null;
+
+  /**
+   * A LINE'S INK IS CLIPPED TO ITS VIEW. The platform lays the line out
+   * from the font's metrics and keeps only what falls inside the text view
+   * — Android's `TextView` clips its drawing to its bounds, iOS rasterises
+   * into a layer the size of the view — and QPC calligraphy overshoots its
+   * metrics by up to 0.4 em above and 0.2 em below (`MUSHAF_INK_ABOVE_EM`),
+   * and past the line's ends by up to 0.36 em (`MUSHAF_INK_RIGHT_EM`).
+   * So the deepest swashes on a page lost their bottoms, and page 146's
+   * first word the tail of its swash. The view is padded by what the ink
+   * needs beyond the line box, and pulled back by the same margins so the
+   * box — and the baseline, and the tint behind a marked ayah — sit
+   * exactly where they did; the padding is only room for the ink to land
+   * in. On Android the clip is the whole view, padding included, on a
+   * line that does not scroll; on iOS the text is drawn in the content
+   * frame and the layer covers the padding too. The native line view is
+   * sized the same way, for the same reason: its canvas is its bounds.
+   */
+  const ink = lineInkPadding(fontSize, lineHeight);
+
+  if (nativeMushafLineAvailable()) {
+    const side = lineInkSidePadding(fontSize);
+    const Native = MushafLineNative();
+    // The baseline where the platform's text view puts it: the leading —
+    // what is left of the line height after the font's ascent and descent
+    // — split evenly above and below, negative or not (Android halves a
+    // negative leading; iOS does not, and the pages are drawn alike).
+    const leading = lineHeight - (MUSHAF_FONT_ASCENT_EM + MUSHAF_FONT_DESCENT_EM) * fontSize;
+    const baseline = ink.top + leading / 2 + MUSHAF_FONT_ASCENT_EM * fontSize;
+    const runs: MushafLineRun[] = [];
+    lineTokenStream(line).forEach(piece => {
+      if (piece.kind === 'gap') {
+        const colour = tintAt(piece.index);
+        const on =
+          colour != null &&
+          (piece.inner ||
+            (piece.index > 0 && tintAt(piece.index - 1) === colour));
+        runs.push(
+          on
+            ? { g: piece.inner ? WORD_SPACE_EM * fontSize : space, w: rgba(colour) }
+            : { g: piece.inner ? WORD_SPACE_EM * fontSize : space },
+        );
+        return;
+      }
+      const w = piece.word;
+      const lit =
+        activeWord >= 0 &&
+        !w.isEnd &&
+        activeWord === wordCode(w.surah, w.ayah, w.position);
+      const colour = lit ? colors.word : tintAt(piece.index);
+      const medallion = w.isEnd ? inkAt(piece.index) : null;
+      const run: { t: string; w?: number; i?: number } = { t: piece.text };
+      if (colour != null) run.w = rgba(colour);
+      if (medallion != null) run.i = rgba(medallion);
+      runs.push(run);
+    });
+    return (
+      <View style={[styles.line, { width, height: lineHeight }]}>
+        <Pressable
+          onPress={e => {
+            const w = wordAt(runRightEdge - e.nativeEvent.locationX);
+            if (w) onPress(w);
+          }}
+          onLongPress={e => {
+            const w = wordAt(runRightEdge - e.nativeEvent.locationX);
+            if (w) onLongPress(w);
+          }}
+          delayLongPress={280}
+          style={{ width: boxWidth, height: lineHeight }}
+        >
+          <Native
+            accessible={false}
+            importantForAccessibility="no"
+            fontFamily={fontFamily ?? ''}
+            fontSize={fontSize}
+            color={colors.text}
+            runs={runs}
+            penRight={side.left + runRightEdge}
+            penBaseline={baseline}
+            boxTop={ink.top}
+            boxHeight={lineHeight}
+            style={{
+              width: boxWidth + side.left + side.right,
+              height: lineHeight + ink.top + ink.bottom,
+              marginTop: -ink.top,
+              marginBottom: -ink.bottom,
+              // The mushaf is right-to-left in every locale, and the room
+              // is for ink at the line's physical ends.
+              // rtl-safe: physical ends of an always-RTL line
+              marginLeft: -side.left,
+              marginRight: -side.right, // rtl-safe: see above
+            }}
+          />
+        </Pressable>
+      </View>
+    );
+  }
 
   // Marking a single ayah inside one paragraph needs the paragraph split at
   // the ayah boundary — nested <Text> keeps the text one shaped stream, so
@@ -455,14 +581,14 @@ const LineView = React.memo(function LineView({
     const colour = lit ? colors.word : tintAt(piece.index);
     // The reading marker's medallion — ink over the wash, never instead
     // of it, so an ayah that is also bookmarked or the khatmah's shows both.
-    const ink = w.isEnd ? inkAt(piece.index) : null;
+    const medallion = w.isEnd ? inkAt(piece.index) : null;
     nodes.push(
-      colour != null || ink != null ? (
+      colour != null || medallion != null ? (
         <Text
           key={i}
           style={{
             ...(colour != null ? { backgroundColor: colour } : null),
-            ...(ink != null ? { color: ink } : null),
+            ...(medallion != null ? { color: medallion } : null),
           }}>
           {piece.text}
         </Text>
@@ -472,22 +598,7 @@ const LineView = React.memo(function LineView({
     );
   });
 
-  /**
-   * A LINE'S INK IS CLIPPED TO ITS VIEW. The platform lays the line out
-   * from the font's metrics and keeps only what falls inside the text view
-   * — Android's `TextView` clips its drawing to its bounds, iOS rasterises
-   * into a layer the size of the view — and QPC calligraphy overshoots its
-   * metrics by up to 0.4 em above and 0.2 em below (`MUSHAF_INK_ABOVE_EM`).
-   * So the deepest swashes on a page lost their bottoms. The view is padded
-   * by what the ink needs beyond the line box, and pulled back by the same
-   * margins so the box — and the baseline, and the tint behind a marked
-   * ayah — sit exactly where they did; the padding is only room for the
-   * ink to land in. On Android the clip is the whole view, padding
-   * included, on a line that does not scroll; on iOS the text is drawn in
-   * the content frame and the layer covers the padding too.
-   */
-  const ink = lineInkPadding(fontSize, lineHeight);
-
+  const side = lineInkSidePadding(fontSize);
   return (
     <View style={[styles.line, { width, height: lineHeight }]}>
       <Pressable
@@ -518,12 +629,19 @@ const LineView = React.memo(function LineView({
               fontSize,
               lineHeight,
               color: colors.text,
-              width: boxWidth,
+              width: boxWidth + side.left + side.right,
               height: lineHeight + ink.top + ink.bottom,
               paddingTop: ink.top,
               paddingBottom: ink.bottom,
+              // The mushaf is right-to-left in every locale, and the room
+              // is for ink at the line's physical ends.
+              // rtl-safe: physical ends of an always-RTL line
+              paddingLeft: side.left,
+              paddingRight: side.right, // rtl-safe: see above
               marginTop: -ink.top,
               marginBottom: -ink.bottom,
+              marginLeft: -side.left, // rtl-safe: see above
+              marginRight: -side.right, // rtl-safe: see above
             },
           ]}
         >

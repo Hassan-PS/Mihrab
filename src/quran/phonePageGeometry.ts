@@ -43,8 +43,17 @@
  */
 import { useEffect, useState } from 'react';
 
-/** Breathing room either side of the page inside its column. */
-export const H_PADDING = 10;
+/**
+ * Breathing room either side of the page inside its column.
+ *
+ * The page keeps its own margin inside this — `MUSHAF_PAGE_INSET_EM` of
+ * its font, which is where the ink that overshoots a line's ends lands —
+ * so this is only what separates that margin from the edge of the
+ * screen. It was 10dp when the inset was a share of the width and the
+ * two together, with the box slack, cost the text an eighth of the
+ * screen; the spread reader has kept 4dp all along.
+ */
+export const H_PADDING = 4;
 
 /**
  * How much bigger the landscape text is than portrait. The landscape

@@ -38,6 +38,35 @@ break such a line, so it breaks between glyphs instead — and in QPC a glyph is
 a whole word, so the line loses its last one anyway. Nothing but fitting the
 box prevents that.
 
+### The native line view
+
+All of the above is the `<Text>` path, and since 2.25.2 it is the fallback. A
+build that carries the native line view (`native/MushafLineView.ts`; `MushafLine`
+on Android and iOS/Catalyst) draws each line with the pen: the same pieces —
+glyph runs and solved gaps, washes, the medallion's ink — handed to a canvas
+that measures every word with the platform's own shaper and puts the pen where
+the layout says. A pen does not break, so a run a hair wide lands a hair
+further left and nothing is lost; and a canvas does not clip to a text view, so
+the ink that overshoots the line's ends lands in the room the view is given.
+That changes three numbers, and the page is set about a tenth larger for it:
+
+- `lineBoxSlackEm()` is **0** on that path (the half em stays for `<Text>`),
+  so a line's box is the run itself and the widest line spans the block;
+- the ink past the line ends has its own room — `MUSHAF_INK_RIGHT_EM` (0.36,
+  past the first glyph's advance) and `MUSHAF_INK_LEFT_EM` (0.2), measured by
+  `scripts/mushaf/measure_ink_overshoot.py` over all 604 fonts — padded into
+  the line's view and pulled back with margins, exactly as `lineInkPadding`
+  does above and below;
+- the page inset is `MUSHAF_PAGE_INSET_EM` of the page font (0.4 em), sized
+  to hold that overshoot, instead of 3.5% of the block, and the phone column's
+  own padding is 4dp. Page 146's first word overshoots by more than half the
+  old slack and used to lose the tail of its swash; now nothing on any page
+  reaches the edge.
+
+Every reader of the page geometry — hit-testing, the word reader, the
+follow-scroll, the previews — takes the block width from `pageBlockEm`, which
+knows which path is drawing, so nothing else had to learn the difference.
+
 ### Token order
 
 The glyphs of a line are drawn in the order QPC numbers them, in a
@@ -115,10 +144,14 @@ margin instead of scale.
 ## Where these live
 
 - `WORD_SPACE_MIN_EM` / `WORD_SPACE_MAX_EM`, `WORD_SPACE_EM`,
-  `MUSHAF_SPACE_ADVANCE_EM`, `MUSHAF_LINE_BOX_SLACK_EM`, and the
+  `MUSHAF_SPACE_ADVANCE_EM`, `MUSHAF_LINE_BOX_SLACK_EM` / `lineBoxSlackEm`,
+  `MUSHAF_INK_*_EM`, `MUSHAF_PAGE_INSET_EM`, and the
   `pageMeasureEm` / `pageBlockEm` / `lineSpaceEm` / `lineWidthEm` /
   `lineTokenStream` model — `mushafLayout.ts`, kept free of React Native so
   the tests replay exactly what the renderer draws
+- The native line view — `src/quran/native/MushafLineView.ts` (and its
+  codegen spec beside it), `android/.../MushafLineView.kt`,
+  `ios/PrayerApp/MushafLine.swift`
 - `MIN_DUAL_PAGE_DP` / `MAX_SINGLE_PAGE_DP` — `mushafSpread.ts`, used by
   `MushafSpreadReader`
 - Phone landscape zoom (`LANDSCAPE_ZOOM`) — `MushafPhoneReader`, bounded by
