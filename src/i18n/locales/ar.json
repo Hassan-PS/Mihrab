@@ -388,7 +388,22 @@
     "accentPickerAdjusted": "نُقل إلى أقرب درجة تبقى مقروءة على هذه الخلفية.",
     "sectionAppearanceBlurbAndroid": "السمة واللون وصيغة الوقت واللغة والودجة",
     "verdantAccentHelp": "النمط الأخضر يلوّن كل سطح بهذا التمييز.",
-    "refreshStoredHelp": "يعيد جلب هذا الشهر بالكامل بدلاً من سدّ الفجوات فقط، فتُستبدل الأوقات الخاطئة (بعد تغيير التوقيت مثلاً) بدل الإبقاء عليها."
+    "refreshStoredHelp": "يعيد جلب هذا الشهر بالكامل بدلاً من سدّ الفجوات فقط، فتُستبدل الأوقات الخاطئة (بعد تغيير التوقيت مثلاً) بدل الإبقاء عليها.",
+    "silenceTitle": "إسكات الهاتف",
+    "silenceToggle": "إسكات الهاتف وقت الصلاة",
+    "silenceHelp": "يفعّل وضع عدم الإزعاج حول الصلوات التي تختارها ليبقى الهاتف صامتًا في المسجد، ثم يعطّله بعدها. المنبهات وما تسمح به في وضع عدم الإزعاج تصل كالمعتاد.",
+    "silenceAccessNeeded": "يحتاج محراب إلى صلاحية عدم الإزعاج لهذا.",
+    "silenceGrantAccess": "منح الصلاحية",
+    "silencePrayers": "أي الصلوات",
+    "silenceLead": "البدء",
+    "silenceAtAdhan": "عند الأذان",
+    "silenceDuration": "المدة",
+    "silenceAfterAdhan": "{{duration}} بعد الأذان",
+    "minutesOption": "{{count}} د",
+    "silenceJumuahDuration": "مدة الجمعة",
+    "silenceJumuahFixed": "الجمعة في وقت ثابت",
+    "silenceJumuahFixedHelp": "كثير من المساجد تقيم الجمعة في الوقت نفسه طوال السنة. عند الإيقاف تتبع الفترة الظهر.",
+    "silenceJumuahTime": "وقت الجمعة"
   },
   "locationSetup": {
     "headline": "حدّد موقعك",
@@ -498,7 +513,8 @@
     "secondTimeFrom": "الوقت الضروري من {{time}}",
     "approx": "تقريبًا",
     "Subh": "الصبح",
-    "Subh_abbr": "الصبح"
+    "Subh_abbr": "الصبح",
+    "Jumuah": "الجمعة"
   },
   "placeSearch": {
     "label": "ابحث عن مدينة أو عنوان",
@@ -1924,5 +1940,11 @@
     "copyNotes": "نسخ ملاحظات الإصدار {{version}}",
     "copied": "تم النسخ",
     "copyFailed": "تعذّر النسخ"
+  },
+  "silence": {
+    "activeTitle": "صامت لصلاة {{prayer}}",
+    "activeText": "حتى {{time}}",
+    "endNow": "إنهاء الآن",
+    "channel": "الصمت وقت الصلاة"
   }
 }

@@ -79,6 +79,7 @@ import { useTabBarInset } from '../navigation/tabBarInset';
 import { useTabBarScroll } from '../navigation/tabBarVisibility';
 import { HomeStatusBand } from './home/HomeStatusBand';
 import { rescheduleEndOfDayLogReminders } from '../notifications/endOfDayLog';
+import { syncPrayerSilence } from '../notifications/prayerSilence';
 import { rescheduleDuaReminders } from '../notifications/duaReminders';
 import {
   ChangelogSheet,
@@ -112,6 +113,7 @@ import { SPACING } from '../theme/tokens';
 const NOTIF_RESYNC_KEY = 'home.prayerNotifications';
 const EOD_RESYNC_KEY = 'home.endOfDayReminders';
 const DUA_RESYNC_KEY = 'home.duaReminders';
+const SILENCE_RESYNC_KEY = 'home.prayerSilence';
 
 export function HomeScreen() {
   const navigation =
@@ -665,6 +667,29 @@ export function HomeScreen() {
         .then(() => markResynced(DUA_RESYNC_KEY, duaPrint))
         .catch(e => console.warn('rescheduleDuaReminders:', e));
     }
+
+    // The quiet windows (issue #60), from the same week and anchor: the
+    // native side keeps the next few days of them and works the clock
+    // itself, so this is the one place they are ever computed. The alert
+    // week rather than the drawn one, for the reason the alerts use it.
+    const silencePrint = dayTzFingerprint(
+      new Date(),
+      JSON.stringify(settings.prayerSilence),
+      String(clockHour12),
+      state.baseDate.getTime(),
+    );
+    if (Platform.OS === 'android' && shouldResync(SILENCE_RESYNC_KEY, silencePrint)) {
+      syncPrayerSilence({
+        settings: settings.prayerSilence,
+        today: view.table.today,
+        tomorrow: view.table.tomorrow,
+        baseDate: state.baseDate,
+        week: view.alertWeek,
+        hour12: clockHour12,
+      })
+        .then(() => markResynced(SILENCE_RESYNC_KEY, silencePrint))
+        .catch(e => console.warn('syncPrayerSilence:', e));
+    }
   }, [
     afterFirstPaint,
     hydrated,
@@ -688,6 +713,7 @@ export function HomeScreen() {
     settings.endOfDayLogReminderEnabled,
     settings.morningDuaReminderEnabled,
     settings.eveningDuaReminderEnabled,
+    settings.prayerSilence,
     state,
     view,
   ]);

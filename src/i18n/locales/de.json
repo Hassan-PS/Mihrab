@@ -388,7 +388,22 @@
     "accentPickerAdjusted": "Auf den nächsten Ton verschoben, der auf diesem Hintergrund lesbar bleibt.",
     "sectionAppearanceBlurbAndroid": "Thema, Akzent, Zeitformat, Sprache, Widget",
     "verdantAccentHelp": "Smaragd färbt jede Fläche in diesem Akzent.",
-    "refreshStoredHelp": "Lädt diesen Monat neu, statt nur die Lücken zu füllen, sodass falsche Zeiten – etwa nach einer Zeitumstellung – ersetzt und nicht beibehalten werden."
+    "refreshStoredHelp": "Lädt diesen Monat neu, statt nur die Lücken zu füllen, sodass falsche Zeiten – etwa nach einer Zeitumstellung – ersetzt und nicht beibehalten werden.",
+    "silenceTitle": "Telefon stummschalten",
+    "silenceToggle": "Zur Gebetszeit stummschalten",
+    "silenceHelp": "Schaltet rund um die gewählten Gebete „Nicht stören“ ein, damit das Telefon in der Moschee still bleibt, und danach wieder aus. Wecker und alles, was du bei „Nicht stören“ erlaubst, kommen weiter durch.",
+    "silenceAccessNeeded": "Mihrab braucht dafür Zugriff auf „Nicht stören“.",
+    "silenceGrantAccess": "Zugriff erlauben",
+    "silencePrayers": "Welche Gebete",
+    "silenceLead": "Beginn",
+    "silenceAtAdhan": "Beim Adhan",
+    "silenceDuration": "Dauer",
+    "silenceAfterAdhan": "{{duration}} nach dem Adhan",
+    "minutesOption": "{{count}} Min.",
+    "silenceJumuahDuration": "Dauer am Freitag (Dschumua)",
+    "silenceJumuahFixed": "Dschumua zu fester Uhrzeit",
+    "silenceJumuahFixedHelp": "Viele Moscheen halten das Freitagsgebet das ganze Jahr zur selben Zeit. Aus, folgt das Fenster dem Dhuhr.",
+    "silenceJumuahTime": "Uhrzeit der Dschumua"
   },
   "locationSetup": {
     "headline": "Legen Sie Ihren Standort fest",
@@ -498,7 +513,8 @@
     "secondTimeFrom": "Zweite Zeit ab {{time}}",
     "approx": "ca.",
     "Subh": "Subh",
-    "Subh_abbr": "Subh"
+    "Subh_abbr": "Subh",
+    "Jumuah": "Dschumua"
   },
   "placeSearch": {
     "label": "Stadt oder Adresse suchen",
@@ -1924,5 +1940,11 @@
     "copyNotes": "Versionshinweise für {{version}} kopieren",
     "copied": "Kopiert",
     "copyFailed": "Kopieren fehlgeschlagen"
+  },
+  "silence": {
+    "activeTitle": "Stumm für {{prayer}}",
+    "activeText": "Bis {{time}}",
+    "endNow": "Jetzt beenden",
+    "channel": "Stumm zur Gebetszeit"
   }
 }

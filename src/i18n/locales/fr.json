@@ -388,7 +388,22 @@
     "accentPickerAdjusted": "Déplacée vers la nuance la plus proche qui reste lisible sur ce fond.",
     "sectionAppearanceBlurbAndroid": "Thème, couleur, format de l'heure, langue, widget",
     "verdantAccentHelp": "Verdure colorie chaque surface avec cet accent.",
-    "refreshStoredHelp": "Récupère de nouveau ce mois-ci au lieu de combler les trous, afin que les horaires erronés — après un changement d’heure, par exemple — soient remplacés plutôt que conservés."
+    "refreshStoredHelp": "Récupère de nouveau ce mois-ci au lieu de combler les trous, afin que les horaires erronés — après un changement d’heure, par exemple — soient remplacés plutôt que conservés.",
+    "silenceTitle": "Mettre le téléphone en silencieux",
+    "silenceToggle": "Silencieux à l'heure de la prière",
+    "silenceHelp": "Active Ne pas déranger autour des prières choisies, pour que le téléphone reste silencieux à la mosquée, puis le désactive. Les alarmes et ce que vous autorisez dans Ne pas déranger passent toujours.",
+    "silenceAccessNeeded": "Mihrab a besoin de l'accès à Ne pas déranger pour cela.",
+    "silenceGrantAccess": "Autoriser l'accès",
+    "silencePrayers": "Quelles prières",
+    "silenceLead": "Début",
+    "silenceAtAdhan": "À l'adhan",
+    "silenceDuration": "Durée",
+    "silenceAfterAdhan": "{{duration}} après l'adhan",
+    "minutesOption": "{{count}} min",
+    "silenceJumuahDuration": "Durée de la Joumou'a",
+    "silenceJumuahFixed": "Joumou'a à heure fixe",
+    "silenceJumuahFixedHelp": "Beaucoup de mosquées tiennent la Joumou'a à la même heure toute l'année. Désactivé, la plage suit le Dhuhr.",
+    "silenceJumuahTime": "Heure de la Joumou'a"
   },
   "locationSetup": {
     "headline": "Définissez votre emplacement",
@@ -498,7 +513,8 @@
     "secondTimeFrom": "Second temps à partir de {{time}}",
     "approx": "env.",
     "Subh": "Sobh",
-    "Subh_abbr": "Sobh"
+    "Subh_abbr": "Sobh",
+    "Jumuah": "Joumou'a"
   },
   "placeSearch": {
     "label": "Rechercher une ville ou une adresse",
@@ -1924,5 +1940,11 @@
     "copyNotes": "Copier les notes de version {{version}}",
     "copied": "Copié",
     "copyFailed": "Impossible de copier"
+  },
+  "silence": {
+    "activeTitle": "Silencieux pour {{prayer}}",
+    "activeText": "Jusqu'à {{time}}",
+    "endNow": "Terminer maintenant",
+    "channel": "Silence à l'heure de la prière"
   }
 }

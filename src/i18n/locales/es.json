@@ -388,7 +388,22 @@
     "accentPickerAdjusted": "Movido al tono más cercano que sigue siendo legible sobre este fondo.",
     "sectionAppearanceBlurbAndroid": "Tema, color, formato de hora, idioma, widget",
     "verdantAccentHelp": "Verdor colorea cada superficie con este acento.",
-    "refreshStoredHelp": "Vuelve a descargar este mes en lugar de rellenar los huecos, de modo que los horarios incorrectos —tras un cambio de hora, por ejemplo— se sustituyen en vez de conservarse."
+    "refreshStoredHelp": "Vuelve a descargar este mes en lugar de rellenar los huecos, de modo que los horarios incorrectos —tras un cambio de hora, por ejemplo— se sustituyen en vez de conservarse.",
+    "silenceTitle": "Silenciar el teléfono",
+    "silenceToggle": "Silenciar el teléfono a la hora del rezo",
+    "silenceHelp": "Activa No molestar en torno a los rezos que elijas, para que el teléfono guarde silencio en la mezquita, y lo desactiva después. Las alarmas y lo que permitas en No molestar siguen llegando.",
+    "silenceAccessNeeded": "Mihrab necesita acceso a No molestar para esto.",
+    "silenceGrantAccess": "Conceder acceso",
+    "silencePrayers": "Qué rezos",
+    "silenceLead": "Inicio",
+    "silenceAtAdhan": "Con el adhan",
+    "silenceDuration": "Duración",
+    "silenceAfterAdhan": "{{duration}} después del adhan",
+    "minutesOption": "{{count}} min",
+    "silenceJumuahDuration": "Duración del Yumu'ah",
+    "silenceJumuahFixed": "Yumu'ah a una hora fija",
+    "silenceJumuahFixedHelp": "Muchas mezquitas celebran el Yumu'ah a la misma hora todo el año. Apagado, el periodo sigue al Dhuhr.",
+    "silenceJumuahTime": "Hora del Yumu'ah"
   },
   "locationSetup": {
     "headline": "Establece tu ubicación",
@@ -498,7 +513,8 @@
     "secondTimeFrom": "Segundo tiempo desde {{time}}",
     "approx": "aprox.",
     "Subh": "Subh",
-    "Subh_abbr": "Subh"
+    "Subh_abbr": "Subh",
+    "Jumuah": "Yumu'ah"
   },
   "placeSearch": {
     "label": "Buscar ciudad o dirección",
@@ -1924,5 +1940,11 @@
     "copyNotes": "Copiar las notas de la versión {{version}}",
     "copied": "Copiado",
     "copyFailed": "No se pudo copiar"
+  },
+  "silence": {
+    "activeTitle": "En silencio por {{prayer}}",
+    "activeText": "Hasta las {{time}}",
+    "endNow": "Terminar ahora",
+    "channel": "Silencio a la hora del rezo"
   }
 }

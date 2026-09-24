@@ -388,7 +388,22 @@
     "accentPickerAdjusted": "قریب ترین ایسے شیڈ پر منتقل کر دیا گیا جو اس پس منظر پر پڑھا جا سکے۔",
     "sectionAppearanceBlurbAndroid": "تھیم، رنگ، وقت کی شکل، زبان، ویجیٹ",
     "verdantAccentHelp": "سرسبز اس رنگ سے ہر سطح کو رنگین کرتا ہے۔",
-    "refreshStoredHelp": "خالی جگہیں بھرنے کے بجائے پورا مہینہ دوبارہ حاصل کرتا ہے، تاکہ غلط اوقات (مثلاً گھڑی کی تبدیلی کے بعد) برقرار رہنے کے بجائے بدل دیے جائیں۔"
+    "refreshStoredHelp": "خالی جگہیں بھرنے کے بجائے پورا مہینہ دوبارہ حاصل کرتا ہے، تاکہ غلط اوقات (مثلاً گھڑی کی تبدیلی کے بعد) برقرار رہنے کے بجائے بدل دیے جائیں۔",
+    "silenceTitle": "فون خاموش کریں",
+    "silenceToggle": "نماز کے وقت فون خاموش کریں",
+    "silenceHelp": "آپ کی چنی ہوئی نمازوں کے آس پاس ڈسٹرب نہ کریں آن کرتا ہے تاکہ مسجد میں فون خاموش رہے، اور بعد میں بند کر دیتا ہے۔ الارم اور جس کی آپ اجازت دیں وہ آتے رہیں گے۔",
+    "silenceAccessNeeded": "اس کے لیے محراب کو ڈسٹرب نہ کریں کی رسائی چاہیے۔",
+    "silenceGrantAccess": "رسائی دیں",
+    "silencePrayers": "کون سی نمازیں",
+    "silenceLead": "آغاز",
+    "silenceAtAdhan": "اذان کے وقت",
+    "silenceDuration": "دورانیہ",
+    "silenceAfterAdhan": "اذان کے {{duration}} بعد",
+    "minutesOption": "{{count}} منٹ",
+    "silenceJumuahDuration": "جمعہ کا دورانیہ",
+    "silenceJumuahFixed": "جمعہ مقررہ وقت پر",
+    "silenceJumuahFixedHelp": "بہت سی مساجد سارا سال ایک ہی وقت پر جمعہ پڑھاتی ہیں۔ بند ہونے پر وقفہ ظہر کے ساتھ چلتا ہے۔",
+    "silenceJumuahTime": "جمعہ کا وقت"
   },
   "locationSetup": {
     "headline": "اپنا مقام متعین کریں۔",
@@ -498,7 +513,8 @@
     "secondTimeFrom": "دوسرا وقت {{time}} سے",
     "approx": "تقریباً",
     "Subh": "صبح",
-    "Subh_abbr": "صبح"
+    "Subh_abbr": "صبح",
+    "Jumuah": "جمعہ"
   },
   "placeSearch": {
     "label": "شہر یا پتہ تلاش کریں۔",
@@ -1924,5 +1940,11 @@
     "copyNotes": "{{version}} کے ریلیز نوٹس کاپی کریں",
     "copied": "کاپی ہو گیا",
     "copyFailed": "کاپی نہیں ہو سکا"
+  },
+  "silence": {
+    "activeTitle": "{{prayer}} کے لیے خاموش",
+    "activeText": "{{time}} تک",
+    "endNow": "ابھی ختم کریں",
+    "channel": "نماز کے وقت خاموشی"
   }
 }

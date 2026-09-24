@@ -4,6 +4,7 @@ import type { PrePrayerReminderMinutes } from './prePrayerReminder';
 import type { NotificationSoundId } from '../notifications/notificationSounds';
 import type { PrayerOffsetMinutes } from './prayerOffsets';
 import type { AlertModeMap } from './alertModes';
+import { DEFAULT_PRAYER_SILENCE, type PrayerSilenceSettings } from './prayerSilence';
 import type { ClockFormat } from '../utils/clockFormat';
 import type { DhikrReminder } from '../dhikr/dhikrReminders';
 import { DEFAULT_READING_SCALE } from '../theme/readingText';
@@ -221,6 +222,12 @@ export type PrayerAppSettings = {
    * which Apple grants to health and public-safety apps.
    */
   adhanUsesAlarmStream: boolean;
+  /**
+   * ANDROID: put the phone on Do Not Disturb around the prayers chosen,
+   * for the mosque — issue #60. See `settings/prayerSilence.ts`. Never
+   * shown on iOS, which lets no app touch silent mode or Focus.
+   */
+  prayerSilence: PrayerSilenceSettings;
   /** Android: widget background opacity 0–100. */
   androidWidgetBackgroundOpacity: number;
   /** Highlight style for the widget next-prayer row. */
@@ -648,6 +655,7 @@ export const DEFAULT_SETTINGS: PrayerAppSettings = {
   prePrayerReminderMinutes: 0,
   notificationSound: 'default',
   adhanUsesAlarmStream: false,
+  prayerSilence: { ...DEFAULT_PRAYER_SILENCE },
   prayerAlertModes: {},
   androidWidgetBackgroundOpacity: 88,
   widgetHighlightId: 'green',

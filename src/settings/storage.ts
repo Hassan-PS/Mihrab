@@ -7,6 +7,7 @@ import { coerceClockFormat } from '../utils/clockFormat';
 import { coerceDhikrReminders } from '../dhikr/dhikrReminders';
 import { coerceDaruriAlerts } from '../prayer/daruriTimes';
 import { coercePrePrayerReminderMinutes } from './prePrayerReminder';
+import { coercePrayerSilence } from './prayerSilence';
 import { clampReadingScale } from '../theme/readingText';
 import {
   extractSecureFields,
@@ -252,6 +253,10 @@ async function loadSettingsUncached(): Promise<PrayerAppSettings> {
   if (typeof merged.adhanUsesAlarmStream !== 'boolean') {
     merged.adhanUsesAlarmStream = false;
   }
+  // The same kind of guard: this one turns Do Not Disturb on and off on
+  // a clock, and a half-shaped blob would be read by a receiver with the
+  // app closed, where there is nobody to notice.
+  merged.prayerSilence = coercePrayerSilence(parsed.prayerSilence);
   // One-time v2.7.27 migration: the mushaf became the default reading
   // mode. Blobs written before the marker existed carry the OLD default
   // ('withTranslation') that virtually no user chose explicitly — apply

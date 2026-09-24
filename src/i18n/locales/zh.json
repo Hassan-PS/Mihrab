@@ -388,7 +388,22 @@
     "accentPickerAdjusted": "已调整为在此背景上仍然清晰可读的最接近色调。",
     "sectionAppearanceBlurbAndroid": "主题、强调色、时间格式、语言、小部件",
     "verdantAccentHelp": "翠绿用此强调色铺满每个表面。",
-    "refreshStoredHelp": "会重新获取本月数据，而不是只补上缺失的部分，因此错误的时间（例如在时间制度更改之后）会被替换，而不是保留。"
+    "refreshStoredHelp": "会重新获取本月数据，而不是只补上缺失的部分，因此错误的时间（例如在时间制度更改之后）会被替换，而不是保留。",
+    "silenceTitle": "手机静音",
+    "silenceToggle": "礼拜时手机静音",
+    "silenceHelp": "在所选礼拜前后开启勿扰模式，让手机在清真寺里保持安静，结束后自动关闭。闹钟和你在勿扰模式中允许的内容仍会送达。",
+    "silenceAccessNeeded": "Mihrab 需要勿扰模式权限才能执行此操作。",
+    "silenceGrantAccess": "授予权限",
+    "silencePrayers": "哪些礼拜",
+    "silenceLead": "开始",
+    "silenceAtAdhan": "宣礼时",
+    "silenceDuration": "时长",
+    "silenceAfterAdhan": "宣礼后 {{duration}}",
+    "minutesOption": "{{count}} 分钟",
+    "silenceJumuahDuration": "主麻时长",
+    "silenceJumuahFixed": "主麻固定时间",
+    "silenceJumuahFixedHelp": "许多清真寺全年在同一时间举行主麻。关闭时，时段跟随晌礼。",
+    "silenceJumuahTime": "主麻时间"
   },
   "locationSetup": {
     "headline": "设置您的位置",
@@ -498,7 +513,8 @@
     "secondTimeFrom": "第二时段自 {{time}}",
     "approx": "约",
     "Subh": "晨礼",
-    "Subh_abbr": "晨礼"
+    "Subh_abbr": "晨礼",
+    "Jumuah": "主麻"
   },
   "placeSearch": {
     "label": "搜索城市或地址",
@@ -1924,5 +1940,11 @@
     "copyNotes": "复制 {{version}} 的更新说明",
     "copied": "已复制",
     "copyFailed": "无法复制"
+  },
+  "silence": {
+    "activeTitle": "{{prayer}}静音中",
+    "activeText": "直到 {{time}}",
+    "endNow": "立即结束",
+    "channel": "礼拜时静音"
   }
 }

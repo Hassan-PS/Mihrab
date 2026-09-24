@@ -388,7 +388,22 @@
     "accentPickerAdjusted": "Moved to the nearest shade that stays readable on this background.",
     "sectionAppearanceBlurbAndroid": "Theme, accent, time format, language, widget",
     "verdantAccentHelp": "Verdant colors every surface in this accent.",
-    "refreshStoredHelp": "Fetches this month again rather than filling the gaps, so times that are wrong — after a change of clocks, say — are replaced rather than kept."
+    "refreshStoredHelp": "Fetches this month again rather than filling the gaps, so times that are wrong — after a change of clocks, say — are replaced rather than kept.",
+    "silenceTitle": "Silence the phone",
+    "silenceToggle": "Silence the phone at prayer time",
+    "silenceHelp": "Turns on Do Not Disturb around the prayers you choose, so the phone stays quiet in the mosque, and turns it off again afterwards. Alarms and whatever you allow through Do Not Disturb still get through.",
+    "silenceAccessNeeded": "Mihrab needs Do Not Disturb access to do this.",
+    "silenceGrantAccess": "Grant access",
+    "silencePrayers": "Which prayers",
+    "silenceLead": "Start",
+    "silenceAtAdhan": "At the adhan",
+    "silenceDuration": "Length",
+    "silenceAfterAdhan": "{{duration}} after the adhan",
+    "minutesOption": "{{count}} min",
+    "silenceJumuahDuration": "Jumu'ah length",
+    "silenceJumuahFixed": "Jumu'ah at a fixed time",
+    "silenceJumuahFixedHelp": "Many mosques hold Jumu'ah at the same time all year. Off, the window follows Dhuhr.",
+    "silenceJumuahTime": "Jumu'ah time"
   },
   "locationSetup": {
     "headline": "Set your location",
@@ -498,7 +513,8 @@
     "secondTimeFrom": "Second time from {{time}}",
     "approx": "approx.",
     "Subh": "Subh",
-    "Subh_abbr": "Subh"
+    "Subh_abbr": "Subh",
+    "Jumuah": "Jumu'ah"
   },
   "placeSearch": {
     "label": "Search city or address",
@@ -1924,5 +1940,11 @@
     "copyNotes": "Copy release notes for {{version}}",
     "copied": "Copied",
     "copyFailed": "Couldn't copy"
+  },
+  "silence": {
+    "activeTitle": "Silenced for {{prayer}}",
+    "activeText": "Until {{time}}",
+    "endNow": "End now",
+    "channel": "Silence at prayer time"
   }
 }

@@ -388,7 +388,22 @@
     "accentPickerAdjusted": "Flyttad till närmaste nyans som är läsbar mot den här bakgrunden.",
     "sectionAppearanceBlurbAndroid": "Tema, accentfärg, tidsformat, språk, widget",
     "verdantAccentHelp": "Grönskande färgar varje yta i den här accenten.",
-    "refreshStoredHelp": "Hämtar den här månaden på nytt i stället för att fylla luckorna, så att felaktiga tider – till exempel efter en tidsomställning – ersätts i stället för att behållas."
+    "refreshStoredHelp": "Hämtar den här månaden på nytt i stället för att fylla luckorna, så att felaktiga tider – till exempel efter en tidsomställning – ersätts i stället för att behållas.",
+    "silenceTitle": "Tysta telefonen",
+    "silenceToggle": "Tysta telefonen vid bönetid",
+    "silenceHelp": "Slår på Stör ej runt de böner du väljer så att telefonen är tyst i moskén, och stänger av det efteråt. Alarm och det du släpper igenom i Stör ej kommer fortfarande fram.",
+    "silenceAccessNeeded": "Mihrab behöver åtkomst till Stör ej för detta.",
+    "silenceGrantAccess": "Ge åtkomst",
+    "silencePrayers": "Vilka böner",
+    "silenceLead": "Start",
+    "silenceAtAdhan": "Vid adhan",
+    "silenceDuration": "Längd",
+    "silenceAfterAdhan": "{{duration}} efter adhan",
+    "minutesOption": "{{count}} min",
+    "silenceJumuahDuration": "Längd för Jumu'ah",
+    "silenceJumuahFixed": "Jumu'ah på fast tid",
+    "silenceJumuahFixedHelp": "Många moskéer håller Jumu'ah på samma tid året runt. Av följer fönstret Dhuhr.",
+    "silenceJumuahTime": "Tid för Jumu'ah"
   },
   "locationSetup": {
     "headline": "Ange din plats",
@@ -498,7 +513,8 @@
     "secondTimeFrom": "Andra tiden från {{time}}",
     "approx": "ca",
     "Subh": "Subh",
-    "Subh_abbr": "Subh"
+    "Subh_abbr": "Subh",
+    "Jumuah": "Jumu'ah"
   },
   "placeSearch": {
     "label": "Sök stad eller adress",
@@ -1924,5 +1940,11 @@
     "copyNotes": "Kopiera versionsinformationen för {{version}}",
     "copied": "Kopierat",
     "copyFailed": "Kunde inte kopiera"
+  },
+  "silence": {
+    "activeTitle": "Tyst för {{prayer}}",
+    "activeText": "Till {{time}}",
+    "endNow": "Avsluta nu",
+    "channel": "Tyst vid bönetid"
   }
 }

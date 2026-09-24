@@ -388,7 +388,22 @@
     "accentPickerAdjusted": "Dipindahkan ke corak terdekat yang tetap terbaca di latar ini.",
     "sectionAppearanceBlurbAndroid": "Tema, warna, format waktu, bahasa, widget",
     "verdantAccentHelp": "Zamrud mewarnai setiap permukaan dengan aksen ini.",
-    "refreshStoredHelp": "Mengambil ulang bulan ini alih-alih sekadar mengisi bagian yang kosong, sehingga waktu yang salah — misalnya setelah perubahan jam — diganti, bukan dipertahankan."
+    "refreshStoredHelp": "Mengambil ulang bulan ini alih-alih sekadar mengisi bagian yang kosong, sehingga waktu yang salah — misalnya setelah perubahan jam — diganti, bukan dipertahankan.",
+    "silenceTitle": "Senyapkan ponsel",
+    "silenceToggle": "Senyapkan ponsel saat waktu salat",
+    "silenceHelp": "Mengaktifkan Jangan Ganggu di sekitar salat yang Anda pilih agar ponsel tetap senyap di masjid, lalu mematikannya lagi. Alarm dan yang Anda izinkan lewat Jangan Ganggu tetap masuk.",
+    "silenceAccessNeeded": "Mihrab memerlukan akses Jangan Ganggu untuk ini.",
+    "silenceGrantAccess": "Beri akses",
+    "silencePrayers": "Salat yang mana",
+    "silenceLead": "Mulai",
+    "silenceAtAdhan": "Saat azan",
+    "silenceDuration": "Lama",
+    "silenceAfterAdhan": "{{duration}} setelah azan",
+    "minutesOption": "{{count}} mnt",
+    "silenceJumuahDuration": "Lama Jumat",
+    "silenceJumuahFixed": "Jumat pada jam tetap",
+    "silenceJumuahFixedHelp": "Banyak masjid mengadakan Jumat pada jam yang sama sepanjang tahun. Jika mati, jendela mengikuti Zuhur.",
+    "silenceJumuahTime": "Waktu Jumat"
   },
   "locationSetup": {
     "headline": "Tetapkan lokasi Anda",
@@ -498,7 +513,8 @@
     "secondTimeFrom": "Waktu kedua dari {{time}}",
     "approx": "kira-kira",
     "Subh": "Subuh",
-    "Subh_abbr": "Subuh"
+    "Subh_abbr": "Subuh",
+    "Jumuah": "Jumat"
   },
   "placeSearch": {
     "label": "Cari kota atau alamat",
@@ -1924,5 +1940,11 @@
     "copyNotes": "Salin catatan rilis {{version}}",
     "copied": "Disalin",
     "copyFailed": "Tidak dapat menyalin"
+  },
+  "silence": {
+    "activeTitle": "Senyap untuk {{prayer}}",
+    "activeText": "Sampai {{time}}",
+    "endNow": "Akhiri sekarang",
+    "channel": "Senyap saat waktu salat"
   }
 }

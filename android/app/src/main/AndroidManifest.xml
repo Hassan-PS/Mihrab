@@ -37,6 +37,11 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- "Silence the phone at prayer time" (issue #60): the app owns one
+         automatic Do Not Disturb rule and turns it on and off around the
+         prayers chosen. Declaring this grants nothing; the person grants
+         Do Not Disturb access on the system's own screen. -->
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Live Activity foreground service. Required on Android 14+ — the
          FOREGROUND_SERVICE_SPECIAL_USE type covers our case (pinned
@@ -334,6 +339,22 @@
         <intent-filter>
           <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
           <action android:name="android.intent.action.BOOT_COMPLETED" />
+        </intent-filter>
+      </receiver>
+
+      <!-- The quiet windows around prayer times (issue #60): the exact
+           alarms at a window's two ends and the notification's "End now"
+           arrive as explicit intents; a boot, an update or a clock change
+           re-reads the saved windows and puts the phone in the state they
+           say. -->
+      <receiver
+        android:name=".PrayerSilenceReceiver"
+        android:exported="false">
+        <intent-filter>
+          <action android:name="android.intent.action.BOOT_COMPLETED" />
+          <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+          <action android:name="android.intent.action.TIME_SET" />
+          <action android:name="android.intent.action.TIMEZONE_CHANGED" />
         </intent-filter>
       </receiver>
 

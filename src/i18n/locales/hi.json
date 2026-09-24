@@ -388,7 +388,22 @@
     "accentPickerAdjusted": "निकटतम ऐसे शेड पर ले जाया गया जो इस पृष्ठभूमि पर पढ़ने योग्य रहे।",
     "sectionAppearanceBlurbAndroid": "थीम, रंग, समय प्रारूप, भाषा, विजेट",
     "verdantAccentHelp": "हरित इस रंग से हर सतह को रंगता है।",
-    "refreshStoredHelp": "अंतराल भरने के बजाय इस पूरे महीने को दोबारा लाता है, ताकि ग़लत समय — जैसे घड़ी बदलने के बाद — बने रहने के बजाय बदल दिए जाएँ।"
+    "refreshStoredHelp": "अंतराल भरने के बजाय इस पूरे महीने को दोबारा लाता है, ताकि ग़लत समय — जैसे घड़ी बदलने के बाद — बने रहने के बजाय बदल दिए जाएँ।",
+    "silenceTitle": "फ़ोन साइलेंट करें",
+    "silenceToggle": "नमाज़ के समय फ़ोन साइलेंट करें",
+    "silenceHelp": "आपकी चुनी नमाज़ों के आसपास डिस्टर्ब न करें चालू करता है ताकि मस्जिद में फ़ोन शांत रहे, और बाद में बंद कर देता है। अलार्म और जो आप अनुमति देते हैं वे आते रहेंगे।",
+    "silenceAccessNeeded": "इसके लिए मिहराब को डिस्टर्ब न करें की अनुमति चाहिए।",
+    "silenceGrantAccess": "अनुमति दें",
+    "silencePrayers": "कौन-सी नमाज़ें",
+    "silenceLead": "शुरुआत",
+    "silenceAtAdhan": "अज़ान के समय",
+    "silenceDuration": "अवधि",
+    "silenceAfterAdhan": "अज़ान के {{duration}} बाद",
+    "minutesOption": "{{count}} मिनट",
+    "silenceJumuahDuration": "जुमा की अवधि",
+    "silenceJumuahFixed": "जुमा एक तय समय पर",
+    "silenceJumuahFixedHelp": "कई मस्जिदें साल भर एक ही समय पर जुमा करती हैं। बंद होने पर अवधि ज़ुहर के साथ चलती है।",
+    "silenceJumuahTime": "जुमा का समय"
   },
   "locationSetup": {
     "headline": "अपना स्थान निर्धारित करें",
@@ -498,7 +513,8 @@
     "secondTimeFrom": "दूसरा समय {{time}} से",
     "approx": "लगभग",
     "Subh": "सुब्ह",
-    "Subh_abbr": "सुब्ह"
+    "Subh_abbr": "सुब्ह",
+    "Jumuah": "जुमा"
   },
   "placeSearch": {
     "label": "शहर या पता खोजें",
@@ -1924,5 +1940,11 @@
     "copyNotes": "{{version}} के रिलीज़ नोट्स कॉपी करें",
     "copied": "कॉपी हो गया",
     "copyFailed": "कॉपी नहीं हो सका"
+  },
+  "silence": {
+    "activeTitle": "{{prayer}} के लिए साइलेंट",
+    "activeText": "{{time}} तक",
+    "endNow": "अभी समाप्त करें",
+    "channel": "नमाज़ के समय साइलेंट"
   }
 }

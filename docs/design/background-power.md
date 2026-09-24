@@ -267,6 +267,14 @@ charger, which is what this kind of opportunistic prefetch is for.
   side effect, and break the thing the comment at `index.js:24-29` describes:
   screens stuck on the old palette after a theme change. Fix the timers
   directly instead.
+- **The prayer-silence alarms** (issue #60, `PrayerSilence.kt`). Off by
+  default. On, they are TWO outstanding alarms at most — the next window's
+  start and the current window's end — each re-armed by the one it triggers,
+  so at most ~12 wake-ups a day and no service. The receiver reads one
+  SharedPreferences string, flips the state of the app's own Do Not Disturb
+  rule, and posts or cancels one low-importance notification. JS rewrites the
+  list on the same resync the adhan alerts use (gated by the same
+  day/settings fingerprint), so it costs nothing extra to compute.
 
 ## Order of work
 

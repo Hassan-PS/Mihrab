@@ -23,6 +23,13 @@ import { MalikiAlertsCard } from '../MalikiAlertsCard';
 import { NestedPageRows } from '../NestedPageRows';
 import { NotificationsCard } from '../NotificationsCard';
 import { PreReminderModal } from '../PreReminderModal';
+import { PrayerSilenceCard } from '../PrayerSilenceCard';
+import { MinutesPickerModal } from '../MinutesPickerModal';
+import { TimePickerSheet } from '../TimePickerSheet';
+import {
+  SILENCE_DURATION_OPTIONS,
+  SILENCE_JUMUAH_DURATION_OPTIONS,
+} from '../../../settings/prayerSilence';
 import { SettingsPage } from '../SettingsPage';
 import { SoundPickerModal } from '../SoundPickerModal';
 import type {
@@ -42,6 +49,10 @@ export function NotificationSettingsScreen() {
   const [soundModal, setSoundModal] = useState(false);
   const [preReminderModal, setPreReminderModal] = useState(false);
   const [daruriLeadModal, setDaruriLeadModal] = useState(false);
+  // The quiet windows' four pickers (issue #60): one sheet at a time.
+  const [silenceModal, setSilenceModal] = useState<
+    'lead' | 'duration' | 'jumuahDuration' | 'jumuahTime' | null
+  >(null);
   const [previewingId, setPreviewingId] = useState<NotificationSoundId | null>(
     null,
   );
@@ -49,7 +60,8 @@ export function NotificationSettingsScreen() {
   const [importingCustom, setImportingCustom] = useState(false);
 
   const deferBack = useRef(false);
-  deferBack.current = soundModal || preReminderModal || daruriLeadModal;
+  deferBack.current =
+    soundModal || preReminderModal || daruriLeadModal || silenceModal !== null;
 
   const openSound = useCallback(() => setSoundModal(true), []);
   const closeSound = useCallback(() => setSoundModal(false), []);
@@ -57,6 +69,23 @@ export function NotificationSettingsScreen() {
   const closePreReminder = useCallback(() => setPreReminderModal(false), []);
   const openDaruriLead = useCallback(() => setDaruriLeadModal(true), []);
   const closeDaruriLead = useCallback(() => setDaruriLeadModal(false), []);
+  const openSilenceLead = useCallback(() => setSilenceModal('lead'), []);
+  const openSilenceDuration = useCallback(() => setSilenceModal('duration'), []);
+  const openSilenceJumuahDuration = useCallback(
+    () => setSilenceModal('jumuahDuration'),
+    [],
+  );
+  const openSilenceJumuahTime = useCallback(() => setSilenceModal('jumuahTime'), []);
+  const closeSilence = useCallback(() => setSilenceModal(null), []);
+  const silence = settings.prayerSilence;
+  const patchSilence = useCallback(
+    (part: Partial<typeof silence>) =>
+      updateSettings({ prayerSilence: { ...silence, ...part } }),
+    [silence, updateSettings],
+  );
+  const [jumuahHour, jumuahMinute] = (silence.jumuahTime ?? '13:00')
+    .split(':')
+    .map(Number);
 
   // Read from disk rather than from the saved setting: the setting says
   // which sound is chosen, the filesystem says whether the recording is
@@ -112,6 +141,15 @@ export function NotificationSettingsScreen() {
             warning — the part of that feature that fires. It lived inside
             the Calculation card on Prayer times until #23. */}
         <MalikiAlertsCard onOpenDaruriLeadPicker={openDaruriLead} />
+        {/* The phone itself going quiet for the mosque (issue #60). It
+            fires, in its way, so it is here; Android only, and the card
+            renders nothing anywhere else. */}
+        <PrayerSilenceCard
+          onOpenLeadPicker={openSilenceLead}
+          onOpenDurationPicker={openSilenceDuration}
+          onOpenJumuahDurationPicker={openSilenceJumuahDuration}
+          onOpenJumuahTimePicker={openSilenceJumuahTime}
+        />
         {/* A Live Activity is a notification: posted, dismissed, and
             living in the shade beside the adhan alert. It sat under
             "Home screen" next to the widget, which grouped it by where
@@ -155,6 +193,52 @@ export function NotificationSettingsScreen() {
           updateSettings({ malikiSecondTimeAlertMinutes: minutes })
         }
         onClose={closeDaruriLead}
+      />
+      {/* The quiet windows' pickers. The lead is the reminder picker's
+          question asked again — "how far before" — so it is the same
+          sheet with a different zero. */}
+      <PreReminderModal
+        visible={silenceModal === 'lead'}
+        current={silence.leadMinutes}
+        palette={palette}
+        title={t('settings.silenceLead')}
+        offLabel={t('settings.silenceAtAdhan')}
+        onSelect={minutes => patchSilence({ leadMinutes: minutes })}
+        onClose={closeSilence}
+      />
+      <MinutesPickerModal
+        visible={silenceModal === 'duration'}
+        title={t('settings.silenceDuration')}
+        options={SILENCE_DURATION_OPTIONS}
+        current={silence.durationMinutes}
+        palette={palette}
+        onSelect={minutes => patchSilence({ durationMinutes: minutes })}
+        onClose={closeSilence}
+      />
+      <MinutesPickerModal
+        visible={silenceModal === 'jumuahDuration'}
+        title={t('settings.silenceJumuahDuration')}
+        options={SILENCE_JUMUAH_DURATION_OPTIONS}
+        current={silence.jumuahDurationMinutes}
+        palette={palette}
+        onSelect={minutes => patchSilence({ jumuahDurationMinutes: minutes })}
+        onClose={closeSilence}
+      />
+      <TimePickerSheet
+        visible={silenceModal === 'jumuahTime'}
+        hour={jumuahHour}
+        minute={jumuahMinute}
+        onChangeHour={h =>
+          patchSilence({
+            jumuahTime: `${String(h).padStart(2, '0')}:${String(jumuahMinute).padStart(2, '0')}`,
+          })
+        }
+        onChangeMinute={m =>
+          patchSilence({
+            jumuahTime: `${String(jumuahHour).padStart(2, '0')}:${String(m).padStart(2, '0')}`,
+          })
+        }
+        onClose={closeSilence}
       />
     </>
   );

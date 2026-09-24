@@ -388,7 +388,22 @@
     "accentPickerAdjusted": "Bu arka planda okunabilir kalan en yakın tona taşındı.",
     "sectionAppearanceBlurbAndroid": "Tema, vurgu rengi, saat biçimi, dil, widget",
     "verdantAccentHelp": "Zümrüt her yüzeyi bu vurgu renginde boyar.",
-    "refreshStoredHelp": "Boşlukları doldurmak yerine bu ayı yeniden indirir; böylece yanlış vakitler — örneğin saat değişiminden sonra — korunmak yerine değiştirilir."
+    "refreshStoredHelp": "Boşlukları doldurmak yerine bu ayı yeniden indirir; böylece yanlış vakitler — örneğin saat değişiminden sonra — korunmak yerine değiştirilir.",
+    "silenceTitle": "Telefonu sessize al",
+    "silenceToggle": "Namaz vaktinde telefonu sessize al",
+    "silenceHelp": "Seçtiğiniz namazlar çevresinde Rahatsız Etmeyin'i açar, telefon camide sessiz kalır, sonra kapatır. Alarmlar ve Rahatsız Etmeyin'de izin verdikleriniz yine gelir.",
+    "silenceAccessNeeded": "Bunun için Mihrab'ın Rahatsız Etmeyin erişimi gerekir.",
+    "silenceGrantAccess": "Erişim ver",
+    "silencePrayers": "Hangi namazlar",
+    "silenceLead": "Başlangıç",
+    "silenceAtAdhan": "Ezanla",
+    "silenceDuration": "Süre",
+    "silenceAfterAdhan": "Ezandan {{duration}} sonra",
+    "minutesOption": "{{count}} dk",
+    "silenceJumuahDuration": "Cuma süresi",
+    "silenceJumuahFixed": "Cuma sabit saatte",
+    "silenceJumuahFixedHelp": "Birçok cami cumayı yıl boyunca aynı saatte kılar. Kapalıyken aralık öğleyi izler.",
+    "silenceJumuahTime": "Cuma saati"
   },
   "locationSetup": {
     "headline": "Konumunuzu ayarlayın",
@@ -498,7 +513,8 @@
     "secondTimeFrom": "İkinci vakit {{time}} itibarıyla",
     "approx": "yaklaşık",
     "Subh": "Sabah",
-    "Subh_abbr": "Sabah"
+    "Subh_abbr": "Sabah",
+    "Jumuah": "Cuma"
   },
   "placeSearch": {
     "label": "Şehir veya adres arayın",
@@ -1924,5 +1940,11 @@
     "copyNotes": "{{version}} sürüm notlarını kopyala",
     "copied": "Kopyalandı",
     "copyFailed": "Kopyalanamadı"
+  },
+  "silence": {
+    "activeTitle": "{{prayer}} için sessiz",
+    "activeText": "{{time}}'e kadar",
+    "endNow": "Şimdi bitir",
+    "channel": "Namaz vaktinde sessiz"
   }
 }

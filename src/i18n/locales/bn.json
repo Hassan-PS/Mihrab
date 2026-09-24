@@ -388,7 +388,22 @@
     "accentPickerAdjusted": "এই পটভূমিতে পড়া যায় এমন নিকটতম শেডে সরানো হয়েছে।",
     "sectionAppearanceBlurbAndroid": "থিম, রং, সময়ের বিন্যাস, ভাষা, উইজেট",
     "verdantAccentHelp": "সবুজাভ এই অ্যাকসেন্টে প্রতিটি পৃষ্ঠতল রঙ করে।",
-    "refreshStoredHelp": "ফাঁক পূরণ না করে এই মাসটি আবার নতুন করে নামায়, তাই ভুল সময় — যেমন ঘড়ি বদলের পরে — রেখে না দিয়ে বদলে দেওয়া হয়।"
+    "refreshStoredHelp": "ফাঁক পূরণ না করে এই মাসটি আবার নতুন করে নামায়, তাই ভুল সময় — যেমন ঘড়ি বদলের পরে — রেখে না দিয়ে বদলে দেওয়া হয়।",
+    "silenceTitle": "ফোন নীরব করুন",
+    "silenceToggle": "নামাজের সময় ফোন নীরব করুন",
+    "silenceHelp": "আপনার বেছে নেওয়া নামাজের সময় বিরক্ত করবেন না মোড চালু করে, যাতে মসজিদে ফোন নীরব থাকে, এবং পরে আবার বন্ধ করে দেয়। অ্যালার্ম ও আপনি যা অনুমতি দিয়েছেন তা আসতে থাকবে।",
+    "silenceAccessNeeded": "এর জন্য মিহরাবের বিরক্ত করবেন না অ্যাক্সেস দরকার।",
+    "silenceGrantAccess": "অ্যাক্সেস দিন",
+    "silencePrayers": "কোন নামাজ",
+    "silenceLead": "শুরু",
+    "silenceAtAdhan": "আজানের সময়",
+    "silenceDuration": "সময়কাল",
+    "silenceAfterAdhan": "আজানের পর {{duration}}",
+    "minutesOption": "{{count}} মিনিট",
+    "silenceJumuahDuration": "জুমুআর সময়কাল",
+    "silenceJumuahFixed": "নির্দিষ্ট সময়ে জুমুআ",
+    "silenceJumuahFixedHelp": "অনেক মসজিদে সারা বছর একই সময়ে জুমুআ হয়। বন্ধ থাকলে সময়টি যোহর অনুসরণ করে।",
+    "silenceJumuahTime": "জুমুআর সময়"
   },
   "locationSetup": {
     "headline": "আপনার অবস্থান সেট করুন",
@@ -498,7 +513,8 @@
     "secondTimeFrom": "দ্বিতীয় ওয়াক্ত {{time}} থেকে",
     "approx": "আনুমানিক",
     "Subh": "সুবহ",
-    "Subh_abbr": "সুবহ"
+    "Subh_abbr": "সুবহ",
+    "Jumuah": "জুমুআ"
   },
   "placeSearch": {
     "label": "শহর বা ঠিকানা খুঁজুন",
@@ -1924,5 +1940,11 @@
     "copyNotes": "{{version}}-এর রিলিজ নোট কপি করুন",
     "copied": "কপি হয়েছে",
     "copyFailed": "কপি করা যায়নি"
+  },
+  "silence": {
+    "activeTitle": "{{prayer}}-এর জন্য নীরব",
+    "activeText": "{{time}} পর্যন্ত",
+    "endNow": "এখনই শেষ করুন",
+    "channel": "নামাজের সময় নীরবতা"
   }
 }

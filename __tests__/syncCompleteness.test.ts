@@ -136,6 +136,7 @@ const STAYS: Record<string, string> = {
   'home.prayerNotifications': 'a resync gate key, not a store',
   'home.endOfDayReminders': 'a resync gate key, not a store',
   'home.duaReminders': 'a resync gate key, not a store',
+  'home.prayerSilence': 'a resync gate key, not a store',
   'journal-log-prayer': 'a notification action id, not a store',
   'journal-log-sunnah': 'a notification action id, not a store',
   'log-day-all': 'a notification action id, not a store',
