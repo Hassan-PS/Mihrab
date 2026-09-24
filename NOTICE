@@ -30,6 +30,7 @@ THIRD-PARTY CONTENT
 -------------------
 Religious content and fonts are sourced and attributed in README.md and in the
 app under Settings -> About. The Quran text (Tanzil, CC BY 3.0), the KFGQPC
-mushaf page fonts, the Amiri fonts and the MihrabMedallion font derived from
+mushaf page fonts (QPC v2, and the QPC V4 Tajweed colour fonts via the Quranic
+Universal Library), the tajweed rule data (quran.com API), the Amiri fonts and the MihrabMedallion font derived from
 Amiri Quran (SIL OFL 1.1), and the recitation audio are
 the property of their respective authors and are used under their own terms.

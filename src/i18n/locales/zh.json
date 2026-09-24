@@ -1553,7 +1553,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "《穆斯林堡垒》中的祷词",
     "quranGeometry": "经文位置数据（quran.com / Quran for Android 项目）",
-    "tajweedFonts": "诵读规则颜色页面字体（下载，非内置）与规则数据",
+    "tajweedRules": "每个词的诵读规则",
+    "tajweedFonts": "诵读规则颜色页面字体（下载，非内置）",
     "recitation": "诵读音频（42位诵读者）：EveryAyah.com · 逐词时间：quran-align（CC BY 4.0）",
     "tafsir": "经注文本：伊本·凯西尔、Maarif-ul-Quran、简明经注",
     "surahHeaderFont": "章名书法"

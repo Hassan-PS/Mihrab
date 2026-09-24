@@ -1553,7 +1553,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisn al-Muslim-duor",
     "quranGeometry": "Data för ayah-positioner (quran.com / projektet Quran for Android)",
-    "tajweedFonts": "Sidtypsnitt med tajwidfärger (nedladdade, inte medföljande) och regeldata",
+    "tajweedRules": "Tajwidregler för varje ord",
+    "tajweedFonts": "Sidtypsnitt med tajwidfärger (nedladdade, inte medföljande)",
     "recitation": "Recitationsljud (42 recitatörer): EveryAyah.com · ordtiming: quran-align (CC BY 4.0)",
     "tafsir": "Tafsir-texter: Ibn Kathir, Maarif-ul-Quran, al-Muyassar",
     "surahHeaderFont": "Kalligrafi för surarubriker"

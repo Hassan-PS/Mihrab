@@ -1553,7 +1553,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "حصنُ المسلم کی دعائیں",
     "quranGeometry": "آیات کی پوزیشن کا ڈیٹا (quran.com / Quran for Android پروجیکٹ)",
-    "tajweedFonts": "تجوید کے رنگوں والے صفحاتی فونٹس (ڈاؤن لوڈ، ساتھ شامل نہیں) اور قواعد کا ڈیٹا",
+    "tajweedRules": "ہر لفظ کے تجوید کے قواعد",
+    "tajweedFonts": "تجوید کے رنگوں والے صفحاتی فونٹس (ڈاؤن لوڈ، ساتھ شامل نہیں)",
     "recitation": "تلاوت کی آڈیو (42 قاری): EveryAyah.com · الفاظ کی ٹائمنگ: quran-align (CC BY 4.0)",
     "tafsir": "تفسیری متون: ابن کثیر، معارف القرآن، المیسر",
     "surahHeaderFont": "سورت کے عنوان کی خطاطی"

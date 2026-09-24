@@ -511,3 +511,38 @@ search for "Clear Quran" usually turns up first. It is available on the
 terms the other fourteen editions already ship under. It is not what was
 asked for, so it is not in the app; it is written down here so the next
 person to look does not mistake one for the other.
+
+---
+
+## Tajweed colours — SHIPPED (unreleased) 2026-09-24
+
+### The fonts
+
+The KFGQPC **QPC V4 Tajweed** page fonts, one per page, COLR/CPAL colour
+fonts with the same glyph codes as the QPC v2 fonts the muṣḥaf already
+draws. Source of truth: the Quranic Universal Library's font resources
+(<https://qul.tarteel.ai/resources/font>); the build fetched a verbatim
+mirror of that download (`YaseenDotDev/quran-qcf-v4`) and checked every
+glyph the layout draws is in each file. Terms: KFGQPC's copyright page
+for software use (<https://dm.qurancomplex.gov.sa/copyright-2/>), the same
+terms the v2 fonts ship under. A permission request to QUL (issue #766 on
+their tracker) was open and unanswered when this shipped.
+
+`scripts/mushaf/build_tajweed_assets.py fonts` rewrites them: base-ink
+layers to the foreground colour, the medallion fills cleared, one palette
+per file. Hosted as two releases on this repo —
+`mushaf-fonts-v4-tajweed-light` and `mushaf-fonts-v4-tajweed-dark`, 604
+assets each (GitHub caps a release at 1,000) — and fetched on demand.
+
+### The rules
+
+Per-word rule spans from the quran.com API v4,
+`verses/by_page/{p}?words=true&word_fields=text_uthmani_tajweed`
+(<https://api-docs.quran.com/>), stored with the API's own word text in
+`assets/quran/tajweed/{NNN}.json` (`build_tajweed_assets.py rules`). The
+markup has no rule for tafkhīm; the build reads that off the fonts — a
+word whose glyph has a layer in the tafkhīm ink carries the rule.
+
+Also considered: `cpfair/quran-tajweed` (CC BY 4.0, Ḥafṣ, Tanzil text) —
+a sound fallback if the API's markup ever stops being available.
+

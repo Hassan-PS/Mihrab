@@ -1553,7 +1553,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Doa-doa Hisnul Muslim",
     "quranGeometry": "Data posisi ayat (quran.com / proyek Quran for Android)",
-    "tajweedFonts": "Font halaman warna tajwid (diunduh, tidak dibundel) dan data hukum",
+    "tajweedRules": "Hukum tajwid setiap kata",
+    "tajweedFonts": "Font halaman warna tajwid (diunduh, tidak dibundel)",
     "recitation": "Audio tilawah (42 qari): EveryAyah.com · pewaktuan kata: quran-align (CC BY 4.0)",
     "tafsir": "Teks tafsir: Ibnu Katsir, Maarif-ul-Quran, al-Muyassar",
     "surahHeaderFont": "Kaligrafi kepala surah"

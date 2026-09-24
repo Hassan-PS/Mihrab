@@ -1553,7 +1553,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisn al-Muslim duaları",
     "quranGeometry": "Ayet konum verileri (quran.com / Quran for Android projesi)",
-    "tajweedFonts": "Tecvid renkli sayfa yazı tipleri (indirilir, pakete dahil değil) ve kural verileri",
+    "tajweedRules": "Her kelimenin tecvid kuralları",
+    "tajweedFonts": "Tecvid renkli sayfa yazı tipleri (indirilir, pakete dahil değil)",
     "recitation": "Tilavet sesi (42 kâri): EveryAyah.com · kelime zamanlaması: quran-align (CC BY 4.0)",
     "tafsir": "Tefsir metinleri: İbn Kesir, Maarif-ul-Kuran, el-Müyesser",
     "surahHeaderFont": "Sure başlığı hattı"

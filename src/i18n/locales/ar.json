@@ -1553,7 +1553,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "أدعية حصن المسلم",
     "quranGeometry": "بيانات مواضع الآيات (quran.com / مشروع Quran for Android)",
-    "tajweedFonts": "خطوط صفحات ألوان التجويد (تُنزَّل، غير مضمّنة) وبيانات الأحكام",
+    "tajweedRules": "أحكام التجويد لكل كلمة",
+    "tajweedFonts": "خطوط صفحات ألوان التجويد (تُنزَّل، غير مضمّنة)",
     "recitation": "صوت التلاوة (42 قارئًا): EveryAyah.com · توقيت الكلمات: quran-align (CC BY 4.0)",
     "tafsir": "نصوص التفسير: ابن كثير، معارف القرآن، الميسر",
     "surahHeaderFont": "خط عناوين السور"

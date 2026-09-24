@@ -55,6 +55,7 @@
 
 - **Interactive Madinah mushaf** — All 604 pages, drawn as *text* from the official KFGQPC page fonts rather than as page images: sharp at any zoom, instant to rotate, and a fraction of the memory. Reading starts the moment the download does — pages arrive as their fonts do (~300 KB each) with a slim line saying how the rest is going. Paper, sepia or night; a page rail and a go-to-page jump; fullscreen from the margins.
 - **A facing-page spread on iPad and Mac** — the pair of pages is the thing that turns, with the keyboard and a surah sidebar.
+- **Tajweed colours** — Optional: the King Fahd Complex's own colour-coded page fonts, each letter painted for the rule it falls under. Tap an ayah to see its rules word by word and hear each word read; a guide explains every colour.
 - **Four riwāyāt** — Ḥafṣ from the KFGQPC page fonts, and Warsh, Qālūn and Shuʿbah as bundled-typeface muṣḥafs downloaded on request from Quranpedia. Your place carries across a switch: the ayah is the coordinate, not the page number.
 - **Everything in one panel** — A tap on a word opens its ayah: translation, real **tafsir** (Ibn Kathir, Maarif-ul-Quran, al-Muyassar and more — cached for offline), coloured bookmarks, star, share as text or a rendered image card, the khatmah position, and the full recitation controls.
 - **42 reciters** — Al-Husary, Alafasy, Abdul Basit, Al-Minshawi, As-Sudais, Ash-Shatri, Ahmed Al-Ajmi, Yasser Ad-Dossari, Maher Al-Muaiqly, Saad Al-Ghamdi, plus mujawwad readings from Abdul Basit, Al-Minshawi and Al-Husary, streamed per-ayah or downloaded per-surah for offline listening. **Word-level highlight on the page itself** for nine of them — and in landscape the column follows the reciter down the page; prefetching keeps long sessions gapless.
@@ -173,6 +174,7 @@ Religious content is sourced and attributed (also listed in-app under Settings �
 
 - Quran Uthmani text — [Tanzil.net](https://tanzil.net/) (CC BY 3.0)
 - Madinah mushaf — KFGQPC QPC v2 page fonts, mirrored at [nuqayah/qpc-fonts](https://github.com/nuqayah/qpc-fonts) ([KFGQPC terms](https://dm.qurancomplex.gov.sa/copyright-2/)); page layout built from the [quran.com API](https://api-docs.quran.com/)
+- Tajweed colours — KFGQPC QPC V4 Tajweed page fonts, from the [Quranic Universal Library](https://qul.tarteel.ai/resources/font) ([KFGQPC terms](https://dm.qurancomplex.gov.sa/copyright-2/)), downloaded on request; the rules of each word from the [quran.com API](https://api-docs.quran.com/) (`text_uthmani_tajweed`)
 - Ayah and word positions — [quran.com / Quran for Android](https://github.com/quran/quran_android)
 - Recitation audio — [EveryAyah.com](https://everyayah.com/); word timings from [cpfair/quran-align](https://github.com/cpfair/quran-align) (CC BY 4.0)
 - Tafsir texts — [spa5k/tafsir_api](https://github.com/spa5k/tafsir_api) mirror of the Quran.com tafsir corpus

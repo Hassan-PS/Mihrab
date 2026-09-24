@@ -1553,7 +1553,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "हिस्न अल-मुस्लिम की दुआएँ",
     "quranGeometry": "आयत स्थिति डेटा (quran.com / Quran for Android प्रोजेक्ट)",
-    "tajweedFonts": "तजवीद रंगों वाले पन्ना-फ़ॉन्ट (डाउनलोड, बंडल नहीं) और नियमों का डेटा",
+    "tajweedRules": "हर शब्द के तजवीद नियम",
+    "tajweedFonts": "तजवीद रंगों वाले पन्ना-फ़ॉन्ट (डाउनलोड, बंडल नहीं)",
     "recitation": "तिलावत ऑडियो (42 क़ारी): EveryAyah.com · शब्द समय: quran-align (CC BY 4.0)",
     "tafsir": "तफ़सीर: इब्न कसीर, मआरिफ़-उल-क़ुरआन, अल-मुयस्सर",
     "surahHeaderFont": "सूरह शीर्षक कैलिग्राफी"

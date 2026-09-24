@@ -1553,7 +1553,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisnul Muslim duas",
     "quranGeometry": "Ayah position data (quran.com / Quran for Android project)",
-    "tajweedFonts": "Tajweed colour page fonts (downloaded, not bundled) and rule data",
+    "tajweedRules": "Tajweed rules of each word",
+    "tajweedFonts": "Tajweed colour page fonts (downloaded, not bundled)",
     "recitation": "Recitation audio (42 reciters): EveryAyah.com · word timings: quran-align (CC BY 4.0)",
     "tafsir": "Tafsir texts: Ibn Kathir, Maarif-ul-Quran, al-Muyassar",
     "surahHeaderFont": "Surah-header calligraphy"

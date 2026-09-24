@@ -1553,7 +1553,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Дуа из Хисн аль-Муслим",
     "quranGeometry": "Данные о положении аятов (quran.com / проект Quran for Android)",
-    "tajweedFonts": "Страничные шрифты с цветами таджвида (загружаются, не встроены) и данные правил",
+    "tajweedRules": "Правила таджвида для каждого слова",
+    "tajweedFonts": "Страничные шрифты с цветами таджвида (загружаются, не встроены)",
     "recitation": "Аудио чтения (42 чтеца): EveryAyah.com · тайминг слов: quran-align (CC BY 4.0)",
     "tafsir": "Тафсиры: Ибн Касир, Маариф-уль-Куран, аль-Муяссар",
     "surahHeaderFont": "Каллиграфия заголовков сур"

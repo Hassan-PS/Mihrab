@@ -42,11 +42,11 @@ export function AttributionsSettingsScreen() {
       url: 'https://github.com/Hassan-PS/Mihrab/releases/tag/mushaf-assets-v2',
     },
     {
-      label: t('attributions.tajweedFonts', {
-        defaultValue: 'Tajweed colour page fonts (downloaded, not bundled) and rule data',
+      label: t('attributions.tajweedRules', {
+        defaultValue: 'Tajweed rules of each word',
       }),
-      sub: 'King Fahd Glorious Quran Printing Complex · QPC V4 tajweed via QUL · rules via quran.com',
-      url: 'https://qul.tarteel.ai/resources/font/',
+      sub: 'quran.com API · text_uthmani_tajweed',
+      url: 'https://api-docs.quran.com/',
     },
     {
       label: t('attributions.quranGeometry', {
@@ -137,6 +137,13 @@ export function AttributionsSettingsScreen() {
       }),
       sub: 'aliftype/amiri · SIL OFL 1.1',
       url: 'https://github.com/aliftype/amiri',
+    },
+    {
+      label: t('attributions.tajweedFonts', {
+        defaultValue: 'Tajweed colour page fonts (downloaded, not bundled)',
+      }),
+      sub: 'King Fahd Glorious Quran Printing Complex · QPC V4 Tajweed · via Quranic Universal Library (QUL)',
+      url: 'https://qul.tarteel.ai/resources/font',
     },
     {
       label: t('attributions.surahHeaderFont', {

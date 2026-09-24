@@ -1553,7 +1553,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Invocations de Hisn al-Muslim",
     "quranGeometry": "Données de position des versets (quran.com / projet Quran for Android)",
-    "tajweedFonts": "Polices de page aux couleurs du tajwid (téléchargées, non incluses) et données des règles",
+    "tajweedRules": "Règles de tajwid de chaque mot",
+    "tajweedFonts": "Polices de page aux couleurs du tajwid (téléchargées, non incluses)",
     "recitation": "Audio de récitation (42 récitateurs) : EveryAyah.com · synchronisation des mots : quran-align (CC BY 4.0)",
     "tafsir": "Textes de tafsir : Ibn Kathir, Maarif-ul-Quran, al-Muyassar",
     "surahHeaderFont": "Calligraphie des en-têtes de sourates"

@@ -1553,7 +1553,8 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisn al-Muslim Bittgebete",
     "quranGeometry": "Ayah-Positionsdaten (quran.com / Quran-for-Android-Projekt)",
-    "tajweedFonts": "Seitenschriften mit Tadschwid-Farben (geladen, nicht gebündelt) und Regeldaten",
+    "tajweedRules": "Tadschwid-Regeln jedes Wortes",
+    "tajweedFonts": "Seitenschriften mit Tadschwid-Farben (geladen, nicht gebündelt)",
     "recitation": "Rezitationsaudio (42 Rezitatoren): EveryAyah.com · Wort-Timings: quran-align (CC BY 4.0)",
     "tafsir": "Tafsir-Texte: Ibn Kathir, Maarif-ul-Quran, al-Muyassar",
     "surahHeaderFont": "Kalligrafie der Surenüberschriften"
