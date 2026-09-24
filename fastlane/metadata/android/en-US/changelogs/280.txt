@@ -1,0 +1,4 @@
+• New: Tajweed colours for the muṣḥaf — each letter shown in the ink of its recitation rule, with a guide and per-rule detail on every āyah. Turn it on in Settings → Quran.
+• New (Android): let the phone go quiet for the prayer itself and come back on its own — Settings → Notifications.
+• The muṣḥaf page is set closer to the print: tighter word spacing, and lines that no longer clip or drop a word.
+• Moroccan prayer times refreshed from the Ministry of Habous.

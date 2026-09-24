@@ -1,0 +1,4 @@
+• Nytt: tajwīd-färger i muṣḥafen — varje bokstav i sin regels egen färg, med en guide och regeldetaljer vid varje vers. Slå på den i Inställningar → Koranen.
+• Nytt (Android): låt telefonen tystna helt vid bönen och slå på sig själv igen efteråt — Inställningar → Aviseringar.
+• Muṣḥaf-sidan följer nu tryckta koranen närmare: tätare ordmellanrum, och rader som varken klipps eller tappar ett ord.
+• Marockos bönetider uppdaterade från ministeriet för Habous.
