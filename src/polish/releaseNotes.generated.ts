@@ -19,6 +19,16 @@ export type ReleaseNote = {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    code: 280,
+    version: '2.26.0',
+    date: '2026-09-24',
+    notes: {
+      en: '• New: Tajweed colours for the muṣḥaf — each letter shown in the ink of its recitation rule, with a guide and per-rule detail on every āyah. Turn it on in Settings → Quran.\n• New (Android): let the phone go quiet for the prayer itself and come back on its own — Settings → Notifications.\n• The muṣḥaf page is set closer to the print: tighter word spacing, and lines that no longer clip or drop a word.\n• Moroccan prayer times refreshed from the Ministry of Habous.',
+      ar: '• جديد: ألوان التجويد في المصحف — كل حرف بلون حكمه، مع دليل وتفاصيل كل حكم عند كل آية. فعّلها من الإعدادات ← القرآن.\n• جديد (أندرويد): أسكت الهاتف وقت الصلاة نفسها، ثم يعود صوته تلقائيًا بعدها — الإعدادات ← الإشعارات.\n• صفحة المصحف أقرب الآن إلى المطبوع: تباعد أضيق بين الكلمات، وأسطر لا تُقصّ ولا تُسقط كلمة.\n• تحديث مواقيت الصلاة في المغرب من وزارة الأوقاف.',
+      sv: '• Nytt: tajwīd-färger i muṣḥafen — varje bokstav i sin regels egen färg, med en guide och regeldetaljer vid varje vers. Slå på den i Inställningar → Koranen.\n• Nytt (Android): låt telefonen tystna helt vid bönen och slå på sig själv igen efteråt — Inställningar → Aviseringar.\n• Muṣḥaf-sidan följer nu tryckta koranen närmare: tätare ordmellanrum, och rader som varken klipps eller tappar ett ord.\n• Marockos bönetider uppdaterade från ministeriet för Habous.',
+    },
+  },
+  {
     code: 279,
     version: '2.25.1',
     date: '2026-09-22',

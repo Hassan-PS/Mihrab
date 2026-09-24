@@ -1006,3 +1006,17 @@ execute bit in 98911860 (a rewrite that did not keep the mode), so
 release.sh stopped at "Permission denied" after publishing — the gate
 was run by hand with `bash` and passed. The bit is back; a test now
 checks every script release.sh calls is executable.
+
+## 2.26.0 (280) — 2026-09-24
+
+Took 4 aborted attempt(s) before it ran clean:
+
+  - 2 catalyst build failed — /tmp/release-catalyst.log
+  - 1 missing release notes: en-US/changelogs/280.txt
+  - 1 sv-SE/changelogs/280.txt is 503 characters — Play's limit is 500
+
+Changed the release cycle itself:
+
+  - `scripts/verify-release.sh`
+
+**Lesson:** _(unfilled)_
