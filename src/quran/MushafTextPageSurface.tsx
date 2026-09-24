@@ -37,7 +37,7 @@ import {
 } from './mushafLayout';
 import { DEFAULT_RIWAYAH, riwayahById, type RiwayahId } from './riwayat';
 import { toneIsDark, type MushafTone } from './mushafTone';
-import { useMushafPageFont } from './useMushafPageFont';
+import { useMushafFontSet, useMushafPageFont } from './useMushafPageFont';
 import { ayahEndInk, ayahTint, withAlpha, type AyahRefLike } from './ayahMarks';
 import type { QuranBookmark } from './quranState';
 
@@ -320,7 +320,10 @@ function GlyphPageSurface({
   prefetchRadius = 0,
 }: MushafTextPageSurfaceProps) {
   const nightMode = toneIsDark(tone);
-  const { family, failed } = useMushafPageFont(page, true, prefetchRadius);
+  // The set before the layout: `getPageLayout` measures with the set's
+  // advances, and the tajwīd faces are cut a little wider than V2's.
+  const fontSet = useMushafFontSet(nightMode);
+  const { family, failed } = useMushafPageFont(page, true, prefetchRadius, fontSet);
   const layout = getPageLayout(page);
   // Only the page-font surface: the word reader needs a word under the
   // finger, and only these pages know where their words are.

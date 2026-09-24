@@ -28,6 +28,7 @@ import { NotificationSettingsScreen } from './pages/NotificationSettingsScreen';
 import { PrayerTimesSettingsScreen } from './pages/PrayerTimesSettingsScreen';
 import { QuranSettingsScreen } from './pages/QuranSettingsScreen';
 import { WordReaderSettingsScreen } from './pages/WordReaderSettingsScreen';
+import { TajweedSettingsScreen } from './pages/TajweedSettingsScreen';
 
 export type SettingsSubpageRoute = Extract<
   keyof RootStackParamList,
@@ -144,6 +145,12 @@ const ALL_SUBPAGES: readonly SettingsSubpage[] = [
         titleKey: 'quran.wordReaderTitle',
         blurbKey: 'quran.wordReaderBlurb',
         component: WordReaderSettingsScreen,
+      },
+      {
+        route: 'SettingsTajweed',
+        titleKey: 'tajweed.title',
+        blurbKey: 'tajweed.settingsBlurb',
+        component: TajweedSettingsScreen,
       },
     ],
   },

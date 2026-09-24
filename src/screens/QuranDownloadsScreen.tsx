@@ -53,6 +53,7 @@ import {
 } from '../quran/audio/audioStore';
 import {
   cancelQuranDownload,
+  fontSetOf,
   quranDownloadState,
   startQuranDownload,
   subscribeQuranDownload,
@@ -93,6 +94,11 @@ export function QuranDownloadsScreen() {
   const [mushafPages, setMushafPages] = useState(0);
   const [legacyBytes, setLegacyBytes] = useState(0);
   const [tafsirBytes, setTafsirBytes] = useState(0);
+  /** The tajwīd page fonts, one set per palette (`mushafFontStore`). */
+  const [tajweed, setTajweed] = useState({
+    light: { bytes: 0, pages: 0 },
+    dark: { bytes: 0, pages: 0 },
+  });
   const [audio, setAudio] = useState<ReciterUsage[]>([]);
   const [riwayahBytes, setRiwayahBytes] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -110,13 +116,19 @@ export function QuranDownloadsScreen() {
           0,
         ),
       );
-      const [fonts, legacy, tafsir] = await Promise.all([
+      const [fonts, light, dark, legacy, tafsir] = await Promise.all([
         fontStoreStats(),
+        fontStoreStats('tajweed-light'),
+        fontStoreStats('tajweed-dark'),
         legacyImageStoreBytes(),
         tafsirDiskUsage(),
       ]);
       setMushafBytes(fonts.bytes);
       setMushafPages(fonts.pages);
+      setTajweed({
+        light: { bytes: light.bytes, pages: light.pages },
+        dark: { bytes: dark.bytes, pages: dark.pages },
+      });
       setLegacyBytes(legacy);
       setTafsirBytes(tafsir);
       const base = `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/quran/audio`;
@@ -265,6 +277,8 @@ export function QuranDownloadsScreen() {
 
   const total =
     mushafBytes +
+    tajweed.light.bytes +
+    tajweed.dark.bytes +
     legacyBytes +
     tafsirBytes +
     riwayahBytes +
@@ -295,7 +309,9 @@ export function QuranDownloadsScreen() {
             <Text style={[styles.rowTitle, { color: palette.text }]}>
               {running.kind === 'audio'
                 ? findReciter(running.reciterId).name
-                : t('downloads.mushaf', 'Mushaf pages')}
+                : running.kind === 'fonts' && fontSetOf(running) !== 'v2'
+                  ? t('tajweed.downloadsRow', 'Tajweed colours')
+                  : t('downloads.mushaf', 'Mushaf pages')}
             </Text>
             <Text style={[styles.rowSub, { color: palette.muted }]}>
               {running.kind === 'audio'
@@ -355,6 +371,29 @@ export function QuranDownloadsScreen() {
               }),
           )
         : null}
+
+      {(['light', 'dark'] as const).map(which =>
+        tajweed[which].bytes > 0
+          ? row(
+              `tajweed-${which}`,
+              `${t('tajweed.downloadsRow', 'Tajweed colours')} · ${
+                which === 'dark'
+                  ? t('tajweed.darkPages', 'dark pages')
+                  : t('tajweed.lightPages', 'light pages')
+              }`,
+              t('tajweed.downloadsRowSub', {
+                defaultValue: '{{pages}} of {{total}} coloured pages',
+                pages: tajweed[which].pages,
+                total: MUSHAF_TOTAL_PAGES,
+              }),
+              tajweed[which].bytes,
+              () =>
+                confirmDelete(t('tajweed.downloadsRow', 'Tajweed colours'), async () => {
+                  await deletePageFonts(`tajweed-${which}`);
+                }),
+            )
+          : null,
+      )}
 
       {legacyBytes > 0
         ? row(

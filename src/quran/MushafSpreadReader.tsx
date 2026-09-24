@@ -63,7 +63,7 @@ import { MiniPlayer } from './audio/MiniPlayer';
 import { ActiveWordProbe } from './audio/ActiveWordProbe';
 import { useRegisterKeyPaging } from './useKeyPaging';
 import { useMushafPager } from './useMushafPager';
-import { warmAround } from './useMushafPageFont';
+import { useMushafFontSet, warmAround } from './useMushafPageFont';
 import { findPageForAyah } from './pages';
 import { riwayahById, type RiwayahId } from './riwayat';
 import { toneIsDark, type MushafTone } from './mushafTone';
@@ -256,6 +256,9 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
     currentPage,
     setCurrentPage,
   } = core;
+  // Applied here, ahead of every `getPageLayout` this render makes: the
+  // page column's height is measured in the set the pages are drawn in.
+  const fontSet = useMushafFontSet(toneIsDark(tone));
 
   /**
    * Display cutout / rounded corners (v2.8.2). `insets.left`/`insets.right`
@@ -408,8 +411,8 @@ export const MushafSpreadReader = React.memo(function MushafSpreadReader(
   // per turn, rather than as a per-page prop. A bundled riwayah has none.
   useEffect(() => {
     if (riwayahById(riwayah).render === 'unicode') return;
-    warmAround(currentPage, WARM_RADIUS);
-  }, [currentPage, riwayah]);
+    warmAround(currentPage, WARM_RADIUS, fontSet);
+  }, [currentPage, riwayah, fontSet]);
 
   // One item while opening, three once the transition is out of the way.
   const [windowSize, setWindowSize] = useState(WINDOW_OPENING);

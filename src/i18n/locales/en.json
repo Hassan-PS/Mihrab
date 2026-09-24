@@ -1553,6 +1553,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisnul Muslim duas",
     "quranGeometry": "Ayah position data (quran.com / Quran for Android project)",
+    "tajweedFonts": "Tajweed colour page fonts (downloaded, not bundled) and rule data",
     "recitation": "Recitation audio (42 reciters): EveryAyah.com · word timings: quran-align (CC BY 4.0)",
     "tafsir": "Tafsir texts: Ibn Kathir, Maarif-ul-Quran, al-Muyassar",
     "surahHeaderFont": "Surah-header calligraphy"
@@ -1946,5 +1947,137 @@
     "activeText": "Until {{time}}",
     "endNow": "End now",
     "channel": "Silence at prayer time"
+  },
+  "tajweed": {
+    "title": "Tajweed colours",
+    "settingsBlurb": "Tint the letters by their rule, and learn what each colour asks of you",
+    "toggle": "Colour the mushaf by tajweed rule",
+    "toggleHelp": "Letters are tinted in the King Fahd Complex's colours: grey is not sounded, green hums, red stretches, light blue bounces. Turn it on while learning; plain ink is a tap away.",
+    "warshNote": "The colours are drawn on the Hafs mushaf. Switch back to Hafs to see them.",
+    "guideLink": "How to read the colours",
+    "guideTitle": "Reading the colours",
+    "guideIntro": "Every tinted letter is a rule at work. One colour is one idea, so a page teaches you as you read: grey is written but not sounded, green is a hum through the nose, the reds are a vowel held longer, light blue is a bounce, and dark blue a heavy letter.",
+    "guidePractice": "To practise: turn the colours on, open any page, and tap an ayah — its sheet lists the rules in it, word by word. Hold a word to hear it read.",
+    "legend": "The colours",
+    "counts": "{{counts}} counts",
+    "example": "Example",
+    "showInMushaf": "Show in mushaf",
+    "hearWord": "Hear it",
+    "downloadAll": "Download all coloured pages",
+    "downloadAllHelp": "The coloured pages are their own set of page fonts, fetched as you read like the plain ones. Download them all once to read offline.",
+    "downloadsRow": "Tajweed colours",
+    "downloadsRowSub": "{{pages}} of {{total}} coloured pages",
+    "sheetSection": "Tajweed",
+    "sheetNone": "Nothing in this ayah is tinted — no rule applies.",
+    "sheetUnavailable": "The rules for this ayah are not available.",
+    "sheetMore": "All the colours explained",
+    "family": {
+      "silent": {
+        "name": "Silent",
+        "summary": "Written, not sounded. The letter is on the page but your tongue passes over it — or it melts into the letter after it."
+      },
+      "ghunnah": {
+        "name": "Ghunnah",
+        "summary": "A hum through the nose, held for about two counts. Every green letter is a nūn or mīm doing this, in one of its forms."
+      },
+      "madd": {
+        "name": "Madd",
+        "summary": "A vowel held longer than usual. The deeper the red, the longer: from two counts up to six."
+      },
+      "qalqalah": {
+        "name": "Qalqalah",
+        "summary": "A small bounce on a still ق ط ب ج د, so the letter is heard and not swallowed."
+      },
+      "tafkheem": {
+        "name": "Tafkhīm",
+        "summary": "A heavy letter, said with the back of the tongue raised: خ ص ض غ ط ق ظ always, the rā after a fatḥah or ḍammah, and the lām of Allah's name after one."
+      }
+    },
+    "rule": {
+      "ham_wasl": {
+        "name": "Hamzat al-waṣl",
+        "help": "The joining alif. It is sounded only when you start on it; joined to the word before, it is skipped."
+      },
+      "laam_shamsiyah": {
+        "name": "Sun lām",
+        "help": "The lām of ال is not pronounced before a sun letter; that letter is doubled instead."
+      },
+      "slnt": {
+        "name": "Silent letter",
+        "help": "A letter that is written but never sounded, like the wāw of أُوْلَـٰٓئِكَ."
+      },
+      "idgham_wo_ghunnah": {
+        "name": "Idghām without ghunnah",
+        "help": "A still nūn or tanwīn merges fully into the lām or rā after it, with no hum."
+      },
+      "idgham_mutajanisayn": {
+        "name": "Idghām of like letters",
+        "help": "A still letter merges into the next, which is made in the same place in the mouth — a dāl into a tā."
+      },
+      "idgham_mutaqaribayn": {
+        "name": "Idghām of near letters",
+        "help": "A still letter merges into a close neighbour — a lām into a rā, a qāf into a kāf."
+      },
+      "ghunnah": {
+        "name": "Ghunnah",
+        "help": "A doubled nūn or mīm is hummed through the nose for two counts."
+      },
+      "ikhafa": {
+        "name": "Ikhfāʾ",
+        "help": "A still nūn or tanwīn is hidden: the tongue does not touch, and a light hum leads into the next letter."
+      },
+      "idgham_ghunnah": {
+        "name": "Idghām with ghunnah",
+        "help": "A still nūn or tanwīn merges into a following yā, nūn, mīm or wāw, keeping the hum."
+      },
+      "iqlab": {
+        "name": "Iqlāb",
+        "help": "A still nūn or tanwīn before a bā turns into a mīm, hummed with the lips lightly closed."
+      },
+      "ikhafa_shafawi": {
+        "name": "Ikhfāʾ shafawī",
+        "help": "A still mīm before a bā is hidden with a light hum, the lips barely closed."
+      },
+      "idgham_shafawi": {
+        "name": "Idghām shafawī",
+        "help": "A still mīm merges into the mīm after it, with a hum."
+      },
+      "madda_normal": {
+        "name": "Natural madd",
+        "help": "The plain long vowel: hold it for two counts, no more."
+      },
+      "madda_permissible": {
+        "name": "Permissible madd",
+        "help": "A long vowel before a pause, or a līn letter: two, four or six counts when you stop on it."
+      },
+      "madda_obligatory_mottasel": {
+        "name": "Obligatory connected madd",
+        "help": "A long vowel before a hamzah in the same word: hold it four or five counts."
+      },
+      "madda_obligatory_monfasel": {
+        "name": "Separated madd",
+        "help": "A long vowel at the end of a word before a hamzah starting the next: four or five counts, two when reading fast."
+      },
+      "madda_necessary": {
+        "name": "Necessary madd",
+        "help": "A long vowel before a sukūn or shaddah that never leaves: hold it six counts. The opening letters of a surah are read this way."
+      },
+      "qalaqah": {
+        "name": "Qalqalah",
+        "help": "A still ق ط ب ج د is given a small bounce so it is clearly heard."
+      },
+      "tafkheem": {
+        "name": "Tafkhīm",
+        "help": "The letter is made heavy, with the back of the tongue raised — always for خ ص ض غ ط ق ظ, and for the rā after a fatḥah or ḍammah and the lām of Allah's name."
+      }
+    },
+    "turnOn": "Show the colours in the mushaf",
+    "downloading": "Downloading the tajweed colours",
+    "downloadStrip": "Downloading the tajweed colours · {{pct}}%",
+    "downloadDoneTitle": "The tajweed colours are ready",
+    "downloadDoneBody": "Every coloured page is on this device.",
+    "lightPages": "light pages",
+    "darkPages": "dark pages",
+    "attribution": "Colours and page fonts: the King Fahd Glorious Qur'an Printing Complex, Madinah (QPC V4 tajweed), via the Quranic Universal Library. Rule data: quran.com."
   }
 }

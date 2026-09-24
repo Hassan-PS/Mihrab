@@ -75,7 +75,7 @@ import { MiniPlayer } from './audio/MiniPlayer';
 import { ActiveWordProbe } from './audio/ActiveWordProbe';
 import { useRegisterKeyPaging } from './useKeyPaging';
 import { useMushafPager } from './useMushafPager';
-import { warmAround } from './useMushafPageFont';
+import { useMushafFontSet, warmAround } from './useMushafPageFont';
 import { findPageForAyah } from './pages';
 import { ayahLineBox, followOffset } from './mushafFollowScroll';
 import { riwayahById, type RiwayahId } from './riwayat';
@@ -374,6 +374,9 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
     currentPage,
     setCurrentPage,
   } = core;
+  // Applied here, ahead of every `getPageLayout` this render makes: the
+  // page column's height is measured in the set the pages are drawn in.
+  const fontSet = useMushafFontSet(toneIsDark(tone));
 
   const listRef = useRef<FlatList<number>>(null);
   // Measured list viewport (excludes the fullscreen top inset padding).
@@ -577,8 +580,8 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
   // every turn and re-rendered both. A bundled riwayah has no page fonts.
   useEffect(() => {
     if (riwayahById(riwayah).render === 'unicode') return;
-    warmAround(currentPage, WARM_RADIUS);
-  }, [currentPage, riwayah]);
+    warmAround(currentPage, WARM_RADIUS, fontSet);
+  }, [currentPage, riwayah, fontSet]);
 
   // Which page each of the per-page things is on, so every other page can
   // be handed null and stay put.

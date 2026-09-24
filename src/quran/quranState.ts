@@ -456,6 +456,14 @@ export type QuranPrefs = {
    * and the default reciter otherwise. Never a reciter without timings.
    */
   wordReaderReciterId: string;
+  /**
+   * TAJWĪD COLOURS (additive): draw the Ḥafṣ page in the King Fahd
+   * Complex's colour-coded fonts, where each rule of recitation has its
+   * colour — and let a tapped āyah say which letters carry which rule.
+   * Off by default: the plain page is the one everybody knows, and the
+   * colours are a second set of fonts to fetch. Only Ḥafṣ has them.
+   */
+  tajweedColours: boolean;
   /** Memorization masking in translation view. */
   hideMode: 'none' | 'arabic' | 'translation';
   repeat: RepeatSettings;
@@ -644,6 +652,7 @@ export const DEFAULT_QURAN_STATE: QuranState = {
     readerKeepAwake: true,
     wordReader: false,
     wordReaderReciterId: '',
+    tajweedColours: false,
     hideMode: 'none',
     repeat: { eachAyah: 1, range: 1, pauseFactor: 0 },
     votdMode: 'translation',
@@ -1027,6 +1036,8 @@ function mergeStored(raw: unknown): QuranState {
       readerKeepAwake:
         (r.prefs as { readerKeepAwake?: unknown } | undefined)
           ?.readerKeepAwake !== false,
+      tajweedColours:
+        (r.prefs as { tajweedColours?: unknown } | undefined)?.tajweedColours === true,
     },
     // Kept if it is there and sane, and LEFT OUT otherwise rather than
     // written as 0: an export of a blob that never had it must round-trip

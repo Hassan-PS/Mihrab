@@ -1553,6 +1553,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "《穆斯林堡垒》中的祷词",
     "quranGeometry": "经文位置数据（quran.com / Quran for Android 项目）",
+    "tajweedFonts": "诵读规则颜色页面字体（下载，非内置）与规则数据",
     "recitation": "诵读音频（42位诵读者）：EveryAyah.com · 逐词时间：quran-align（CC BY 4.0）",
     "tafsir": "经注文本：伊本·凯西尔、Maarif-ul-Quran、简明经注",
     "surahHeaderFont": "章名书法"
@@ -1946,5 +1947,137 @@
     "activeText": "直到 {{time}}",
     "endNow": "立即结束",
     "channel": "礼拜时静音"
+  },
+  "tajweed": {
+    "title": "诵读规则颜色",
+    "settingsBlurb": "按规则为字母着色，并了解每种颜色的要求",
+    "toggle": "按诵读规则为古兰经着色",
+    "toggleHelp": "字母以法赫德国王印经中心的颜色着色：灰色不发音，绿色带鼻音，红色拉长，浅蓝色弹跳。学习时开启；一按即可回到普通墨色。",
+    "warshNote": "颜色绘制在哈夫斯版古兰经上。切换回哈夫斯即可看到。",
+    "guideLink": "如何读懂颜色",
+    "guideTitle": "读懂颜色",
+    "guideIntro": "每个着色的字母都是一条正在起作用的规则。一种颜色一个意思，页面在你阅读时教你：灰色写而不读，绿色是鼻音，各种红色是拉长的元音，浅蓝色是弹跳，深蓝色是重读字母。",
+    "guidePractice": "练习方法：开启颜色，打开任意一页，点按一节经文——其面板会逐词列出其中的规则。长按一个词即可听它的读法。",
+    "legend": "颜色",
+    "counts": "{{counts}} 拍",
+    "example": "示例",
+    "showInMushaf": "在经页中查看",
+    "hearWord": "听一听",
+    "downloadAll": "下载所有着色页面",
+    "downloadAllHelp": "着色页面是一套独立的页面字体，与普通页面一样边读边下载。一次全部下载即可离线阅读——下载的是当前色调的一套；切换色调后再下载一次即可获得另一套。",
+    "downloadsRow": "诵读规则颜色",
+    "downloadsRowSub": "已有 {{pages}} / {{total}} 个着色页面",
+    "sheetSection": "诵读规则",
+    "sheetNone": "这节经文没有着色字母——没有适用的规则。",
+    "sheetUnavailable": "这节经文的规则不可用。",
+    "sheetMore": "所有颜色的说明",
+    "turnOn": "在经页中显示颜色",
+    "downloading": "正在下载诵读规则颜色",
+    "downloadStrip": "正在下载诵读规则颜色 · {{pct}}%",
+    "downloadDoneTitle": "诵读规则颜色已就绪",
+    "downloadDoneBody": "所有着色页面都已在本设备上。",
+    "lightPages": "浅色页面",
+    "darkPages": "深色页面",
+    "attribution": "颜色与页面字体：麦地那法赫德国王古兰经印经中心（QPC V4 tajweed），经由 Quranic Universal Library。规则数据：quran.com。",
+    "family": {
+      "silent": {
+        "name": "不发音",
+        "summary": "写而不读。字母在页面上，但舌头略过它——或者它并入后面的字母。"
+      },
+      "ghunnah": {
+        "name": "鼻音（Ghunnah）",
+        "summary": "从鼻腔发出的声音，约持续两拍。每个绿色字母都是以某种形式这样做的 nūn 或 mīm。"
+      },
+      "madd": {
+        "name": "长音（Madd）",
+        "summary": "比平常拉得更长的元音。红色越深越长：从两拍到六拍。"
+      },
+      "qalqalah": {
+        "name": "弹音（Qalqalah）",
+        "summary": "静符 ق ط ب ج د 上的轻微弹跳，让字母被听见而不被吞掉。"
+      },
+      "tafkheem": {
+        "name": "重读（Tafkhīm）",
+        "summary": "舌根抬起发出的重读字母：خ ص ض غ ط ق ظ 一律重读，fatḥah 或 ḍammah 之后的 rā，以及其后真主之名中的 lām。"
+      }
+    },
+    "rule": {
+      "ham_wasl": {
+        "name": "连接 hamzah",
+        "help": "连接用的 alif。只有从它开始读时才发音；与前一个词连读时跳过。"
+      },
+      "laam_shamsiyah": {
+        "name": "太阳 lām",
+        "help": "ال 中的 lām 在太阳字母前不发音；改为将该字母读成双音。"
+      },
+      "slnt": {
+        "name": "不发音的字母",
+        "help": "写出来但从不发音的字母，如 أُوْلَـٰٓئِكَ 中的 wāw。"
+      },
+      "idgham_wo_ghunnah": {
+        "name": "无鼻音同化",
+        "help": "静符 nūn 或 tanwīn 完全并入其后的 lām 或 rā，不带鼻音。"
+      },
+      "idgham_mutajanisayn": {
+        "name": "同部位字母同化",
+        "help": "静符字母并入下一个在口腔同一部位发出的字母——如 dāl 并入 tā。"
+      },
+      "idgham_mutaqaribayn": {
+        "name": "近部位字母同化",
+        "help": "静符字母并入相近的邻近字母——如 lām 并入 rā，qāf 并入 kāf。"
+      },
+      "ghunnah": {
+        "name": "鼻音",
+        "help": "带叠音符的 nūn 或 mīm 从鼻腔发音两拍。"
+      },
+      "ikhafa": {
+        "name": "隐读（Ikhfāʾ）",
+        "help": "静符 nūn 或 tanwīn 被隐藏：舌头不接触，轻微鼻音引向下一个字母。"
+      },
+      "idgham_ghunnah": {
+        "name": "带鼻音同化",
+        "help": "静符 nūn 或 tanwīn 并入其后的 yā、nūn、mīm 或 wāw，保留鼻音。"
+      },
+      "iqlab": {
+        "name": "转换（Iqlāb）",
+        "help": "bā 之前的静符 nūn 或 tanwīn 变为 mīm，双唇轻合带鼻音。"
+      },
+      "ikhafa_shafawi": {
+        "name": "唇音隐读",
+        "help": "bā 之前的静符 mīm 以轻微鼻音隐藏，双唇几乎不合。"
+      },
+      "idgham_shafawi": {
+        "name": "唇音同化",
+        "help": "静符 mīm 并入其后的 mīm，带鼻音。"
+      },
+      "madda_normal": {
+        "name": "自然长音",
+        "help": "普通的长元音：保持两拍，不多。"
+      },
+      "madda_permissible": {
+        "name": "许可长音",
+        "help": "停顿前的长元音或 līn 字母：在其上停顿时读两、四或六拍。"
+      },
+      "madda_obligatory_mottasel": {
+        "name": "必须连接长音",
+        "help": "同一个词内 hamzah 之前的长元音：保持四或五拍。"
+      },
+      "madda_obligatory_monfasel": {
+        "name": "分离长音",
+        "help": "词尾的长元音，其后一个词以 hamzah 开头：四或五拍，快读时两拍。"
+      },
+      "madda_necessary": {
+        "name": "必然长音",
+        "help": "固定静符或叠音符之前的长元音：保持六拍。章首字母就是这样读的。"
+      },
+      "qalaqah": {
+        "name": "弹音",
+        "help": "静符 ق ط ب ج د 加上轻微弹跳，使其清楚可闻。"
+      },
+      "tafkheem": {
+        "name": "重读",
+        "help": "字母重读，舌根抬起——خ ص ض غ ط ق ظ 一律如此，fatḥah 或 ḍammah 之后的 rā 以及真主之名中的 lām 亦然。"
+      }
+    }
   }
 }

@@ -30,6 +30,7 @@ import { findReciter } from './audio/reciters';
 import {
   cancelQuranDownload,
   dismissResumableJob,
+  fontSetOf,
   jobSurahName,
   quranDownloadState,
   resumeQuranDownload,
@@ -110,10 +111,15 @@ export function QuranDownloadStripView({
   // releases because nobody reads a progress strip twice.
   const label =
     job.kind === 'fonts'
-      ? t('quran.mushafDownloadStrip', {
-          defaultValue: 'Downloading the mushaf · {{pct}}%',
-          pct,
-        })
+      ? fontSetOf(job) === 'v2'
+        ? t('quran.mushafDownloadStrip', {
+            defaultValue: 'Downloading the mushaf · {{pct}}%',
+            pct,
+          })
+        : t('tajweed.downloadStrip', {
+            defaultValue: 'Downloading the tajweed colours · {{pct}}%',
+            pct,
+          })
       : job.kind === 'audio'
         ? t('quran.reciterDownloadStrip', {
             defaultValue: 'Downloading {{name}} · {{pct}}%',
@@ -188,7 +194,9 @@ function StoppedStrip({
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
   const name =
     job.kind === 'fonts'
-      ? t('downloads.mushaf', 'Mushaf pages')
+      ? fontSetOf(job) === 'v2'
+        ? t('downloads.mushaf', 'Mushaf pages')
+        : t('tajweed.downloadsRow', 'Tajweed colours')
       : job.kind === 'audio'
         ? findReciter(job.reciterId).name
         : jobSurahName(job.surah);

@@ -1553,6 +1553,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisn al-Muslim Bittgebete",
     "quranGeometry": "Ayah-Positionsdaten (quran.com / Quran-for-Android-Projekt)",
+    "tajweedFonts": "Seitenschriften mit Tadschwid-Farben (geladen, nicht gebündelt) und Regeldaten",
     "recitation": "Rezitationsaudio (42 Rezitatoren): EveryAyah.com · Wort-Timings: quran-align (CC BY 4.0)",
     "tafsir": "Tafsir-Texte: Ibn Kathir, Maarif-ul-Quran, al-Muyassar",
     "surahHeaderFont": "Kalligrafie der Surenüberschriften"
@@ -1946,5 +1947,137 @@
     "activeText": "Bis {{time}}",
     "endNow": "Jetzt beenden",
     "channel": "Stumm zur Gebetszeit"
+  },
+  "tajweed": {
+    "title": "Tadschwid-Farben",
+    "settingsBlurb": "Buchstaben nach ihrer Regel einfärben und lernen, was jede Farbe von dir verlangt",
+    "toggle": "Mushaf nach Tadschwid-Regel einfärben",
+    "toggleHelp": "Die Buchstaben werden in den Farben des König-Fahd-Komplexes getönt: Grau wird nicht gesprochen, Grün ist nasal, Rot wird gedehnt, Hellblau prallt. Zum Lernen einschalten; die schlichte Tinte ist einen Tipp entfernt.",
+    "warshNote": "Die Farben liegen auf dem Hafs-Mushaf. Wechsle zurück zu Hafs, um sie zu sehen.",
+    "guideLink": "So liest man die Farben",
+    "guideTitle": "Die Farben lesen",
+    "guideIntro": "Jeder getönte Buchstabe ist eine Regel bei der Arbeit. Eine Farbe ist ein Gedanke, so lehrt dich die Seite beim Lesen: Grau ist geschrieben, aber stumm, Grün ist ein Nasallaut, die Rottöne sind ein länger gehaltener Vokal, Hellblau ein Prall und Dunkelblau ein schwerer Buchstabe.",
+    "guidePractice": "Zum Üben: Farben einschalten, eine Seite öffnen und eine Aya antippen — ihr Blatt listet die Regeln darin Wort für Wort. Ein Wort gedrückt halten, um es zu hören.",
+    "legend": "Die Farben",
+    "counts": "{{counts}} Zählzeiten",
+    "example": "Beispiel",
+    "showInMushaf": "Im Mushaf zeigen",
+    "hearWord": "Anhören",
+    "downloadAll": "Alle farbigen Seiten laden",
+    "downloadAllHelp": "Die farbigen Seiten sind ein eigener Satz Seitenschriften, der wie die schlichten beim Lesen geholt wird. Einmal alle laden, um offline zu lesen — den Satz für den Ton, in dem der Mushaf gerade ist; Ton wechseln und erneut laden für den anderen.",
+    "downloadsRow": "Tadschwid-Farben",
+    "downloadsRowSub": "{{pages}} von {{total}} farbigen Seiten",
+    "sheetSection": "Tadschwid",
+    "sheetNone": "Nichts in dieser Aya ist getönt — keine Regel greift.",
+    "sheetUnavailable": "Die Regeln für diese Aya sind nicht verfügbar.",
+    "sheetMore": "Alle Farben erklärt",
+    "turnOn": "Farben im Mushaf zeigen",
+    "downloading": "Tadschwid-Farben werden geladen",
+    "downloadStrip": "Tadschwid-Farben werden geladen · {{pct}} %",
+    "downloadDoneTitle": "Die Tadschwid-Farben sind bereit",
+    "downloadDoneBody": "Alle farbigen Seiten sind auf diesem Gerät.",
+    "lightPages": "helle Seiten",
+    "darkPages": "dunkle Seiten",
+    "attribution": "Farben und Seitenschriften: King Fahd Glorious Qur'an Printing Complex, Madinah (QPC V4 tajweed), über die Quranic Universal Library. Regeldaten: quran.com.",
+    "family": {
+      "silent": {
+        "name": "Stumm",
+        "summary": "Geschrieben, nicht gesprochen. Der Buchstabe steht auf der Seite, aber die Zunge geht über ihn hinweg — oder er verschmilzt mit dem Buchstaben danach."
+      },
+      "ghunnah": {
+        "name": "Ghunna",
+        "summary": "Ein Nasallaut, etwa zwei Zählzeiten gehalten. Jeder grüne Buchstabe ist ein Nun oder Mim, das dies in einer seiner Formen tut."
+      },
+      "madd": {
+        "name": "Madd",
+        "summary": "Ein länger als üblich gehaltener Vokal. Je tiefer das Rot, desto länger: von zwei bis zu sechs Zählzeiten."
+      },
+      "qalqalah": {
+        "name": "Qalqala",
+        "summary": "Ein kleiner Prall auf einem ruhenden ق ط ب ج د, damit der Buchstabe gehört und nicht verschluckt wird."
+      },
+      "tafkheem": {
+        "name": "Tafchim",
+        "summary": "Ein schwerer Buchstabe mit angehobenem Zungenrücken: خ ص ض غ ط ق ظ immer, das Ra nach Fatha oder Damma und das Lam im Namen Allahs danach."
+      }
+    },
+    "rule": {
+      "ham_wasl": {
+        "name": "Hamzat al-Wasl",
+        "help": "Das Verbindungs-Alif. Es wird nur gesprochen, wenn man mit ihm beginnt; an das Wort davor gebunden wird es übersprungen."
+      },
+      "laam_shamsiyah": {
+        "name": "Sonnen-Lam",
+        "help": "Das Lam von ال wird vor einem Sonnenbuchstaben nicht gesprochen; dieser Buchstabe wird stattdessen verdoppelt."
+      },
+      "slnt": {
+        "name": "Stummer Buchstabe",
+        "help": "Ein Buchstabe, der geschrieben, aber nie gesprochen wird, wie das Waw in أُوْلَـٰٓئِكَ."
+      },
+      "idgham_wo_ghunnah": {
+        "name": "Idgham ohne Ghunna",
+        "help": "Ein ruhendes Nun oder Tanwin verschmilzt ganz mit dem folgenden Lam oder Ra, ohne Nasallaut."
+      },
+      "idgham_mutajanisayn": {
+        "name": "Idgham gleichartiger Buchstaben",
+        "help": "Ein ruhender Buchstabe verschmilzt mit dem nächsten, der an derselben Stelle im Mund gebildet wird — ein Dal in ein Ta."
+      },
+      "idgham_mutaqaribayn": {
+        "name": "Idgham naher Buchstaben",
+        "help": "Ein ruhender Buchstabe verschmilzt mit einem nahen Nachbarn — ein Lam in ein Ra, ein Qaf in ein Kaf."
+      },
+      "ghunnah": {
+        "name": "Ghunna",
+        "help": "Ein verdoppeltes Nun oder Mim wird zwei Zählzeiten lang nasal gesprochen."
+      },
+      "ikhafa": {
+        "name": "Ikhfa",
+        "help": "Ein ruhendes Nun oder Tanwin wird verborgen: Die Zunge berührt nicht, und ein leichter Nasallaut führt zum nächsten Buchstaben."
+      },
+      "idgham_ghunnah": {
+        "name": "Idgham mit Ghunna",
+        "help": "Ein ruhendes Nun oder Tanwin verschmilzt mit einem folgenden Ya, Nun, Mim oder Waw, der Nasallaut bleibt."
+      },
+      "iqlab": {
+        "name": "Iqlab",
+        "help": "Ein ruhendes Nun oder Tanwin vor Ba wird zu einem Mim, nasal mit leicht geschlossenen Lippen."
+      },
+      "ikhafa_shafawi": {
+        "name": "Ikhfa schafawi",
+        "help": "Ein ruhendes Mim vor Ba wird mit leichtem Nasallaut verborgen, die Lippen kaum geschlossen."
+      },
+      "idgham_shafawi": {
+        "name": "Idgham schafawi",
+        "help": "Ein ruhendes Mim verschmilzt mit dem folgenden Mim, mit Nasallaut."
+      },
+      "madda_normal": {
+        "name": "Natürlicher Madd",
+        "help": "Der einfache lange Vokal: zwei Zählzeiten halten, nicht mehr."
+      },
+      "madda_permissible": {
+        "name": "Erlaubter Madd",
+        "help": "Ein langer Vokal vor einer Pause oder ein Lin-Buchstabe: zwei, vier oder sechs Zählzeiten, wenn man darauf anhält."
+      },
+      "madda_obligatory_mottasel": {
+        "name": "Verbundener Pflicht-Madd",
+        "help": "Ein langer Vokal vor einer Hamza im selben Wort: vier oder fünf Zählzeiten halten."
+      },
+      "madda_obligatory_monfasel": {
+        "name": "Getrennter Madd",
+        "help": "Ein langer Vokal am Wortende vor einer Hamza, die das nächste beginnt: vier oder fünf Zählzeiten, zwei beim schnellen Lesen."
+      },
+      "madda_necessary": {
+        "name": "Notwendiger Madd",
+        "help": "Ein langer Vokal vor einem Sukun oder einer Schadda, die nie weicht: sechs Zählzeiten halten. So werden die Anfangsbuchstaben einer Sure gelesen."
+      },
+      "qalaqah": {
+        "name": "Qalqala",
+        "help": "Ein ruhendes ق ط ب ج د bekommt einen kleinen Prall, damit es deutlich zu hören ist."
+      },
+      "tafkheem": {
+        "name": "Tafchim",
+        "help": "Der Buchstabe wird schwer gesprochen, mit angehobenem Zungenrücken — immer bei خ ص ض غ ط ق ظ, beim Ra nach Fatha oder Damma und beim Lam im Namen Allahs."
+      }
+    }
   }
 }

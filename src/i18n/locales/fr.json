@@ -1553,6 +1553,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Invocations de Hisn al-Muslim",
     "quranGeometry": "Données de position des versets (quran.com / projet Quran for Android)",
+    "tajweedFonts": "Polices de page aux couleurs du tajwid (téléchargées, non incluses) et données des règles",
     "recitation": "Audio de récitation (42 récitateurs) : EveryAyah.com · synchronisation des mots : quran-align (CC BY 4.0)",
     "tafsir": "Textes de tafsir : Ibn Kathir, Maarif-ul-Quran, al-Muyassar",
     "surahHeaderFont": "Calligraphie des en-têtes de sourates"
@@ -1946,5 +1947,137 @@
     "activeText": "Jusqu'à {{time}}",
     "endNow": "Terminer maintenant",
     "channel": "Silence à l'heure de la prière"
+  },
+  "tajweed": {
+    "title": "Couleurs du tajwid",
+    "settingsBlurb": "Teinter les lettres selon leur règle, et apprendre ce que chaque couleur demande",
+    "toggle": "Colorer le mushaf selon les règles du tajwid",
+    "toggleHelp": "Les lettres sont teintées aux couleurs du Complexe du roi Fahd : le gris ne se prononce pas, le vert nasalise, le rouge s'allonge, le bleu clair rebondit. À activer pour apprendre ; l'encre simple est à un geste.",
+    "warshNote": "Les couleurs sont dessinées sur le mushaf de Hafs. Revenez à Hafs pour les voir.",
+    "guideLink": "Comment lire les couleurs",
+    "guideTitle": "Lire les couleurs",
+    "guideIntro": "Chaque lettre teintée est une règle à l'œuvre. Une couleur, une idée : la page vous enseigne en lisant. Le gris est écrit mais muet, le vert est un son nasal, les rouges une voyelle tenue plus longtemps, le bleu clair un rebond et le bleu foncé une lettre emphatique.",
+    "guidePractice": "Pour s'exercer : activez les couleurs, ouvrez une page et touchez un verset — sa fiche liste ses règles, mot par mot. Maintenez un mot pour l'entendre.",
+    "legend": "Les couleurs",
+    "counts": "{{counts}} temps",
+    "example": "Exemple",
+    "showInMushaf": "Voir dans le mushaf",
+    "hearWord": "Écouter",
+    "downloadAll": "Télécharger toutes les pages colorées",
+    "downloadAllHelp": "Les pages colorées forment un jeu de polices à part, récupéré à la lecture comme les pages simples. Téléchargez-les toutes une fois pour lire hors ligne — le jeu du ton actuel du mushaf ; changez de ton et téléchargez de nouveau pour l'autre.",
+    "downloadsRow": "Couleurs du tajwid",
+    "downloadsRowSub": "{{pages}} pages colorées sur {{total}}",
+    "sheetSection": "Tajwid",
+    "sheetNone": "Rien n'est teinté dans ce verset — aucune règle ne s'applique.",
+    "sheetUnavailable": "Les règles de ce verset ne sont pas disponibles.",
+    "sheetMore": "Toutes les couleurs expliquées",
+    "turnOn": "Afficher les couleurs dans le mushaf",
+    "downloading": "Téléchargement des couleurs du tajwid",
+    "downloadStrip": "Téléchargement des couleurs du tajwid · {{pct}} %",
+    "downloadDoneTitle": "Les couleurs du tajwid sont prêtes",
+    "downloadDoneBody": "Toutes les pages colorées sont sur cet appareil.",
+    "lightPages": "pages claires",
+    "darkPages": "pages sombres",
+    "attribution": "Couleurs et polices de page : King Fahd Glorious Qur'an Printing Complex, Médine (QPC V4 tajweed), via la Quranic Universal Library. Données des règles : quran.com.",
+    "family": {
+      "silent": {
+        "name": "Muet",
+        "summary": "Écrit, non prononcé. La lettre est sur la page mais la langue passe par-dessus — ou elle se fond dans la lettre suivante."
+      },
+      "ghunnah": {
+        "name": "Ghunna",
+        "summary": "Un son nasal tenu environ deux temps. Chaque lettre verte est un nun ou un mim qui le fait, sous l'une de ses formes."
+      },
+      "madd": {
+        "name": "Madd",
+        "summary": "Une voyelle tenue plus longtemps que d'habitude. Plus le rouge est profond, plus c'est long : de deux à six temps."
+      },
+      "qalqalah": {
+        "name": "Qalqala",
+        "summary": "Un petit rebond sur un ق ط ب ج د quiescent, pour que la lettre s'entende et ne soit pas avalée."
+      },
+      "tafkheem": {
+        "name": "Tafkhim",
+        "summary": "Une lettre emphatique, dite avec l'arrière de la langue relevé : خ ص ض غ ط ق ظ toujours, le ra après fatha ou damma, et le lam du nom d'Allah après l'une d'elles."
+      }
+    },
+    "rule": {
+      "ham_wasl": {
+        "name": "Hamzat al-wasl",
+        "help": "L'alif de liaison. Il ne se prononce que si l'on commence par lui ; lié au mot précédent, il est sauté."
+      },
+      "laam_shamsiyah": {
+        "name": "Lam solaire",
+        "help": "Le lam de ال ne se prononce pas devant une lettre solaire ; cette lettre est doublée à la place."
+      },
+      "slnt": {
+        "name": "Lettre muette",
+        "help": "Une lettre écrite mais jamais prononcée, comme le waw de أُوْلَـٰٓئِكَ."
+      },
+      "idgham_wo_ghunnah": {
+        "name": "Idgham sans ghunna",
+        "help": "Un nun quiescent ou un tanwin se fond entièrement dans le lam ou le ra qui suit, sans son nasal."
+      },
+      "idgham_mutajanisayn": {
+        "name": "Idgham de lettres semblables",
+        "help": "Une lettre quiescente se fond dans la suivante, articulée au même endroit — un dal dans un ta."
+      },
+      "idgham_mutaqaribayn": {
+        "name": "Idgham de lettres proches",
+        "help": "Une lettre quiescente se fond dans une voisine proche — un lam dans un ra, un qaf dans un kaf."
+      },
+      "ghunnah": {
+        "name": "Ghunna",
+        "help": "Un nun ou un mim redoublé se nasalise pendant deux temps."
+      },
+      "ikhafa": {
+        "name": "Ikhfa",
+        "help": "Un nun quiescent ou un tanwin est dissimulé : la langue ne touche pas, et un léger son nasal mène à la lettre suivante."
+      },
+      "idgham_ghunnah": {
+        "name": "Idgham avec ghunna",
+        "help": "Un nun quiescent ou un tanwin se fond dans un ya, nun, mim ou waw qui suit, en gardant le son nasal."
+      },
+      "iqlab": {
+        "name": "Iqlab",
+        "help": "Un nun quiescent ou un tanwin devant un ba devient un mim, nasalisé les lèvres légèrement closes."
+      },
+      "ikhafa_shafawi": {
+        "name": "Ikhfa shafawi",
+        "help": "Un mim quiescent devant un ba est dissimulé avec un léger son nasal, les lèvres à peine closes."
+      },
+      "idgham_shafawi": {
+        "name": "Idgham shafawi",
+        "help": "Un mim quiescent se fond dans le mim qui suit, avec un son nasal."
+      },
+      "madda_normal": {
+        "name": "Madd naturel",
+        "help": "La simple voyelle longue : tenez-la deux temps, pas plus."
+      },
+      "madda_permissible": {
+        "name": "Madd permis",
+        "help": "Une voyelle longue avant une pause, ou une lettre lin : deux, quatre ou six temps quand on s'y arrête."
+      },
+      "madda_obligatory_mottasel": {
+        "name": "Madd obligatoire lié",
+        "help": "Une voyelle longue avant une hamza dans le même mot : tenez-la quatre ou cinq temps."
+      },
+      "madda_obligatory_monfasel": {
+        "name": "Madd séparé",
+        "help": "Une voyelle longue en fin de mot avant une hamza qui ouvre le suivant : quatre ou cinq temps, deux en lecture rapide."
+      },
+      "madda_necessary": {
+        "name": "Madd nécessaire",
+        "help": "Une voyelle longue avant un sukun ou une shadda permanents : tenez-la six temps. Les lettres qui ouvrent une sourate se lisent ainsi."
+      },
+      "qalaqah": {
+        "name": "Qalqala",
+        "help": "Un ق ط ب ج د quiescent reçoit un petit rebond pour être clairement entendu."
+      },
+      "tafkheem": {
+        "name": "Tafkhim",
+        "help": "La lettre est rendue emphatique, l'arrière de la langue relevé — toujours pour خ ص ض غ ط ق ظ, et pour le ra après fatha ou damma et le lam du nom d'Allah."
+      }
+    }
   }
 }

@@ -150,6 +150,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
        * where the "download stopped" notification lands.
        */
       QuranDownloads: 'downloads',
+      QuranTajweed: 'tajweed',
       MonthTimes: 'month',
       /**
        * Absent on a Mac, where `RootNavigator` does not register the

@@ -66,6 +66,8 @@ export type RootStackParamList = {
   };
   /** Manage downloads: mushaf pages, recitation audio, tafsir cache. */
   QuranDownloads: undefined;
+  /** The tajwīd colours explained — the legend, rule by rule. */
+  QuranTajweed: undefined;
   /**
    * Tilāwah: the recitation as a player, not as part of the reader.
    *
@@ -105,6 +107,7 @@ export type RootStackParamList = {
   SettingsNotifications: undefined;
   SettingsQuran: undefined;
   SettingsWordReader: undefined;
+  SettingsTajweed: undefined;
   SettingsAbout: undefined;
   /**
    * Pages nested under a section rather than under the index. They are

@@ -27,6 +27,7 @@ import { MUSHAF_TOTAL_PAGES } from './mushafImages';
 import { mkdirDeep } from './mushafDownload';
 import { isValidFontFile } from '../native/MushafFont';
 import manifest from './data/mushafFontManifest.json';
+import tajweedManifest from './data/mushafTajweedFontManifest.json';
 
 /**
  * Release tag holding the 604 subset page fonts. Exported because the silent
@@ -34,6 +35,69 @@ import manifest from './data/mushafFontManifest.json';
  */
 export const FONT_RELEASE = 'mushaf-fonts-v2';
 const STORE_VERSION = 'v2';
+
+/**
+ * The font SETS the store keeps — the tajwīd colours.
+ *
+ * `v2` is the plain Ḥafṣ muṣḥaf every install reads. The two `tajweed`
+ * sets are the QPC V4 tajwīd fonts, one file per page per palette: the
+ * platform cannot pick a palette out of a colour font, so the build
+ * wrote a light and a dark file of every page and the reader fetches the
+ * one its tone needs (`scripts/mushaf/build_tajweed_assets.py`). Each
+ * set has its own release — GitHub allows a thousand assets per release,
+ * and two palettes of 604 pages are twelve hundred — the two tajwīd sets
+ * share a folder, and a page is "on the device" per set: deleting one
+ * set leaves the others.
+ */
+export type MushafFontSet = 'v2' | 'tajweed-light' | 'tajweed-dark';
+
+export const TAJWEED_FONT_RELEASES: { light: string; dark: string } = tajweedManifest.releases;
+
+type FontSetSpec = {
+  release: string;
+  dir: string;
+  file: (page: number) => string;
+  /** The size the release serves for each page, by page − 1. */
+  bytes: ReadonlyArray<number>;
+  /** The page a file name stands for, if it is one of this set's. */
+  page: (name: string) => number | null;
+};
+
+const pad3 = (page: number) => String(page).padStart(3, '0');
+const pageIn = (m: RegExpExecArray | null): number | null => {
+  if (!m) return null;
+  const page = Number(m[1]);
+  return page >= 1 && page <= MUSHAF_TOTAL_PAGES ? page : null;
+};
+
+const SETS: Record<MushafFontSet, FontSetSpec> = {
+  v2: {
+    release: FONT_RELEASE,
+    dir: STORE_VERSION,
+    file: page => `QCF2${pad3(page)}.ttf`,
+    bytes: manifest.bytes,
+    page: name => pageIn(/^QCF2(\d{3})\.ttf$/.exec(name)),
+  },
+  'tajweed-light': {
+    release: tajweedManifest.releases.light,
+    dir: 'v4-tajweed',
+    file: page => `QCF4T${pad3(page)}L.ttf`,
+    bytes: tajweedManifest.light,
+    page: name => pageIn(/^QCF4T(\d{3})L\.ttf$/.exec(name)),
+  },
+  'tajweed-dark': {
+    release: tajweedManifest.releases.dark,
+    dir: 'v4-tajweed',
+    file: page => `QCF4T${pad3(page)}D.ttf`,
+    bytes: tajweedManifest.dark,
+    page: name => pageIn(/^QCF4T(\d{3})D\.ttf$/.exec(name)),
+  },
+};
+
+/** The tajwīd set a page tone draws: the dark palette on the night page. */
+export function tajweedFontSet(nightMode: boolean): MushafFontSet {
+  return nightMode ? 'tajweed-dark' : 'tajweed-light';
+}
 
 /** Smallest plausible page font; anything under this is a failed download. */
 export const MIN_FONT_BYTES = 8_192;
@@ -58,12 +122,10 @@ export const MIN_FONT_BYTES = 8_192;
  * Sizes are what a directory listing returns in one round-trip; a hash
  * would mean reading 180 MB on every open.
  */
-const FONT_BYTES: ReadonlyArray<number> = manifest.bytes;
-
 /** The size the release serves for a page's font, or 0 if the manifest has none. */
-export function expectedFontBytes(page: number): number {
+export function expectedFontBytes(page: number, set: MushafFontSet = 'v2'): number {
   const safe = Math.max(1, Math.min(MUSHAF_TOTAL_PAGES, Math.round(page)));
-  return FONT_BYTES[safe - 1] ?? 0;
+  return SETS[set].bytes[safe - 1] ?? 0;
 }
 
 export type FontFileState = 'missing' | 'stale' | 'ok';
@@ -73,9 +135,13 @@ export type FontFileState = 'missing' | 'stale' | 'ok';
  * tested without a filesystem: too small is a failed download and counts
  * as missing; the wrong size is the wrong font.
  */
-export function fontFileState(bytes: number, page: number): FontFileState {
+export function fontFileState(
+  bytes: number,
+  page: number,
+  set: MushafFontSet = 'v2',
+): FontFileState {
   if (!(bytes >= MIN_FONT_BYTES)) return 'missing';
-  const expected = expectedFontBytes(page);
+  const expected = expectedFontBytes(page, set);
   if (expected > 0 && bytes !== expected) return 'stale';
   return 'ok';
 }
@@ -85,34 +151,34 @@ export function fontFileState(bytes: number, page: number): FontFileState {
  * the release they came from beside them — a store with no record of which
  * release filled it cannot be told from one that is out of date.
  */
-export function fontStoreDir(): string {
-  return `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/quran/fonts/${STORE_VERSION}`;
+export function fontStoreDir(set: MushafFontSet = 'v2'): string {
+  return `${ReactNativeBlobUtil.fs.dirs.DocumentDir}/quran/fonts/${SETS[set].dir}`;
 }
 
-function storeDir(): string {
-  return fontStoreDir();
+function storeDir(set: MushafFontSet): string {
+  return fontStoreDir(set);
 }
 
-export function fontFileName(page: number): string {
+export function fontFileName(page: number, set: MushafFontSet = 'v2'): string {
   const safe = Math.max(1, Math.min(MUSHAF_TOTAL_PAGES, Math.round(page)));
-  return `QCF2${String(safe).padStart(3, '0')}.ttf`;
+  return SETS[set].file(safe);
 }
 
-export function fontFilePath(page: number): string {
-  return `${storeDir()}/${fontFileName(page)}`;
+export function fontFilePath(page: number, set: MushafFontSet = 'v2'): string {
+  return `${storeDir(set)}/${fontFileName(page, set)}`;
 }
 
-export function fontUrl(page: number): string {
-  return `https://github.com/Hassan-PS/Mihrab/releases/download/${FONT_RELEASE}/${fontFileName(
-    page,
-  )}`;
+export function fontUrl(page: number, set: MushafFontSet = 'v2'): string {
+  return `https://github.com/Hassan-PS/Mihrab/releases/download/${
+    SETS[set].release
+  }/${fontFileName(page, set)}`;
 }
 
-async function fileOk(path: string, page: number): Promise<boolean> {
+async function fileOk(path: string, page: number, set: MushafFontSet): Promise<boolean> {
   try {
     if (!(await ReactNativeBlobUtil.fs.exists(path))) return false;
     const stat = await ReactNativeBlobUtil.fs.stat(path);
-    return fontFileState(Number(stat.size), page) === 'ok';
+    return fontFileState(Number(stat.size), page, set) === 'ok';
   } catch {
     return false;
   }
@@ -125,13 +191,17 @@ async function fileOk(path: string, page: number): Promise<boolean> {
  * emulator's NAT does exactly that, and so do some corporate proxies. The
  * page-image store learned this the hard way; fonts inherit the fix.
  */
-async function fetchFontViaRNFetch(page: number, dest: string): Promise<void> {
+async function fetchFontViaRNFetch(
+  page: number,
+  set: MushafFontSet,
+  dest: string,
+): Promise<void> {
   // A deadline, because this is the path a broken network ROUTES TO: one
   // streaming failure condemns that transport for the session, and from
   // then on all 604 pages come through here. Untimed, a stalled proxy
   // left the reader on a page that would never draw.
   const response = await fetchContentOnce(
-    fontUrl(page),
+    fontUrl(page, set),
     undefined,
     CONTENT_DEADLINES.pageFont,
   );
@@ -151,18 +221,19 @@ async function fetchFontViaRNFetch(page: number, dest: string): Promise<void> {
   await ReactNativeBlobUtil.fs.writeFile(dest, base64, 'base64');
 }
 
-const inFlight = new Map<number, Promise<string | null>>();
+const inFlight = new Map<string, Promise<string | null>>();
 
 /**
  * The store directory only has to be created once per launch. `mkdirDeep`
  * creates each path segment in turn, so calling it per page meant several
  * bridge round-trips × 604 competing with the downloads themselves.
  */
-let storeDirReady = false;
-async function ensureStoreDir(): Promise<void> {
-  if (storeDirReady) return;
-  await mkdirDeep(storeDir());
-  storeDirReady = true;
+const storeDirReady = new Set<string>();
+async function ensureStoreDir(set: MushafFontSet): Promise<void> {
+  const dir = storeDir(set);
+  if (storeDirReady.has(dir)) return;
+  await mkdirDeep(dir);
+  storeDirReady.add(dir);
 }
 
 /**
@@ -200,15 +271,19 @@ function noteProgress(done: number, total: number, now: number): void {
  * Ensure page's font file is on disk and return its path (null on failure).
  * Concurrent callers for the same page share one download.
  */
-export function ensurePageFontFile(page: number): Promise<string | null> {
-  const existing = inFlight.get(page);
+export function ensurePageFontFile(
+  page: number,
+  set: MushafFontSet = 'v2',
+): Promise<string | null> {
+  const key = `${set}:${page}`;
+  const existing = inFlight.get(key);
   if (existing) return existing;
 
   const task = (async (): Promise<string | null> => {
-    const path = fontFilePath(page);
+    const path = fontFilePath(page, set);
     try {
-      if (await fileOk(path, page)) return path;
-      await ensureStoreDir();
+      if (await fileOk(path, page, set)) return path;
+      await ensureStoreDir(set);
       const tmp = `${path}.part`;
       let lastError: unknown = null;
       let landed = false;
@@ -222,7 +297,7 @@ export function ensurePageFontFile(page: number): Promise<string | null> {
             await ReactNativeBlobUtil.fs.unlink(tmp).catch(() => undefined);
           }
           if (attempt === 3 || !streamingDownloadWorks) {
-            await fetchFontViaRNFetch(page, path);
+            await fetchFontViaRNFetch(page, set, path);
             landed = true;
             break;
           }
@@ -234,7 +309,7 @@ export function ensurePageFontFile(page: number): Promise<string | null> {
           const res = await withDownloadDeadline(
             ReactNativeBlobUtil.config({ path: tmp, overwrite: true }).fetch(
               'GET',
-              fontUrl(page),
+              fontUrl(page, set),
             ),
             CONTENT_DEADLINES.pageFont,
             `font ${page}`,
@@ -244,11 +319,11 @@ export function ensurePageFontFile(page: number): Promise<string | null> {
           if (status !== 200 || !stat || Number(stat.size) < MIN_FONT_BYTES) {
             throw new Error(`font ${page}: HTTP ${status}`);
           }
-          if (fontFileState(Number(stat.size), page) === 'stale') {
+          if (fontFileState(Number(stat.size), page, set) === 'stale') {
             // The release served a font the manifest does not describe — a
             // CDN still holding a superseded asset, say. Not this font.
             throw new Error(
-              `font ${page}: ${stat.size} bytes, manifest says ${expectedFontBytes(page)}`,
+              `font ${page}: ${stat.size} bytes, manifest says ${expectedFontBytes(page, set)}`,
             );
           }
           stats.bytes += Number(stat.size);
@@ -289,11 +364,11 @@ export function ensurePageFontFile(page: number): Promise<string | null> {
       console.warn(`mushafFonts: page ${page}`, e);
       return null;
     } finally {
-      inFlight.delete(page);
+      inFlight.delete(key);
     }
   })();
 
-  inFlight.set(page, task);
+  inFlight.set(key, task);
   return task;
 }
 
@@ -319,9 +394,11 @@ export type FontDownloadHandle = {
 export function downloadAllPageFonts({
   concurrency = 4,
   onProgress,
+  set = 'v2',
 }: {
   concurrency?: number;
   onProgress?: (p: FontDownloadProgress) => void;
+  set?: MushafFontSet;
 } = {}): FontDownloadHandle {
   let cancelled = false;
   let done = 0;
@@ -331,7 +408,7 @@ export function downloadAllPageFonts({
   let interrupted = false;
 
   const run = async (): Promise<DownloadOutcome> => {
-    await ensureStoreDir();
+    await ensureStoreDir(set);
     stats.retries = 0;
     stats.failures = 0;
     stats.bytes = 0;
@@ -344,7 +421,7 @@ export function downloadAllPageFonts({
       while (!cancelled && !interrupted) {
         const page = queue.shift();
         if (page == null) return;
-        const path = await ensurePageFontFile(page);
+        const path = await ensurePageFontFile(page, set);
         if (path == null) {
           failed += 1;
           stats.failures += 1;
@@ -364,7 +441,7 @@ export function downloadAllPageFonts({
 
     await Promise.all(Array.from({ length: concurrency }, () => worker()));
     const complete = !cancelled && !interrupted && failed === 0;
-    if (complete) knownComplete = true;
+    if (complete) knownComplete.add(set);
     return { complete, interrupted: interrupted && !cancelled };
   };
 
@@ -377,10 +454,10 @@ export function downloadAllPageFonts({
  * delete. The reader's gate asks this first and opens on the answer, so the
  * second open of the muṣḥaf in a session waits on nothing at all.
  */
-let knownComplete = false;
+const knownComplete = new Set<MushafFontSet>();
 
-export function fontStoreKnownComplete(): boolean {
-  return knownComplete;
+export function fontStoreKnownComplete(set: MushafFontSet = 'v2'): boolean {
+  return knownComplete.has(set);
 }
 
 /**
@@ -393,7 +470,7 @@ export function fontStoreKnownComplete(): boolean {
  * muṣḥaf that had been on the device for months. `lstat` on the directory
  * returns every entry with its size in a single round-trip.
  */
-export async function fontStoreStats(): Promise<{
+export async function fontStoreStats(set: MushafFontSet = 'v2'): Promise<{
   /** Page fonts on disk — the right ones and the stale ones together. */
   pages: number;
   /**
@@ -409,10 +486,10 @@ export async function fontStoreStats(): Promise<{
   bytes: number;
 }> {
   try {
-    if (!(await ReactNativeBlobUtil.fs.exists(storeDir()))) {
+    if (!(await ReactNativeBlobUtil.fs.exists(storeDir(set)))) {
       return { pages: 0, stalePages: [], bytes: 0 };
     }
-    const entries = (await ReactNativeBlobUtil.fs.lstat(storeDir())) as Array<{
+    const entries = (await ReactNativeBlobUtil.fs.lstat(storeDir(set))) as Array<{
       filename: string;
       size: string | number;
       type: string;
@@ -422,16 +499,16 @@ export async function fontStoreStats(): Promise<{
     const stalePages: number[] = [];
     for (const entry of entries) {
       if (entry.type === 'directory' || !entry.filename.endsWith('.ttf')) continue;
-      const page = pageOfFileName(entry.filename);
+      const page = pageOfFileName(entry.filename, set);
       if (page == null) continue;
       const size = Number(entry.size) || 0;
-      const state = fontFileState(size, page);
+      const state = fontFileState(size, page, set);
       if (state === 'missing') continue;
       pages += 1;
       bytes += size;
       if (state === 'stale') stalePages.push(page);
     }
-    if (pages >= MUSHAF_TOTAL_PAGES) knownComplete = true;
+    if (pages >= MUSHAF_TOTAL_PAGES) knownComplete.add(set);
     return { pages, stalePages, bytes };
   } catch {
     return { pages: 0, stalePages: [], bytes: 0 };
@@ -439,11 +516,8 @@ export async function fontStoreStats(): Promise<{
 }
 
 /** `QCF2564.ttf` → 564; anything else in the directory → null. */
-export function pageOfFileName(name: string): number | null {
-  const m = /^QCF2(\d{3})\.ttf$/.exec(name);
-  if (!m) return null;
-  const page = Number(m[1]);
-  return page >= 1 && page <= MUSHAF_TOTAL_PAGES ? page : null;
+export function pageOfFileName(name: string, set: MushafFontSet = 'v2'): number | null {
+  return SETS[set].page(name);
 }
 
 /**
@@ -458,7 +532,7 @@ export function pageOfFileName(name: string): number | null {
  * download if it is already in flight.
  */
 let repairing = false;
-export function repairStaleFonts(pages: number[]): void {
+export function repairStaleFonts(pages: number[], set: MushafFontSet = 'v2'): void {
   if (repairing || pages.length === 0) return;
   repairing = true;
   console.log(`[mushafFonts] ${pages.length} stale page fonts — re-fetching`);
@@ -467,7 +541,7 @@ export function repairStaleFonts(pages: number[]): void {
     for (;;) {
       const page = queue.shift();
       if (page == null) return;
-      await ensurePageFontFile(page);
+      await ensurePageFontFile(page, set);
     }
   };
   void Promise.all([worker(), worker()]).finally(() => {
@@ -478,10 +552,22 @@ export function repairStaleFonts(pages: number[]): void {
 /** For tests. */
 export function _resetFontStoreForTests(): void {
   repairing = false;
-  knownComplete = false;
+  knownComplete.clear();
 }
 
-export async function deletePageFonts(): Promise<void> {
-  knownComplete = false;
-  await ReactNativeBlobUtil.fs.unlink(storeDir()).catch(() => undefined);
+export async function deletePageFonts(set: MushafFontSet = 'v2'): Promise<void> {
+  knownComplete.delete(set);
+  if (set === 'v2') {
+    await ReactNativeBlobUtil.fs.unlink(storeDir(set)).catch(() => undefined);
+    return;
+  }
+  // The two tajwīd sets share a folder: delete only this set's files.
+  const entries = (await ReactNativeBlobUtil.fs
+    .lstat(storeDir(set))
+    .catch(() => [])) as Array<{ filename: string; path: string }>;
+  for (const entry of entries) {
+    if (pageOfFileName(entry.filename, set) != null) {
+      await ReactNativeBlobUtil.fs.unlink(entry.path).catch(() => undefined);
+    }
+  }
 }

@@ -5,6 +5,11 @@
 # page on a dedicated, permanent release tag, fetched by the app on demand.
 #
 #   scripts/mushaf/upload_qcf_fonts.sh /tmp/qcfbuild/fonts [tag]
+#   scripts/mushaf/upload_qcf_fonts.sh /tmp/qcf4/out mushaf-fonts-v4-tajweed-light
+#   scripts/mushaf/upload_qcf_fonts.sh /tmp/qcf4/out mushaf-fonts-v4-tajweed-dark
+#
+# The tajwīd release (`build_tajweed_assets.py fonts`) is the same shape:
+# one asset per page and palette, on its own permanent tag.
 #
 # Re-runnable: an asset already on the release AT THE SAME SIZE is skipped, so
 # an interrupted upload can simply be started again. An asset of a different
@@ -20,10 +25,30 @@ DIR="${1:?usage: upload_qcf_fonts.sh <font-dir> [tag]}"
 TAG="${2:-mushaf-fonts-v2}"
 REPO="Hassan-PS/Mihrab"
 
+# GitHub allows a thousand assets per release; the two tajwīd palettes are
+# twelve hundred files, so each palette is a release of its own.
+case "$TAG" in
+  mushaf-fonts-v4-tajweed-light)
+    GLOB="QCF4T*L.ttf"
+    TITLE="Mushaf fonts (QPC v4 tajweed, light palette)"
+    NOTES="KFGQPC QPC v4 tajweed per-page mushaf fonts (COLR/CPAL, one glyph per word), cut to the palette for a light page. Used by Mihrab's mushaf when tajweed colours are on. Fonts © King Fahd Glorious Quran Printing Complex, via the Quranic Universal Library, used under their terms for software: https://dm.qurancomplex.gov.sa/copyright-2/"
+    ;;
+  mushaf-fonts-v4-tajweed-dark)
+    GLOB="QCF4T*D.ttf"
+    TITLE="Mushaf fonts (QPC v4 tajweed, dark palette)"
+    NOTES="KFGQPC QPC v4 tajweed per-page mushaf fonts (COLR/CPAL, one glyph per word), cut to the palette for a dark page. Used by Mihrab's mushaf when tajweed colours are on. Fonts © King Fahd Glorious Quran Printing Complex, via the Quranic Universal Library, used under their terms for software: https://dm.qurancomplex.gov.sa/copyright-2/"
+    ;;
+  *)
+    GLOB="QCF2*.ttf"
+    TITLE="Mushaf fonts (QPC v2)"
+    NOTES="KFGQPC QPC v2 per-page mushaf fonts (one glyph per word), subset to each page's own glyphs. Used by Mihrab's font-rendered mushaf. Fonts © King Fahd Glorious Quran Printing Complex, used under their terms for software: https://dm.qurancomplex.gov.sa/copyright-2/"
+    ;;
+esac
+
 if ! gh release view "$TAG" -R "$REPO" >/dev/null 2>&1; then
   gh release create "$TAG" -R "$REPO" \
-    --title "Mushaf fonts (QPC v2)" \
-    --notes "KFGQPC QPC v2 per-page mushaf fonts (one glyph per word), subset to each page's own glyphs. Used by Mihrab's font-rendered mushaf. Fonts © King Fahd Glorious Quran Printing Complex, used under their terms for software: https://dm.qurancomplex.gov.sa/copyright-2/" \
+    --title "$TITLE" \
+    --notes "$NOTES" \
     --latest=false
 fi
 
@@ -50,7 +75,7 @@ flush() {
   batch=()
 }
 
-for f in "$DIR"/QCF2*.ttf; do
+for f in "$DIR"/$GLOB; do
   name=$(basename "$f")
   size=$(stat -f %z "$f" 2>/dev/null || stat -c %s "$f")
   if grep -qxF "$name $size" "$EXISTING"; then

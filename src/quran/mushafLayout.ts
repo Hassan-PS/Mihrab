@@ -547,7 +547,52 @@ export function isFramedPage(page: number): boolean {
 }
 
 let raw: RawPage[] | null = null;
-const decoded = new Map<number, MushafPageLayout>();
+/** Decoded pages, keyed by set and page — `cacheKey`. */
+const decoded = new Map<string, MushafPageLayout>();
+
+// ---------------------------------------------------------------------------
+// Which page fonts are being drawn
+//
+// The QPC V4 tajwīd fonts (`docs/mushaf-fidelity-rules.md`, "Tajwīd
+// colours") carry the same glyph codes as V2 but are cut a little wider,
+// so the advances a line is measured and hit-tested with have to be the
+// fonts' own. `mushafLayoutV4Advances.json` holds V4's, per page and line;
+// which set is live is a module switch, set by the reader from its
+// preference, so that every reader of the geometry — the surface, the
+// hit-test, the follow-scroll, the previews — sees one truth at a time
+// rather than each being told. The decode cache is dropped on a switch.
+// ---------------------------------------------------------------------------
+
+/** The page-font family in use: the plain V2 faces, or V4's tajwīd colours. */
+export type MushafGlyphSet = 'v2' | 'tajweed';
+
+let glyphSet: MushafGlyphSet = 'v2';
+
+export function mushafGlyphSet(): MushafGlyphSet {
+  return glyphSet;
+}
+
+/**
+ * Switch the page fonts. Idempotent and free of side effects — the decode
+ * cache is keyed by set — so the reader applies it from its render
+ * (`useMushafFontSet`), before its first `getPageLayout` of the frame,
+ * rather than from an effect a frame late.
+ */
+export function setMushafGlyphSet(next: MushafGlyphSet): void {
+  glyphSet = next;
+}
+
+const cacheKey = (page: number, set: MushafGlyphSet) => `${set}:${page}`;
+
+type V4LineAdvances = [number, number[]] | null;
+let v4: V4LineAdvances[][] | null = null;
+
+function loadV4(): V4LineAdvances[][] {
+  if (v4 == null) {
+    v4 = require('./data/mushafLayoutV4Advances.json') as V4LineAdvances[][];
+  }
+  return v4;
+}
 
 function loadRaw(): RawPage[] {
   if (raw == null) {
@@ -581,7 +626,7 @@ export function warmMushafLayout(riwayah?: RiwayahId): void {
   loadRaw();
 }
 
-function decodeLine(line: RawLine): MushafLine | null {
+function decodeLine(line: RawLine, v4Line: V4LineAdvances = null): MushafLine | null {
   if (line.t === 's' || line.t === 'b') {
     return {
       kind: line.t === 's' ? 'surah' : 'basmalah',
@@ -589,7 +634,7 @@ function decodeLine(line: RawLine): MushafLine | null {
     };
   }
   const tokens = (line.x ?? '').split('|').filter(Boolean);
-  const advances = line.a ?? [];
+  const advances = v4Line?.[1] ?? line.a ?? [];
   const words: MushafWord[] = [];
   let i = 0;
   for (const seg of line.w ?? []) {
@@ -612,41 +657,60 @@ function decodeLine(line: RawLine): MushafLine | null {
   return {
     kind: 'ayah',
     words,
-    natural: line.n ?? 0,
+    natural: v4Line?.[0] ?? line.n ?? 0,
     centered: line.c === 1,
   };
 }
 
-/** Decoded layout for one page, or null when the page is out of range. */
+/** Decoded layout for one page in the live glyph set, or null when the page is out of range. */
 export function getPageLayout(page: number): MushafPageLayout | null {
-  const cached = decoded.get(page);
+  return getPageLayoutIn(page, glyphSet);
+}
+
+/**
+ * The same, in a named set — for a surface drawing the tajwīd faces
+ * beside a reader that is not (the āyah sheet's Tajweed section), which
+ * must not switch the reader's own geometry to get its own.
+ */
+export function getPageLayoutIn(page: number, set: MushafGlyphSet): MushafPageLayout | null {
+  const cached = decoded.get(cacheKey(page, set));
   if (cached) return cached;
   const pages = loadRaw();
   const entry = pages[page - 1];
   if (!entry || entry.p !== page) {
     const found = pages.find(p => p.p === page);
     if (!found) return null;
-    return decodePage(found);
+    return decodePage(found, set);
   }
-  return decodePage(entry);
+  return decodePage(entry, set);
 }
 
-function decodePage(entry: RawPage): MushafPageLayout {
-  const cached = decoded.get(entry.p);
+function decodePage(entry: RawPage, set: MushafGlyphSet): MushafPageLayout {
+  const key = cacheKey(entry.p, set);
+  const cached = decoded.get(key);
   if (cached) return cached;
+  // The V4 advances for this page, when V4 is what is drawn and the
+  // build produced them; a page the build has not covered keeps V2's.
+  const v4Lines = set === 'tajweed' ? loadV4()[entry.p - 1] : undefined;
   const lines = entry.l
-    .map(decodeLine)
+    .map((line, i) => decodeLine(line, v4Lines?.[i] ?? null))
     .filter((l): l is MushafLine => l != null);
+  let measure = entry.m;
+  if (v4Lines) {
+    for (const line of lines) {
+      if (line.kind === 'ayah' && line.natural > measure) measure = line.natural;
+    }
+  }
   const layout: MushafPageLayout = {
     page: entry.p,
-    measure: entry.m,
+    measure,
     lines,
   };
-  decoded.set(entry.p, layout);
+  decoded.set(key, layout);
   // The reader only ever holds a few pages; keep the decode cache near that.
   if (decoded.size > 24) {
     const oldest = decoded.keys().next().value;
-    if (oldest != null && oldest !== entry.p) decoded.delete(oldest);
+    if (oldest != null && oldest !== key) decoded.delete(oldest);
   }
   return layout;
 }
@@ -680,4 +744,5 @@ export function surahHeadersOnPage(page: number): number[] {
 /** Test seam. */
 export function _resetLayoutCache(): void {
   decoded.clear();
+  glyphSet = 'v2';
 }

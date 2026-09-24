@@ -126,6 +126,13 @@ export async function reconcileMushafAssets(
   // wrong from inside the app, so this is the one place that would ever
   // notice. It runs in the background and blocks nothing.
   if (stats.stalePages.length > 0) repairStaleFonts(stats.stalePages);
+  // The tajwīd sets likewise — only where there is a set to check; the
+  // generation stamp is the plain faces' alone, the sets have their own
+  // manifest and a release each.
+  for (const set of ['tajweed-light', 'tajweed-dark'] as const) {
+    const own = await fontStoreStats(set);
+    if (own.stalePages.length > 0) repairStaleFonts(own.stalePages, set);
+  }
   const action = assetActionFor(
     { stamp, pagesOnDisk: stats.pages },
     generation,

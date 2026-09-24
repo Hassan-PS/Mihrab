@@ -1553,6 +1553,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisn al-Muslim duaları",
     "quranGeometry": "Ayet konum verileri (quran.com / Quran for Android projesi)",
+    "tajweedFonts": "Tecvid renkli sayfa yazı tipleri (indirilir, pakete dahil değil) ve kural verileri",
     "recitation": "Tilavet sesi (42 kâri): EveryAyah.com · kelime zamanlaması: quran-align (CC BY 4.0)",
     "tafsir": "Tefsir metinleri: İbn Kesir, Maarif-ul-Kuran, el-Müyesser",
     "surahHeaderFont": "Sure başlığı hattı"
@@ -1946,5 +1947,137 @@
     "activeText": "{{time}}'e kadar",
     "endNow": "Şimdi bitir",
     "channel": "Namaz vaktinde sessiz"
+  },
+  "tajweed": {
+    "title": "Tecvid renkleri",
+    "settingsBlurb": "Harfleri kuralına göre renklendir, her rengin senden ne istediğini öğren",
+    "toggle": "Mushafı tecvid kuralına göre renklendir",
+    "toggleHelp": "Harfler Kral Fahd Kompleksi'nin renklerine boyanır: gri okunmaz, yeşil gunnedir, kırmızı uzatılır, açık mavi kalkaledir. Öğrenirken aç; sade mürekkep bir dokunuş uzakta.",
+    "warshNote": "Renkler Hafs mushafı üzerine çizilir. Görmek için Hafs'a dön.",
+    "guideLink": "Renkler nasıl okunur",
+    "guideTitle": "Renkleri okumak",
+    "guideIntro": "Boyalı her harf iş başındaki bir kuraldır. Bir renk bir fikirdir; sayfa okurken sana öğretir: gri yazılır ama okunmaz, yeşil burundan gelen bir ses, kırmızılar daha uzun tutulan bir sesli, açık mavi bir sıçrama, koyu mavi kalın bir harftir.",
+    "guidePractice": "Alıştırma için: renkleri aç, bir sayfa aç ve bir ayete dokun — kartı içindeki kuralları kelime kelime sıralar. Bir kelimeyi basılı tut, okunuşunu dinle.",
+    "legend": "Renkler",
+    "counts": "{{counts}} elif miktarı",
+    "example": "Örnek",
+    "showInMushaf": "Mushafta göster",
+    "hearWord": "Dinle",
+    "downloadAll": "Tüm renkli sayfaları indir",
+    "downloadAllHelp": "Renkli sayfalar kendi sayfa yazı tipi takımıdır; sade sayfalar gibi okurken indirilir. Çevrimdışı okumak için bir kez hepsini indir — mushafın şu anki tonunun takımı; tonu değiştirip diğeri için yeniden indir.",
+    "downloadsRow": "Tecvid renkleri",
+    "downloadsRowSub": "{{total}} renkli sayfadan {{pages}}",
+    "sheetSection": "Tecvid",
+    "sheetNone": "Bu ayette boyalı harf yok — kural uygulanmıyor.",
+    "sheetUnavailable": "Bu ayetin kuralları mevcut değil.",
+    "sheetMore": "Tüm renklerin açıklaması",
+    "turnOn": "Renkleri mushafta göster",
+    "downloading": "Tecvid renkleri indiriliyor",
+    "downloadStrip": "Tecvid renkleri indiriliyor · %{{pct}}",
+    "downloadDoneTitle": "Tecvid renkleri hazır",
+    "downloadDoneBody": "Tüm renkli sayfalar bu cihazda.",
+    "lightPages": "açık sayfalar",
+    "darkPages": "koyu sayfalar",
+    "attribution": "Renkler ve sayfa yazı tipleri: Kral Fahd Kur'an-ı Kerim Basım Kompleksi, Medine (QPC V4 tajweed), Quranic Universal Library aracılığıyla. Kural verileri: quran.com.",
+    "family": {
+      "silent": {
+        "name": "Okunmaz",
+        "summary": "Yazılır, okunmaz. Harf sayfadadır ama dil üzerinden geçer — ya da sonraki harfe katılır."
+      },
+      "ghunnah": {
+        "name": "Gunne",
+        "summary": "Yaklaşık iki elif miktarı tutulan burun sesi. Her yeşil harf, bir biçimiyle bunu yapan bir nun ya da mimdir."
+      },
+      "madd": {
+        "name": "Med",
+        "summary": "Her zamankinden uzun tutulan bir sesli. Kırmızı koyulaştıkça uzar: iki elif miktarından altıya."
+      },
+      "qalqalah": {
+        "name": "Kalkale",
+        "summary": "Sakin ق ط ب ج د üzerinde küçük bir sıçrama; harf yutulmaz, duyulur."
+      },
+      "tafkheem": {
+        "name": "Tefhim",
+        "summary": "Dilin arkası kalkarak söylenen kalın harf: خ ص ض غ ط ق ظ her zaman, fetha ya da dammeden sonra ra ve bunlardan sonra Allah lafzının lamı."
+      }
+    },
+    "rule": {
+      "ham_wasl": {
+        "name": "Hemze-i vasıl",
+        "help": "Bağlama elifi. Yalnızca onunla başlarken okunur; önceki kelimeye bağlanınca atlanır."
+      },
+      "laam_shamsiyah": {
+        "name": "Şemsî lam",
+        "help": "ال'ın lamı şemsî bir harften önce okunmaz; onun yerine o harf şeddelenir."
+      },
+      "slnt": {
+        "name": "Okunmayan harf",
+        "help": "Yazılan ama hiç okunmayan harf, أُوْلَـٰٓئِكَ'deki vav gibi."
+      },
+      "idgham_wo_ghunnah": {
+        "name": "Gunnesiz idgam",
+        "help": "Sakin nun ya da tenvin, sonraki lam ya da raya gunnesiz, tamamen katılır."
+      },
+      "idgham_mutajanisayn": {
+        "name": "İdgam-ı mütecaniseyn",
+        "help": "Sakin bir harf, ağızda aynı yerden çıkan sonraki harfe katılır — dal taya."
+      },
+      "idgham_mutaqaribayn": {
+        "name": "İdgam-ı mütekaribeyn",
+        "help": "Sakin bir harf, yakın bir komşusuna katılır — lam raya, kaf kefe."
+      },
+      "ghunnah": {
+        "name": "Gunne",
+        "help": "Şeddeli nun ya da mim iki elif miktarı burundan okunur."
+      },
+      "ikhafa": {
+        "name": "İhfa",
+        "help": "Sakin nun ya da tenvin gizlenir: dil değmez, hafif bir gunne sonraki harfe götürür."
+      },
+      "idgham_ghunnah": {
+        "name": "Gunneli idgam",
+        "help": "Sakin nun ya da tenvin, sonraki ya, nun, mim ya da vava gunne kalarak katılır."
+      },
+      "iqlab": {
+        "name": "İklab",
+        "help": "Badan önceki sakin nun ya da tenvin mime dönüşür; dudaklar hafif kapalı, gunneli."
+      },
+      "ikhafa_shafawi": {
+        "name": "İhfa-i şefevi",
+        "help": "Badan önceki sakin mim hafif bir gunneyle gizlenir, dudaklar zar zor kapanır."
+      },
+      "idgham_shafawi": {
+        "name": "İdgam-ı şefevi",
+        "help": "Sakin mim sonraki mime gunneyle katılır."
+      },
+      "madda_normal": {
+        "name": "Med-i tabii",
+        "help": "Sade uzun sesli: iki elif miktarı tut, fazlası değil."
+      },
+      "madda_permissible": {
+        "name": "Med-i caiz",
+        "help": "Duraktan önceki uzun sesli ya da lin harfi: üzerinde durulunca iki, dört ya da altı elif miktarı."
+      },
+      "madda_obligatory_mottasel": {
+        "name": "Med-i muttasıl",
+        "help": "Aynı kelimede hemzeden önceki uzun sesli: dört ya da beş elif miktarı tut."
+      },
+      "madda_obligatory_monfasel": {
+        "name": "Med-i munfasıl",
+        "help": "Kelime sonundaki uzun sesli, sonraki kelimeyi açan hemzeden önce: dört ya da beş elif miktarı, hızlı okuyuşta iki."
+      },
+      "madda_necessary": {
+        "name": "Med-i lazım",
+        "help": "Hiç kalkmayan sükun ya da şeddeden önceki uzun sesli: altı elif miktarı tut. Sure başlarındaki harfler böyle okunur."
+      },
+      "qalaqah": {
+        "name": "Kalkale",
+        "help": "Sakin ق ط ب ج د açıkça duyulsun diye küçük bir sıçramayla okunur."
+      },
+      "tafkheem": {
+        "name": "Tefhim",
+        "help": "Harf, dilin arkası kalkarak kalın okunur — خ ص ض غ ط ق ظ her zaman; fetha ya da dammeden sonra ra ve Allah lafzının lamı."
+      }
+    }
   }
 }

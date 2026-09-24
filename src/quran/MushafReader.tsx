@@ -46,6 +46,7 @@ import {
 } from './mushafDownload';
 import { fontStoreKnownComplete, fontStoreStats } from './mushafFontStore';
 import {
+  fontSetOf,
   quranDownloadState,
   startQuranDownload,
   subscribeQuranDownload,
@@ -179,12 +180,14 @@ export function MushafReader(props: Props) {
       // arriving in the background is not this gate's business, and
       // reporting it here would put a mushaf progress bar in front of a
       // book that is already on the device.
+      // Only the plain faces' job: a tajwīd set arriving is a layer on
+      // a book that is already here, not this gate's business.
       if (s.running) {
-        if (s.running.kind !== 'fonts') return;
+        if (s.running.kind !== 'fonts' || fontSetOf(s.running) !== 'v2') return;
         setDownloadStatus('downloading');
         return;
       }
-      if (!s.last || s.last.job.kind !== 'fonts') return;
+      if (!s.last || s.last.job.kind !== 'fonts' || fontSetOf(s.last.job) !== 'v2') return;
       setLastRunFailed(s.last.complete ? 0 : s.last.failed);
       setDownloadStatus(s.last.complete ? 'ready' : 'needs_download');
     };

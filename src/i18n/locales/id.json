@@ -1553,6 +1553,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Doa-doa Hisnul Muslim",
     "quranGeometry": "Data posisi ayat (quran.com / proyek Quran for Android)",
+    "tajweedFonts": "Font halaman warna tajwid (diunduh, tidak dibundel) dan data hukum",
     "recitation": "Audio tilawah (42 qari): EveryAyah.com · pewaktuan kata: quran-align (CC BY 4.0)",
     "tafsir": "Teks tafsir: Ibnu Katsir, Maarif-ul-Quran, al-Muyassar",
     "surahHeaderFont": "Kaligrafi kepala surah"
@@ -1946,5 +1947,137 @@
     "activeText": "Sampai {{time}}",
     "endNow": "Akhiri sekarang",
     "channel": "Senyap saat waktu salat"
+  },
+  "tajweed": {
+    "title": "Warna tajwid",
+    "settingsBlurb": "Mewarnai huruf menurut hukumnya, dan mempelajari apa yang diminta tiap warna",
+    "toggle": "Warnai mushaf menurut hukum tajwid",
+    "toggleHelp": "Huruf diwarnai dengan warna Kompleks Raja Fahd: abu-abu tidak dibaca, hijau dengung, merah dipanjangkan, biru muda memantul. Nyalakan saat belajar; tinta polos hanya sekali ketuk.",
+    "warshNote": "Warna digambar pada mushaf Hafs. Kembali ke Hafs untuk melihatnya.",
+    "guideLink": "Cara membaca warna",
+    "guideTitle": "Membaca warna",
+    "guideIntro": "Setiap huruf berwarna adalah hukum yang sedang bekerja. Satu warna satu gagasan, sehingga halaman mengajarimu sambil membaca: abu-abu tertulis tapi tidak dibaca, hijau dengung dari hidung, merah vokal yang ditahan lebih lama, biru muda pantulan, dan biru tua huruf tebal.",
+    "guidePractice": "Untuk berlatih: nyalakan warna, buka halaman mana pun, dan ketuk sebuah ayat — lembarnya mencantumkan hukum di dalamnya, kata demi kata. Tahan sebuah kata untuk mendengarnya dibaca.",
+    "legend": "Warna-warna",
+    "counts": "{{counts}} harakat",
+    "example": "Contoh",
+    "showInMushaf": "Tampilkan di mushaf",
+    "hearWord": "Dengarkan",
+    "downloadAll": "Unduh semua halaman berwarna",
+    "downloadAllHelp": "Halaman berwarna adalah set font halaman tersendiri, diambil saat membaca seperti yang polos. Unduh semuanya sekali untuk membaca luring — set untuk nada mushaf saat ini; ganti nada dan unduh lagi untuk yang lain.",
+    "downloadsRow": "Warna tajwid",
+    "downloadsRowSub": "{{pages}} dari {{total}} halaman berwarna",
+    "sheetSection": "Tajwid",
+    "sheetNone": "Tidak ada yang berwarna di ayat ini — tidak ada hukum yang berlaku.",
+    "sheetUnavailable": "Hukum untuk ayat ini tidak tersedia.",
+    "sheetMore": "Semua warna dijelaskan",
+    "turnOn": "Tampilkan warna di mushaf",
+    "downloading": "Mengunduh warna tajwid",
+    "downloadStrip": "Mengunduh warna tajwid · {{pct}}%",
+    "downloadDoneTitle": "Warna tajwid siap",
+    "downloadDoneBody": "Semua halaman berwarna ada di perangkat ini.",
+    "lightPages": "halaman terang",
+    "darkPages": "halaman gelap",
+    "attribution": "Warna dan font halaman: King Fahd Glorious Qur'an Printing Complex, Madinah (QPC V4 tajweed), melalui Quranic Universal Library. Data hukum: quran.com.",
+    "family": {
+      "silent": {
+        "name": "Tidak dibaca",
+        "summary": "Tertulis, tidak dibunyikan. Hurufnya ada di halaman tapi lidah melewatinya — atau melebur ke huruf sesudahnya."
+      },
+      "ghunnah": {
+        "name": "Gunnah",
+        "summary": "Dengung dari hidung, ditahan sekitar dua harakat. Setiap huruf hijau adalah nun atau mim yang melakukannya, dalam salah satu bentuknya."
+      },
+      "madd": {
+        "name": "Mad",
+        "summary": "Vokal yang ditahan lebih lama dari biasa. Makin pekat merahnya, makin panjang: dari dua hingga enam harakat."
+      },
+      "qalqalah": {
+        "name": "Qalqalah",
+        "summary": "Pantulan kecil pada ق ط ب ج د yang sukun, agar hurufnya terdengar dan tidak tertelan."
+      },
+      "tafkheem": {
+        "name": "Tafkhim",
+        "summary": "Huruf tebal, dibaca dengan pangkal lidah terangkat: خ ص ض غ ط ق ظ selalu, ra setelah fathah atau dammah, dan lam pada nama Allah setelah keduanya."
+      }
+    },
+    "rule": {
+      "ham_wasl": {
+        "name": "Hamzah washal",
+        "help": "Alif penyambung. Hanya dibaca saat memulai darinya; jika disambung dengan kata sebelumnya, dilewati."
+      },
+      "laam_shamsiyah": {
+        "name": "Lam syamsiyah",
+        "help": "Lam pada ال tidak dibaca sebelum huruf syamsiyah; huruf itu ditasydidkan sebagai gantinya."
+      },
+      "slnt": {
+        "name": "Huruf tak dibaca",
+        "help": "Huruf yang ditulis tapi tidak pernah dibaca, seperti wau pada أُوْلَـٰٓئِكَ."
+      },
+      "idgham_wo_ghunnah": {
+        "name": "Idgam bila gunnah",
+        "help": "Nun sukun atau tanwin melebur sepenuhnya ke lam atau ra sesudahnya, tanpa dengung."
+      },
+      "idgham_mutajanisayn": {
+        "name": "Idgam mutajanisain",
+        "help": "Huruf sukun melebur ke huruf berikutnya yang keluar dari makhraj yang sama — dal ke ta."
+      },
+      "idgham_mutaqaribayn": {
+        "name": "Idgam mutaqaribain",
+        "help": "Huruf sukun melebur ke huruf tetangga yang dekat — lam ke ra, qaf ke kaf."
+      },
+      "ghunnah": {
+        "name": "Gunnah",
+        "help": "Nun atau mim bertasydid didengungkan dari hidung selama dua harakat."
+      },
+      "ikhafa": {
+        "name": "Ikhfa",
+        "help": "Nun sukun atau tanwin disamarkan: lidah tidak menyentuh, dan dengung ringan mengantar ke huruf berikutnya."
+      },
+      "idgham_ghunnah": {
+        "name": "Idgam bigunnah",
+        "help": "Nun sukun atau tanwin melebur ke ya, nun, mim, atau wau sesudahnya, dengan dengung tetap."
+      },
+      "iqlab": {
+        "name": "Iqlab",
+        "help": "Nun sukun atau tanwin sebelum ba berubah menjadi mim, didengungkan dengan bibir rapat ringan."
+      },
+      "ikhafa_shafawi": {
+        "name": "Ikhfa syafawi",
+        "help": "Mim sukun sebelum ba disamarkan dengan dengung ringan, bibir nyaris rapat."
+      },
+      "idgham_shafawi": {
+        "name": "Idgam syafawi",
+        "help": "Mim sukun melebur ke mim sesudahnya, dengan dengung."
+      },
+      "madda_normal": {
+        "name": "Mad thabi'i",
+        "help": "Vokal panjang biasa: tahan dua harakat, tidak lebih."
+      },
+      "madda_permissible": {
+        "name": "Mad jaiz",
+        "help": "Vokal panjang sebelum berhenti, atau huruf lin: dua, empat, atau enam harakat saat waqaf padanya."
+      },
+      "madda_obligatory_mottasel": {
+        "name": "Mad wajib muttasil",
+        "help": "Vokal panjang sebelum hamzah dalam kata yang sama: tahan empat atau lima harakat."
+      },
+      "madda_obligatory_monfasel": {
+        "name": "Mad jaiz munfasil",
+        "help": "Vokal panjang di akhir kata sebelum hamzah yang mengawali kata berikutnya: empat atau lima harakat, dua saat membaca cepat."
+      },
+      "madda_necessary": {
+        "name": "Mad lazim",
+        "help": "Vokal panjang sebelum sukun atau tasydid yang tetap: tahan enam harakat. Huruf pembuka surah dibaca begini."
+      },
+      "qalaqah": {
+        "name": "Qalqalah",
+        "help": "ق ط ب ج د yang sukun diberi pantulan kecil agar terdengar jelas."
+      },
+      "tafkheem": {
+        "name": "Tafkhim",
+        "help": "Huruf dibaca tebal, dengan pangkal lidah terangkat — selalu untuk خ ص ض غ ط ق ظ, dan untuk ra setelah fathah atau dammah serta lam pada nama Allah."
+      }
+    }
   }
 }

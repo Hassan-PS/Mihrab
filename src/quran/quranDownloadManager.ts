@@ -43,7 +43,7 @@ import type {
   MushafDownloadHandle,
   MushafDownloadProgress,
 } from './mushafDownload';
-import { downloadAllPageFonts } from './mushafFontStore';
+import { downloadAllPageFonts, type MushafFontSet } from './mushafFontStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   downloadAyahs,
@@ -82,7 +82,8 @@ import i18n from '../i18n';
  * skipped.
  */
 export type QuranDownloadJob =
-  | { kind: 'fonts' }
+  /** The page faces: V2 when `set` is absent, or one of the tajwīd sets. */
+  | { kind: 'fonts'; set?: MushafFontSet }
   | { kind: 'audio'; reciterId: string }
   | {
       kind: 'surah';
@@ -170,7 +171,15 @@ export function isJobRunning(job: QuranDownloadJob): boolean {
     // when somebody else pressed the button.
     return running.reciterId === job.reciterId && running.surah === job.surah;
   }
+  if (running.kind === 'fonts' && job.kind === 'fonts') {
+    return fontSetOf(running) === fontSetOf(job);
+  }
   return true;
+}
+
+/** Which page faces a fonts job fetches — V2 unless it says otherwise. */
+export function fontSetOf(job: { kind: 'fonts'; set?: MushafFontSet }): MushafFontSet {
+  return job.set ?? 'v2';
 }
 
 /** The reciter's name as the shade should say it. */
@@ -239,12 +248,13 @@ function notificationText(job: QuranDownloadJob) {
         i18n.t('quran.downloadStoppedBodyAyahs', { done, total }),
     };
   }
+  const tajweed = fontSetOf(job) !== 'v2';
   return {
-    label: i18n.t('quran.downloadingFonts'),
+    label: tajweed ? i18n.t('tajweed.downloading') : i18n.t('quran.downloadingFonts'),
     body: (done: number, total: number) =>
       i18n.t('quran.downloadProgress', { done, total }),
-    doneTitle: i18n.t('quran.downloadDoneTitle'),
-    doneBody: i18n.t('quran.downloadDoneBody'),
+    doneTitle: tajweed ? i18n.t('tajweed.downloadDoneTitle') : i18n.t('quran.downloadDoneTitle'),
+    doneBody: tajweed ? i18n.t('tajweed.downloadDoneBody') : i18n.t('quran.downloadDoneBody'),
     incompleteTitle: i18n.t('quran.downloadIncompleteTitle'),
     incompleteBody: (failed: number) =>
       i18n.t('quran.downloadIncompleteBody', { count: failed }),
@@ -302,7 +312,7 @@ function begin(job: QuranDownloadJob): MushafDownloadHandle {
   if (job.kind === 'audio') {
     return downloadReciterAudio(job.reciterId, onProgress);
   }
-  return downloadAllPageFonts({ onProgress });
+  return downloadAllPageFonts({ onProgress, set: fontSetOf(job) });
 }
 
 /**
@@ -441,7 +451,11 @@ let pendingJob: QuranDownloadJob | null = null;
 function validJob(value: unknown): QuranDownloadJob | null {
   if (!value || typeof value !== 'object') return null;
   const job = value as Record<string, unknown>;
-  if (job.kind === 'fonts') return { kind: 'fonts' };
+  if (job.kind === 'fonts') {
+    return job.set === 'tajweed-light' || job.set === 'tajweed-dark'
+      ? { kind: 'fonts', set: job.set }
+      : { kind: 'fonts' };
+  }
   if (typeof job.reciterId !== 'string' || !job.reciterId) return null;
   if (job.kind === 'audio') return { kind: 'audio', reciterId: job.reciterId };
   if (job.kind === 'surah' && typeof job.surah === 'number') {

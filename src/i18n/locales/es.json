@@ -1553,6 +1553,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Súplicas de Hisn al-Muslim",
     "quranGeometry": "Datos de posición de aleyas (quran.com / proyecto Quran for Android)",
+    "tajweedFonts": "Fuentes de página con colores del tayuid (descargadas, no incluidas) y datos de reglas",
     "recitation": "Audio de recitación (42 recitadores): EveryAyah.com · tiempos de palabras: quran-align (CC BY 4.0)",
     "tafsir": "Textos de tafsir: Ibn Kathir, Maarif-ul-Quran, al-Muyassar",
     "surahHeaderFont": "Caligrafía de encabezados de sura"
@@ -1946,5 +1947,137 @@
     "activeText": "Hasta las {{time}}",
     "endNow": "Terminar ahora",
     "channel": "Silencio a la hora del rezo"
+  },
+  "tajweed": {
+    "title": "Colores del tayuid",
+    "settingsBlurb": "Teñir las letras según su regla, y aprender qué te pide cada color",
+    "toggle": "Colorear el mushaf por regla de tayuid",
+    "toggleHelp": "Las letras se tiñen con los colores del Complejo del Rey Fahd: el gris no se pronuncia, el verde nasaliza, el rojo se alarga, el azul claro rebota. Actívalo mientras aprendes; la tinta simple está a un toque.",
+    "warshNote": "Los colores se dibujan sobre el mushaf de Hafs. Vuelve a Hafs para verlos.",
+    "guideLink": "Cómo leer los colores",
+    "guideTitle": "Leer los colores",
+    "guideIntro": "Cada letra teñida es una regla en acción. Un color es una idea, así que la página te enseña mientras lees: el gris está escrito pero no suena, el verde es un sonido nasal, los rojos son una vocal sostenida más tiempo, el azul claro un rebote y el azul oscuro una letra enfática.",
+    "guidePractice": "Para practicar: activa los colores, abre una página y toca una aleya — su ficha enumera sus reglas, palabra por palabra. Mantén pulsada una palabra para oírla.",
+    "legend": "Los colores",
+    "counts": "{{counts}} tiempos",
+    "example": "Ejemplo",
+    "showInMushaf": "Ver en el mushaf",
+    "hearWord": "Escuchar",
+    "downloadAll": "Descargar todas las páginas coloreadas",
+    "downloadAllHelp": "Las páginas coloreadas son un juego de fuentes aparte, que se obtiene al leer como las simples. Descárgalas todas una vez para leer sin conexión — el juego del tono actual del mushaf; cambia el tono y descarga otra vez para el otro.",
+    "downloadsRow": "Colores del tayuid",
+    "downloadsRowSub": "{{pages}} de {{total}} páginas coloreadas",
+    "sheetSection": "Tayuid",
+    "sheetNone": "Nada en esta aleya está teñido — no se aplica ninguna regla.",
+    "sheetUnavailable": "Las reglas de esta aleya no están disponibles.",
+    "sheetMore": "Todos los colores explicados",
+    "turnOn": "Mostrar los colores en el mushaf",
+    "downloading": "Descargando los colores del tayuid",
+    "downloadStrip": "Descargando los colores del tayuid · {{pct}} %",
+    "downloadDoneTitle": "Los colores del tayuid están listos",
+    "downloadDoneBody": "Todas las páginas coloreadas están en este dispositivo.",
+    "lightPages": "páginas claras",
+    "darkPages": "páginas oscuras",
+    "attribution": "Colores y fuentes de página: King Fahd Glorious Qur'an Printing Complex, Medina (QPC V4 tajweed), vía Quranic Universal Library. Datos de reglas: quran.com.",
+    "family": {
+      "silent": {
+        "name": "Muda",
+        "summary": "Escrita, no pronunciada. La letra está en la página pero la lengua pasa de largo — o se funde con la letra siguiente."
+      },
+      "ghunnah": {
+        "name": "Gunna",
+        "summary": "Un sonido nasal sostenido unos dos tiempos. Cada letra verde es una nun o una mim haciéndolo, en una de sus formas."
+      },
+      "madd": {
+        "name": "Madd",
+        "summary": "Una vocal sostenida más de lo habitual. Cuanto más intenso el rojo, más larga: de dos a seis tiempos."
+      },
+      "qalqalah": {
+        "name": "Qalqala",
+        "summary": "Un pequeño rebote en una ق ط ب ج د quiescente, para que la letra se oiga y no se trague."
+      },
+      "tafkheem": {
+        "name": "Tafjim",
+        "summary": "Una letra enfática, dicha con la parte posterior de la lengua elevada: خ ص ض غ ط ق ظ siempre, la ra tras fatha o damma, y la lam del nombre de Allah tras una de ellas."
+      }
+    },
+    "rule": {
+      "ham_wasl": {
+        "name": "Hamzat al-wasl",
+        "help": "El alif de unión. Solo se pronuncia al empezar por él; unido a la palabra anterior, se omite."
+      },
+      "laam_shamsiyah": {
+        "name": "Lam solar",
+        "help": "La lam de ال no se pronuncia ante una letra solar; esa letra se duplica en su lugar."
+      },
+      "slnt": {
+        "name": "Letra muda",
+        "help": "Una letra que se escribe pero nunca se pronuncia, como la uau de أُوْلَـٰٓئِكَ."
+      },
+      "idgham_wo_ghunnah": {
+        "name": "Idgam sin gunna",
+        "help": "Una nun quiescente o un tanuin se funde del todo en la lam o la ra siguiente, sin sonido nasal."
+      },
+      "idgham_mutajanisayn": {
+        "name": "Idgam de letras afines",
+        "help": "Una letra quiescente se funde en la siguiente, articulada en el mismo punto de la boca — una dal en una ta."
+      },
+      "idgham_mutaqaribayn": {
+        "name": "Idgam de letras cercanas",
+        "help": "Una letra quiescente se funde en una vecina cercana — una lam en una ra, una qaf en una kaf."
+      },
+      "ghunnah": {
+        "name": "Gunna",
+        "help": "Una nun o mim duplicada se nasaliza durante dos tiempos."
+      },
+      "ikhafa": {
+        "name": "Ijfa",
+        "help": "Una nun quiescente o un tanuin se oculta: la lengua no toca, y un leve sonido nasal lleva a la letra siguiente."
+      },
+      "idgham_ghunnah": {
+        "name": "Idgam con gunna",
+        "help": "Una nun quiescente o un tanuin se funde en una ya, nun, mim o uau siguiente, manteniendo el sonido nasal."
+      },
+      "iqlab": {
+        "name": "Iqlab",
+        "help": "Una nun quiescente o un tanuin ante ba se convierte en mim, nasalizada con los labios apenas cerrados."
+      },
+      "ikhafa_shafawi": {
+        "name": "Ijfa shafaui",
+        "help": "Una mim quiescente ante ba se oculta con un leve sonido nasal, los labios apenas cerrados."
+      },
+      "idgham_shafawi": {
+        "name": "Idgam shafaui",
+        "help": "Una mim quiescente se funde en la mim siguiente, con sonido nasal."
+      },
+      "madda_normal": {
+        "name": "Madd natural",
+        "help": "La vocal larga simple: sostenla dos tiempos, no más."
+      },
+      "madda_permissible": {
+        "name": "Madd permitido",
+        "help": "Una vocal larga antes de una pausa, o una letra lin: dos, cuatro o seis tiempos al detenerse en ella."
+      },
+      "madda_obligatory_mottasel": {
+        "name": "Madd obligatorio unido",
+        "help": "Una vocal larga ante una hamza en la misma palabra: sostenla cuatro o cinco tiempos."
+      },
+      "madda_obligatory_monfasel": {
+        "name": "Madd separado",
+        "help": "Una vocal larga al final de una palabra ante una hamza que abre la siguiente: cuatro o cinco tiempos, dos al leer rápido."
+      },
+      "madda_necessary": {
+        "name": "Madd necesario",
+        "help": "Una vocal larga ante un sukun o una shadda permanentes: sostenla seis tiempos. Así se leen las letras que abren una sura."
+      },
+      "qalaqah": {
+        "name": "Qalqala",
+        "help": "Una ق ط ب ج د quiescente recibe un pequeño rebote para oírse con claridad."
+      },
+      "tafkheem": {
+        "name": "Tafjim",
+        "help": "La letra se hace enfática, con la parte posterior de la lengua elevada — siempre en خ ص ض غ ط ق ظ, y en la ra tras fatha o damma y la lam del nombre de Allah."
+      }
+    }
   }
 }

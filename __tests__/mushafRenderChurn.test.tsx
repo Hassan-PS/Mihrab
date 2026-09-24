@@ -137,6 +137,7 @@ jest.mock('../src/quran/MushafTextPage', () => ({
 
 jest.mock('../src/quran/useMushafPageFont', () => ({
   useMushafPageFont: () => ({ family: 'MihrabMushaf0', failed: false }),
+  useMushafFontSet: () => 'v2',
 }));
 
 import MushafTextPageSurface from '../src/quran/MushafTextPageSurface';
@@ -277,7 +278,7 @@ describe('the readers hand the page a handler, not an arrow around one', () => {
     '%s warms fonts once per turn, not through a per-page prop',
     file => {
       const src = read(`src/quran/${file}`);
-      expect(src).toMatch(/warmAround\(currentPage, WARM_RADIUS\)/);
+      expect(src).toMatch(/warmAround\(currentPage, WARM_RADIUS, fontSet\)/);
       expect(src).not.toMatch(/prefetchRadius=/);
       expect(src).toMatch(/windowSize=\{windowSize\}/);
     },
@@ -285,12 +286,12 @@ describe('the readers hand the page a handler, not an arrow around one', () => {
 
   it('the phone reader warms fonts once per turn, not through a per-page prop', () => {
     const phone = read('src/quran/MushafPhoneReader.tsx');
-    expect(phone).toMatch(/warmAround\(currentPage, WARM_RADIUS\)/);
+    expect(phone).toMatch(/warmAround\(currentPage, WARM_RADIUS, fontSet\)/);
     expect(phone).not.toMatch(/prefetchRadius=/);
     // And the font hook does not re-run its pin/load effect for the
     // radius changing on the readers that still pass it.
     const font = read('src/quran/useMushafPageFont.ts');
-    expect(font).toMatch(/\}, \[page, enabled\]\);/);
+    expect(font).toMatch(/\}, \[page, key, set, enabled\]\);/);
   });
 
   // One page at rest, three while a finger is on the pager. The neighbours

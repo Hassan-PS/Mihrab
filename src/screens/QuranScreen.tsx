@@ -1192,6 +1192,23 @@ export function QuranScreen() {
             </Text>
           </Pressable>
         ) : null}
+        {/* The tajwīd colours' door, beside the riwayah's: both are ways
+            to read the same book differently, and the guide is what
+            makes the colours worth turning on. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('tajweed.title', 'Tajweed colours')}
+          onPress={() => navigation.navigate('QuranTajweed')}
+          style={styles.downloadsLink}>
+          <Text
+            style={{
+              color: palette.accentSolid,
+              fontSize: TYPE.label.fontSize,
+              fontWeight: '700',
+            }}>
+            {t('tajweed.title', 'Tajweed colours')} ›
+          </Text>
+        </Pressable>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('downloads.title', 'Manage downloads')}
@@ -2255,6 +2272,7 @@ const styles = StyleSheet.create({
   /** Tilāwah leads as a chip; the two plain links trail behind it. */
   downloadsRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'flex-end',
     alignItems: 'center',
     gap: SPACING.md,

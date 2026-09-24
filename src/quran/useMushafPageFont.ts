@@ -20,7 +20,41 @@ import {
   unpinPageFont,
 } from '../native/MushafFont';
 import { MUSHAF_TOTAL_PAGES } from './mushafImages';
-import { ensurePageFontFile } from './mushafFontStore';
+import {
+  ensurePageFontFile,
+  tajweedFontSet,
+  type MushafFontSet,
+} from './mushafFontStore';
+import { setMushafGlyphSet } from './mushafLayout';
+import { useQuranState } from './quranState';
+
+/**
+ * Which page fonts this reader draws with, from the preference and the
+ * tone: V2, or V4's tajwīd colours in the palette cut for the tone.
+ *
+ * Applying the glyph set here, in render, is deliberate: the layout
+ * geometry (`getPageLayout`) is read in the same render, by the reader for
+ * its column height and by every page surface for its lines, and all of
+ * them have to see the set the fonts are about to be drawn in. An effect
+ * would switch it a frame after the pages had been laid out for the other.
+ */
+export function useMushafFontSet(nightMode: boolean): MushafFontSet {
+  const { prefs } = useQuranState();
+  const set: MushafFontSet = prefs.tajweedColours ? tajweedFontSet(nightMode) : 'v2';
+  setMushafGlyphSet(set === 'v2' ? 'v2' : 'tajweed');
+  return set;
+}
+
+/**
+ * The slot pool's key for a page of a font set. The pool was written for
+ * one set and keys its slots by page; a second set's page 125 is a
+ * different typeface, so it gets a different key. The set's block is
+ * wide enough that no page of one set can collide with another.
+ */
+export function fontKey(page: number, set: MushafFontSet): number {
+  const block = set === 'v2' ? 0 : set === 'tajweed-light' ? 1 : 2;
+  return block * 1000 + page;
+}
 
 /**
  * Register the fonts around `page` ahead of time, so the next page drawn
@@ -41,18 +75,19 @@ import { ensurePageFontFile } from './mushafFontStore';
  * during: a font parse on the main thread in the middle of the turn
  * animation is a dropped frame, and the whole point is smoothness.
  */
-export function warmAround(page: number, radius: number): void {
+export function warmAround(page: number, radius: number, set: MushafFontSet = 'v2'): void {
   const pages: number[] = [];
   for (let d = 1; d <= radius; d++) {
     for (const p of [page + d, page - d]) {
-      if (p >= 1 && p <= MUSHAF_TOTAL_PAGES && !loadedPageFont(p)) pages.push(p);
+      if (p >= 1 && p <= MUSHAF_TOTAL_PAGES && !loadedPageFont(fontKey(p, set))) pages.push(p);
     }
   }
   if (pages.length === 0) return;
   void InteractionManager.runAfterInteractions(() => {
     for (const p of pages) {
-      void ensurePageFontFile(p).then(path => {
-        if (path != null && !loadedPageFont(p)) void acquirePageFont(p, path);
+      void ensurePageFontFile(p, set).then(path => {
+        const key = fontKey(p, set);
+        if (path != null && !loadedPageFont(key)) void acquirePageFont(key, path);
       });
     }
   });
@@ -69,9 +104,11 @@ export function useMushafPageFont(
   page: number,
   enabled: boolean,
   prefetchRadius = 0,
+  set: MushafFontSet = 'v2',
 ): PageFontState {
+  const key = fontKey(page, set);
   const [state, setState] = useState<PageFontState>(() => ({
-    family: enabled ? loadedPageFont(page) : null,
+    family: enabled ? loadedPageFont(key) : null,
     failed: false,
   }));
 
@@ -92,10 +129,10 @@ export function useMushafPageFont(
     const pinOnce = () => {
       if (pinned) return;
       pinned = true;
-      pinPageFont(page);
+      pinPageFont(key);
     };
 
-    const ready = loadedPageFont(page);
+    const ready = loadedPageFont(key);
     if (ready) {
       // Registered already — warmed by a neighbour, or simply still in the
       // pool. Nothing to fetch and nothing to check: a font the platform
@@ -106,13 +143,13 @@ export function useMushafPageFont(
     } else {
       setState({ family: null, failed: false });
       void (async () => {
-        const path = await ensurePageFontFile(page);
+        const path = await ensurePageFontFile(page, set);
         if (!alive) return;
         if (path == null) {
           setState({ family: null, failed: true });
           return;
         }
-        const family = await acquirePageFont(page, path);
+        const family = await acquirePageFont(key, path);
         if (!alive) return;
         if (family == null) {
           setState({ family: null, failed: true });
@@ -125,9 +162,9 @@ export function useMushafPageFont(
 
     return () => {
       alive = false;
-      if (pinned) unpinPageFont(page);
+      if (pinned) unpinPageFont(key);
     };
-  }, [page, enabled]);
+  }, [page, key, set, enabled]);
 
   // Its own effect, so the radius changing does not re-run the one above.
   // It did: the reader hands the radius to the page being read and 0 to
@@ -136,9 +173,9 @@ export function useMushafPageFont(
   // a render of both neighbours for a page that had not moved.
   useEffect(() => {
     if (enabled && mushafFontAvailable && prefetchRadius > 0) {
-      warmAround(page, prefetchRadius);
+      warmAround(page, prefetchRadius, set);
     }
-  }, [page, enabled, prefetchRadius]);
+  }, [page, enabled, prefetchRadius, set]);
 
   return state;
 }

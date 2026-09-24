@@ -14,6 +14,7 @@ import { MonthTimesScreen } from '../screens/MonthTimesScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { QuranSurahScreen } from '../screens/QuranSurahScreen';
 import { QuranDownloadsScreen } from '../screens/QuranDownloadsScreen';
+import { TajweedGuideScreen } from '../quran/tajweed/TajweedGuideScreen';
 import { TilawahScreen } from '../screens/quran/TilawahScreen';
 import { ShareMonthScreen } from '../screens/ShareMonthScreen';
 import { BackupScreen } from '../screens/BackupScreen';
@@ -230,6 +231,14 @@ export function RootNavigator() {
         component={QuranDownloadsScreen}
         options={{
           title: t('downloads.title', 'Manage downloads'),
+          headerLargeTitle: false,
+        }}
+      />
+      <Stack.Screen
+        name="QuranTajweed"
+        component={TajweedGuideScreen}
+        options={{
+          title: t('tajweed.guideTitle', 'Reading the colours'),
           headerLargeTitle: false,
         }}
       />

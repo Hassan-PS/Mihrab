@@ -127,6 +127,38 @@ the nominal space per gap. Every page then renders at the same physical width,
 which is why the text does not jump size as you turn pages, even though the
 604 fonts are drawn at different design sizes.
 
+### 3. Tajwīd colours
+
+A second set of page faces, off by default (Settings → Quran → Tajweed
+colours): the King Fahd Complex's QPC V4 tajwīd fonts, which carry the
+same glyph codes as V2 with each letter's rule painted in the Complex's
+ink — grey silent, green ghunnah, four reds by madd length, light blue
+qalqalah, dark blue tafkhīm. They are COLR/CPAL fonts and the native line
+view draws them as such; the `<Text>` fallback does not, so the colours
+are Hafs-only and only on the page-font surface.
+
+What may change with the set, and what may not:
+
+- The glyphs are cut a little wider than V2's, so a line is measured and
+  hit-tested with the V4 advances (`mushafLayoutV4Advances.json`, read
+  when `setMushafGlyphSet('tajweed')` is live — the readers apply it from
+  their render, before the first `getPageLayout` of the frame). The
+  measure is the widest V4 line, the font size follows it, and the words
+  on every line are the print's, as always.
+- The page's own ink: the text, the marks and the medallion's outline are
+  pointed at the palette's "foreground" entry, so the reader's tone and
+  the reading marker colour them as they colour V2. The medallion's
+  three fills are cleared. Only the rule colours are the font's.
+- Two files per page, one per palette (`QCF4T{page}L.ttf` / `…D.ttf`),
+  because neither platform lets the app pick a palette at draw time; the
+  store fetches the one the tone needs (`tajweedFontSet`).
+
+Built by `scripts/mushaf/build_tajweed_assets.py` (`fonts` for the faces,
+manifest and advances; `rules` for `assets/quran/tajweed/{NNN}.json`, the
+per-word rule spans behind the āyah sheet's Tajweed section and the guide,
+from quran.com's `text_uthmani_tajweed`). The rule catalogue — ids, inks,
+examples — is `src/quran/tajweed/rules.ts`.
+
 ## Single page vs dual page
 
 The decision is about **available width per page**, not about the device name.

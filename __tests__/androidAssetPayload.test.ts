@@ -105,6 +105,7 @@ describe('the repo assets/ folder', () => {
     expect(ignored).not.toContain('quran');
     expect(readdirSync(path.join(ASSETS, 'quran')).sort()).toEqual([
       'surahs',
+      'tajweed',
       'translations',
     ]);
   });

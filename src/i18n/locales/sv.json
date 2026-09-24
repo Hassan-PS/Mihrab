@@ -1553,6 +1553,7 @@
     "scheherazade": "Scheherazade New",
     "hisnulMuslim": "Hisn al-Muslim-duor",
     "quranGeometry": "Data för ayah-positioner (quran.com / projektet Quran for Android)",
+    "tajweedFonts": "Sidtypsnitt med tajwidfärger (nedladdade, inte medföljande) och regeldata",
     "recitation": "Recitationsljud (42 recitatörer): EveryAyah.com · ordtiming: quran-align (CC BY 4.0)",
     "tafsir": "Tafsir-texter: Ibn Kathir, Maarif-ul-Quran, al-Muyassar",
     "surahHeaderFont": "Kalligrafi för surarubriker"
@@ -1946,5 +1947,137 @@
     "activeText": "Till {{time}}",
     "endNow": "Avsluta nu",
     "channel": "Tyst vid bönetid"
+  },
+  "tajweed": {
+    "title": "Tajwidfärger",
+    "settingsBlurb": "Färga bokstäverna efter regel, och lär dig vad varje färg ber dig om",
+    "toggle": "Färga mushafen efter tajwidregel",
+    "toggleHelp": "Bokstäverna tonas i Kung Fahd-komplexets färger: grått uttalas inte, grönt nasalt, rött förlängs, ljusblått studsar. Slå på det medan du lär dig; vanligt bläck är ett tryck bort.",
+    "warshNote": "Färgerna ritas på Hafs-mushafen. Byt tillbaka till Hafs för att se dem.",
+    "guideLink": "Så läser du färgerna",
+    "guideTitle": "Att läsa färgerna",
+    "guideIntro": "Varje färgad bokstav är en regel i arbete. En färg är en idé, så sidan lär dig medan du läser: grått är skrivet men uttalas inte, grönt är ett nasalt ljud, de röda är en vokal som hålls längre, ljusblått är en studs och mörkblått en tung bokstav.",
+    "guidePractice": "Att öva: slå på färgerna, öppna en sida och tryck på en aya — dess blad listar reglerna i den, ord för ord. Håll ett ord för att höra det läsas.",
+    "legend": "Färgerna",
+    "counts": "{{counts}} slag",
+    "example": "Exempel",
+    "showInMushaf": "Visa i mushafen",
+    "hearWord": "Hör det",
+    "downloadAll": "Ladda ner alla färgade sidor",
+    "downloadAllHelp": "De färgade sidorna är en egen uppsättning sidtypsnitt som hämtas medan du läser, som de vanliga. Ladda ner alla en gång för att läsa offline — uppsättningen för tonen mushafen är i nu; byt ton och ladda ner igen för den andra.",
+    "downloadsRow": "Tajwidfärger",
+    "downloadsRowSub": "{{pages}} av {{total}} färgade sidor",
+    "sheetSection": "Tajwid",
+    "sheetNone": "Inget i denna aya är färgat — ingen regel gäller.",
+    "sheetUnavailable": "Reglerna för denna aya är inte tillgängliga.",
+    "sheetMore": "Alla färger förklarade",
+    "turnOn": "Visa färgerna i mushafen",
+    "downloading": "Laddar ner tajwidfärgerna",
+    "downloadStrip": "Laddar ner tajwidfärgerna · {{pct}} %",
+    "downloadDoneTitle": "Tajwidfärgerna är klara",
+    "downloadDoneBody": "Alla färgade sidor finns på den här enheten.",
+    "lightPages": "ljusa sidor",
+    "darkPages": "mörka sidor",
+    "attribution": "Färger och sidtypsnitt: King Fahd Glorious Qur'an Printing Complex, Madinah (QPC V4 tajweed), via Quranic Universal Library. Regeldata: quran.com.",
+    "family": {
+      "silent": {
+        "name": "Tyst",
+        "summary": "Skrivet, inte uttalat. Bokstaven står på sidan men tungan går förbi den — eller så smälter den in i bokstaven efter."
+      },
+      "ghunnah": {
+        "name": "Ghunnah",
+        "summary": "Ett nasalt ljud som hålls ungefär två slag. Varje grön bokstav är en nun eller mim som gör detta, i någon av sina former."
+      },
+      "madd": {
+        "name": "Madd",
+        "summary": "En vokal som hålls längre än vanligt. Ju djupare rött, desto längre: från två slag upp till sex."
+      },
+      "qalqalah": {
+        "name": "Qalqalah",
+        "summary": "En liten studs på ett stilla ق ط ب ج د, så att bokstaven hörs och inte sväljs."
+      },
+      "tafkheem": {
+        "name": "Tafkhim",
+        "summary": "En tung bokstav, sagd med tungans bakre del höjd: خ ص ض غ ط ق ظ alltid, ra efter fatha eller damma, och lam i Allahs namn efter en sådan."
+      }
+    },
+    "rule": {
+      "ham_wasl": {
+        "name": "Hamzat al-wasl",
+        "help": "Bindealifen. Den uttalas bara när du börjar på den; bunden till ordet före hoppas den över."
+      },
+      "laam_shamsiyah": {
+        "name": "Sol-lam",
+        "help": "Lam i ال uttalas inte före en solbokstav; den bokstaven dubbleras i stället."
+      },
+      "slnt": {
+        "name": "Tyst bokstav",
+        "help": "En bokstav som skrivs men aldrig uttalas, som waw i أُوْلَـٰٓئِكَ."
+      },
+      "idgham_wo_ghunnah": {
+        "name": "Idgham utan ghunnah",
+        "help": "Ett stilla nun eller tanwin smälter helt in i lam eller ra efter det, utan nasalt ljud."
+      },
+      "idgham_mutajanisayn": {
+        "name": "Idgham av lika bokstäver",
+        "help": "En stilla bokstav smälter in i nästa, som bildas på samma ställe i munnen — ett dal i ett ta."
+      },
+      "idgham_mutaqaribayn": {
+        "name": "Idgham av nära bokstäver",
+        "help": "En stilla bokstav smälter in i en nära granne — ett lam i ett ra, ett qaf i ett kaf."
+      },
+      "ghunnah": {
+        "name": "Ghunnah",
+        "help": "Ett dubblerat nun eller mim nasaleras i två slag."
+      },
+      "ikhafa": {
+        "name": "Ikhfa",
+        "help": "Ett stilla nun eller tanwin döljs: tungan rör inte, och ett lätt nasalt ljud leder in i nästa bokstav."
+      },
+      "idgham_ghunnah": {
+        "name": "Idgham med ghunnah",
+        "help": "Ett stilla nun eller tanwin smälter in i ett följande ya, nun, mim eller waw, med det nasala ljudet kvar."
+      },
+      "iqlab": {
+        "name": "Iqlab",
+        "help": "Ett stilla nun eller tanwin före ba blir ett mim, nasalerat med läpparna lätt slutna."
+      },
+      "ikhafa_shafawi": {
+        "name": "Ikhfa shafawi",
+        "help": "Ett stilla mim före ba döljs med ett lätt nasalt ljud, läpparna knappt slutna."
+      },
+      "idgham_shafawi": {
+        "name": "Idgham shafawi",
+        "help": "Ett stilla mim smälter in i mim efter det, med nasalt ljud."
+      },
+      "madda_normal": {
+        "name": "Naturlig madd",
+        "help": "Den vanliga långa vokalen: håll den två slag, inte mer."
+      },
+      "madda_permissible": {
+        "name": "Tillåten madd",
+        "help": "En lång vokal före en paus, eller en lin-bokstav: två, fyra eller sex slag när du stannar på den."
+      },
+      "madda_obligatory_mottasel": {
+        "name": "Obligatorisk sammanhängande madd",
+        "help": "En lång vokal före en hamza i samma ord: håll den fyra eller fem slag."
+      },
+      "madda_obligatory_monfasel": {
+        "name": "Åtskild madd",
+        "help": "En lång vokal i slutet av ett ord före en hamza som inleder nästa: fyra eller fem slag, två vid snabb läsning."
+      },
+      "madda_necessary": {
+        "name": "Nödvändig madd",
+        "help": "En lång vokal före ett sukun eller en shadda som aldrig försvinner: håll den sex slag. Surornas inledande bokstäver läses så."
+      },
+      "qalaqah": {
+        "name": "Qalqalah",
+        "help": "Ett stilla ق ط ب ج د får en liten studs så att det hörs tydligt."
+      },
+      "tafkheem": {
+        "name": "Tafkhim",
+        "help": "Bokstaven görs tung, med tungans bakre del höjd — alltid för خ ص ض غ ط ق ظ, och för ra efter fatha eller damma och lam i Allahs namn."
+      }
+    }
   }
 }

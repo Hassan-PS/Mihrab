@@ -28,7 +28,7 @@ import { TYPE, arabicTextStyle } from '../../theme/typography';
 import { READING_BASE } from '../../theme/readingText';
 import { useReadingText } from '../../hooks/useReadingText';
 import { findSurah, loadSurah } from '../quran';
-import { resolveRiwayah } from '../riwayat';
+import { resolveRiwayah, riwayahById } from '../riwayat';
 import { riwayahAyahText } from '../riwayahData';
 import { getAyahTranslation, QURAN_TRANSLATIONS } from '../translations';
 import { useActiveEdition } from '../useActiveEdition';
@@ -60,6 +60,7 @@ import {
 import { playFromAyah, playRange } from '../audio/playback';
 import { RecitationControls } from '../audio/RecitationControls';
 import { ShareAyahModal } from './ShareAyahModal';
+import { TajweedAyahSection } from '../tajweed/TajweedAyahSection';
 import { ShareIcon } from '../../theme/icons';
 import {
   ayahShareText,
@@ -663,6 +664,19 @@ export function AyahActionSheet({
                 </Text>
               )}
             </View>
+          ) : null}
+
+          {/* Tajwīd: the āyah's tinted letters and what each colour asks.
+              Only where the muṣḥaf can draw them — the Warsh reader has
+              no rules data and no coloured faces. */}
+          {riwayahById(state.prefs.riwayah).render !== 'unicode' ? (
+            <TajweedAyahSection
+              surah={surah}
+              ayah={ayah}
+              onClose={onClose}
+              toggleStyle={styles.tafsirToggle}
+              toggleLabelStyle={styles.tafsirToggleLabel}
+            />
           ) : null}
 
           {/* Bookmark colors — one bookmark per ayah, tap active color to remove. */}

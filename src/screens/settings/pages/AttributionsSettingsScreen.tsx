@@ -42,6 +42,13 @@ export function AttributionsSettingsScreen() {
       url: 'https://github.com/Hassan-PS/Mihrab/releases/tag/mushaf-assets-v2',
     },
     {
+      label: t('attributions.tajweedFonts', {
+        defaultValue: 'Tajweed colour page fonts (downloaded, not bundled) and rule data',
+      }),
+      sub: 'King Fahd Glorious Quran Printing Complex · QPC V4 tajweed via QUL · rules via quran.com',
+      url: 'https://qul.tarteel.ai/resources/font/',
+    },
+    {
       label: t('attributions.quranGeometry', {
         defaultValue:
           'Ayah position data (quran.com / Quran for Android project)',
