@@ -119,6 +119,94 @@ export function warshRuns(
   return runs;
 }
 
+// ── Keeping a coloured word joined ───────────────────────────────────
+
+const ZWJ = '\u200d';
+
+/** A combining mark (ḥaraka, Qurʾānic sign) — it rides on a letter. */
+function isMark(c: number): boolean {
+  return (
+    (c >= 0x0610 && c <= 0x061a) ||
+    (c >= 0x064b && c <= 0x065f) ||
+    c === 0x0670 ||
+    (c >= 0x06d6 && c <= 0x06dc) ||
+    (c >= 0x06df && c <= 0x06e4) ||
+    c === 0x06e7 ||
+    c === 0x06e8 ||
+    (c >= 0x06ea && c <= 0x06ed) ||
+    (c >= 0x08d3 && c <= 0x08ff) ||
+    c === ZWJ.charCodeAt(0)
+  );
+}
+
+/** Letters that join on neither side, or only to the letter before. */
+const RIGHT_JOINING = new Set([
+  0x0622, 0x0623, 0x0624, 0x0625, 0x0627, 0x0629, 0x062f, 0x0630, 0x0631,
+  0x0632, 0x0648, 0x0671, 0x0672, 0x0673, 0x0675, 0x0676, 0x0677, 0x06c0,
+  0x06c3, 0x06c4, 0x06c5, 0x06c6, 0x06c7, 0x06c8, 0x06c9, 0x06ca, 0x06cb,
+  0x06cd, 0x06cf, 0x06d2, 0x06d3, 0x06d5,
+]);
+
+function isArabicLetter(c: number): boolean {
+  return (
+    (c >= 0x0620 && c <= 0x064a) ||
+    (c >= 0x066e && c <= 0x066f) ||
+    (c >= 0x0671 && c <= 0x06d3) ||
+    c === 0x06d5 ||
+    (c >= 0x06fa && c <= 0x06fc)
+  );
+}
+
+/** Does this letter reach forward to the next one (dual-joining)? */
+function joinsForward(c: number): boolean {
+  return (isArabicLetter(c) || c === 0x0640) && c !== 0x0621 && !RIGHT_JOINING.has(c);
+}
+
+/** Does this letter reach back to the one before it? */
+function joinsBack(c: number): boolean {
+  return (isArabicLetter(c) || c === 0x0640) && c !== 0x0621;
+}
+
+function lastBase(text: string): number | null {
+  for (let i = text.length - 1; i >= 0; i--) {
+    const c = text.charCodeAt(i);
+    if (!isMark(c)) return c;
+  }
+  return null;
+}
+
+function firstBase(text: string): number | null {
+  for (let i = 0; i < text.length; i++) {
+    const c = text.charCodeAt(i);
+    if (!isMark(c)) return c;
+  }
+  return null;
+}
+
+/**
+ * The runs as they are DRAWN: a zero-width joiner on each side of every
+ * cut that falls between two letters that join.
+ *
+ * Android shapes each styled run of a nested Text on its own, so a word
+ * cut into colours came apart into isolated letters — هُدًى drawn as ه
+ * and دى, every line wider than the measure. The joiner tells the shaper
+ * the letter continues past the cut, so each run picks the same joined
+ * form it has in the whole word; it has no width and draws nothing.
+ */
+export function shapedRuns(runs: readonly WarshRun[]): WarshRun[] {
+  const out = runs.map(r => ({ ...r }));
+  for (let i = 0; i + 1 < out.length; i++) {
+    const before = lastBase(out[i].text);
+    const after = firstBase(out[i + 1].text);
+    if (before == null || after == null) continue;
+    if (joinsForward(before) && joinsBack(after)) {
+      out[i].text += ZWJ;
+      out[i + 1].text = ZWJ + out[i + 1].text;
+    }
+  }
+  return out;
+}
+
 // ── Loading ──────────────────────────────────────────────────────────
 
 const cache = new Map<number, RawSurah | null>();

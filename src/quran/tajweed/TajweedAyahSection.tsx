@@ -22,7 +22,12 @@ import { setQuranPrefs, useQuranState } from '../quranState';
 import { riwayahById, riwayahFontFamily } from '../riwayat';
 import { riwayahAyahText } from '../riwayahData';
 import { loadTajweedAyah, type TajweedAyah } from './tajweedData';
-import { loadWarshSurah, warshAyahWords, type WarshTajweedWord } from './warshTajweed';
+import {
+  loadWarshSurah,
+  shapedRuns,
+  warshAyahWords,
+  type WarshTajweedWord,
+} from './warshTajweed';
 import { tajweedInk, type TajweedRule } from './rules';
 import { TajweedSwatch } from './TajweedText';
 import { ayahGlyphWords, TajweedAyahGlyphs, TajweedWordGlyph } from './TajweedAyahGlyphs';
@@ -251,7 +256,7 @@ function WarshTajweedBody({
   for (const w of words ?? []) for (const r of w.rules) if (!rules.includes(r)) rules.push(r);
 
   const drawn = (w: WarshTajweedWord) =>
-    w.runs.map((run, i) =>
+    shapedRuns(w.runs).map((run, i) =>
       run.rule ? (
         <Text key={i} style={{ color: tajweedInk(run.rule, isDark) }}>
           {run.text}

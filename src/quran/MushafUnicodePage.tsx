@@ -45,6 +45,7 @@ import {
   loadWarshSurah,
   warshAyahWords,
   warshSurahIfLoaded,
+  shapedRuns,
   type WarshTajweedWord,
 } from './tajweed/warshTajweed';
 import { tajweedInk } from './tajweed/rules';
@@ -693,7 +694,7 @@ function useWarshTajweed(riwayah: RiwayahId, surahs: readonly number[]): WarshTa
 function WordRuns({ word, darkPage }: { word: WarshTajweedWord; darkPage: boolean }) {
   return (
     <>
-      {word.runs.map((run, i) =>
+      {shapedRuns(word.runs).map((run, i) =>
         run.rule ? (
           <Text key={i} style={{ color: tajweedInk(run.rule, darkPage) }}>
             {run.text}
@@ -1057,7 +1058,11 @@ function PrintedPageBody({
     return start;
   }, [rows, tajweed]);
 
-  const fitKey = `${pageKey}:${fontFamily}:${Math.round(width)}`;
+  // Coloured lines are measured apart from plain ones: they are the same
+  // width only as long as the joiners hold, and a width measured on one
+  // must never justify the other.
+  const coloured = tajweed !== NO_TAJWEED;
+  const fitKey = `${pageKey}:${fontFamily}:${Math.round(width)}${coloured ? ':t' : ''}`;
   const [ems, setEms] = React.useState<number[] | null>(
     () => PRINTED_LINE_CACHE.get(fitKey) ?? null,
   );

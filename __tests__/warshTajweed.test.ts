@@ -12,7 +12,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { TAJWEED_RULES, familiesFor, riwayahHasTajweed, rulesOfFamily, tajweedRule } from '../src/quran/tajweed/rules';
-import { warshAyahWords, warshRuns, warshWordHash } from '../src/quran/tajweed/warshTajweed';
+import {
+  shapedRuns,
+  warshAyahWords,
+  warshRuns,
+  warshWordHash,
+} from '../src/quran/tajweed/warshTajweed';
 
 type RawWord = string | [string, Array<[number, number, number]>] | null;
 type RawSurah = { v: number; rules: string[]; ayahs: RawWord[][] };
@@ -120,5 +125,37 @@ describe('which riwayat are coloured', () => {
     expect(familiesFor('warsh')).toContain('warsh');
     expect(rulesOfFamily('madd', 'hafs').map(r => r.id)).not.toContain('madd_badal');
     expect(rulesOfFamily('madd', 'warsh').map(r => r.id)).toContain('madd_badal');
+  });
+});
+
+describe('shapedRuns — a coloured word stays joined', () => {
+  const ZWJ = '\u200d';
+  const rule = tajweedRule('ghunnah')!;
+
+  it('puts a joiner on both sides of a cut between two joining letters', () => {
+    // هُدًى cut after the hā: hā joins forward, dāl joins back.
+    const runs = shapedRuns([
+      { text: 'هُ', rule },
+      { text: 'دًى', rule: null },
+    ]);
+    expect(runs).toEqual([
+      { text: 'هُ' + ZWJ, rule },
+      { text: ZWJ + 'دًى', rule: null },
+    ]);
+  });
+
+  it('adds nothing after a letter that does not join forward', () => {
+    // دًى cut after the dāl: dāl never joins the letter after it.
+    const runs = shapedRuns([
+      { text: 'دً', rule },
+      { text: 'ى', rule: null },
+    ]);
+    expect(runs.map(r => r.text)).toEqual(['دً', 'ى']);
+  });
+
+  it('keeps the word itself: stripping the joiners gives it back', () => {
+    const word = 'فَإِمَّا';
+    const runs = shapedRuns(warshRuns(word, [{ rule, start: 2, end: 6 }]));
+    expect(runs.map(r => r.text).join('').split(ZWJ).join('')).toBe(word);
   });
 });
