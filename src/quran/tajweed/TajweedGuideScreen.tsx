@@ -22,13 +22,13 @@ import { RADIUS, SPACING } from '../../theme/tokens';
 import { TYPE, arabicTextStyle } from '../../theme/typography';
 import { findPageForAyah } from '../pages';
 import { setQuranPrefs, useQuranState } from '../quranState';
-import { riwayahById } from '../riwayat';
 import {
-  TAJWEED_FAMILIES,
   rulesOfFamily,
   tajweedInk,
   type TajweedFamilyId,
   type TajweedRule,
+  familiesFor,
+  riwayahHasTajweed,
 } from './rules';
 import { speakWord } from './TajweedAyahSection';
 import { TajweedSwatch } from './TajweedText';
@@ -51,7 +51,9 @@ export function TajweedGuideScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const systemBottom = useSystemNavigationReserve();
   const { prefs } = useQuranState();
-  const hafs = riwayahById(prefs.riwayah).render !== 'unicode';
+  // Warsh has colours of its own (issue #58) and rules Ḥafṣ does not.
+  const coloured = riwayahHasTajweed(prefs.riwayah);
+  const warsh = prefs.riwayah === 'warsh';
   const [busy, setBusy] = useState<string | null>(null);
 
   const hear = useCallback(async (rule: TajweedRule) => {
@@ -88,7 +90,7 @@ export function TajweedGuideScreen() {
           {t('tajweed.guideIntro')}
         </Text>
 
-        {hafs ? (
+        {coloured ? (
           <View style={[styles.card, styles.toggleRow, card]}>
             <Text style={[styles.toggleLabel, { color: palette.text }]}>
               {t('tajweed.toggle', 'Colour the mushaf by tajweed rule')}
@@ -140,8 +142,8 @@ export function TajweedGuideScreen() {
           {t('tajweed.guidePractice')}
         </Text>
 
-        {TAJWEED_FAMILIES.map(family => {
-          const rules = rulesOfFamily(family);
+        {familiesFor(prefs.riwayah).map(family => {
+          const rules = rulesOfFamily(family, prefs.riwayah);
           const lead = rules[0];
           return (
             <View key={family} style={[styles.card, card]}>
@@ -187,7 +189,7 @@ export function TajweedGuideScreen() {
                     </Text>
                   </View>
                   <View style={styles.actions}>
-                    {rule.id !== 'tafkheem' ? (
+                    {rule.id !== 'tafkheem' && !warsh ? (
                       <Pressable
                         accessibilityRole="button"
                         disabled={busy === rule.id}

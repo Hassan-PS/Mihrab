@@ -546,3 +546,25 @@ word whose glyph has a layer in the tafkhīm ink carries the rule.
 Also considered: `cpfair/quran-tajweed` (CC BY 4.0, Ḥafṣ, Tanzil text) —
 a sound fallback if the API's markup ever stops being available.
 
+### Warsh — issue #58
+
+No published Warsh tajwīd data was reliable enough to colour a muṣḥaf
+people memorise from (`ahkam_tajweed` was tested and set aside on the
+issue: the basmalah's rāʾs, ذِكْراً, qalqalah after naql). So the rules
+are Mihrab's own, in `scripts/mushaf/warsh_tajweed.py`, over the KFGQPC
+Warsh text the app already fetches (Quranpedia `mushafs/4`). That text
+writes most of the recitation into its orthography — an assimilated nūn
+bare, tanwīn open, iqlāb's small mīm, naql moved onto the letter, taqlīl
+as the low dot — and the script reads it, adding the rules the text does
+not write (the rāʾ, the lām, madd al-badal, līn before a hamza) from
+*Uṣūl riwāyat Warsh min ṭarīq al-Shāṭibiyyah — suʾāl wa-jawāb* (Muḥammad
+Aḥmad ʿAbd al-Jalīl), the reference proposed on the issue.
+`scripts/mushaf/test_warsh_tajweed.py` holds the issue's fixtures, each
+cited, and `build_warsh_tajweed.py` will not write the files unless they
+pass.
+
+`assets/quran/tajweed-warsh/{NNN}.json` is the Ḥafṣ shape with a hash
+where the word would be: Mihrab does not redistribute the Warsh text, so
+the files carry FNV-1a hashes of each word and the app colours only a
+word whose text on the device hashes the same.
+

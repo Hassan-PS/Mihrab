@@ -1958,7 +1958,7 @@
     "settingsBlurb": "Färga bokstäverna efter regel, och lär dig vad varje färg ber dig om",
     "toggle": "Färga mushafen efter tajwidregel",
     "toggleHelp": "Bokstäverna tonas i Kung Fahd-komplexets färger: grått uttalas inte, grönt nasalt, rött förlängs, ljusblått studsar. Slå på det medan du lär dig; vanligt bläck är ett tryck bort.",
-    "warshNote": "Färgerna ritas på Hafs-mushafen. Byt tillbaka till Hafs för att se dem.",
+    "warshNote": "Tajweedfärgerna ritas på Hafs- och Warsh-mushafen. Byt till någon av dem för att se dem.",
     "guideLink": "Så läser du färgerna",
     "guideTitle": "Att läsa färgerna",
     "guideIntro": "Varje färgad bokstav är en regel i arbete. En färg är en idé, så sidan lär dig medan du läser: grått är skrivet men uttalas inte, grönt är ett nasalt ljud, de röda är en vokal som hålls längre, ljusblått är en studs och mörkblått en tung bokstav.",
@@ -2012,6 +2012,10 @@
       "tafkheem": {
         "name": "Tafkhim",
         "summary": "En tung bokstav, sagd med tungans bakre del höjd: خ ص ض غ ط ق ظ alltid, ra efter fatha eller damma, och lam i Allahs namn efter en sådan."
+      },
+      "warsh": {
+        "name": "Warshs egna",
+        "summary": "Det som Warsh-läsningen gör annorlunda: en hamza som flyttas eller mjukas upp, ett ā som dras mot ē och ett rā som förblir lätt."
       }
     },
     "rule": {
@@ -2090,6 +2094,34 @@
       "tafkheem": {
         "name": "Tafkhim",
         "help": "Bokstaven görs tung, med tungans bakre del höjd — alltid för خ ص ض غ ط ق ظ, och för ra efter fatha eller damma och lam i Allahs namn."
+      },
+      "madd_badal": {
+        "name": "Madd al-badal",
+        "help": "En lång vokal direkt efter en hamza, som i ءَامَنُواْ. Warsh kan hålla den två, fyra eller sex slag."
+      },
+      "leen_mahmooz": {
+        "name": "Līn före hamza",
+        "help": "Ett stilla wāw eller yā efter en fatḥa, med en hamza efter sig i samma ord — شَےْءٖ. Warsh håller det fyra eller sex slag."
+      },
+      "laam_taghleedh": {
+        "name": "Tungt lām",
+        "help": "Ett öppet lām efter ett öppet eller stilla ṣād, ṭā eller ẓā uttalas tungt hos Warsh, som i اَ۬لصَّلَوٰةَ."
+      },
+      "raa_tarqeeq": {
+        "name": "Lätt rā",
+        "help": "Warsh håller rā lätt efter en kasra eller ett stilla yā — خَيْرٞ — där Ḥafṣ gör det tungt. Utländska namn, en tung bokstav efter och några bestämda ord förblir tunga."
+      },
+      "naql": {
+        "name": "Naql",
+        "help": "Hamzan faller bort och dess vokal flyttas till den stilla bokstaven före: قَدَ اَفْلَحَ läses qada-flaḥa."
+      },
+      "tasheel": {
+        "name": "Tashīl",
+        "help": "Den andra av två hamzor mjukas upp, mellan en hamza och en lång vokal, som i شُهَدَآءَ ا۪ذْ."
+      },
+      "taqleel": {
+        "name": "Taqlīl",
+        "help": "Det långa ā dras lätt mot ē, mellan fatḥa och imāla. Den lilla pricken under bokstaven visar det: اَ۬لنَّصَٰر۪ىٰ."
       }
     }
   }

@@ -40,7 +40,15 @@
  * A page that reflows once on its first appearance is a smaller fault
  * than a page that stays blank because a measurement never arrived.
  */
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  loadWarshSurah,
+  warshAyahWords,
+  warshSurahIfLoaded,
+  type WarshTajweedWord,
+} from './tajweed/warshTajweed';
+import { tajweedInk } from './tajweed/rules';
+import { useQuranState } from './quranState';
 import {
   Platform,
   StyleSheet,
@@ -621,6 +629,83 @@ const TEXT_ALIGN: 'justify' | 'right' =
     ? 'right'
     : 'justify';
 
+/** The words of one āyah with their tajwīd runs, or null for plain ink. */
+export type WarshTajweedLookup = (surah: number, ayah: number) => WarshTajweedWord[] | null;
+
+const NO_TAJWEED: WarshTajweedLookup = () => null;
+
+/**
+ * Is this ink light — i.e. is the page it is written on dark? The colours
+ * come in two palettes, a light page's and a dark one's, and the page
+ * hands over only its inks.
+ */
+function inkIsLight(ink: string): boolean {
+  const m = /^#?([0-9a-f]{6})/i.exec(ink.trim());
+  if (!m) return false;
+  const n = parseInt(m[1], 16);
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+  return 0.299 * r + 0.587 * g + 0.114 * b > 140;
+}
+
+/**
+ * The Warsh tajwīd colours for the āyāt on a page — see
+ * `tajweed/warshTajweed.ts`. Off unless the reader asked for the colours
+ * and this is the Warsh muṣḥaf; the surah files load on first use and the
+ * page redraws in colour when they arrive.
+ */
+function useWarshTajweed(riwayah: RiwayahId, surahs: readonly number[]): WarshTajweedLookup {
+  const { prefs } = useQuranState();
+  const on = prefs.tajweedColours && riwayah === 'warsh';
+  const [, setLoaded] = useState(0);
+  const key = surahs.join(',');
+  useEffect(() => {
+    if (!on) return undefined;
+    let live = true;
+    const missing = surahs.filter(s => warshSurahIfLoaded(s) === undefined);
+    if (missing.length === 0) return undefined;
+    void Promise.all(missing.map(loadWarshSurah)).then(() => {
+      if (live) setLoaded(n => n + 1);
+    });
+    return () => {
+      live = false;
+    };
+    // `key` is `surahs`, by value.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [on, key]);
+  const table = on ? loadRiwayahText(riwayah) : null;
+  const memo = useRef(new Map<string, WarshTajweedWord[] | null>());
+  if (!on || !table) return NO_TAJWEED;
+  return (surah, ayah) => {
+    const k = `${surah}:${ayah}`;
+    if (memo.current.has(k)) return memo.current.get(k)!;
+    const data = warshSurahIfLoaded(surah);
+    const text = table[k];
+    if (!data || !text) return null; // not loaded yet: do not cache the miss
+    const words = warshAyahWords(data, ayah, text);
+    memo.current.set(k, words);
+    return words;
+  };
+}
+
+/** A word drawn in its tajwīd runs — nested Text, so it stays one shaped word. */
+function WordRuns({ word, darkPage }: { word: WarshTajweedWord; darkPage: boolean }) {
+  return (
+    <>
+      {word.runs.map((run, i) =>
+        run.rule ? (
+          <Text key={i} style={{ color: tajweedInk(run.rule, darkPage) }}>
+            {run.text}
+          </Text>
+        ) : (
+          run.text
+        ),
+      )}
+    </>
+  );
+}
+
 function MushafUnicodePage({
   page,
   riwayah,
@@ -640,6 +725,16 @@ function MushafUnicodePage({
   );
   const extent = useMemo(() => pageExtent(blocks), [blocks]);
   const fontFamily = riwayahFontFamily(riwayahById(riwayah));
+  const pageSurahs = useMemo(() => {
+    const out: number[] = [];
+    for (const b of blocks) {
+      if (b.kind !== 'text') continue;
+      for (const a of b.ayahs) if (!out.includes(a.surah)) out.push(a.surah);
+    }
+    return out;
+  }, [blocks]);
+  const tajweed = useWarshTajweed(riwayah, pageSurahs);
+  const darkPage = inkIsLight(colors.text);
 
   /**
    * The print's own lines, when this riwayah has a table for them.
@@ -748,6 +843,8 @@ function MushafUnicodePage({
         endInk={endInk}
         onAyahPress={onAyahPress}
         onAyahLongPress={onAyahLongPress}
+        tajweed={tajweed}
+        darkPage={darkPage}
       />
     );
   }
@@ -834,7 +931,20 @@ function MushafUnicodePage({
                   return colour ? { backgroundColor: colour } : undefined;
                 })()}
               >
-                {ayah.text}
+                {(() => {
+                  const words = tajweed(ayah.surah, ayah.ayah);
+                  // Only when the block holds the whole āyah — the words
+                  // are matched by position.
+                  if (!words || words.length !== ayah.text.split(/\s+/).filter(Boolean).length) {
+                    return ayah.text;
+                  }
+                  return words.map((w, wi) => (
+                    <React.Fragment key={wi}>
+                      {wi > 0 ? ' ' : null}
+                      <WordRuns word={w} darkPage={darkPage} />
+                    </React.Fragment>
+                  ));
+                })()}
                 {/* The mark carries its own no-break space — see
                     `ayahMarkText`, which explains why it must. An ordinary
                     space follows, so the line may still break between one
@@ -894,6 +1004,8 @@ function PrintedPageBody({
   endInk = NO_AYAH_END_INK,
   onAyahPress,
   onAyahLongPress,
+  tajweed = NO_TAJWEED,
+  darkPage = false,
 }: {
   /** Identifies the page whose measured line widths are cached. */
   pageKey: string;
@@ -906,8 +1018,44 @@ function PrintedPageBody({
   endInk?: AyahEndInk;
   onAyahPress?: (ref: AyahRef) => void;
   onAyahLongPress?: (ref: AyahRef) => void;
+  /** The Warsh tajwīd runs per āyah, or none. */
+  tajweed?: WarshTajweedLookup;
+  darkPage?: boolean;
 }) {
   const measure = width;
+  // How many of each āyah's words the rows above have drawn — the render
+  // walks the rows in order, so this is the word's index in the page's run.
+  const seen = React.useRef(new Map<string, number>()).current;
+  /**
+   * Which word of its āyah each word on this page is. An āyah that began
+   * on the page before has its first words there, so the page's run of it
+   * is found in the whole āyah by its text — never assumed to start at
+   * the first word.
+   */
+  const wordStart = React.useMemo(() => {
+    const onPage = new Map<string, string[]>();
+    for (const row of rows) {
+      for (const part of row.ayahs) {
+        const k = `${part.surah}:${part.ayah}`;
+        const list = onPage.get(k) ?? [];
+        list.push(...part.text.split(/\s+/).filter(Boolean));
+        onPage.set(k, list);
+      }
+    }
+    const start = new Map<string, number>();
+    for (const [k, here] of onPage) {
+      const [su, ay] = k.split(':').map(Number);
+      const all = tajweed(su, ay);
+      if (!all) continue;
+      for (let o = 0; o + here.length <= all.length; o++) {
+        if (here.every((t, i) => all[o + i].text === t)) {
+          start.set(k, o);
+          break;
+        }
+      }
+    }
+    return start;
+  }, [rows, tajweed]);
 
   const fitKey = `${pageKey}:${fontFamily}:${Math.round(width)}`;
   const [ems, setEms] = React.useState<number[] | null>(
@@ -1037,6 +1185,7 @@ function PrintedPageBody({
   /** The measure, in ems of the size every page is set at. */
   const targetEm = fontSize > 0 ? measure / fontSize : 0;
 
+  seen.clear();
   return (
     // The rows are as tall as the type needs, so a box taller than the
     // page's own proportions gives it a margin rather than stretching it.
@@ -1078,18 +1227,27 @@ function PrintedPageBody({
           lit: string | null;
           /** The medallion's ink when a reading marker sits here, or null. */
           ink: string | null;
+          /** The word's tajwīd runs (Warsh, colours on), or null. */
+          tajweed: WarshTajweedWord | null;
         }> = [];
         for (const part of row.ayahs) {
           const words = part.text.split(/\s+/).filter(Boolean);
           const lit = tint(part.surah, part.ayah);
           const ink = part.ends ? endInk(part.surah, part.ayah) : null;
+          const k = `${part.surah}:${part.ayah}`;
+          const coloured = tajweed(part.surah, part.ayah);
+          const first = wordStart.get(k);
           words.forEach((word, wi) => {
+            const n = seen.get(k) ?? 0;
+            seen.set(k, n + 1);
+            const w = coloured && first != null ? coloured[first + n] : undefined;
             tokens.push({
               text: word,
               ref: { surah: part.surah, ayah: part.ayah },
               mark: part.ends && wi === words.length - 1 ? part.ayah : null,
               lit,
               ink,
+              tajweed: w && w.text === word ? w : null,
             });
           });
         }
@@ -1182,7 +1340,11 @@ function PrintedPageBody({
                     token.lit ? { backgroundColor: token.lit } : undefined
                   }
                 >
-                  {token.text}
+                  {token.tajweed ? (
+                    <WordRuns word={token.tajweed} darkPage={darkPage} />
+                  ) : (
+                    token.text
+                  )}
                   {token.mark != null ? (
                     <Text
                       style={{

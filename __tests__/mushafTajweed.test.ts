@@ -200,7 +200,9 @@ describe('the rules', () => {
   });
 
   it('have an example on the page for every rule', () => {
-    for (const rule of TAJWEED_RULES) {
+    // Ḥafṣ's own and the shared rules; Warsh's are checked against its
+    // own files in warshTajweed.test.ts.
+    for (const rule of TAJWEED_RULES.filter(r => r.riwayah == null)) {
       const { surah, ayah, word } = rule.example;
       const data = surahFile(surah);
       const w = data.ayahs[ayah - 1][word - 1];
@@ -222,9 +224,12 @@ describe('the rules', () => {
 
   it('are arranged one colour per family, and every family is listed', () => {
     for (const family of TAJWEED_FAMILIES) {
-      const rules = rulesOfFamily(family);
+      // Warsh's family has rules only for a Warsh reader.
+      const rules = rulesOfFamily(family, family === 'warsh' ? 'warsh' : undefined);
       expect(rules.length).toBeGreaterThan(0);
-      if (family !== 'madd') {
+      // Warsh's family is three changes to how a letter is said, and each
+      // has its own ink; the Complex's families are one ink each.
+      if (family !== 'madd' && family !== 'warsh') {
         expect(new Set(rules.map(r => r.light)).size).toBe(1);
       }
     }

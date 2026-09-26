@@ -35,14 +35,29 @@ export type TajweedRuleId =
   | 'madda_obligatory_monfasel'
   | 'madda_necessary'
   | 'qalaqah'
-  | 'tafkheem';
+  | 'tafkheem'
+  // Warsh's own (issue #58) — `scripts/mushaf/warsh_tajweed.py`.
+  | 'madd_badal'
+  | 'leen_mahmooz'
+  | 'laam_taghleedh'
+  | 'raa_tarqeeq'
+  | 'naql'
+  | 'tasheel'
+  | 'taqleel';
 
 /**
  * One colour, one idea: the guide is arranged by what the reader sees,
  * and a reader who has learnt "green is a hum" has learnt six rules'
  * worth of pages.
  */
-export type TajweedFamilyId = 'silent' | 'ghunnah' | 'madd' | 'qalqalah' | 'tafkheem';
+export type TajweedFamilyId =
+  | 'silent'
+  | 'ghunnah'
+  | 'madd'
+  | 'qalqalah'
+  | 'tafkheem'
+  /** What Warsh reads differently: the moved or eased hamza, taqlīl, the thin rāʾ. */
+  | 'warsh';
 
 export type TajweedRule = {
   id: TajweedRuleId;
@@ -54,6 +69,12 @@ export type TajweedRule = {
   counts?: string;
   /** An example word, and where it is — the guide's "show me". */
   example: { text: string; surah: number; ayah: number; word: number };
+  /**
+   * The riwayah the rule belongs to, when it is not a shared one. A Warsh
+   * rule's example is a Warsh word at a Warsh reference, and the Ḥafṣ
+   * guide does not list it.
+   */
+  riwayah?: 'warsh';
 };
 
 // The CPAL entries of the V4 tajwīd fonts, light palette then dark.
@@ -72,9 +93,17 @@ function rule(
   ink: readonly [string, string],
   example: TajweedRule['example'],
   counts?: string,
+  riwayah?: 'warsh',
 ): TajweedRule {
-  return { id, family, light: ink[0], dark: ink[1], example, counts };
+  return { id, family, light: ink[0], dark: ink[1], example, counts, riwayah };
 }
+
+// Warsh's own inks. Not the Complex's — its tajwīd fonts are Ḥafṣ only —
+// so chosen to sit apart from the five it does use: a purple for the
+// hamza that moves or softens, a rose for taqlīl, a teal for the thin rāʾ.
+const HAMZA_CHANGE = ['#8e44ad', '#c39bd3'] as const;
+const TAQLEEL = ['#c2185b', '#f48fb1'] as const;
+const TARQEEQ = ['#00897b', '#4db6ac'] as const;
 
 /** Every rule, in the order the guide lists them. */
 export const TAJWEED_RULES: readonly TajweedRule[] = [
@@ -101,6 +130,15 @@ export const TAJWEED_RULES: readonly TajweedRule[] = [
   // ── Blue: the bounce, and the heavy letter ────────────────────────
   rule('qalaqah', 'qalqalah', QALQALAH, { text: 'أَحَدٌ', surah: 112, ayah: 1, word: 4 }),
   rule('tafkheem', 'tafkheem', TAFKHEEM, { text: 'رَبِّ', surah: 1, ayah: 2, word: 3 }),
+  // ── Warsh ─────────────────────────────────────────────────────────
+  // References are Warsh's own numbering, where the muṣḥaf differs.
+  rule('madd_badal', 'madd', MADD_PERMISSIBLE, { text: 'ءَامَنُواْ', surah: 2, ayah: 8, word: 4 }, '2 · 4 · 6', 'warsh'),
+  rule('leen_mahmooz', 'madd', MADD_PERMISSIBLE, { text: 'شَےْءٖ', surah: 2, ayah: 19, word: 24 }, '4 · 6', 'warsh'),
+  rule('laam_taghleedh', 'tafkheem', TAFKHEEM, { text: 'اَ۬لصَّلَوٰةَ', surah: 2, ayah: 2, word: 5 }, undefined, 'warsh'),
+  rule('raa_tarqeeq', 'warsh', TARQEEQ, { text: 'خَيْرٞ', surah: 2, ayah: 53, word: 18 }, undefined, 'warsh'),
+  rule('naql', 'warsh', HAMZA_CHANGE, { text: 'قَدَ اَفْلَحَ', surah: 23, ayah: 1, word: 2 }, undefined, 'warsh'),
+  rule('tasheel', 'warsh', HAMZA_CHANGE, { text: 'شُهَدَآءَ ا۪ذْ', surah: 2, ayah: 132, word: 5 }, undefined, 'warsh'),
+  rule('taqleel', 'warsh', TAQLEEL, { text: 'اِ۬لنَّصَٰر۪ىٰ', surah: 2, ayah: 112, word: 4 }, undefined, 'warsh'),
 ];
 
 const BY_ID = new Map(TAJWEED_RULES.map(r => [r.id, r]));
@@ -116,10 +154,27 @@ export const TAJWEED_FAMILIES: readonly TajweedFamilyId[] = [
   'madd',
   'qalqalah',
   'tafkheem',
+  'warsh',
 ];
 
-export function rulesOfFamily(family: TajweedFamilyId): TajweedRule[] {
-  return TAJWEED_RULES.filter(r => r.family === family);
+/**
+ * The family's rules for a reader of `riwayah`: the shared rules always,
+ * and a riwayah's own only for that riwayah. Without one, the Ḥafṣ set.
+ */
+export function rulesOfFamily(family: TajweedFamilyId, riwayah?: string): TajweedRule[] {
+  return TAJWEED_RULES.filter(
+    r => r.family === family && (r.riwayah == null || r.riwayah === riwayah),
+  );
+}
+
+/** The families with anything in them for this riwayah. */
+export function familiesFor(riwayah?: string): TajweedFamilyId[] {
+  return TAJWEED_FAMILIES.filter(f => rulesOfFamily(f, riwayah).length > 0);
+}
+
+/** Does this riwayah have tajwīd colours at all — Ḥafṣ's fonts, Warsh's spans. */
+export function riwayahHasTajweed(riwayah: string): boolean {
+  return riwayah === 'hafs' || riwayah === 'warsh';
 }
 
 /** The rule's page ink for the tone the page is in. */

@@ -1958,7 +1958,7 @@
     "settingsBlurb": "Harfleri kuralına göre renklendir, her rengin senden ne istediğini öğren",
     "toggle": "Mushafı tecvid kuralına göre renklendir",
     "toggleHelp": "Harfler Kral Fahd Kompleksi'nin renklerine boyanır: gri okunmaz, yeşil gunnedir, kırmızı uzatılır, açık mavi kalkaledir. Öğrenirken aç; sade mürekkep bir dokunuş uzakta.",
-    "warshNote": "Renkler Hafs mushafı üzerine çizilir. Görmek için Hafs'a dön.",
+    "warshNote": "Tecvit renkleri Hafs ve Verş mushaflarında çizilir. Görmek için bunlardan birine geç.",
     "guideLink": "Renkler nasıl okunur",
     "guideTitle": "Renkleri okumak",
     "guideIntro": "Boyalı her harf iş başındaki bir kuraldır. Bir renk bir fikirdir; sayfa okurken sana öğretir: gri yazılır ama okunmaz, yeşil burundan gelen bir ses, kırmızılar daha uzun tutulan bir sesli, açık mavi bir sıçrama, koyu mavi kalın bir harftir.",
@@ -2012,6 +2012,10 @@
       "tafkheem": {
         "name": "Tefhim",
         "summary": "Dilin arkası kalkarak söylenen kalın harf: خ ص ض غ ط ق ظ her zaman, fetha ya da dammeden sonra ra ve bunlardan sonra Allah lafzının lamı."
+      },
+      "warsh": {
+        "name": "Verş'e özgü",
+        "summary": "Verş rivayetinin farklı yaptıkları: nakledilen ya da yumuşatılan hemze, ē'ye doğru meyleden ā ve ince kalan rā."
       }
     },
     "rule": {
@@ -2090,6 +2094,34 @@
       "tafkheem": {
         "name": "Tefhim",
         "help": "Harf, dilin arkası kalkarak kalın okunur — خ ص ض غ ط ق ظ her zaman; fetha ya da dammeden sonra ra ve Allah lafzının lamı."
+      },
+      "madd_badal": {
+        "name": "Med-i bedel",
+        "help": "Hemzeden hemen sonra gelen uzun ünlü, ءَامَنُواْ'daki gibi. Verş onu iki, dört ya da altı hareke çekebilir."
+      },
+      "leen_mahmooz": {
+        "name": "Hemzeli lîn",
+        "help": "Fethadan sonra sâkin vâv ya da yâ, aynı kelimede ardından hemze — شَےْءٖ. Verş onu dört ya da altı hareke çeker."
+      },
+      "laam_taghleedh": {
+        "name": "Kalın lâm",
+        "help": "Üstünlü ya da sâkin sâd, tı ya da zı'dan sonra gelen üstünlü lâm Verş'te kalın okunur, اَ۬لصَّلَوٰةَ'deki gibi."
+      },
+      "raa_tarqeeq": {
+        "name": "İnce râ",
+        "help": "Verş, esre ya da sâkin yâdan sonra râyı ince okur — خَيْرٞ —; Hafs'ta ise kalındır. Yabancı isimler, ardından gelen kalın harf ve birkaç belirli kelime kalın kalır."
+      },
+      "naql": {
+        "name": "Nakil",
+        "help": "Hemze düşer, harekesi önündeki sâkin harfe geçer: قَدَ اَفْلَحَ, kade-flaha okunur."
+      },
+      "tasheel": {
+        "name": "Teshîl",
+        "help": "İki hemzeden ikincisi hemze ile med harfi arasında yumuşatılır, شُهَدَآءَ ا۪ذْ'deki gibi."
+      },
+      "taqleel": {
+        "name": "Taklîl",
+        "help": "Uzun ā hafifçe ē'ye meylettirilir, fetha ile imâle arasında. Harfin altındaki küçük nokta bunu gösterir: اَ۬لنَّصَٰر۪ىٰ."
       }
     }
   }

@@ -1958,7 +1958,7 @@
     "settingsBlurb": "Mewarnai huruf menurut hukumnya, dan mempelajari apa yang diminta tiap warna",
     "toggle": "Warnai mushaf menurut hukum tajwid",
     "toggleHelp": "Huruf diwarnai dengan warna Kompleks Raja Fahd: abu-abu tidak dibaca, hijau dengung, merah dipanjangkan, biru muda memantul. Nyalakan saat belajar; tinta polos hanya sekali ketuk.",
-    "warshNote": "Warna digambar pada mushaf Hafs. Kembali ke Hafs untuk melihatnya.",
+    "warshNote": "Warna tajwid digambar pada mushaf Hafs dan Warsh. Pindah ke salah satunya untuk melihatnya.",
     "guideLink": "Cara membaca warna",
     "guideTitle": "Membaca warna",
     "guideIntro": "Setiap huruf berwarna adalah hukum yang sedang bekerja. Satu warna satu gagasan, sehingga halaman mengajarimu sambil membaca: abu-abu tertulis tapi tidak dibaca, hijau dengung dari hidung, merah vokal yang ditahan lebih lama, biru muda pantulan, dan biru tua huruf tebal.",
@@ -2012,6 +2012,10 @@
       "tafkheem": {
         "name": "Tafkhim",
         "summary": "Huruf tebal, dibaca dengan pangkal lidah terangkat: خ ص ض غ ط ق ظ selalu, ra setelah fathah atau dammah, dan lam pada nama Allah setelah keduanya."
+      },
+      "warsh": {
+        "name": "Khas Warsh",
+        "summary": "Yang dibaca berbeda dalam riwayat Warsh: hamzah yang dipindah atau diringankan, ā yang dicondongkan ke ē, dan rā yang tetap tipis."
       }
     },
     "rule": {
@@ -2090,6 +2094,34 @@
       "tafkheem": {
         "name": "Tafkhim",
         "help": "Huruf dibaca tebal, dengan pangkal lidah terangkat — selalu untuk خ ص ض غ ط ق ظ, dan untuk ra setelah fathah atau dammah serta lam pada nama Allah."
+      },
+      "madd_badal": {
+        "name": "Mad badal",
+        "help": "Vokal panjang tepat setelah hamzah, seperti ءَامَنُواْ. Warsh boleh memanjangkannya dua, empat, atau enam harakat."
+      },
+      "leen_mahmooz": {
+        "name": "Līn sebelum hamzah",
+        "help": "Wāw atau yā sukun setelah fathah, diikuti hamzah dalam kata yang sama — شَےْءٖ. Warsh memanjangkannya empat atau enam harakat."
+      },
+      "laam_taghleedh": {
+        "name": "Lām tebal",
+        "help": "Lām berfathah setelah ṣād, ṭā, atau ẓā yang berfathah atau sukun dibaca tebal dalam Warsh, seperti اَ۬لصَّلَوٰةَ."
+      },
+      "raa_tarqeeq": {
+        "name": "Rā tipis",
+        "help": "Warsh membaca rā tipis setelah kasrah atau yā sukun — خَيْرٞ — padahal Ḥafṣ membacanya tebal. Nama asing, huruf tebal sesudahnya, dan beberapa kata tertentu tetap tebal."
+      },
+      "naql": {
+        "name": "Naql",
+        "help": "Hamzah dibuang dan harakatnya pindah ke huruf sukun sebelumnya: قَدَ اَفْلَحَ dibaca qada-flaḥa."
+      },
+      "tasheel": {
+        "name": "Tashīl",
+        "help": "Hamzah kedua dari dua hamzah diringankan, antara hamzah dan huruf mad, seperti شُهَدَآءَ ا۪ذْ."
+      },
+      "taqleel": {
+        "name": "Taqlīl",
+        "help": "Ā panjang sedikit dicondongkan ke ē, antara fathah dan imalah. Titik kecil di bawah huruf menandainya: اَ۬لنَّصَٰر۪ىٰ."
       }
     }
   }

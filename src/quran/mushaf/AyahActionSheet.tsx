@@ -61,6 +61,7 @@ import { playFromAyah, playRange } from '../audio/playback';
 import { RecitationControls } from '../audio/RecitationControls';
 import { ShareAyahModal } from './ShareAyahModal';
 import { TajweedAyahSection } from '../tajweed/TajweedAyahSection';
+import { riwayahHasTajweed } from '../tajweed/rules';
 import { TajweedAyahGlyphs } from '../tajweed/TajweedAyahGlyphs';
 
 /** The page font's size for the āyah at the top of the sheet, dp — the
@@ -692,7 +693,7 @@ export function AyahActionSheet({
           {/* Tajwīd: the āyah's tinted letters and what each colour asks.
               Only where the muṣḥaf can draw them — the Warsh reader has
               no rules data and no coloured faces. */}
-          {riwayahById(state.prefs.riwayah).render !== 'unicode' ? (
+          {riwayahHasTajweed(state.prefs.riwayah) ? (
             <TajweedAyahSection
               surah={surah}
               ayah={ayah}

@@ -78,7 +78,12 @@ describe('what is offered', () => {
     ]);
     expect(offerableQuranFeatures({ hafs: true, tajweedColours: true, wordReader: true })).toEqual([]);
   });
-  it('is nothing on Warsh — both are Hafs features', () => {
+  it('is the colours alone on Warsh, which has no word reader', () => {
+    expect(
+      offerableQuranFeatures({ hafs: false, warsh: true, tajweedColours: false, wordReader: false }),
+    ).toEqual(['tajweedColours']);
+  });
+  it('is nothing on a riwayah with neither', () => {
     expect(offerableQuranFeatures({ hafs: false, tajweedColours: false, wordReader: false })).toEqual([]);
   });
 });

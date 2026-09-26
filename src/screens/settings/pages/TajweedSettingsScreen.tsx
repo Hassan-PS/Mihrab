@@ -36,6 +36,7 @@ import {
 } from '../../../quran/quranDownloadManager';
 import { setQuranPrefs, useQuranState } from '../../../quran/quranState';
 import { riwayahById } from '../../../quran/riwayat';
+import { riwayahHasTajweed } from '../../../quran/tajweed/rules';
 import { SettingsGroup, SettingsLinkRow, SettingsToggleRow } from '../SettingsGroup';
 import { SettingsPage } from '../SettingsPage';
 
@@ -48,6 +49,9 @@ export function TajweedSettingsScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { prefs } = useQuranState();
   const hafs = riwayahById(prefs.riwayah).render !== 'unicode';
+  // Ḥafṣ draws the colours from its tajwīd fonts, Warsh from its own
+  // spans over the text; Qālūn and Shuʿbah have neither yet.
+  const coloured = riwayahHasTajweed(prefs.riwayah);
   // The set the muṣḥaf draws right now, listed first and marked.
   const inUse = tajweedFontSet(toneIsDark(mushafTone(prefs, isDark)));
 
@@ -142,7 +146,7 @@ export function TajweedSettingsScreen() {
     <SettingsPage>
       <SettingsGroup
         footer={
-          hafs
+          coloured
             ? t('tajweed.toggleHelp', {
                 defaultValue:
                   "Letters are tinted in the King Fahd Complex's colours: grey is not sounded, green hums, red stretches, light blue bounces. Turn it on while learning; plain ink is a tap away.",
@@ -156,7 +160,7 @@ export function TajweedSettingsScreen() {
           testID="settings-tajweed-colours"
           title={t('tajweed.toggle', 'Colour the mushaf by tajweed rule')}
           value={prefs.tajweedColours}
-          disabled={!hafs}
+          disabled={!coloured}
           onValueChange={next => setQuranPrefs({ tajweedColours: next })}
         />
       </SettingsGroup>

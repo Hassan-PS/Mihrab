@@ -41,13 +41,14 @@ export const OFFER_KEY = 'mihrab.quran.featuresOffer.v1';
 /** What there is to offer. Pure, for the tests. */
 export function offerableQuranFeatures(input: {
   hafs: boolean;
+  /** Warsh has tajwīd colours of its own, and no word reader. */
+  warsh?: boolean;
   tajweedColours: boolean;
   wordReader: boolean;
 }): QuranFeature[] {
-  if (!input.hafs) return [];
   const out: QuranFeature[] = [];
-  if (!input.tajweedColours) out.push('tajweedColours');
-  if (!input.wordReader) out.push('wordReader');
+  if ((input.hafs || input.warsh) && !input.tajweedColours) out.push('tajweedColours');
+  if (input.hafs && !input.wordReader) out.push('wordReader');
   return out;
 }
 
@@ -75,6 +76,7 @@ export function useQuranFeaturesOffer(ready: boolean): {
         if (!live || seen) return;
         const offer = offerableQuranFeatures({
           hafs: riwayahById(prefs.riwayah).render !== 'unicode',
+          warsh: prefs.riwayah === 'warsh',
           tajweedColours: prefs.tajweedColours,
           wordReader: prefs.wordReader,
         });
@@ -113,6 +115,7 @@ export function QuranFeaturesOfferSheet({
 }) {
   const { t } = useTranslation();
   const { palette } = useAppPalette();
+  const { prefs } = useQuranState();
   // The switches start ON: the question is "want these?", and the
   // expected answer is yes. Unticking one and pressing Turn on is a no
   // for that one only.
@@ -175,7 +178,7 @@ export function QuranFeaturesOfferSheet({
             />
           ))}
         </Group>
-        {features.includes('tajweedColours') ? (
+        {features.includes('tajweedColours') && prefs.riwayah !== 'warsh' ? (
           <Text style={[typeStyle('footnote'), styles.note, { color: palette.muted }]}>
             {t('quran.featuresOfferTajweedNote', {
               defaultValue:

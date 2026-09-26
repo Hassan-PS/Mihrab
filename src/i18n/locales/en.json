@@ -1958,7 +1958,7 @@
     "settingsBlurb": "Tint the letters by their rule, and learn what each colour asks of you",
     "toggle": "Colour the mushaf by tajweed rule",
     "toggleHelp": "Letters are tinted in the King Fahd Complex's colours: grey is not sounded, green hums, red stretches, light blue bounces. Turn it on while learning; plain ink is a tap away.",
-    "warshNote": "The colours are drawn on the Hafs mushaf. Switch back to Hafs to see them.",
+    "warshNote": "Tajweed colours are drawn on the Hafs and Warsh mushafs. Switch to one of them to see them.",
     "guideLink": "How to read the colours",
     "guideTitle": "Reading the colours",
     "guideIntro": "Every tinted letter is a rule at work. One colour is one idea, so a page teaches you as you read: grey is written but not sounded, green is a hum through the nose, the reds are a vowel held longer, light blue is a bounce, and dark blue a heavy letter.",
@@ -2004,6 +2004,10 @@
       "tafkheem": {
         "name": "Tafkhīm",
         "summary": "A heavy letter, said with the back of the tongue raised: خ ص ض غ ط ق ظ always, the rā after a fatḥah or ḍammah, and the lām of Allah's name after one."
+      },
+      "warsh": {
+        "name": "Warsh's own",
+        "summary": "What the Warsh reading does differently: a hamza that moves or softens, a vowel leaned towards ē, and a rā that stays light."
       }
     },
     "rule": {
@@ -2082,6 +2086,34 @@
       "tafkheem": {
         "name": "Tafkhīm",
         "help": "The letter is made heavy, with the back of the tongue raised — always for خ ص ض غ ط ق ظ, and for the rā after a fatḥah or ḍammah and the lām of Allah's name."
+      },
+      "madd_badal": {
+        "name": "Madd al-badal",
+        "help": "A long vowel right after a hamza, as in ءَامَنُواْ. Warsh may hold it for two, four or six counts."
+      },
+      "leen_mahmooz": {
+        "name": "Līn before a hamza",
+        "help": "A still wāw or yā after a fatḥa, with a hamza after it in the same word — شَےْءٖ. Warsh holds it for four or six counts."
+      },
+      "laam_taghleedh": {
+        "name": "Heavy lām",
+        "help": "An open lām after a ṣād, ṭā or ẓā that is open or still is said heavy in Warsh, as in اَ۬لصَّلَوٰةَ."
+      },
+      "raa_tarqeeq": {
+        "name": "Light rā",
+        "help": "Warsh keeps the rā light after a kasra or a still yā — خَيْرٞ — where Ḥafṣ makes it heavy. Foreign names, a heavy letter after it and a few set words stay heavy."
+      },
+      "naql": {
+        "name": "Naql",
+        "help": "The hamza is dropped and its vowel moves onto the still letter before it: قَدَ اَفْلَحَ is read qada-flaḥa."
+      },
+      "tasheel": {
+        "name": "Tashīl",
+        "help": "The second of two hamzas is softened, between a hamza and a long vowel, as in شُهَدَآءَ ا۪ذْ."
+      },
+      "taqleel": {
+        "name": "Taqlīl",
+        "help": "The long ā is leaned slightly towards ē, between a fatḥa and an imāla. The small dot below the letter marks it: اَ۬لنَّصَٰر۪ىٰ."
       }
     },
     "turnOn": "Show the colours in the mushaf",

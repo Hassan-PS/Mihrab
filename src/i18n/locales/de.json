@@ -1958,7 +1958,7 @@
     "settingsBlurb": "Buchstaben nach ihrer Regel einfärben und lernen, was jede Farbe von dir verlangt",
     "toggle": "Mushaf nach Tadschwid-Regel einfärben",
     "toggleHelp": "Die Buchstaben werden in den Farben des König-Fahd-Komplexes getönt: Grau wird nicht gesprochen, Grün ist nasal, Rot wird gedehnt, Hellblau prallt. Zum Lernen einschalten; die schlichte Tinte ist einen Tipp entfernt.",
-    "warshNote": "Die Farben liegen auf dem Hafs-Mushaf. Wechsle zurück zu Hafs, um sie zu sehen.",
+    "warshNote": "Die Tajweed-Farben werden im Hafs- und im Warsh-Mushaf gezeichnet. Wechsle zu einem von beiden, um sie zu sehen.",
     "guideLink": "So liest man die Farben",
     "guideTitle": "Die Farben lesen",
     "guideIntro": "Jeder getönte Buchstabe ist eine Regel bei der Arbeit. Eine Farbe ist ein Gedanke, so lehrt dich die Seite beim Lesen: Grau ist geschrieben, aber stumm, Grün ist ein Nasallaut, die Rottöne sind ein länger gehaltener Vokal, Hellblau ein Prall und Dunkelblau ein schwerer Buchstabe.",
@@ -2012,6 +2012,10 @@
       "tafkheem": {
         "name": "Tafchim",
         "summary": "Ein schwerer Buchstabe mit angehobenem Zungenrücken: خ ص ض غ ط ق ظ immer, das Ra nach Fatha oder Damma und das Lam im Namen Allahs danach."
+      },
+      "warsh": {
+        "name": "Warsh eigen",
+        "summary": "Was die Lesart Warsh anders macht: eine Hamza, die verschoben oder erleichtert wird, ein ā, das zu ē geneigt wird, und ein Rā, das leicht bleibt."
       }
     },
     "rule": {
@@ -2090,6 +2094,34 @@
       "tafkheem": {
         "name": "Tafchim",
         "help": "Der Buchstabe wird schwer gesprochen, mit angehobenem Zungenrücken — immer bei خ ص ض غ ط ق ظ, beim Ra nach Fatha oder Damma und beim Lam im Namen Allahs."
+      },
+      "madd_badal": {
+        "name": "Madd al-badal",
+        "help": "Ein langer Vokal direkt nach einer Hamza, wie in ءَامَنُواْ. Warsh kann ihn zwei, vier oder sechs Zählzeiten halten."
+      },
+      "leen_mahmooz": {
+        "name": "Līn vor Hamza",
+        "help": "Ein ruhendes Wāw oder Yā nach einer Fatḥa, gefolgt von einer Hamza im selben Wort — شَےْءٖ. Warsh hält es vier oder sechs Zählzeiten."
+      },
+      "laam_taghleedh": {
+        "name": "Schweres Lām",
+        "help": "Ein offenes Lām nach einem offenen oder ruhenden Ṣād, Ṭā oder Ẓā wird bei Warsh schwer gesprochen, wie in اَ۬لصَّلَوٰةَ."
+      },
+      "raa_tarqeeq": {
+        "name": "Leichtes Rā",
+        "help": "Warsh spricht das Rā nach einer Kasra oder einem ruhenden Yā leicht — خَيْرٞ —, wo Ḥafṣ es schwer macht. Fremdnamen, ein schwerer Buchstabe danach und einige feste Wörter bleiben schwer."
+      },
+      "naql": {
+        "name": "Naql",
+        "help": "Die Hamza entfällt und ihr Vokal wandert auf den ruhenden Buchstaben davor: قَدَ اَفْلَحَ wird qada-flaḥa gelesen."
+      },
+      "tasheel": {
+        "name": "Tashīl",
+        "help": "Die zweite von zwei Hamzas wird erleichtert, zwischen Hamza und langem Vokal, wie in شُهَدَآءَ ا۪ذْ."
+      },
+      "taqleel": {
+        "name": "Taqlīl",
+        "help": "Das lange ā wird leicht zu ē geneigt, zwischen Fatḥa und Imāla. Der kleine Punkt unter dem Buchstaben zeigt es an: اَ۬لنَّصَٰر۪ىٰ."
       }
     }
   }

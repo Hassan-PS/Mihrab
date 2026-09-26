@@ -1958,7 +1958,7 @@
     "settingsBlurb": "Teñir las letras según su regla, y aprender qué te pide cada color",
     "toggle": "Colorear el mushaf por regla de tayuid",
     "toggleHelp": "Las letras se tiñen con los colores del Complejo del Rey Fahd: el gris no se pronuncia, el verde nasaliza, el rojo se alarga, el azul claro rebota. Actívalo mientras aprendes; la tinta simple está a un toque.",
-    "warshNote": "Los colores se dibujan sobre el mushaf de Hafs. Vuelve a Hafs para verlos.",
+    "warshNote": "Los colores del tajwid se dibujan en los mushafs de Hafs y de Warsh. Cambia a uno de ellos para verlos.",
     "guideLink": "Cómo leer los colores",
     "guideTitle": "Leer los colores",
     "guideIntro": "Cada letra teñida es una regla en acción. Un color es una idea, así que la página te enseña mientras lees: el gris está escrito pero no suena, el verde es un sonido nasal, los rojos son una vocal sostenida más tiempo, el azul claro un rebote y el azul oscuro una letra enfática.",
@@ -2012,6 +2012,10 @@
       "tafkheem": {
         "name": "Tafjim",
         "summary": "Una letra enfática, dicha con la parte posterior de la lengua elevada: خ ص ض غ ط ق ظ siempre, la ra tras fatha o damma, y la lam del nombre de Allah tras una de ellas."
+      },
+      "warsh": {
+        "name": "Propio de Warsh",
+        "summary": "Lo que la lectura de Warsh hace distinto: una hamza que se traslada o se suaviza, una ā inclinada hacia ē y una rā que se queda ligera."
       }
     },
     "rule": {
@@ -2090,6 +2094,34 @@
       "tafkheem": {
         "name": "Tafjim",
         "help": "La letra se hace enfática, con la parte posterior de la lengua elevada — siempre en خ ص ض غ ط ق ظ, y en la ra tras fatha o damma y la lam del nombre de Allah."
+      },
+      "madd_badal": {
+        "name": "Madd al-badal",
+        "help": "Una vocal larga justo después de una hamza, como en ءَامَنُواْ. Warsh puede sostenerla dos, cuatro o seis tiempos."
+      },
+      "leen_mahmooz": {
+        "name": "Līn ante hamza",
+        "help": "Una wāw o yā sākin tras una fatḥa, con una hamza detrás en la misma palabra — شَےْءٖ. Warsh la sostiene cuatro o seis tiempos."
+      },
+      "laam_taghleedh": {
+        "name": "Lām enfática",
+        "help": "Una lām abierta tras una ṣād, ṭā o ẓā abierta o sākin se pronuncia enfática en Warsh, como en اَ۬لصَّلَوٰةَ."
+      },
+      "raa_tarqeeq": {
+        "name": "Rā ligera",
+        "help": "Warsh mantiene ligera la rā tras una kasra o una yā sākin — خَيْرٞ —, donde Ḥafṣ la hace enfática. Los nombres extranjeros, una letra enfática después y algunas palabras fijas quedan enfáticas."
+      },
+      "naql": {
+        "name": "Naql",
+        "help": "La hamza cae y su vocal pasa a la letra sākin anterior: قَدَ اَفْلَحَ se lee qada-flaḥa."
+      },
+      "tasheel": {
+        "name": "Tashīl",
+        "help": "La segunda de dos hamzas se suaviza, entre una hamza y una vocal larga, como en شُهَدَآءَ ا۪ذْ."
+      },
+      "taqleel": {
+        "name": "Taqlīl",
+        "help": "La ā larga se inclina un poco hacia ē, entre fatḥa e imāla. El puntito bajo la letra lo marca: اَ۬لنَّصَٰر۪ىٰ."
       }
     }
   }
