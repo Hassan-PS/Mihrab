@@ -1019,4 +1019,13 @@ Changed the release cycle itself:
 
   - `scripts/verify-release.sh`
 
-**Lesson:** _(unfilled)_
+**Lesson:** Write the store notes before starting, and count them in
+the longest language: two of the four stops were notes — one missing,
+one Swedish file at 503 characters, where English fitted. And the Mac
+toolchain moves under the release, not with it: Xcode 27 refused the
+Catalyst build (a 10.15 deployment target no setting reached), so 2.26.0
+shipped Android and iOS with `SKIP_CATALYST=1` and the notarized Mac zip
+and cask followed by hand the same day. `build-catalyst.sh
+--check-toolchain` now finds Xcode 26 alongside 27 in preflight; keep an
+Xcode that can build Catalyst installed until the deployment-target
+source is found.

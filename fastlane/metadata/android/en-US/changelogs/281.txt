@@ -1,0 +1,5 @@
+• New: Tajweed colours on the Warsh muṣḥaf, with Warsh's own rules — naql, tashīl, taqlīl and more — explained in the guide.
+• Fullscreen reading: an exit button and the page number at the top, and a smooth fade in and out.
+• Tajweed colours download in the background as soon as you turn them on.
+• The āyah sheet shows the āyah in the muṣḥaf's own font.
+• Khatmah options no longer run off the screen.

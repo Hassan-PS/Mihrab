@@ -1,0 +1,5 @@
+• Nytt: tajwīd-färger i Warsh-muṣḥafen, med Warshs egna regler — naql, tashīl, taqlīl med flera — förklarade i guiden.
+• Helskärmsläsning: en stängknapp och sidnumret överst, och en mjuk övertoning in och ut.
+• Tajwīd-färgerna laddas ner i bakgrunden så fort du slår på dem.
+• Versbladet visar versen i muṣḥafens eget typsnitt.
+• Khatmah-valen hamnar inte längre utanför skärmen.
