@@ -867,10 +867,22 @@ if [ -x "$LSREGISTER" ]; then
       echo "    docs/release/catalyst-widgets.md; the zip is fine." >&2
     fi
   fi
-  sleep 2
-  GHOSTS=$("$LSREGISTER" -dump 2>/dev/null |
-    grep -oE '^path: +/[^ ]*(PrayerApp\.app|Mihrab\.app|PrayerWidgetExtension\.appex)[^ ]*' |
-    sed 's/^path: *//' | sort -u | grep -v '^/Applications/Mihrab\.app' || true)
+  # SWEPT AGAIN BEFORE IT IS CALLED A FAILURE. The build products are
+  # still on disk after the sweep above, and LaunchServices registers a
+  # bundle it notices on its own: 2.27.0's first run found
+  # `catalyst-release/…/PrayerApp.app` registered again seconds after it
+  # had been unregistered, and a single `lsregister -u` by hand cleared it
+  # for good. So a ghost found here is unregistered and looked for again,
+  # three times, and only one that keeps coming back stops the build.
+  GHOSTS=""
+  for try in 1 2 3 4; do
+    sleep 2
+    GHOSTS=$("$LSREGISTER" -dump 2>/dev/null |
+      grep -oE '^path: +/[^ ]*(PrayerApp\.app|Mihrab\.app|PrayerWidgetExtension\.appex)[^ ]*' |
+      sed 's/^path: *//' | sort -u | grep -v '^/Applications/Mihrab\.app' || true)
+    if [ -z "$GHOSTS" ] || [ "$try" = 4 ]; then break; fi
+    for stale in $GHOSTS; do "$LSREGISTER" -u "$stale" 2>/dev/null || true; done
+  done
   if [ -n "$GHOSTS" ]; then
     echo "  ✗ LaunchServices still points at a build copy:" >&2
     printf '      %s\n' $GHOSTS >&2
