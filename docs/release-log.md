@@ -1029,3 +1029,16 @@ and cask followed by hand the same day. `build-catalyst.sh
 --check-toolchain` now finds Xcode 26 alongside 27 in preflight; keep an
 Xcode that can build Catalyst installed until the deployment-target
 source is found.
+
+## 2.27.0 (281) — 2026-09-26
+
+Took 5 aborted attempt(s) before it ran clean:
+
+  - 3 catalyst build failed — /tmp/release-catalyst.log
+  - 2 origin/main has commits main does not — pull first
+
+Changed the release cycle itself:
+
+  - `scripts/build-catalyst.sh`
+
+**Lesson:** _(unfilled)_

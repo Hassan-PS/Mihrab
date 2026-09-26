@@ -19,6 +19,16 @@ export type ReleaseNote = {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    code: 281,
+    version: '2.27.0',
+    date: '2026-09-26',
+    notes: {
+      en: '• New: Tajweed colours on the Warsh muṣḥaf, with Warsh\'s own rules — naql, tashīl, taqlīl and more — explained in the guide.\n• Fullscreen reading: an exit button and the page number at the top, and a smooth fade in and out.\n• Tajweed colours download in the background as soon as you turn them on.\n• The āyah sheet shows the āyah in the muṣḥaf\'s own font.\n• Khatmah options no longer run off the screen.',
+      ar: '• جديد: ألوان التجويد في مصحف ورش، مع أحكام ورش الخاصة — النقل والتسهيل والتقليل وغيرها — مشروحة في الدليل.\n• القراءة بملء الشاشة: زر للخروج ورقم الصفحة في الأعلى، وانتقال سلس عند الدخول والخروج.\n• تُنزَّل ألوان التجويد في الخلفية بمجرد تفعيلها.\n• تظهر الآية في بطاقة الآية بخط المصحف نفسه.\n• خيارات الختمة لم تعد تخرج عن حدود الشاشة.',
+      sv: '• Nytt: tajwīd-färger i Warsh-muṣḥafen, med Warshs egna regler — naql, tashīl, taqlīl med flera — förklarade i guiden.\n• Helskärmsläsning: en stängknapp och sidnumret överst, och en mjuk övertoning in och ut.\n• Tajwīd-färgerna laddas ner i bakgrunden så fort du slår på dem.\n• Versbladet visar versen i muṣḥafens eget typsnitt.\n• Khatmah-valen hamnar inte längre utanför skärmen.',
+    },
+  },
+  {
     code: 280,
     version: '2.26.0',
     date: '2026-09-24',
