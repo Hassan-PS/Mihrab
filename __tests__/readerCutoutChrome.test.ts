@@ -67,7 +67,7 @@ describe('the page header shares the cutout band', () => {
    */
   it('is a phone rule: only the phone asks for it', () => {
     const phone = read('src/quran/MushafPhoneReader.tsx');
-    expect(phone).toMatch(/labelMaxWidth=\{label\.maxWidth\}[\s\S]{0,400}\n\s+island\n/);
+    expect(phone).toMatch(/labelMaxWidth=\{label\.maxWidth\}[\s\S]{0,1200}\n\s+island\n/);
     const spread = read('src/quran/MushafSpreadReader.tsx');
     expect(spread).not.toMatch(/\bisland\b/);
   });

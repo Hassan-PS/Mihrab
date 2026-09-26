@@ -1327,7 +1327,11 @@
     "wordReaderReciter": "Wer das Wort liest",
     "wordReaderReciterHelp": "Nur Rezitatoren mit Wortzeiten können ein einzelnes Wort lesen, darum werden nur sie aufgeführt. Dein Rezitator für die Rezitation ist davon getrennt und kann jeder sein.",
     "wordReaderOffline": "Dieses Wort ist noch nicht auf dem Gerät, und es gibt keine Verbindung, um es zu laden.",
-    "wordReaderNoTiming": "Für dieses Wort ist keine Zeit bekannt, daher kann es nicht allein gelesen werden."
+    "wordReaderNoTiming": "Für dieses Wort ist keine Zeit bekannt, daher kann es nicht allein gelesen werden.",
+    "featuresOfferTitle": "Der Mushaf kann mehr",
+    "featuresOfferBody": "Zwei Dinge sind aus, bis du sie einschaltest. Beides lässt sich später unter Einstellungen → Koran ändern.",
+    "featuresOfferTajweedNote": "Die farbigen Seiten werden im Hintergrund über WLAN geladen, etwa 170 MB.",
+    "featuresOfferTurnOn": "Einschalten"
   },
   "reading": {
     "textSize": "Schriftgröße",
@@ -1971,8 +1975,9 @@
     "darkRowTone": "Nacht",
     "rowStatus": "{{tone}} · {{pages}} von {{total}} Seiten",
     "waiting": "Nach dem laufenden Download",
+    "queued": "Als Nächstes, nach dem laufenden Download · zum Entfernen tippen",
     "inUse": "in Gebrauch",
-    "downloadAllHelp": "Die farbigen Seiten sind eigene Seitenschriften, die wie die schlichten beim Lesen geholt werden. Eine Schrift trägt eine Palette, daher sind helle Seiten (Papier und Sepia) und dunkle Seiten (Nacht) zwei Sätze zu je etwa 170 MB: Lade die, in denen du liest.",
+    "downloadAllHelp": "Beim Einschalten der Farben werden die Seiten, in denen du liest, über WLAN im Hintergrund geladen – auch wenn du diese Seite oder die App verlässt. Eine Schrift trägt eine Palette, daher sind helle Seiten (Papier und Sepia) und dunkle Seiten (Nacht) zwei Sätze zu je etwa 170 MB; beim Ton „Auto“ werden beide geholt.",
     "downloadsRow": "Tadschwid-Farben",
     "downloadsRowSub": "{{pages}} von {{total}} farbigen Seiten",
     "sheetSection": "Tadschwid",

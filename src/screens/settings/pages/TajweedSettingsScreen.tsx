@@ -7,6 +7,13 @@
  * one for a dark — so the offline download is one row per palette, each
  * with its own count, the one the muṣḥaf is drawn in now listed first.
  * Either set also arrives page by page as it is read.
+ *
+ * The switch itself starts the download of the palette in use (and the
+ * other, on auto tone) — see `tajweedAutoDownload`. The rows are for the
+ * rest: the other palette on a fixed tone, a run to restart, or a look
+ * at how far it got. A row tapped while another download runs QUEUES it
+ * behind that one rather than asking to come back later; tapping again
+ * takes it out of the queue.
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
@@ -20,9 +27,11 @@ import { MUSHAF_TOTAL_PAGES } from '../../../quran/mushafImages';
 import { fontStoreStats, tajweedFontSet } from '../../../quran/mushafFontStore';
 import { mushafTone, toneIsDark } from '../../../quran/mushafTone';
 import {
+  dequeueQuranDownload,
+  isJobQueued,
   isJobRunning,
+  queueQuranDownload,
   quranDownloadState,
-  startQuranDownload,
   subscribeQuranDownload,
 } from '../../../quran/quranDownloadManager';
 import { setQuranPrefs, useQuranState } from '../../../quran/quranState';
@@ -78,7 +87,7 @@ export function TajweedSettingsScreen() {
   const row = (set: TajweedSet) => {
     const job = { kind: 'fonts', set } as const;
     const running = isJobRunning(job);
-    const busyElsewhere = download.running != null && !running;
+    const queuedUp = isJobQueued(job);
     const have = pages[set];
     const complete = have != null && have >= MUSHAF_TOTAL_PAGES;
     const dark = set === 'tajweed-dark';
@@ -90,8 +99,8 @@ export function TajweedSettingsScreen() {
           done: download.progress.done,
           total: download.progress.total,
         })
-      : busyElsewhere && !complete
-        ? t('tajweed.waiting', 'After the download that is running')
+      : queuedUp
+        ? t('tajweed.queued', 'Next, after the download that is running · tap to remove')
         : have == null
           ? tone
           : t('tajweed.rowStatus', {
@@ -114,15 +123,16 @@ export function TajweedSettingsScreen() {
             <Text style={[styles.tick, { color: palette.accent }]}>✓</Text>
           ) : running ? (
             <ActivityIndicator color={palette.muted} />
-          ) : busyElsewhere ? (
+          ) : queuedUp ? (
             <Text style={[styles.tick, { color: palette.muted }]}>…</Text>
           ) : (
             <Text style={[styles.tick, { color: palette.accentSolid }]}>↓</Text>
           )
         }
         onPress={() => {
-          if (running || complete || busyElsewhere) return;
-          startQuranDownload(job);
+          if (running || complete) return;
+          if (queuedUp) dequeueQuranDownload(job);
+          else queueQuranDownload(job);
         }}
       />
     );
@@ -164,7 +174,7 @@ export function TajweedSettingsScreen() {
           title={t('tajweed.offlineTitle', 'For reading offline')}
           footer={t('tajweed.downloadAllHelp', {
             defaultValue:
-              'The coloured pages are page fonts of their own, fetched as you read like the plain ones. A font carries one palette, so light pages (paper and sepia) and dark pages (night) are two sets of about 170 MB each: download the ones you read in.',
+              'Turning the colours on downloads the pages you read in, over Wi-Fi, in the background — it keeps going when you leave this screen or the app. A font carries one palette, so light pages (paper and sepia) and dark pages (night) are two sets of about 170 MB each; on the Auto tone both are fetched.',
           })}>
           {ordered.map(row)}
         </SettingsGroup>

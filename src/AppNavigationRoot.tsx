@@ -52,6 +52,7 @@ import {
 import { reconcileMushafAssets } from './quran/mushafAssets';
 import { clearStaleDownloadNotification } from './quran/downloadNotification';
 import { startDownloadResumeWatch } from './quran/quranDownloadResume';
+import { startTajweedAutoDownload } from './quran/tajweedAutoDownload';
 import { startAutoSync } from './sync/autoSync';
 import {
   dayTzFingerprint,
@@ -323,6 +324,7 @@ export function AppNavigationRoot() {
    * range, which is most of them.
    */
   useEffect(() => startDownloadResumeWatch(), []);
+  useEffect(() => startTajweedAutoDownload(), []);
 
   // Write anything tapped on the Log Today widget into the journal.
   //

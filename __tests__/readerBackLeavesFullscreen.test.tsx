@@ -125,6 +125,7 @@ describe('both ends are connected', () => {
     // False when it is not in the mode, so back out of the READER is
     // unchanged — one level at a time, not two.
     expect(answer).toMatch(/if \(!isFullscreen\) return false;/);
-    expect(answer).toContain('setIsFullscreen(false)');
+    // Through the veil, like every other way out — see fullscreenVeil.ts.
+    expect(answer).toContain('requestFullscreen(false)');
   });
 });

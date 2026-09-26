@@ -88,7 +88,11 @@ jest.mock('../src/quran/downloadNotification', () => ({
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   cancelQuranDownload,
+  dequeueQuranDownload,
   dismissResumableJob,
+  isJobQueued,
+  queueQuranDownload,
+  queuedQuranDownloads,
   hydrateResumableJob,
   isJobRunning,
   quranDownloadState,
@@ -532,5 +536,78 @@ describe('a download that stopped', () => {
 
     expect(resumableJob()).toBeNull();
     expect(resumeQuranDownload()).toBe(false);
+  });
+});
+
+/**
+ * The follow-up queue — see `queueQuranDownload`. Not the general queue
+ * the manager declines in its header: one job waiting behind the running
+ * one, for the tajwīd switch that wants both palettes and a row tapped
+ * while something else runs. And it must empty on a cancel, because a
+ * person who stopped one download did not ask for the next.
+ */
+describe('what waits behind the running one', () => {
+  const LIGHT = { kind: 'fonts', set: 'tajweed-light' } as const;
+  const DARK = { kind: 'fonts', set: 'tajweed-dark' } as const;
+
+  it('starts at once when nothing is running', () => {
+    expect(queueQuranDownload(LIGHT)).toBe('started');
+    expect(isJobRunning(LIGHT)).toBe(true);
+    expect(isJobQueued(LIGHT)).toBe(false);
+  });
+
+  it('queues behind a running job and starts when it ends', async () => {
+    queueQuranDownload(LIGHT);
+    expect(queueQuranDownload(DARK)).toBe('queued');
+    expect(isJobQueued(DARK)).toBe(true);
+    expect(mockHandles).toHaveLength(1);
+    mockHandles[0].resolve(true);
+    await settle();
+    expect(isJobRunning(DARK)).toBe(true);
+    expect(isJobQueued(DARK)).toBe(false);
+    expect(mockHandles).toHaveLength(2);
+  });
+
+  it('answers "running" and "queued" instead of doubling up', () => {
+    queueQuranDownload(LIGHT);
+    queueQuranDownload(DARK);
+    expect(queueQuranDownload(LIGHT)).toBe('running');
+    expect(queueQuranDownload(DARK)).toBe('queued');
+    expect(queuedQuranDownloads()).toHaveLength(1);
+  });
+
+  it('can be taken back out before its turn', () => {
+    queueQuranDownload(LIGHT);
+    queueQuranDownload(DARK);
+    dequeueQuranDownload(DARK);
+    expect(isJobQueued(DARK)).toBe(false);
+    expect(queuedQuranDownloads()).toHaveLength(0);
+  });
+
+  it('is emptied by a cancel — stopping one does not start the next', async () => {
+    queueQuranDownload(LIGHT);
+    queueQuranDownload(DARK);
+    cancelQuranDownload();
+    mockHandles[0].resolve(false);
+    await settle();
+    expect(quranDownloadState().running).toBeNull();
+    expect(queuedQuranDownloads()).toHaveLength(0);
+    expect(mockHandles).toHaveLength(1);
+  });
+
+  it('is emptied when the connection goes — the next would only stall too', async () => {
+    queueQuranDownload(LIGHT);
+    queueQuranDownload(DARK);
+    mockHandles[0].settle({ complete: false, interrupted: true });
+    await settle();
+    expect(quranDownloadState().running).toBeNull();
+    expect(queuedQuranDownloads()).toHaveLength(0);
+  });
+
+  it('tells a queued job apart from a running one by its palette', () => {
+    queueQuranDownload(LIGHT);
+    queueQuranDownload(DARK);
+    expect(isJobQueued(LIGHT)).toBe(false);
+    expect(isJobQueued({ kind: 'fonts' })).toBe(false);
   });
 });

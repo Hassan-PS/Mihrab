@@ -1327,7 +1327,11 @@
     "wordReaderReciter": "由谁朗读",
     "wordReaderReciterHelp": "只有带有逐词时间轴的诵读者才能朗读单个词，因此这里只列出他们。诵读所用的诵读者是另一项设置，可以是任何人。",
     "wordReaderOffline": "该词尚未下载到本设备，且没有网络连接可供获取。",
-    "wordReaderNoTiming": "该词没有已知的时间轴，无法单独朗读。"
+    "wordReaderNoTiming": "该词没有已知的时间轴，无法单独朗读。",
+    "featuresOfferTitle": "这本穆斯哈夫还能做更多",
+    "featuresOfferBody": "有两项功能默认关闭，直到你需要它们。之后都可在“设置 → 古兰经”中更改。",
+    "featuresOfferTajweedNote": "着色页面会在 Wi‑Fi 下于后台下载，约 170 MB。",
+    "featuresOfferTurnOn": "开启"
   },
   "reading": {
     "textSize": "文字大小",
@@ -1971,8 +1975,9 @@
     "darkRowTone": "夜间",
     "rowStatus": "{{tone}} · 已有 {{pages}} / {{total}} 页",
     "waiting": "等待当前下载完成后开始",
+    "queued": "排在当前下载之后 · 点按可移除",
     "inUse": "使用中",
-    "downloadAllHelp": "着色页面是独立的页面字体，与普通页面一样边读边下载。一套字体只含一种配色，因此浅色页面（纸张与棕褐色）和深色页面（夜间）是两套，各约 170 MB：下载你阅读时所用的那套即可。",
+    "downloadAllHelp": "开启着色后，会在 Wi‑Fi 下于后台下载你阅读所用的页面——离开此页面或应用后仍会继续。一套字体只含一种配色，因此浅色页面（纸张与棕褐色）和深色页面（夜间）是两套，各约 170 MB；色调为“自动”时两套都会下载。",
     "downloadsRow": "诵读规则颜色",
     "downloadsRowSub": "已有 {{pages}} / {{total}} 个着色页面",
     "sheetSection": "诵读规则",

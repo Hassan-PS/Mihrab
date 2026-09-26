@@ -318,6 +318,68 @@ function begin(job: QuranDownloadJob): MushafDownloadHandle {
 /**
  * Start one, if nothing is running. Returns whether this call started it.
  */
+/**
+ * Jobs waiting for the running one to finish — see `queueQuranDownload`.
+ *
+ * Not the general queue the header note declines: it is never more than
+ * the other tajwīd palette or a second reciter someone tapped while the
+ * first was running, and it empties itself the moment a run is cancelled,
+ * because a person who stops one download did not ask for the next.
+ */
+let queued: QuranDownloadJob[] = [];
+
+export function queuedQuranDownloads(): readonly QuranDownloadJob[] {
+  return queued;
+}
+
+export function isJobQueued(job: QuranDownloadJob): boolean {
+  return queued.some(q => sameJob(q, job));
+}
+
+function sameJob(a: QuranDownloadJob, b: QuranDownloadJob): boolean {
+  if (a.kind !== b.kind) return false;
+  if (a.kind === 'fonts' && b.kind === 'fonts') return fontSetOf(a) === fontSetOf(b);
+  if (a.kind === 'audio' && b.kind === 'audio') return a.reciterId === b.reciterId;
+  if (a.kind === 'surah' && b.kind === 'surah') {
+    return a.reciterId === b.reciterId && a.surah === b.surah;
+  }
+  return false;
+}
+
+/**
+ * Start the job now, or after whatever is running. The answer is what
+ * happened: `started`, `queued`, or `running` when it already is one of
+ * the two. Used by the tajwīd switch, which wants both palettes and does
+ * not want to be told to come back later for the second.
+ */
+export function queueQuranDownload(
+  job: QuranDownloadJob,
+): 'started' | 'queued' | 'running' {
+  if (isJobRunning(job)) return 'running';
+  if (isJobQueued(job)) return 'queued';
+  if (!state.running) {
+    startQuranDownload(job);
+    return 'started';
+  }
+  queued = [...queued, job];
+  publish({ ...state });
+  return 'queued';
+}
+
+export function dequeueQuranDownload(job: QuranDownloadJob): void {
+  const next = queued.filter(q => !sameJob(q, job));
+  if (next.length === queued.length) return;
+  queued = next;
+  publish({ ...state });
+}
+
+function startNextQueued(): void {
+  const [next, ...rest] = queued;
+  if (!next) return;
+  queued = rest;
+  startQuranDownload(next);
+}
+
 export function startQuranDownload(job: QuranDownloadJob): boolean {
   if (state.running) return false;
   cancelledByUser = false;
@@ -385,6 +447,10 @@ export function startQuranDownload(job: QuranDownloadJob): boolean {
      */
     if (interrupted) void rememberPendingJob(job);
     else void forgetPendingJob();
+    // A stopped download stops the ones behind it too: cancelled by hand,
+    // or by the connection going — the next one would only stall the same
+    // way, and its "stopped" would bury this one's.
+    if (cancelledByUser || interrupted) queued = [];
     void finishDownloadNotification({
       complete: outcome.complete,
       cancelled: cancelledByUser,
@@ -398,6 +464,7 @@ export function startQuranDownload(job: QuranDownloadJob): boolean {
       stoppedBody: text.stoppedBody(done, total),
       route: ROUTE_QURAN_DOWNLOADS,
     });
+    startNextQueued();
   });
   return true;
 }
@@ -533,6 +600,7 @@ export function resetQuranDownloadState(): void {
   cancelledByUser = false;
   lastPublishedPct = -1;
   pendingJob = null;
+  queued = [];
   listeners.clear();
   state = { running: null, progress: EMPTY_PROGRESS, last: null };
 }

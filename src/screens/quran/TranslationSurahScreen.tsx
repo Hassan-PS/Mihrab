@@ -219,7 +219,9 @@ export function TranslationSurahScreen({
       // tone is the muṣḥaf's; this reader is the app.
       ...(Platform.OS === 'ios'
         ? { headerBlurEffect: (palette.isDark ? 'dark' : 'light') as 'dark' | 'light' }
-        : { headerStyle: { backgroundColor: String(palette.bg) } }),
+        : // Back in the flow: the muṣḥaf floats its Android header over the
+          // page (see MushafSurahScreen); this list wants it above.
+          { headerTransparent: false, headerStyle: { backgroundColor: String(palette.bg) } }),
       headerTintColor: String(palette.text),
       // writingDirection is a valid TextStyle prop that react-navigation's
       // narrower title-style type omits — the same cast RootNavigator makes.

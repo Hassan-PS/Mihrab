@@ -90,12 +90,15 @@ describe('the bar is the page, on every platform', () => {
     expect(screen).toMatch(/isRtl \? \{ right: 0 \} : \{ left: 0 \}/);
   });
 
-  it('still blurs on a real iOS device, and stays opaque on Android', () => {
+  it('still blurs on a real iOS device, and floats painted the page colour on Android', () => {
     expect(screen).toMatch(
       /:\s*isIOS\s*\n?\s*\?\s*\{\s*headerBlurEffect:\s*\(dark \? 'dark' : 'light'\)/,
     );
+    // Floating, not in the flow: hiding an in-flow header resized the
+    // content and flashed the navigator's background for a frame at the
+    // bottom of the window on the way into fullscreen.
     expect(screen).toMatch(
-      /:\s*\{\s*headerStyle:\s*\{\s*backgroundColor:\s*TONE_PAGE_BG\[tone\]\s*\}\s*\};/,
+      /headerTransparent:\s*true,\s*\n\s*headerStyle:\s*\{\s*backgroundColor:\s*TONE_PAGE_BG\[tone\]\s*\},?\s*\n\s*\};/,
     );
   });
 });

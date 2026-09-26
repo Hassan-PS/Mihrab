@@ -1327,7 +1327,11 @@
     "wordReaderReciter": "Kelimeyi kim okur",
     "wordReaderReciterHelp": "Tek bir kelimeyi yalnızca kelime zamanlaması olan okuyucular okuyabilir; bu yüzden yalnızca onlar listelenir. Tilavet okuyucunuz ayrıdır ve herkes olabilir.",
     "wordReaderOffline": "Bu kelime henüz bu cihazda yok ve indirmek için bağlantı yok.",
-    "wordReaderNoTiming": "Bu kelimenin zamanlaması bilinmiyor, bu yüzden tek başına okunamıyor."
+    "wordReaderNoTiming": "Bu kelimenin zamanlaması bilinmiyor, bu yüzden tek başına okunamıyor.",
+    "featuresOfferTitle": "Mushaf daha fazlasını yapabilir",
+    "featuresOfferBody": "İki özellik sen isteyene kadar kapalı. İkisi de daha sonra Ayarlar → Kur'an'dan değiştirilebilir.",
+    "featuresOfferTajweedNote": "Renkli sayfalar arka planda Wi‑Fi üzerinden indirilir, yaklaşık 170 MB.",
+    "featuresOfferTurnOn": "Aç"
   },
   "reading": {
     "textSize": "Metin boyutu",
@@ -1971,8 +1975,9 @@
     "darkRowTone": "Gece",
     "rowStatus": "{{tone}} · {{total}} sayfadan {{pages}}",
     "waiting": "Süren indirmeden sonra",
+    "queued": "Sırada, süren indirmeden sonra · kaldırmak için dokun",
     "inUse": "kullanımda",
-    "downloadAllHelp": "Renkli sayfalar kendi sayfa yazı tipleridir; sade sayfalar gibi okurken indirilir. Bir yazı tipi tek palet taşır, bu yüzden açık sayfalar (kâğıt ve sepya) ve koyu sayfalar (gece) her biri yaklaşık 170 MB olan iki takımdır: okuduğun tonları indir.",
+    "downloadAllHelp": "Renkleri açmak, okuduğun sayfaları Wi‑Fi üzerinden arka planda indirir; bu ekrandan veya uygulamadan çıksan da sürer. Bir yazı tipi tek palet taşır, bu yüzden açık sayfalar (kâğıt ve sepya) ve koyu sayfalar (gece) her biri yaklaşık 170 MB olan iki takımdır; Otomatik tonda ikisi de indirilir.",
     "downloadsRow": "Tecvid renkleri",
     "downloadsRowSub": "{{total}} renkli sayfadan {{pages}}",
     "sheetSection": "Tecvid",

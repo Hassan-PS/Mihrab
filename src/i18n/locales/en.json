@@ -1327,7 +1327,11 @@
     "wordReaderReciter": "Who reads the word",
     "wordReaderReciterHelp": "Only reciters with word timings can read a single word, so only they are listed. Your recitation reciter is separate and can be anyone.",
     "wordReaderOffline": "That word is not on this device yet, and there is no connection to fetch it.",
-    "wordReaderNoTiming": "No timing is known for that word, so it cannot be read on its own."
+    "wordReaderNoTiming": "No timing is known for that word, so it cannot be read on its own.",
+    "featuresOfferTitle": "The mushaf can do more",
+    "featuresOfferBody": "Two things are off until you ask for them. Both can be changed later in Settings → Quran.",
+    "featuresOfferTajweedNote": "The coloured pages download in the background over Wi‑Fi, about 170 MB.",
+    "featuresOfferTurnOn": "Turn on"
   },
   "reading": {
     "textSize": "Text size",
@@ -1971,8 +1975,9 @@
     "darkRowTone": "Night",
     "rowStatus": "{{tone}} · {{pages}} of {{total}} pages",
     "waiting": "After the download that is running",
+    "queued": "Next, after the download that is running · tap to remove",
     "inUse": "in use",
-    "downloadAllHelp": "The coloured pages are page fonts of their own, fetched as you read like the plain ones. A font carries one palette, so light pages (paper and sepia) and dark pages (night) are two sets of about 170 MB each: download the ones you read in.",
+    "downloadAllHelp": "Turning the colours on downloads the pages you read in, over Wi-Fi, in the background — it keeps going when you leave this screen or the app. A font carries one palette, so light pages (paper and sepia) and dark pages (night) are two sets of about 170 MB each; on the Auto tone both are fetched.",
     "downloadsRow": "Tajweed colours",
     "downloadsRowSub": "{{pages}} of {{total}} coloured pages",
     "sheetSection": "Tajweed",

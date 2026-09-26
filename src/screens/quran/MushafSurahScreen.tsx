@@ -42,6 +42,7 @@ import {
 } from '../../quran/riwayat';
 import { useRiwayahAvailability } from '../../quran/riwayahData';
 import { surahName } from '../../quran/surahName';
+import { useFullscreenVeil } from '../../quran/fullscreenVeil';
 import { useSwitchRiwayah } from '../../quran/useSwitchRiwayah';
 import { mushafTone, toneIsDark, TONE_PAGE_BG } from '../../quran/mushafTone';
 import {
@@ -128,6 +129,11 @@ export function MushafSurahScreen({
 
   const [isFullscreen, setIsFullscreen] = useState(false);
   /**
+   * Every way in and out of fullscreen goes through the veil — see
+   * `fullscreenVeil.ts` for why the change is hidden behind a fade.
+   */
+  const { veil, request: requestFullscreen } = useFullscreenVeil(setIsFullscreen);
+  /**
    * Stable. This one function reaches every mushaf page — a tap anywhere on
    * the page toggles fullscreen — so when it was an inline arrow it changed
    * identity on every render of this screen, and with it the callback each
@@ -135,7 +141,7 @@ export function MushafSurahScreen({
    * the whole way down: a page laid itself out again for a screen re-render
    * that had nothing to do with it.
    */
-  const toggleFullscreen = useCallback(() => setIsFullscreen(f => !f), []);
+  const toggleFullscreen = useCallback(() => requestFullscreen(), [requestFullscreen]);
 
   /**
    * Back leaves fullscreen, and only then leaves the reader.
@@ -150,9 +156,9 @@ export function MushafSurahScreen({
     onBackAnswer,
     useCallback(() => {
       if (!isFullscreen) return false;
-      setIsFullscreen(false);
+      requestFullscreen(false);
       return true;
-    }, [isFullscreen]),
+    }, [isFullscreen, requestFullscreen]),
   );
 
   /**
@@ -328,7 +334,26 @@ export function MushafSurahScreen({
         }
       : isIOS
         ? { headerBlurEffect: (dark ? 'dark' : 'light') as 'dark' | 'light' }
-        : { headerStyle: { backgroundColor: TONE_PAGE_BG[tone] } };
+        : {
+            /**
+             * THE ANDROID HEADER FLOATS OVER THE PAGE, LIKE iOS'S.
+             *
+             * It used to be in the layout flow, and hiding it for
+             * fullscreen resized the screen's content: react-native-
+             * screens moves the content up before it re-measures it, so
+             * for one frame a band the header's height opened at the
+             * BOTTOM of the window, showing the navigator's own
+             * background — a flash of app green under a night page,
+             * outside anything the reader could paint over (seen in a
+             * 30fps recording, 2026-09-25). A header that overlays the
+             * content changes no layout when it goes: the reader pads
+             * below it out of fullscreen (`chromePad`, the same as iOS)
+             * and the toggle is a fade behind the veil and nothing else.
+             * Painted the page colour, so it looks exactly as it did.
+             */
+            headerTransparent: true,
+            headerStyle: { backgroundColor: TONE_PAGE_BG[tone] },
+          };
     const pageChrome = quranHydrated
       ? {
             ...barChrome,
@@ -565,7 +590,7 @@ export function MushafSurahScreen({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('quran.enterFullscreen', 'Enter fullscreen')}
-            onPress={() => setIsFullscreen(true)}
+            onPress={() => requestFullscreen(true)}
             hitSlop={10}
             style={{ paddingHorizontal: SPACING.xs }}>
             <Text
@@ -582,6 +607,7 @@ export function MushafSurahScreen({
     });
   }, [
     navigation,
+    requestFullscreen,
     surah,
     isArabic,
     // Not `isArabic`: the title shift asks which way the LAYOUT runs, and
@@ -644,6 +670,7 @@ export function MushafSurahScreen({
         initialPage={initialPage}
         isFullscreen={isFullscreen}
         onToggleFullscreen={toggleFullscreen}
+        veil={veil}
         audioSheetSignal={audioSheetSignal}
         onTitleChange={handleReaderTitleChange}
         onPageChange={handleReaderPageChange}

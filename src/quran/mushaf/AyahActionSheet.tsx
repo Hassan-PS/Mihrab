@@ -61,6 +61,11 @@ import { playFromAyah, playRange } from '../audio/playback';
 import { RecitationControls } from '../audio/RecitationControls';
 import { ShareAyahModal } from './ShareAyahModal';
 import { TajweedAyahSection } from '../tajweed/TajweedAyahSection';
+import { TajweedAyahGlyphs } from '../tajweed/TajweedAyahGlyphs';
+
+/** The page font's size for the āyah at the top of the sheet, dp — the
+ *  same as the Tajweed section's, so the two read as one face. */
+const AYAH_GLYPH_SIZE = 30;
 import { ShareIcon } from '../../theme/icons';
 import {
   ayahShareText,
@@ -477,7 +482,25 @@ export function AyahActionSheet({
             would be an iOS-only no-op sitting where a reader would take
             it for the fix. */}
         <ScrollView ref={scrollRef} style={styles.body} bounces={false}>
-          {arabic ? (
+          {/* THE ĀYAH IN THE MUṢḤAF'S OWN FACE. It was set in the app's
+              Arabic text font, which is not the face the reader had just
+              been looking at: the sheet opened on a word and showed it in
+              different letters. On a page-font riwayah the āyah is drawn
+              from the same page fonts, word for word — plain ink, or the
+              tajwīd colours when they are on, whichever the page is in.
+              A `unicode` riwayah (Warsh) has no page fonts and keeps the
+              text. The text is still what is shared and copied. */}
+          {arabic && riwayahById(state.prefs.riwayah).render !== 'unicode' ? (
+            <View style={styles.arabicGlyphs}>
+              <TajweedAyahGlyphs
+                surah={surah}
+                ayah={ayah}
+                fontSize={AYAH_GLYPH_SIZE}
+                color={String(palette.text)}
+                glyphs={state.prefs.tajweedColours ? 'tajweed' : 'v2'}
+              />
+            </View>
+          ) : arabic ? (
             <Text style={[styles.arabic, { color: palette.text }]}>
               {arabic}
             </Text>
@@ -976,6 +999,9 @@ const styles = StyleSheet.create({
     writingDirection: 'rtl',
     ...arabicTextStyle('quran'),
   },
+  // The page-font āyah lays itself out in lines; this is the same air the
+  // text version had around it.
+  arabicGlyphs: { paddingVertical: SPACING.xs },
   translation: { fontSize: TYPE.callout.fontSize, lineHeight: 22, marginTop: SPACING.md },
   tafsirToggle: {
     marginTop: SPACING.md,

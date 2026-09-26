@@ -1327,7 +1327,11 @@
     "wordReaderReciter": "Qui lit le mot",
     "wordReaderReciterHelp": "Seuls les récitateurs disposant du minutage des mots peuvent lire un seul mot ; eux seuls sont donc listés. Votre récitateur pour la récitation est distinct et peut être n’importe qui.",
     "wordReaderOffline": "Ce mot n’est pas encore sur cet appareil et aucune connexion ne permet de le récupérer.",
-    "wordReaderNoTiming": "Aucun minutage n’est connu pour ce mot : il ne peut pas être lu seul."
+    "wordReaderNoTiming": "Aucun minutage n’est connu pour ce mot : il ne peut pas être lu seul.",
+    "featuresOfferTitle": "Le mushaf peut faire plus",
+    "featuresOfferBody": "Deux fonctions sont désactivées tant que vous ne les demandez pas. Les deux se modifient plus tard dans Réglages → Coran.",
+    "featuresOfferTajweedNote": "Les pages colorées se téléchargent en arrière-plan en Wi‑Fi, environ 170 Mo.",
+    "featuresOfferTurnOn": "Activer"
   },
   "reading": {
     "textSize": "Taille du texte",
@@ -1971,8 +1975,9 @@
     "darkRowTone": "Nuit",
     "rowStatus": "{{tone}} · {{pages}} pages sur {{total}}",
     "waiting": "Après le téléchargement en cours",
+    "queued": "Ensuite, après le téléchargement en cours · touchez pour retirer",
     "inUse": "utilisées",
-    "downloadAllHelp": "Les pages colorées sont des polices de page à part, récupérées à la lecture comme les pages simples. Une police porte une palette : les pages claires (papier et sépia) et les pages sombres (nuit) sont deux jeux d’environ 170 Mo chacun. Téléchargez ceux dans lesquels vous lisez.",
+    "downloadAllHelp": "Activer les couleurs télécharge les pages dans lesquelles vous lisez, en Wi‑Fi et en arrière-plan : cela continue quand vous quittez cet écran ou l’application. Une police porte une palette : les pages claires (papier et sépia) et les pages sombres (nuit) sont deux jeux d’environ 170 Mo chacun ; avec le ton Auto, les deux sont récupérés.",
     "downloadsRow": "Couleurs du tajwid",
     "downloadsRowSub": "{{pages}} pages colorées sur {{total}}",
     "sheetSection": "Tajwid",

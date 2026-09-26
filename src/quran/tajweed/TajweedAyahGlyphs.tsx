@@ -43,12 +43,23 @@ const WORD_GAP_EM = 0.12;
  * The āyah's words in page order, with the page each is cut for. Two
  * pages at most: an āyah can run over a turn, never over two.
  */
-export function ayahGlyphWords(surah: number, ayah: number): GlyphWord[] {
+/**
+ * Which faces draw the āyah: the plain page fonts the reader uses, or the
+ * tajwīd ones. Named here so the sheet can show the āyah in whatever the
+ * muṣḥaf is drawn in.
+ */
+export type AyahGlyphSet = 'v2' | 'tajweed';
+
+export function ayahGlyphWords(
+  surah: number,
+  ayah: number,
+  set: AyahGlyphSet = 'tajweed',
+): GlyphWord[] {
   const first = findPageForAyah(surah, ayah);
   const out: GlyphWord[] = [];
   for (const page of [first, first + 1]) {
     if (page < 1 || page > MUSHAF_TOTAL_PAGES) continue;
-    const layout = getPageLayoutIn(page, 'tajweed');
+    const layout = getPageLayoutIn(page, set);
     if (!layout) continue;
     let found = false;
     for (const line of layout.lines) {
@@ -91,6 +102,7 @@ export function TajweedAyahGlyphs({
   color,
   onWordPress,
   align = 'right',
+  glyphs = 'tajweed',
 }: {
   surah: number;
   ayah: number;
@@ -99,11 +111,16 @@ export function TajweedAyahGlyphs({
   onWordPress?: (word: GlyphWord) => void;
   /** Where the lines sit in the width: the page's right, or centred for a single word. */
   align?: 'right' | 'center';
+  /**
+   * The plain page fonts (`v2`) or the tajwīd ones. The sheet's āyah at
+   * the top follows the muṣḥaf: plain ink unless the colours are on.
+   */
+  glyphs?: AyahGlyphSet;
 }) {
   const { isDark } = useAppPalette();
-  const set = tajweedFontSet(isDark);
+  const set = glyphs === 'v2' ? 'v2' : tajweedFontSet(isDark);
   const [width, setWidth] = useState(0);
-  const words = useMemo(() => ayahGlyphWords(surah, ayah), [surah, ayah]);
+  const words = useMemo(() => ayahGlyphWords(surah, ayah, glyphs), [surah, ayah, glyphs]);
   const firstPage = words[0]?.page ?? findPageForAyah(surah, ayah);
   const lastPage = words[words.length - 1]?.page ?? firstPage;
   // Two hooks whatever the āyah, so their count never changes across renders.

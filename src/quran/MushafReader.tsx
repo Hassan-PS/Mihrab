@@ -56,6 +56,7 @@ import {
   useQuranDownloadRun,
 } from './QuranDownloadStrip';
 import { WordReaderNotice } from './WordReaderNotice';
+import { QuranFeaturesOfferSheet, useQuranFeaturesOffer } from './QuranFeaturesOffer';
 import { DEVICE_CLASS } from '../responsive/deviceClass';
 import { MushafPhoneReader } from './MushafPhoneReader';
 import { MushafSpreadReader } from './MushafSpreadReader';
@@ -94,14 +95,13 @@ export function MushafReader(props: Props) {
    * the answer (the safe-area top can read 0 there, with the bar hidden).
    */
   const cutout = useDisplayCutout();
-  const stripTop =
-    Platform.OS !== 'ios'
-      ? props.isFullscreen
-        ? Math.max(cutout.top, insets.top)
-        : 0
-      : props.isFullscreen
-        ? insets.top
-        : headerHeight;
+  const stripTop = props.isFullscreen
+    ? Platform.OS !== 'ios'
+      ? Math.max(cutout.top, insets.top)
+      : insets.top
+    : // The header floats over the page on both platforms now — see
+      // MushafSurahScreen's `headerTransparent` — so the strip clears it.
+      headerHeight;
 
   /**
    * A `unicode` riwayah has no page fonts — its text and its face are in
@@ -212,6 +212,12 @@ export function MushafReader(props: Props) {
     startQuranDownload({ kind: 'fonts' });
   };
 
+  // ── The offer ───────────────────────────────────────────────────────
+  // The two off-by-default features, asked about once the plain muṣḥaf is
+  // on the device and a page is up — see QuranFeaturesOffer. Not while
+  // the first download is running: one thing at a time on a first open.
+  const offer = useQuranFeaturesOffer(downloadStatus === 'ready' && !bundledRiwayah);
+
   // ── The keyboard, bound once ────────────────────────────────────────
   const keyTurnRef = useRef<PageTurner | null>(null);
   const turnForward = useCallback(() => keyTurnRef.current?.(1), []);
@@ -317,11 +323,19 @@ export function MushafReader(props: Props) {
   // The word reader's one line, over whichever reader this is — absent
   // until there is something to say, so it costs the page nothing.
   const notice = <WordReaderNotice />;
+  const offerSheet = (
+    <QuranFeaturesOfferSheet
+      visible={offer.visible}
+      features={offer.features}
+      onClose={offer.close}
+    />
+  );
   if (!strip) {
     return (
       <View style={styles.withStrip}>
         {reader}
         {notice}
+        {offerSheet}
       </View>
     );
   }
@@ -330,6 +344,7 @@ export function MushafReader(props: Props) {
       {strip}
       {reader}
       {notice}
+      {offerSheet}
     </View>
   );
 }

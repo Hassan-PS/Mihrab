@@ -25,6 +25,7 @@ import {
 import { useNavigation, usePreventRemove } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useKeepAwake } from './keepAwakeLock';
+import type { FullscreenVeil } from './fullscreenVeil';
 import { SessionDot, useAnchorBookmarkId, useSessionColor } from './SessionDot';
 import { useIslamicDay } from '../hijri/useIslamicDay';
 import { PageProgressMark, usePageProgress } from './PageProgressMark';
@@ -91,6 +92,13 @@ export type MushafReaderProps = {
   isFullscreen: boolean;
   /** Single tap on the page toggles fullscreen — no exit button. */
   onToggleFullscreen: () => void;
+  /**
+   * The fullscreen veil the screen raises before it toggles — the phone
+   * reader draws it over the page and lifts it once its layout has
+   * settled. See `fullscreenVeil.ts`. Optional: the spread reader and
+   * the tests do without.
+   */
+  veil?: FullscreenVeil;
   /** Increment to open the unified sheet scrolled to the recitation
    *  section (the header "Recitation" button). */
   audioSheetSignal?: number;
@@ -724,6 +732,9 @@ export function MushafPageHeader({
   labelSide,
   labelMaxWidth,
   island = false,
+  onExitFullscreen,
+  exitInset = 0,
+  onPageNumberPress,
 }: {
   page: number;
   isFullscreen: boolean;
@@ -752,9 +763,59 @@ export function MushafPageHeader({
    * header is hidden — was squeezed down to a letter and an ellipsis.
    */
   island?: boolean;
+  /**
+   * Fullscreen, label only: draw the way out at the other end of the row
+   * from the name. Only the phone asks — a spread has the whole strip to
+   * tap and no camera to keep out of.
+   */
+  onExitFullscreen?: () => void;
+  /** How far the exit button keeps in from its edge, past a corner camera. */
+  exitInset?: number;
+  /**
+   * With the exit button: the page number sits on its inner side, and a
+   * tap on it opens the jump sheet — the rail that used to name the page
+   * and take you to another is hidden in fullscreen on the phone.
+   */
+  onPageNumberPress?: () => void;
 }) {
   const { t } = useTranslation();
   const sessionColor = useSessionColor();
+  const exitBtn =
+    isFullscreen && show === 'label' && onExitFullscreen ? (
+      <View
+        style={[
+          styles.exitCluster,
+          // The number goes on the INNER side of the ✕ — towards the
+          // middle of the window, away from the edge and the camera. The
+          // ✕ is at the right edge when the name is at the start, so the
+          // number comes first; at the left edge the order flips.
+          labelSide === 'start' ? null : styles.exitClusterFlip,
+          // Physical sides — the pager is pinned LTR (see the phone
+          // reader's `listWrap`): the cluster is on the left when the
+          // name is at the end, and steps in from whichever edge it hugs.
+          // rtl-safe: physical by design, like `labelSide`.
+          labelSide === 'start' ? { marginRight: exitInset } : { marginLeft: exitInset },
+        ]}>
+        {onPageNumberPress ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('quran.jumpToPage', 'Go to page')}
+            hitSlop={8}
+            onPress={onPageNumberPress}
+            style={styles.exitPageBtn}>
+            <Text style={[styles.exitPage, { color: ornament }]}>{page}</Text>
+          </Pressable>
+        ) : null}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('quran.exitFullscreen', 'Exit fullscreen')}
+          hitSlop={12}
+          onPress={onExitFullscreen}
+          style={styles.exitBtn}>
+          <Text style={[styles.exitGlyph, { color: ornament }]}>✕</Text>
+        </Pressable>
+      </View>
+    ) : null;
   const pageProgress = usePageProgress(page, riwayah);
   const meta = pageMetaIn(page, riwayah) ?? pagesForRiwayah(riwayah)[0];
   // The pill cycles the CHOICE (auto included), whatever `tone` is drawn.
@@ -764,6 +825,9 @@ export function MushafPageHeader({
       style={[
         styles.pageHeader,
         show === 'label' && labelSide !== 'start' && styles.pageHeaderLabelEnd,
+        // With the exit button in the row the pair spread to the two
+        // ends, and a name at the end means the button comes first.
+        exitBtn && labelSide !== 'start' && styles.pageHeaderReversed,
       ]}>
       {show !== 'pill' ? (
         <View
@@ -821,6 +885,7 @@ export function MushafPageHeader({
         </Text>
         </View>
       ) : null}
+      {exitBtn}
       {show !== 'label' ? (
         // The pill names the tone a tap goes TO — paper → sepia → night →
         // auto → paper — the way it always named "Night" on the light
@@ -1095,6 +1160,48 @@ const styles = StyleSheet.create({
   // Spread: the odd (right) page shows only the label — push it to the
   // spread's outer right corner.
   pageHeaderLabelEnd: { justifyContent: 'flex-end' },
+  // Name at the end AND an exit button: back to the two ends, button first.
+  pageHeaderReversed: { flexDirection: 'row-reverse', justifyContent: 'space-between' },
+  // The exit button: the same box as the bar's buttons, so the ✕ reads as
+  // a control and not a stray mark in the page's margin.
+  exitBtn: {
+    width: 34,
+    height: 30,
+    borderRadius: RADIUS.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  // Both texts share one line box (and no Android font padding), so the
+  // figures and the ✕ sit on the same line rather than the number riding
+  // a few dp high on its own metrics.
+  exitGlyph: {
+    fontSize: TYPE.body.fontSize,
+    lineHeight: 20,
+    fontWeight: '700',
+    includeFontPadding: false,
+  },
+  exitCluster: { flexDirection: 'row', alignItems: 'center', flexShrink: 0 },
+  exitClusterFlip: { flexDirection: 'row-reverse' },
+  // The page number beside the ✕: the same figures the rail's readout
+  // used, in the page's ink, a tap away from the jump sheet.
+  // A digit sits on its baseline and the ✕ is centred on the x-height,
+  // so at the same line height the figures read a hair high beside it —
+  // measured 1.5dp on a Pixel. Down by that much, and they are level.
+  exitPageBtn: {
+    height: 30,
+    justifyContent: 'center',
+    paddingHorizontal: SPACING.xs,
+    paddingTop: 3,
+  },
+  exitPage: {
+    fontSize: TYPE.footnote.fontSize,
+    lineHeight: 20,
+    fontWeight: '700',
+    letterSpacing: 0.4,
+    fontVariant: ['tabular-nums'],
+    includeFontPadding: false,
+  },
   // In fullscreen the header row is drawn ACROSS the status-bar band, so
   // the surah name and the tone pill sit either side of the cutout rather
   // than below it (see the phone reader). The middle belongs to the

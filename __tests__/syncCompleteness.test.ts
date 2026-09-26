@@ -107,6 +107,12 @@ const STAYS: Record<string, string> = {
   'mihrab.syncHint.dismissed.v1':
     'describes this phone — which one-off pointers the user has waved away, ' +
     'the same kind of thing as the what’s-new version stamp',
+  'mihrab.quran.featuresOffer.v1':
+    'describes this phone — whether the muṣḥaf has asked, once, about its ' +
+    'two off-by-default features (src/quran/QuranFeaturesOffer.tsx). The ' +
+    'answer itself is in the Quran prefs, which travel; a new phone that ' +
+    'already has both switched on is never asked anyway, and one that does ' +
+    'not may as well be asked once more',
 
   'quran/riwayat/v1':
     'content, not record — a muṣḥaf the reader obtained from its publisher ' +

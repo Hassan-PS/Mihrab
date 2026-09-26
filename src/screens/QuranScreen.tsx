@@ -2009,7 +2009,10 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   khatmahDayLabel: { fontSize: TYPE.footnote.fontSize, fontWeight: '700' },
-  khatmahChips: { flexDirection: 'row', gap: SPACING.sm },
+  // Five chips — three durations, a date, custom — and a phone's card is
+  // not five chips wide: "Custom…" ran off the right edge of the card
+  // (reported 2026-09-25). They wrap onto a second line instead.
+  khatmahChips: { flexDirection: 'row', flexWrap: 'wrap', gap: SPACING.sm },
   chip: {
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,

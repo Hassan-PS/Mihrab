@@ -414,8 +414,29 @@ export function downloadAllPageFonts({
     stats.bytes = 0;
     stats.startedAt = 0;
     stats.lastLog = 0;
+    // ── ONE LISTING, NOT SIX HUNDRED AND FOUR STATS ──────────────────
+    //
+    // Every page went through `ensurePageFontFile`, which asks the disk
+    // whether the file is there and then how big it is — two bridge
+    // round-trips per page, before a single byte was fetched, on a store
+    // that is often mostly full: a tajwīd palette read for a week has
+    // hundreds of its pages already, and a download that was interrupted
+    // has all the ones before the interruption. The directory listing
+    // says in one call which pages are already the right font; only the
+    // rest are queued, and the count starts where the disk is rather
+    // than walking to 604 through pages it skips.
+    const onDisk = await okPagesOnDisk(set);
     const queue: number[] = [];
-    for (let i = 1; i <= MUSHAF_TOTAL_PAGES; i++) queue.push(i);
+    for (let i = 1; i <= MUSHAF_TOTAL_PAGES; i++) {
+      if (!onDisk.has(i)) queue.push(i);
+    }
+    done = MUSHAF_TOTAL_PAGES - queue.length;
+    if (queue.length === 0) {
+      knownComplete.add(set);
+      onProgress?.({ done, total: MUSHAF_TOTAL_PAGES, failed });
+      return { complete: true, interrupted: false };
+    }
+    onProgress?.({ done, total: MUSHAF_TOTAL_PAGES, failed });
 
     const worker = async (): Promise<void> => {
       while (!cancelled && !interrupted) {
@@ -446,6 +467,32 @@ export function downloadAllPageFonts({
   };
 
   return { promise: run(), cancel: () => { cancelled = true; } };
+}
+
+/**
+ * The pages whose font on disk is the manifest's — what a bulk download
+ * can skip. One `lstat` of the directory; see `fontStoreStats` for why
+ * that and not a stat per file.
+ */
+async function okPagesOnDisk(set: MushafFontSet): Promise<Set<number>> {
+  const ok = new Set<number>();
+  try {
+    if (!(await ReactNativeBlobUtil.fs.exists(storeDir(set)))) return ok;
+    const entries = (await ReactNativeBlobUtil.fs.lstat(storeDir(set))) as Array<{
+      filename: string;
+      size: string | number;
+      type: string;
+    }>;
+    for (const entry of entries) {
+      if (entry.type === 'directory' || !entry.filename.endsWith('.ttf')) continue;
+      const page = pageOfFileName(entry.filename, set);
+      if (page == null) continue;
+      if (fontFileState(Number(entry.size) || 0, page, set) === 'ok') ok.add(page);
+    }
+  } catch {
+    /* an unreadable listing just means nothing is skipped */
+  }
+  return ok;
 }
 
 /**

@@ -41,8 +41,8 @@ import React, {
   useState,
 } from 'react';
 import {
+  Animated,
   FlatList,
-  Platform,
   Pressable,
   ScrollView,
   StatusBar,
@@ -55,6 +55,7 @@ import { useHeaderHeight } from '@react-navigation/elements';
 import { useAppPalette } from '../hooks/useAppPalette';
 import { useIsActive } from '../hooks/useIsActive';
 import { finishKhatmahPortion } from './quranState';
+import { VEIL_SETTLE_MS } from './fullscreenVeil';
 import MushafTextPageSurface, {
   mushafPageColumnHeight,
 } from './MushafTextPageSurface';
@@ -87,6 +88,7 @@ import {
   HEADER_RESERVE,
   PAGE_TOP_GAP,
   phoneGeometryFits,
+  geometryKey,
   phonePageGeometry,
   phonePageWidth,
   useSettledGeometry,
@@ -101,6 +103,8 @@ const indexPage = (index: number) => index + 1;
 
 /** Pages either side of the one being read whose fonts are registered ahead. */
 const WARM_RADIUS = 2;
+
+
 
 /**
  * The page header row, as `MushafPageHeader` builds it: 10pt above a row of
@@ -159,6 +163,9 @@ type PageItemProps = {
   isFullscreen: boolean;
   /** Fullscreen: where the surah name goes so it is not under the camera. */
   label: { side: 'start' | 'end'; maxWidth?: number };
+  /** Fullscreen: how far the exit button keeps in from its edge — the
+   *  camera's width and some air when the lens is in its corner. */
+  exitInset: number;
   tone: MushafTone;
   ornament: string;
   riwayah: RiwayahId;
@@ -183,6 +190,7 @@ const PhonePageItem = React.memo(function PhonePageItem({
   navPad,
   isFullscreen,
   label,
+  exitInset,
   tone,
   ornament,
   riwayah,
@@ -275,6 +283,18 @@ const PhonePageItem = React.memo(function PhonePageItem({
             show="label"
             labelSide={label.side}
             labelMaxWidth={label.maxWidth}
+            // THE WAY OUT, ACROSS FROM THE NAME. The strip and the margins
+            // toggle fullscreen on a tap, but nothing on screen said so —
+            // a reader who tapped in by the ⛶ was left to guess how to
+            // get back. The button sits at the other end of the band from
+            // the surah name, and on a phone whose camera is in that
+            // corner it steps inward past the lens (`exitInset`).
+            onExitFullscreen={onToggleFullscreen}
+            exitInset={exitInset}
+            // The rail is hidden in fullscreen now, so this is where the
+            // page is named — and the tap that used to open the jump
+            // sheet from the rail's readout opens it from here.
+            onPageNumberPress={onOpenJump}
             // The phone is the one with a cutout in the middle of the
             // band. Where its position is known the cap above is exact;
             // where it is not, `island` asks for the centred one's share.
@@ -358,7 +378,7 @@ const PhonePageItem = React.memo(function PhonePageItem({
 export const MushafPhoneReader = React.memo(function MushafPhoneReader(
   props: MushafReaderProps,
 ) {
-  const { isFullscreen, onToggleFullscreen } = props;
+  const { isFullscreen, onToggleFullscreen, veil } = props;
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const { palette } = useAppPalette();
@@ -402,12 +422,10 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
    * this, never the raw window width, or the snap drifts off the page.
    */
   const pageWidth = phonePageWidth(width, sideInset);
-  // iOS floats a translucent nav header over the content; keep the page
-  // chrome below it (0 on Android's opaque header, 0 in fullscreen).
-  const chromePad =
-    !isFullscreen && Platform.OS === 'ios' && !props.chromeCleared
-      ? headerHeight
-      : 0;
+  // The nav header floats over the content on both platforms now (see
+  // MushafSurahScreen's `headerTransparent`); keep the page chrome below
+  // it out of fullscreen (0 in fullscreen, where there is no header).
+  const chromePad = !isFullscreen && !props.chromeCleared ? headerHeight : 0;
   /**
    * FULLSCREEN PUTS THE PAGE HEADER BESIDE THE CUTOUT, NOT BELOW IT.
    *
@@ -459,6 +477,28 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
     }
     return { side: 'start', maxWidth: Math.max(0, rect.x - air) };
   }, [isFullscreen, cutout, width]);
+  /**
+   * AND WHICH SIDE OF THE CAMERA THE EXIT BUTTON GOES.
+   *
+   * The button takes the end of the band the name left free, so on a
+   * phone with the lens in a corner it is the button, not the name, that
+   * would sit under the camera. It moves inward by the lens's own width
+   * plus the same air the name keeps — onto the inner side of the camera,
+   * where a thumb can reach it and a finger can see it. A centred camera
+   * is between the two and needs nothing; so does a phone without one.
+   * The header's own edge padding is already spent, so this is the rest.
+   */
+  const exitInset = useMemo(() => {
+    if (!isFullscreen) return 0;
+    const { side, rect } = classifyTopCutout(cutout, width);
+    if (!rect || side === 'centre' || side === 'none') return 0;
+    const air = SPACING.md;
+    // The name is at the end when the camera is on the left, so the
+    // button is on the left: clear the lens's right edge.
+    if (side === 'left') return Math.max(0, rect.x + rect.width + air - SPACING.lg);
+    // Camera on the right, button on the right: clear its left edge.
+    return Math.max(0, width - rect.x + air - SPACING.lg);
+  }, [isFullscreen, cutout, width]);
 
   /**
    * TWO BARS DO NOT FIT ACROSS A PHONE'S SHORT SIDE.
@@ -496,6 +536,15 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
    * hides the pager entirely, until the two agree again.
    */
   const geometry = phoneGeometryFits(settled, pageWidth) ? settled : null;
+  // The fullscreen veil (see `fullscreenVeil.ts`): the new layout has
+  // settled and the page has been asked to draw at it — one more frame
+  // for that draw, and the veil can go.
+  const geometrySig = geometryKey(geometry);
+  useEffect(() => {
+    if (!veil || !veil.pending() || !geometry) return undefined;
+    const id = setTimeout(veil.lift, VEIL_SETTLE_MS);
+    return () => clearTimeout(id);
+  }, [geometrySig, geometry, veil]);
 
   const data = useMemo(
     () => Array.from({ length: totalPages }, (_, i) => i + 1),
@@ -622,6 +671,7 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
         navPad={navPad}
         isFullscreen={isFullscreen}
         label={label}
+        exitInset={exitInset}
         tone={tone}
         ornament={ornament}
         riwayah={riwayah}
@@ -642,6 +692,7 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
       navPad,
       isFullscreen,
       label,
+      exitInset,
       tone,
       ornament,
       riwayah,
@@ -747,17 +798,19 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
           Yaseen has no way to ask for it. The rail costs 32pt and answers
           both.
 
-          IT STAYS IN FULLSCREEN. It used to retire with the rest of the
-          chrome, which was the wrong company to keep: the header is a
-          title and buttons you are hiding to see the page, and the rail
-          is how you move through the muṣḥaf — losing it meant fullscreen
-          reading was a page at a time or not at all. It is also the only
-          thing on screen that names the page now the medallion is gone.
+          IT GOES IN FULLSCREEN (2026-09-25, at Hassan's request). It had
+          stayed, on the argument that it is how you move through the
+          muṣḥaf and the only thing that names the page — but fullscreen
+          is asked for to see the page and nothing else, and the rail is
+          ~48dp of chrome under a page that is stretched to fill the
+          height anyway. What it did that mattered is kept: the page
+          number is in the header row beside the ✕, and a tap on it opens
+          the jump sheet, so a distant page is still two taps away.
 
-          Landscape with the player up is still the exception: there the
+          Landscape with the player up is the other exception: there the
           window is short, the player is the thing being used, and getting
           to a distant page is not what anyone is doing mid-recitation. */}
-      {!railYieldsToPlayer ? (
+      {!railYieldsToPlayer && !isFullscreen ? (
         <MushafPageScrubber
           page={currentPage}
           riwayah={riwayah}
@@ -781,6 +834,20 @@ export const MushafPhoneReader = React.memo(function MushafPhoneReader(
               backgroundColor={railChrome.control}
             />
           }
+        />
+      ) : null}
+
+      {/* The fullscreen veil — see `fullscreenVeil.ts`. Last, and over the
+          whole reader: the rail below the pager goes with the chrome, and a
+          veil inside the pager left it uncovered — one frame of its control
+          flashing as it was removed (seen in a 30fps recording). */}
+      {veil ? (
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFill,
+            { backgroundColor: pageBg, opacity: veil.opacity },
+          ]}
         />
       ) : null}
 

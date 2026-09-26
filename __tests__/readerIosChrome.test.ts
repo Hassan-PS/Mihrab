@@ -24,7 +24,9 @@ describe('the download strip clears the floating header', () => {
     // nothing under its opaque header, but in fullscreen the cutout — the
     // strip sat under the camera there (the safe-area top reads 0 with
     // the status bar hidden, so the cutout's own inset is consulted too).
-    expect(source).toMatch(/props\.isFullscreen\s*\?\s*insets\.top\s*:\s*headerHeight/);
+    // Both platforms float the header now (MushafSurahScreen's
+    // `headerTransparent`), so out of fullscreen the strip clears it on both.
+    expect(source).toMatch(/:\s*insets\.top\s*\n?\s*:[\s\S]{0,200}headerHeight;/);
     expect(source).toMatch(/Math\.max\(cutout\.top, insets\.top\)/);
     // The reader works the number out; the shared strip is what applies
     // it. The strip moved out of this file when the tilāwah and reciter

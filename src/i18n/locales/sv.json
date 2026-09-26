@@ -1327,7 +1327,11 @@
     "wordReaderReciter": "Vem läser ordet",
     "wordReaderReciterHelp": "Bara recitatörer med ordtider kan läsa ett enskilt ord, så bara de visas här. Din recitatör för uppläsning är en annan inställning och kan vara vem som helst.",
     "wordReaderOffline": "Det ordet finns inte på enheten än, och det finns ingen anslutning att hämta det med.",
-    "wordReaderNoTiming": "Ingen tid är känd för det ordet, så det kan inte läsas ensamt."
+    "wordReaderNoTiming": "Ingen tid är känd för det ordet, så det kan inte läsas ensamt.",
+    "featuresOfferTitle": "Mushafen kan mer",
+    "featuresOfferBody": "Två saker är avstängda tills du ber om dem. Båda kan ändras senare under Inställningar → Koranen.",
+    "featuresOfferTajweedNote": "De färgade sidorna laddas ner i bakgrunden över Wi‑Fi, ungefär 170 MB.",
+    "featuresOfferTurnOn": "Slå på"
   },
   "reading": {
     "textSize": "Textstorlek",
@@ -1971,8 +1975,9 @@
     "darkRowTone": "Natt",
     "rowStatus": "{{tone}} · {{pages}} av {{total}} sidor",
     "waiting": "Efter nedladdningen som pågår",
+    "queued": "Nästa, efter nedladdningen som pågår · tryck för att ta bort",
     "inUse": "används",
-    "downloadAllHelp": "De färgade sidorna är egna sidtypsnitt som hämtas medan du läser, precis som de vanliga. Ett typsnitt bär en palett, så ljusa sidor (papper och sepia) och mörka sidor (natt) är två uppsättningar på ungefär 170 MB var: ladda ner de du läser i.",
+    "downloadAllHelp": "När du slår på färgerna laddas sidorna du läser i ner över Wi‑Fi i bakgrunden – det fortsätter när du lämnar den här sidan eller appen. Ett typsnitt bär en palett, så ljusa sidor (papper och sepia) och mörka sidor (natt) är två uppsättningar på ungefär 170 MB var; med tonen Auto hämtas båda.",
     "downloadsRow": "Tajwidfärger",
     "downloadsRowSub": "{{pages}} av {{total}} färgade sidor",
     "sheetSection": "Tajwid",

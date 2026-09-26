@@ -1327,7 +1327,11 @@
     "wordReaderReciter": "Quién lee la palabra",
     "wordReaderReciterHelp": "Solo los recitadores con tiempos por palabra pueden leer una sola, así que solo ellos aparecen. Tu recitador de recitación es aparte y puede ser cualquiera.",
     "wordReaderOffline": "Esa palabra aún no está en este dispositivo y no hay conexión para descargarla.",
-    "wordReaderNoTiming": "No se conoce el tiempo de esa palabra, así que no se puede leer sola."
+    "wordReaderNoTiming": "No se conoce el tiempo de esa palabra, así que no se puede leer sola.",
+    "featuresOfferTitle": "El mushaf puede hacer más",
+    "featuresOfferBody": "Dos funciones están desactivadas hasta que las pidas. Ambas se pueden cambiar después en Ajustes → Corán.",
+    "featuresOfferTajweedNote": "Las páginas coloreadas se descargan en segundo plano por Wi‑Fi, unos 170 MB.",
+    "featuresOfferTurnOn": "Activar"
   },
   "reading": {
     "textSize": "Tamaño del texto",
@@ -1971,8 +1975,9 @@
     "darkRowTone": "Noche",
     "rowStatus": "{{tone}} · {{pages}} de {{total}} páginas",
     "waiting": "Tras la descarga en curso",
+    "queued": "A continuación, tras la descarga en curso · toca para quitar",
     "inUse": "en uso",
-    "downloadAllHelp": "Las páginas coloreadas son fuentes de página propias, que se obtienen al leer como las simples. Una fuente lleva una paleta, así que las páginas claras (papel y sepia) y las oscuras (noche) son dos juegos de unos 170 MB cada uno: descarga los que uses para leer.",
+    "downloadAllHelp": "Al activar los colores se descargan las páginas en las que lees, por Wi‑Fi y en segundo plano: sigue aunque salgas de esta pantalla o de la app. Una fuente lleva una paleta, así que las páginas claras (papel y sepia) y las oscuras (noche) son dos juegos de unos 170 MB cada uno; con el tono Auto se obtienen los dos.",
     "downloadsRow": "Colores del tayuid",
     "downloadsRowSub": "{{pages}} de {{total}} páginas coloreadas",
     "sheetSection": "Tayuid",

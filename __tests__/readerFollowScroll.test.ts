@@ -66,7 +66,7 @@ describe('the reader follows only where a column scrolls', () => {
     expect(reader).toContain(
       'const railYieldsToPlayer = width > height && playback.active != null;',
     );
-    expect(reader).toContain('{!railYieldsToPlayer ? (');
+    expect(reader).toContain('{!railYieldsToPlayer && !isFullscreen ? (');
   });
 
   /**

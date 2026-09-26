@@ -1327,7 +1327,11 @@
     "wordReaderReciter": "Siapa yang membaca kata",
     "wordReaderReciterHelp": "Hanya qari dengan pewaktuan kata yang dapat membaca satu kata, jadi hanya mereka yang tercantum. Qari untuk tilawah terpisah dan boleh siapa saja.",
     "wordReaderOffline": "Kata itu belum ada di perangkat ini dan tidak ada koneksi untuk mengambilnya.",
-    "wordReaderNoTiming": "Pewaktuan kata itu tidak diketahui, jadi tidak dapat dibaca sendiri."
+    "wordReaderNoTiming": "Pewaktuan kata itu tidak diketahui, jadi tidak dapat dibaca sendiri.",
+    "featuresOfferTitle": "Mushaf bisa lebih banyak",
+    "featuresOfferBody": "Dua fitur mati sampai kamu memintanya. Keduanya bisa diubah nanti di Pengaturan → Al-Qur'an.",
+    "featuresOfferTajweedNote": "Halaman berwarna diunduh di latar belakang lewat Wi‑Fi, sekitar 170 MB.",
+    "featuresOfferTurnOn": "Nyalakan"
   },
   "reading": {
     "textSize": "Ukuran teks",
@@ -1971,8 +1975,9 @@
     "darkRowTone": "Malam",
     "rowStatus": "{{tone}} · {{pages}} dari {{total}} halaman",
     "waiting": "Setelah unduhan yang sedang berjalan",
+    "queued": "Berikutnya, setelah unduhan yang sedang berjalan · ketuk untuk menghapus",
     "inUse": "dipakai",
-    "downloadAllHelp": "Halaman berwarna adalah font halaman tersendiri, diambil saat membaca seperti yang polos. Satu font membawa satu palet, jadi halaman terang (kertas dan sepia) dan halaman gelap (malam) adalah dua set, masing-masing sekitar 170 MB: unduh yang kamu pakai untuk membaca.",
+    "downloadAllHelp": "Menyalakan warna mengunduh halaman yang kamu baca lewat Wi‑Fi di latar belakang — tetap berjalan saat kamu meninggalkan layar ini atau aplikasi. Satu font membawa satu palet, jadi halaman terang (kertas dan sepia) dan halaman gelap (malam) adalah dua set, masing-masing sekitar 170 MB; pada nada Otomatis keduanya diambil.",
     "downloadsRow": "Warna tajwid",
     "downloadsRowSub": "{{pages}} dari {{total}} halaman berwarna",
     "sheetSection": "Tajwid",
